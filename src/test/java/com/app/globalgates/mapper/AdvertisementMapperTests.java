@@ -3,14 +3,19 @@ package com.app.globalgates.mapper;
 import com.app.globalgates.dto.AdvertisementDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
-@SpringBootTest
+@MybatisTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Commit
 @Slf4j
 public class AdvertisementMapperTests {
     @Autowired
@@ -27,11 +32,9 @@ public class AdvertisementMapperTests {
         adDTO.setLandingUrl("https://globalgates.com/store/yunchan");
         adDTO.setBudget(300000);
         adDTO.setImpressionEstimate(1500);
-        adDTO.setStartedAt(String.valueOf(LocalDate.now()));
+        adDTO.setStartedAt("2026-03-15");
 
         advertisementMapper.insert(adDTO);
-
-        log.info("등록된 광고 정보 : {}", adDTO);
     }
 
     @Test
