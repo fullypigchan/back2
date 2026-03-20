@@ -85,16 +85,74 @@ body {
     flex-direction: column;
 }
 
+.chip-btn-img {
+    object-fit: cover;
+}
+
 .chip-btn {
     border-radius: 9999px;
     border: 1px solid var(--line);
-    background: #fff;
-    min-height: 52px;
+    min-height: 80px;
     padding: 0 16px;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text);
     cursor: pointer;
+}
+
+#naver-login {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+#naver-login img {
+    width: 420px;     /* 원하는 크기로 조절 */
+    height: 80px;
+    display: block;
+    object-fit: contain;
+}
+
+#kakao-login {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+#kakao-login img {
+    width: 420px;     /* 원하는 크기로 조절 */
+    height: 80px;
+    display: block;
+    object-fit: contain;
+}
+
+.nsm7Bb-HzV7m-LgbsSe {
+    cursor: pointer !important;
+    width: 420px !important;   /* 원하는 크기로 조절 */
+    height: 80px !important;
+    object-fit: contain !important;
+    border-radius: 4px;
+    box-sizing: border-box;
+    -webkit-transition: background-color .218s, border-color .218s;
+    transition: background-color .218s, border-color .218s;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    cursor: pointer;
+    font-family: "Google Sans", arial, sans-serif;
+    font-size: 18px;
+    letter-spacing: .25px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 12px;
+    position: relative;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
 }
 
 .chip-google {
@@ -145,15 +203,6 @@ body {
     font-size: 30px;
     line-height: 1;
     font-weight: 700;
-}
-
-.chip-apple {
-    margin-top: 12px;
-}
-
-.apple-mark {
-    font-size: 21px;
-    margin-right: 6px;
 }
 
 .join-or {

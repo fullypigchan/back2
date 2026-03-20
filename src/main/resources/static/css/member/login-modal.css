@@ -9,15 +9,8 @@
     --link: #1d9bf0;
 }
 
-* {
-    box-sizing: border-box;
-}
-
-html, body {
-    width: 100%;
-    height: 100%;
-}
-
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; }
 body {
     margin: 0;
     font-family: "TwitterChirp", "Pretendard Variable", "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
@@ -108,15 +101,9 @@ body {
     cursor: pointer;
 }
 
-.google-chip {
-    margin-bottom: 16px;
-}
+.google-chip { margin-bottom: 16px; }
 
-.chip-user {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
+.chip-user { display: flex; align-items: center; gap: 14px; }
 
 .chip-avatar {
     width: 27px;
@@ -130,21 +117,9 @@ body {
     font-weight: 700;
 }
 
-.chip-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.chip-meta strong {
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.chip-meta span {
-    font-size: 9px;
-    color: #637180;
-}
+.chip-meta { display: flex; flex-direction: column; gap: 1px; }
+.chip-meta strong { font-size: 15px; font-weight: 600; }
+.chip-meta span { font-size: 9px; color: #637180; }
 
 .chip-google {
     color: #4285f4;
@@ -159,15 +134,8 @@ body {
     margin-bottom: 16px;
 }
 
-.apple-icon {
-    font-size: 32px;
-    line-height: 1;
-}
-
-.apple-chip span:last-child {
-    font-size: 26px;
-    font-weight: 500;
-}
+.apple-icon { font-size: 32px; line-height: 1; }
+.apple-chip span:last-child { font-size: 26px; font-weight: 500; }
 
 .divider {
     display: flex;
@@ -176,16 +144,8 @@ body {
     margin-bottom: 16px;
 }
 
-.divider span {
-    flex: 1;
-    height: 1px;
-    background: #c6d0d8;
-}
-
-.divider b {
-    font-size: 29px;
-    font-weight: 500;
-}
+.divider span { flex: 1; height: 1px; background: #c6d0d8; }
+.divider b { font-size: 29px; font-weight: 500; }
 
 .input-wrap {
     display: block;

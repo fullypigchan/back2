@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.app.mapper.MemberMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into tbl_member (member_name, member_email, member_password)
+        values (#{memberName}, #{memberEmail}, #{memberPassword})
+    </insert>
+
+    <select id="selectMemberForLogin">
+        select
+            id, member_name, member_email, member_status, member_role, created_datetime, updated_datetime
+        from tbl_member
+        where member_email = #{memberEmail} and member_password = #{memberPassword} and member_status = 'active'
+    </select>
+
+    <select id="selectMemberByMemberEmail">
+        select
+            id, member_name, member_email, member_password,
+            member_role, member_status, created_datetime, updated_datetime
+        from tbl_member
+        where member_email = #{memberEmail} and member_status = 'active'
+    </select>
+</mapper>

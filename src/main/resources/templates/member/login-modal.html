@@ -7,66 +7,66 @@
     <link rel="stylesheet" href="../../static/css/member/login-modal.css">
 </head>
 <body>
-<div class="login-overlay" aria-hidden="false">
-    <section class="login-modal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
-        <button type="button" class="login-close" aria-label="닫기">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
-            </svg>
-        </button>
-
-        <div class="login-logo" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-                <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
-            </svg>
-        </div>
-
-        <div class="login-inner">
-            <h1 id="loginModalTitle" class="login-title">X 로그인하기</h1>
-
-            <!-- <button type="button" class="social-chip google-chip">
-                <span class="chip-user">
-                    <span class="chip-avatar">하민</span>
-                    <span class="chip-meta">
-                        <strong>하민(으)로 로그인</strong>
-                        <span>dhkdch6356@gmail.com</span>
-                    </span>
-                </span>
-                <span class="chip-google" aria-hidden="true">G</span>
-            </button> -->
-            <button type="button" class="social-chip apple-chip">
-                <span class="apple-icon" aria-hidden="true"></span>
-                <span>Naver로 로그인하기</span>
+    <div class="login-overlay" aria-hidden="false">
+        <section class="login-modal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+            <button type="button" class="login-close" aria-label="닫기">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
+                </svg>
             </button>
 
-            <button type="button" class="social-chip apple-chip">
-                <span class="apple-icon" aria-hidden="true"></span>
-                <span>Facebook로 로그인하기</span>
-            </button>
-            <button type="button" class="social-chip apple-chip">
-                <span class="apple-icon" aria-hidden="true"></span>
-                <span>Kakao로 로그인하기</span>
-            </button>
-
-            <div class="divider" aria-hidden="true">
-                <span></span>
-                <b>또는</b>
-                <span></span>
+            <div class="login-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
+                </svg>
             </div>
 
-            <label class="input-wrap" for="loginIdentity">
-                <input id="loginIdentity" type="text" placeholder="휴대폰 번호 또는 이메일 주소" autocomplete="username">
-            </label>
-            <div class="field-error-message">다시입력하시오</div>
+            <div class="login-inner">
+                <h1 id="loginModalTitle" class="login-title">X 로그인하기</h1>
 
-            <button type="button" class="btn-primary" id="nextBtn" disabled>다음</button>
-            <button type="button" class="btn-secondary">비밀번호를 잊으셨나요?</button>
+                <!-- <button type="button" class="social-chip google-chip">
+                    <span class="chip-user">
+                        <span class="chip-avatar">하민</span>
+                        <span class="chip-meta">
+                            <strong>하민(으)로 로그인</strong>
+                            <span>dhkdch6356@gmail.com</span>
+                        </span>
+                    </span>
+                    <span class="chip-google" aria-hidden="true">G</span>
+                </button> -->
+                <button type="button" class="social-chip apple-chip">
+                    <span class="apple-icon" aria-hidden="true"></span>
+                    <span>Naver로 로그인하기</span>
+                </button>
 
-            <p class="signup-text">계정이 없으신가요? <a href="#">가입하기</a></p>
-        </div>
-    </section>
-</div>
+                <button type="button" class="social-chip apple-chip">   
+                    <span class="apple-icon" aria-hidden="true"></span>
+                    <span>Facebook로 로그인하기</span>
+                </button>
+                <button type="button" class="social-chip apple-chip">
+                    <span class="apple-icon" aria-hidden="true"></span>
+                    <span>Kakao로 로그인하기</span>
+                </button>
 
-<script src="../../static/js/member/login-modal.js"></script>
+                <div class="divider" aria-hidden="true">
+                    <span></span>
+                    <b>또는</b>
+                    <span></span>
+                </div>
+
+                <label class="input-wrap" for="loginIdentity">
+                    <input id="loginIdentity" type="text" placeholder="휴대폰 번호 또는 이메일 주소" autocomplete="username">
+                </label>
+                <div class="field-error-message">다시입력하시오</div>
+
+                <button type="button" class="btn-primary" id="nextBtn" disabled>다음</button>
+                <button type="button" class="btn-secondary">비밀번호를 잊으셨나요?</button>
+
+                <p class="signup-text">계정이 없으신가요? <a href="#">가입하기</a></p>
+            </div>
+        </section>
+    </div>
+
+    <script src="../../static/js/member/login-modal.js"></script>
 </body>
 </html>
