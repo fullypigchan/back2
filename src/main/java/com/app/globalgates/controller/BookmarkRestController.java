@@ -4,11 +4,10 @@ import com.app.globalgates.dto.BookmarkDTO;
 import com.app.globalgates.dto.BookmarkFolderDTO;
 import com.app.globalgates.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/bookmarks")
-public class BookmarkAPIController {
+public class BookmarkRestController {
     private final BookmarkService bookmarkService;
 
     @GetMapping("/folders/{memberId}")
@@ -31,12 +30,12 @@ public class BookmarkAPIController {
         bookmarkService.createFolder(bookmarkFolderDTO);
     }
 
-    @PatchMapping("/folders")
+    @PutMapping("/folders")
     public void updateFolder(@RequestBody BookmarkFolderDTO bookmarkFolderDTO) {
         bookmarkService.updateFolder(bookmarkFolderDTO);
     }
 
-    @DeleteMapping("/folders/{id}")
+    @PostMapping("/folders/{id}/delete")
     public void deleteFolder(@PathVariable Long id) {
         bookmarkService.deleteFolder(id);
     }
@@ -46,17 +45,17 @@ public class BookmarkAPIController {
         bookmarkService.addBookmark(bookmarkDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/delete")
     public void deleteBookmark(@PathVariable Long id) {
         bookmarkService.deleteBookmark(id);
     }
 
-    @DeleteMapping("/members/{memberId}/posts/{postId}")
+    @PostMapping("/members/{memberId}/posts/{postId}/delete")
     public void deleteBookmarkByMemberIdAndPostId(@PathVariable Long memberId, @PathVariable Long postId) {
         bookmarkService.deleteBookmark(memberId, postId);
     }
 
-    @PatchMapping("/{id}/folder")
+    @PutMapping("/{id}/folder")
     public void updateFolderId(@PathVariable Long id, @RequestBody BookmarkDTO bookmarkDTO) {
         bookmarkDTO.setId(id);
         bookmarkService.updateFolderId(bookmarkDTO);

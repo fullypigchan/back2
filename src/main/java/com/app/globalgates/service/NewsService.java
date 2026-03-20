@@ -1,0 +1,25 @@
+package com.app.globalgates.service;
+
+import com.app.globalgates.dto.NewsDTO;
+import com.app.globalgates.repository.NewsDAO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class NewsService {
+    private final NewsDAO newsDAO;
+
+    //    뉴스 전체 조회
+    public List<NewsDTO> getNewsList() {
+        return newsDAO.findAll();
+    }
+
+    //    뉴스 단건 조회
+    public Optional<NewsDTO> getNews(Long id) {
+        return newsDAO.findById(id);
+    }
+}

@@ -93,5 +93,4 @@
         from tbl_bookmark
         where member_id = #{memberId}
     </select>
-
 </mapper>
