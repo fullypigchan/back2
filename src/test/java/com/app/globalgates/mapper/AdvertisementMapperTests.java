@@ -2,6 +2,7 @@ package com.app.globalgates.mapper;
 
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.common.search.AdSearch;
+import com.app.globalgates.domain.AdvertisementVO;
 import com.app.globalgates.dto.AdvertisementDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @Slf4j
@@ -49,5 +51,11 @@ public class AdvertisementMapperTests {
         List<AdvertisementDTO> foundAds = advertisementMapper.selectBySearch(criteria, search);
         log.info("검색된 광고 : {}", foundAds);
         log.info("검색된 모든 광고 수: {}", advertisementMapper.selectTotal(search));
+    }
+
+    @Test
+    public void testSelectById() {
+        Optional<AdvertisementVO> foundAd = advertisementMapper.selectById(12L);
+        log.info("조회한 광고 상세: {}", foundAd);
     }
 }

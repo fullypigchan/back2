@@ -2,11 +2,13 @@ package com.app.globalgates.mapper;
 
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.common.search.AdSearch;
+import com.app.globalgates.domain.AdvertisementVO;
 import com.app.globalgates.dto.AdvertisementDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface AdvertisementMapper {
@@ -22,5 +24,6 @@ public interface AdvertisementMapper {
     // 광고 전체 개수
     public int selectTotal(@Param("search") AdSearch search);
 
-    // 광고 상세 조회
+    // id로 광고 상세 조회
+    public Optional<AdvertisementVO> selectById(Long id);
 }

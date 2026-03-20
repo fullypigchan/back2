@@ -67,4 +67,13 @@
             <include refid="search"></include>
         </where>
     </select>
+
+    <select id="selectById">
+        select
+            id, advertiser_id, title, headline, description,
+            landing_url, budget, impression_estimate, receipt_id,
+            status, started_at, created_datetime, updated_datetime
+        from tbl_advertisement
+        where id = #{id}
+    </select>
 </mapper>

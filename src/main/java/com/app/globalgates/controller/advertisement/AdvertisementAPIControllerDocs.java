@@ -1,4 +1,4 @@
-package com.app.globalgates.controller;
+package com.app.globalgates.controller.advertisement;
 
 import com.app.globalgates.common.search.AdSearch;
 import com.app.globalgates.dto.AdvertisementDTO;
@@ -25,11 +25,18 @@ public interface AdvertisementAPIControllerDocs {
     public ResponseEntity<?> write(@RequestBody AdvertisementDTO advertisementDTO, @RequestParam("images") ArrayList<MultipartFile> images) throws IOException;
 
     @Operation(
-            summary = "광고 등록",
+            summary = "광고 검색",
             description = "화면에서 받아온 정보로 광고를 등록한다.",
             parameters = {@Parameter(name="page", description = "화면에 표시할 페이지 번호"),
                             @Parameter(name="search", description = "화면에서 입력한 검색 값")}
     )
     public ResponseEntity<?> list(@PathVariable int page, AdSearch search);
+
+    @Operation(
+            summary = "광고 상세 조회",
+            description = "목록에서 선택한 광고의 상세 정보를 조회한다.",
+            parameters = {@Parameter(name="id", description = "조회할 광고의 id")}
+    )
+    public ResponseEntity<?> detail(Long id);
 
 }

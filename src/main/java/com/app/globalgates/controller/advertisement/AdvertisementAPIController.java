@@ -1,4 +1,4 @@
-package com.app.globalgates.controller;
+package com.app.globalgates.controller.advertisement;
 
 import com.app.globalgates.aop.annotation.LogStatus;
 import com.app.globalgates.common.search.AdSearch;
@@ -46,7 +46,12 @@ public class AdvertisementAPIController implements AdvertisementAPIControllerDoc
         AdWithPagingDTO adList = advertisementService.list(page, search);
 
         return ResponseEntity.ok(adList);
+    }
 
+    @GetMapping("detail")
+    public ResponseEntity<?> detail(Long id) {
+        AdvertisementDTO adDTO = null;
+        return null;
     }
 
 }

@@ -4,6 +4,7 @@ import com.app.globalgates.audit.Period;
 import com.app.globalgates.common.enumeration.AdStatus;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
@@ -11,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 @EqualsAndHashCode(of = "id", callSuper = false)
 @SuperBuilder
+@NoArgsConstructor
 public class AdvertisementVO extends Period {
     private Long id;
     private Long advertiserId;

@@ -2,12 +2,14 @@ package com.app.globalgates.repository;
 
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.common.search.AdSearch;
+import com.app.globalgates.domain.AdvertisementVO;
 import com.app.globalgates.dto.AdvertisementDTO;
 import com.app.globalgates.mapper.AdvertisementMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -34,5 +36,8 @@ public class AdvertisementDAO {
         return advertisementMapper.selectTotal(search);
     }
 
-    // 광고 상세 조회
+    // id로 광고 상세 조회
+    public Optional<AdvertisementVO> findById(Long id) {
+        return advertisementMapper.selectById(id);
+    }
 }
