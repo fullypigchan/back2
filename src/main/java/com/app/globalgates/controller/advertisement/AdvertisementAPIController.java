@@ -1,6 +1,7 @@
 package com.app.globalgates.controller.advertisement;
 
 import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.search.AdSearch;
 import com.app.globalgates.dto.AdWithPagingDTO;
 import com.app.globalgates.dto.AdvertisementDTO;
@@ -9,6 +10,7 @@ import com.app.globalgates.service.AdvertisementService;
 import com.app.globalgates.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,8 +33,8 @@ public class AdvertisementAPIController implements AdvertisementAPIControllerDoc
 
 //    광고 등록
     @PostMapping("write")
-    @LogStatus
-    public ResponseEntity<?> write(@RequestBody AdvertisementDTO advertisementDTO,
+    @LogStatusWithReturn
+    public ResponseEntity<?> write(@ModelAttribute AdvertisementDTO advertisementDTO,
                                     @RequestParam(value = "images", required = false) ArrayList<MultipartFile> images) throws IOException {
         advertisementService.save(advertisementDTO);
 
@@ -51,16 +55,19 @@ public class AdvertisementAPIController implements AdvertisementAPIControllerDoc
             }
         }
 
-        return ResponseEntity.ok("광고 등록 성공!");
+        log.info("저장된 광고 ID: {}", advertisementDTO.getId());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", advertisementDTO.getId());
+        result.put("message", "광고 등록 성공!");
+
+        return ResponseEntity.ok(result);
     }
 
 //    광고 검색
     @GetMapping("list/{page}")
-    @LogStatus
     public ResponseEntity<?> list(@PathVariable int page, AdSearch search) {
-        AdWithPagingDTO result = search == null
-                ? advertisementService.list(page)
-                : advertisementService.list(page, search);
+        AdWithPagingDTO result = advertisementService.list(page, search);
 
         result.getAdvertisements().forEach(ad ->
                 ad.setAdImageList(convertToPresignedUrl(ad.getAdImageList()))
@@ -70,7 +77,7 @@ public class AdvertisementAPIController implements AdvertisementAPIControllerDoc
     }
 
     @GetMapping("detail")
-    @LogStatus
+    @LogStatusWithReturn
     public ResponseEntity<?> detail(Long id) {
         AdvertisementDTO adDTO = advertisementService.getAdvertisementDetail(id);
         adDTO.setAdImageList(convertToPresignedUrl(adDTO.getAdImageList()));

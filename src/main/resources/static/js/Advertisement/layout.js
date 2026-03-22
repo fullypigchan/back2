@@ -1,13 +1,14 @@
 const advertisementLayout = (() => {
-    const showAdList = (adWithPagingDTO) => {
+    const showAdList = (adWithPagingDTO, append = false) => {
         const tbody = document.querySelector('.MarketplaceAdTable tbody');
         const emptyState = document.querySelector('[data-list-empty]');
-
-        const adList = adWithPagingDTO.adList; // AdWithPagingDTO 안의 광고 목록
+        const adList = adWithPagingDTO.advertisements;
 
         if (!adList || adList.length === 0) {
-            tbody.replaceChildren();
-            emptyState.hidden = false;
+            if (!append) {
+                tbody.replaceChildren();
+                emptyState.hidden = false;
+            }
             return;
         }
 
@@ -17,29 +18,21 @@ const advertisementLayout = (() => {
             const statusClass = ad.status === 'ACTIVE' ? 'is-active' : 'is-reported';
             const statusLabel = ad.status === 'ACTIVE' ? '게시중' : '신고됨';
 
-            // adImageList → 첨부파일 표시용 텍스트 가공
             const attachmentLabel = (() => {
                 if (!ad.adImageList || ad.adImageList.length === 0) return '선택된 파일이 없습니다.';
-                if (ad.adImageList.length === 1) return ad.adImageList[0].originalName;
-                return `${ad.adImageList[0].originalName} 외 ${ad.adImageList.length - 1}개`;
+                if (ad.adImageList.length === 1) return ad.adImageList[0];
+                return `${ad.adImageList[0]} 외 ${ad.adImageList.length - 1}개`;
             })();
-
-            // data-* 에 저장할 attachment 원본 정보 (JSON)
-            const attachmentData = JSON.stringify(
-                ad.adImageList?.map(({ id, originalName, fileName, filePath, contentType }) => ({
-                    id, originalName, fileName, filePath, contentType
-                })) ?? []
-            );
 
             const tr = document.createElement('tr');
             tr.className = 'MarketplaceAdListRow';
             tr.dataset.adId        = ad.id;
             tr.dataset.title       = ad.title;
             tr.dataset.headline    = ad.headline;
-            tr.dataset.link        = ad.landingUrl;       // landingUrl
-            tr.dataset.attachment  = attachmentData;      // JSON 배열
-            tr.dataset.copy        = ad.description;      // description
-            tr.dataset.amount      = ad.budget;           // budget
+            tr.dataset.link        = ad.landingUrl;
+            tr.dataset.attachment  = attachmentLabel;
+            tr.dataset.copy        = ad.description;
+            tr.dataset.amount      = ad.budget;
             tr.dataset.status      = ad.status;
             tr.dataset.statusLabel = statusLabel;
             tr.dataset.createdAt   = ad.createdDatetime;
@@ -66,7 +59,13 @@ const advertisementLayout = (() => {
             return tr;
         });
 
-        tbody.replaceChildren(...rows);
+        if (append) {
+            // ✅ 무한 스크롤 — 기존 행에 추가
+            rows.forEach(row => tbody.appendChild(row));
+        } else {
+            // ✅ 새 검색/필터 — 전체 교체
+            tbody.replaceChildren(...rows);
+        }
     };
     
     const showDetail = (ad) => {

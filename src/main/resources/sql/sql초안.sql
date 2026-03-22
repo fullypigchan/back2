@@ -28,6 +28,7 @@ create type file_content_type as enum (
 'etc'           -- 기타
 );
 
+select * from tbl_file;
 create table tbl_file (
 id            bigint             generated always as identity primary key,  -- pk | 파일 고유 id (자동 증가)
 original_name varchar(255)       not null,                                  -- 사용자가 업로드한 원본 파일명
@@ -492,9 +493,10 @@ references tbl_member(id)
 create type payment_status as enum (
 'pending',      -- 결제 대기
 'completed',    -- 결제 완료
+'cancelled',    -- 결제 취소
 'failed'        -- 결제 실패
 );
-
+select * from tbl_payment_advertisement;
 -- 결제 내역 광고
 create table tbl_payment_advertisement (
 id              bigint         generated always as identity primary key,  -- pk | 결제 고유 id (자동 증가)
@@ -507,7 +509,7 @@ receipt_id      varchar(255),                                                   
 paid_at         timestamp,                                                          -- 결제 완료 처리 일시
 created_datetime      timestamp      not null default now(),
 constraint fk_payment_advertisement foreign key(ad_id)
-references tbl_subscription(id),
+references tbl_advertisement(id),
 constraint fk_payment_advertisement_member foreign key(member_id)
 references tbl_member(id)
 );
@@ -634,7 +636,7 @@ constraint fk_advertisement_advertiser foreign key(advertiser_id)
 references tbl_member(id)
 );
 
-
+select * from tbl_ad_file;
 -- [50] tbl_ad_file  ─ 광고 이미지 (1:1 → tbl_file)
 create table tbl_ad_file (
 id    bigint not null primary key,  -- pk & fk → tbl_file.id
