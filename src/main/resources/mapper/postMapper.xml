@@ -40,7 +40,26 @@
                 where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,
                (select count(*) from tbl_post_like pl where pl.post_id = p.id) as like_count,
-               (select count(*) from tbl_post rp where rp.reply_post_id = p.id) as reply_count
+               (select count(*) from tbl_post rp where rp.reply_post_id = p.id) as reply_count,
+               (select count(*) from tbl_bookmark b where b.post_id = p.id) as bookmark_count,
+               <if test="memberId != null">
+               case when exists (
+                   select 1 from tbl_post_like pl2
+                   where pl2.post_id = p.id and pl2.member_id = #{memberId}
+               ) then true else false end
+               </if>
+               <if test="memberId == null">
+               false
+               </if> as is_liked,
+               <if test="memberId != null">
+               case when exists (
+                   select 1 from tbl_bookmark b
+                   where b.post_id = p.id and b.member_id = #{memberId}
+               ) then true else false end
+               </if>
+               <if test="memberId == null">
+               false
+               </if> as is_bookmarked
         from tbl_post p
                  join tbl_member m on p.member_id = m.id
         where p.id = #{id}
@@ -66,14 +85,38 @@
                 where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,
                (select count(*) from tbl_post_like pl where pl.post_id = p.id) as like_count,
-               (select count(*) from tbl_post rp where rp.reply_post_id = p.id) as reply_count
+               (select count(*) from tbl_post rp where rp.reply_post_id = p.id) as reply_count,
+               (select count(*) from tbl_bookmark b where b.post_id = p.id) as bookmark_count,
+               <if test="memberId != null">
+               case when exists (
+                   select 1 from tbl_post_like pl2
+                   where pl2.post_id = p.id and pl2.member_id = #{memberId}
+               ) then true else false end
+               </if>
+               <if test="memberId == null">
+               false
+               </if> as is_liked,
+               <if test="memberId != null">
+               case when exists (
+                   select 1 from tbl_bookmark b
+                   where b.post_id = p.id and b.member_id = #{memberId}
+               ) then true else false end
+               </if>
+               <if test="memberId == null">
+               false
+               </if> as is_bookmarked
         from tbl_post p
                  join tbl_member m on p.member_id = m.id
         where p.post_status = 'active'
           and p.reply_post_id is null
+          <if test="memberId != null">
+          and p.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
+          and p.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
+          and p.id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'post')
+          </if>
         order by p.created_datetime desc
-        limit #{count}
-        offset #{offset}
+        limit #{criteria.count}
+        offset #{criteria.offset}
     </select>
 
     <!-- 게시글 전체 개수 -->

@@ -21,17 +21,19 @@ public class PostAPIController {
 
     //    게시글 목록 조회 (무한스크롤)
     @GetMapping("list/{page}")
-    public List<PostDTO> getList(@PathVariable int page) {
-        return postService.getList(page);
+    public List<PostDTO> getList(@PathVariable int page, @RequestParam(required = false) Long memberId) {
+        return postService.getList(page, memberId);
     }
 
     //    게시글 작성 (모달로 씀)
     @PostMapping("/write")
     public void write(PostDTO postDTO,
-                      @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
+                      @RequestParam("files") List<MultipartFile> files) throws IOException {
         if (files == null) {
             files = List.of();
         }
+        log.info("게시물 {}", postDTO);
+        log.info("파일 {}", files);
         String todayPath = postService.writePost(postDTO, files);
 
         if (!files.isEmpty()) {
@@ -52,7 +54,7 @@ public class PostAPIController {
     }
 
     //    게시글 삭제 - 상태만 변경
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public void delete(@PathVariable Long id) {
         postService.delete(id);
     }

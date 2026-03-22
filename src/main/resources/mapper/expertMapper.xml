@@ -12,10 +12,6 @@
                    join tbl_file f on mpf.id = f.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,
-               case when exists (
-                   select 1 from tbl_follow fl
-                   where fl.follower_id = #{memberId} and fl.following_id = m.id
-               ) then true else false end as connected,
                (select mm.member_nickname from tbl_follow fl2
                    join tbl_member mm on fl2.follower_id = mm.id
                 where fl2.following_id = m.id and fl2.follower_id != #{memberId}
@@ -24,12 +20,13 @@
         where m.member_role = 'expert'
           and m.member_status = 'active'
           and m.id != #{memberId}
+          and m.id not in (select fl.following_id from tbl_follow fl where fl.follower_id = #{memberId})
         order by m.created_datetime desc
         limit #{criteria.count}
         offset #{criteria.offset}
     </select>
 
-    <!-- 전문가 전체 개수 -->
+    <!-- 추천 전문가 몇명인지 카운트 -->
     <select id="selectTotal" resultType="int">
         select count(*)
         from tbl_member

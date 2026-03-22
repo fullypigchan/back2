@@ -22,10 +22,10 @@ public interface PostMapper {
     public void delete(Long id);
 
     //    게시글 단건 조회
-    public Optional<PostDTO> selectById(Long id);
+    public Optional<PostDTO> selectById(@Param("id") Long id, @Param("memberId") Long memberId);
 
     //    게시글 목록 조회 (메인 피드)
-    public List<PostDTO> selectAll(Criteria criteria);
+    public List<PostDTO> selectAll(@Param("criteria") Criteria criteria, @Param("memberId") Long memberId);
 
     //    게시글 전체 개수
     public int selectTotal();
