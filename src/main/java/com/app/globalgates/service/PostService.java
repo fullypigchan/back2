@@ -113,7 +113,7 @@ public class PostService {
         //    태그 수정 (원래 묶인 관계 삭제하고 저장)
         postHashtagDAO.deleteRelByPostId(postDTO.getId());
         postDTO.getHashtags().forEach(hashtagDTO -> {
-            postHashtagDAO.save(hashtagDTO.toPostHashtagVO());
+            postHashtagDAO.save(hashtagDTO);
             if (hashtagDTO.getId() == null) {
                 hashtagDTO.setId(postHashtagDAO.findByTagName(hashtagDTO.getTagName())
                         .orElseThrow().getId());

@@ -28,7 +28,7 @@ public class PostProductDTO {
     private String postContent;
 
     // 상품 이미지 (tbl_post_file JOIN)
-    private List<PostFileDTO> postFiles = new ArrayList<>();
+    private List<String> postFiles = new ArrayList<>();
 
     // 상품 태그
     private List<PostHashtagDTO> hashtags = new ArrayList<>();

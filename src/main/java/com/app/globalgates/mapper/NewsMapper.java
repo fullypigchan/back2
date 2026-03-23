@@ -16,4 +16,5 @@ public interface NewsMapper {
 
     //    [메인]에서 쓰임 뉴스 2개 조회
     public List<NewsDTO> selectLatestInMain();
+
 }

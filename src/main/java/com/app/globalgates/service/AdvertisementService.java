@@ -56,44 +56,14 @@ public class AdvertisementService {
         fileAdvertisementDAO.save(fileAdDTO.toFileAdVO());
     }
 
-    // 광고 조회 (검색값 없이 조회)
-    @Cacheable(value = "ad:list", key = "'page:' + #page")
-    public AdWithPagingDTO list(int page) {
-        AdWithPagingDTO adWithPagingDTO = new AdWithPagingDTO();
-        Criteria criteria = new Criteria(page, advertisementDAO.getTotal(null));
-
-        // 이미지 등록
-        List<AdvertisementDTO> ads = advertisementDAO.findBySearch(criteria, null).stream()
-                .map(adDTO -> {
-                    List<FileAdvertisementDTO> images = new ArrayList<>(fileAdvertisementDAO.findByAdId(adDTO.getId()));
-                    if (!images.isEmpty()) {
-                        adDTO.setAdImageList(
-                                images.stream()
-                                        .map(FileAdvertisementDTO::getFilePath)
-                                        .collect(Collectors.toList())
-                        );
-                    }
-                    return adDTO;
-                }).collect(Collectors.toList());
-
-        criteria.setHasMore(ads.size() > criteria.getRowCount());
-        adWithPagingDTO.setCriteria(criteria);
-
-        if(criteria.isHasMore()) {
-            ads.remove(ads.size() - 1);
-        }
-
-        ads.forEach(adDTO -> {
-            adDTO.setCreatedDatetime(DateUtils.toRelativeTime(adDTO.getCreatedDatetime()));
-        });
-        adWithPagingDTO.setAdvertisements(ads);
-
-        return adWithPagingDTO;
-    }
-
-
     // 광고 검색 조회 (검색값 포함해서 조회)
-    @Cacheable(value = "ad:list", key = "'page:' + #page + ':memberId:' + #search.memberId + ':keyword:' + #search.keyword + ':filter:' + #search.filter")
+    @Cacheable(
+            value = "ad:list",
+            key = "'page:' + #page" +
+                    " + ':memberId:' + #search.memberId" +
+                    " + ':keyword:' + (#search.keyword ?: '')" +
+                    " + ':filter:' + (#search.filter ?: 'all')"
+    )
     public AdWithPagingDTO list(int page, AdSearch search) {
         AdWithPagingDTO adWithPagingDTO = new AdWithPagingDTO();
         Criteria criteria = new Criteria(page, advertisementDAO.getTotal(search));

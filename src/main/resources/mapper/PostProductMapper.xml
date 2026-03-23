@@ -19,4 +19,29 @@
         order by pp.created_datetime desc
     </select>
 
+    <!-- 추천 상품 전체 조회 -->
+    <select id="selectRecommendProducts">
+        select pp.id,
+               pp.product_price,
+               pp.product_stock,
+               pp.product_category_id,
+               pp.created_datetime,
+               pp.updated_datetime,
+               p.title as post_title,
+               p.content as post_content
+        from tbl_post_product pp
+        join tbl_post p on pp.id = p.id
+        where p.post_status = 'active'
+        order by created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 조회된 총 상품 수 -->
+    <select id="selectTotal">
+        select count(*)
+        from tbl_post_product pp
+        join tbl_post p on pp.id = p.id
+        where p.post_status = 'active'
+    </select>
+
 </mapper>

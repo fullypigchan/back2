@@ -34,6 +34,9 @@ public class AdvertisementDTO implements Serializable {
     // 광고 이미지 리스트
     private List<String> adImageList;
 
+    // 광고 이미지 경로 List
+
+
     public AdvertisementVO toAdVO() {
         return AdvertisementVO.builder()
                 .id(id)
