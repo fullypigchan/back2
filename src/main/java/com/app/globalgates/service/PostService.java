@@ -9,6 +9,7 @@ import com.app.globalgates.dto.FileDTO;
 import com.app.globalgates.dto.PostDTO;
 import com.app.globalgates.dto.PostFileDTO;
 import com.app.globalgates.dto.PostHashtagDTO;
+import com.app.globalgates.dto.PostWithPagingDTO;
 import com.app.globalgates.dto.ReplyProductRelDTO;
 import com.app.globalgates.repository.FileDAO;
 import com.app.globalgates.repository.PostDAO;
@@ -84,16 +85,22 @@ public class PostService {
     }
 
     //    게시글 목록 조회
-    public List<PostDTO> getList(int page, Long memberId) {
+    public PostWithPagingDTO getList(int page, Long memberId) {
         Criteria criteria = new Criteria(page, postDAO.findTotal());
         List<PostDTO> posts = postDAO.findAll(criteria, memberId);
+
+        criteria.setHasMore(posts.size() > criteria.getRowCount());
+        if (criteria.isHasMore()) posts.remove(posts.size() - 1);
 
         posts.forEach(postDTO -> {
             postDTO.setHashtags(postHashtagDAO.findAllByPostId(postDTO.getId()));
             postDTO.setPostFiles(postFileDAO.findAllByPostId(postDTO.getId()));
         });
 
-        return posts;
+        PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
+        postWithPagingDTO.setPosts(posts);
+        postWithPagingDTO.setCriteria(criteria);
+        return postWithPagingDTO;
     }
 
     //    게시글 단건 조회

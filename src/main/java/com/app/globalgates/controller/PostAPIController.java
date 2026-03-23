@@ -1,6 +1,7 @@
 package com.app.globalgates.controller;
 
 import com.app.globalgates.dto.PostDTO;
+import com.app.globalgates.dto.PostWithPagingDTO;
 import com.app.globalgates.service.PostService;
 import com.app.globalgates.service.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class PostAPIController {
 
     //    게시글 목록 조회
     @GetMapping("list/{page}")
-    public List<PostDTO> getList(@PathVariable int page, @RequestParam Long memberId) {
+    public PostWithPagingDTO getList(@PathVariable int page, @RequestParam Long memberId) {
         return postService.getList(page, memberId);
     }
 

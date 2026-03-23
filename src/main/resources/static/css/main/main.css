@@ -9,13 +9,14 @@
     box-sizing: border-box;
 }
 
-html,
-body {
+html {
     margin: 0;
     min-height: 100%;
 }
 
 body {
+    margin: 0;
+    min-height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: #ffffff;
     color: #0f1419;
@@ -29,10 +30,6 @@ body {
     --sidebar-link-color: #1d9bf0;
     --sidebar-search-bg: #f5f7f8;
     --sidebar-search-border: #dbe3e8;
-}
-
-.off {
-    display: none !important;
 }
 
 a {
@@ -53,6 +50,7 @@ button {
 }
 
 textarea {
+    font: inherit;
     resize: vertical;
 }
 
@@ -196,12 +194,6 @@ textarea {
 
 .nav-item.active span {
     font-weight: 700;
-}
-
-.nav-item[data-testid="AppTabBar_More_Menu"] {
-    border: 0;
-    background: none;
-    text-align: left;
 }
 
 /* 좌측 `더 보기` 팝오버: 버튼 주변에 뜨는 오버레이, 메뉴 박스, 메뉴 아이템 톤을 정의한다. */
@@ -638,10 +630,6 @@ a.menu-item:visited {
             rgba(101, 119, 134, 0.15) 0 0 3px 1px;
 }
 
-.share-sheet__card--bookmark {
-    min-height: 320px;
-}
-
 .share-sheet__header {
     display: flex;
     align-items: center;
@@ -1018,12 +1006,12 @@ a.menu-item:visited {
 .tweet-modal-overlay {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    z-index: 2000;
     display: flex;
     align-items: flex-start;
     justify-content: center;
     padding: 32px 16px;
-    background-color: rgba(91, 112, 131, 0.4);
+    background: rgba(91, 112, 131, 0.4);
 }
 
 .tweet-modal-overlay.off {
@@ -1062,7 +1050,7 @@ a.menu-item:visited {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: conic-gradient(#1d9bf0 var(--gauge-progress), #d7dfe4 0deg);
+    background: conic-gradient(#1d9bf0 0deg, #d7dfe4 0deg);
 }
 
 .composerGauge::before {
@@ -1194,8 +1182,7 @@ a.menu-item:visited {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    min-height: 116px;
-    padding: 6px 0 12px;
+    padding: 6px 0 6px;
 }
 
 .tweet-modal__input-wrap {
@@ -1220,7 +1207,8 @@ a.menu-item:visited {
 
 .tweet-modal__editor {
     width: 100%;
-    min-height: 88px;
+    padding-bottom: 8px;
+    min-height: 128px;
     padding-top: 2px;
     font-size: 20px;
     line-height: 1.5;
@@ -1229,6 +1217,7 @@ a.menu-item:visited {
     word-break: break-word;
     white-space: pre-wrap;
     font-family: inherit;
+    border-bottom: 1px solid #eff3f4;
 }
 
 .tweet-modal__editor:empty::before {
@@ -1416,7 +1405,7 @@ a.menu-item:visited {
     flex-direction: row;
     align-items: center;
     gap: 6px;
-    z-index: 10;
+    z-index: 1;
 }
 
 .media-btn {
@@ -1459,7 +1448,7 @@ a.menu-item:visited {
     background-color: rgba(15, 20, 25, 0.75);
     backdrop-filter: blur(4px);
     transition: background-color 0.2s ease;
-    z-index: 10;
+    z-index: 1;
 }
 
 .media-btn-delete:hover {
@@ -2520,12 +2509,6 @@ a.menu-item:visited {
     justify-content: center;
 }
 
-.tweet-modal__tool-btn-text {
-    display: block;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-}
 
 .tweet-modal__tool-btn--format {
     color: #1d9bf0;
@@ -2537,7 +2520,9 @@ a.menu-item:visited {
     border-radius: 4px;
 }
 
-.tweet-modal__tool-btn--active {
+.tweet-modal__tool-btn--active,
+.tweet-modal__tool-btn--bold.active,
+.tweet-modal__tool-btn--italic.active {
     background-color: #1d9bf0;
     color: #ffffff;
 }
@@ -2597,22 +2582,7 @@ a.menu-item:visited {
 
 
 
-/* 작성 본문 배치: 아바타, 입력창, 첨부 미리보기, 메타 영역, 제출 버튼을 세로 흐름으로 정렬한다. */
-
-.tweet-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 32px 16px;
-    background: rgba(91, 112, 131, 0.4);
-}
-
-.tweet-modal-overlay.off {
-    display: none;
-}
+/* 답글 모달 전용 스타일 */
 
 [data-reply-modal] .tweet-modal {
     width: min(100%, 600px);
@@ -2638,13 +2608,6 @@ a.menu-item:visited {
 [data-reply-modal] .tweet-modal:has(.tweet-modal__tag-view:not(.off))
 .tweet-modal__header {
     display: none;
-}
-
-.tweet-modal:has(.tweet-modal__draft-view:not(.off)),
-.tweet-modal:has(.tweet-modal__location-view:not(.off)),
-.tweet-modal:has(.tweet-modal__media-view:not(.off)),
-.tweet-modal:has(.tweet-modal__tag-view:not(.off)) {
-    height: 90vh;
 }
 
 [data-reply-modal] .tweet-modal__progress {
@@ -2678,14 +2641,6 @@ a.menu-item:visited {
     text-align: left;
     cursor: pointer;
     font-family: inherit;
-}
-
-.tweet-modal__source-tweet {
-    display: flex;
-    gap: 12px;
-    padding-bottom: 16px;
-    margin-bottom: 4px;
-    border-bottom: 1px solid #eff3f4;
 }
 
 [data-reply-modal] .tweet-modal__source-avatar,
@@ -2741,7 +2696,7 @@ a.menu-item:visited {
 
 [data-reply-modal] .tweet-modal__editor {
     width: 100%;
-    min-height: 88px;
+    min-height: 128px;
     padding-top: 2px;
     outline: none;
     color: #0f1419;
@@ -2773,76 +2728,6 @@ a.menu-item:visited {
     width: 100%;
     padding-bottom: 12px;
     border-bottom: 1px solid #eff3f4;
-}
-
-.tweet-modal__footer-meta-slot {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    min-width: 0;
-}
-
-.tweet-modal__location-display {
-    display: inline-flex;
-    align-items: center;
-    border: none;
-    min-height: 22px;
-    min-width: 22px;
-    padding: 0;
-    border-radius: 9999px;
-    background: transparent;
-    color: #1d9bf0;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 18px;
-    cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
-    box-shadow: none;
-    outline: none;
-    transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-.tweet-modal__location-display-inner {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 22px;
-    padding: 0 11px;
-    color: inherit;
-}
-
-.tweet-modal__location-display-icon {
-    flex-shrink: 0;
-    width: 14px;
-    height: 14px;
-    fill: currentColor;
-}
-
-.tweet-modal__location-display-text-wrap,
-.tweet-modal__location-display-text-outer {
-    display: inline-flex;
-    align-items: center;
-}
-
-.tweet-modal__location-display-text-outer,
-.tweet-modal__location-display-text-inner {
-    color: inherit;
-    font: inherit;
-    line-height: inherit;
-}
-
-.tweet-modal__location-display.off {
-    display: none;
-}
-
-.tweet-modal__location-display:hover,
-.tweet-modal__location-display:focus,
-.tweet-modal__location-display:focus-visible,
-.tweet-modal__location-display:active {
-    background: rgba(29, 155, 240, 0.1);
-    box-shadow: none;
-    outline: none;
 }
 
 [data-reply-modal] .tweet-modal__footer-bottom {
@@ -2987,9 +2872,9 @@ a.menu-item:visited {
 
 .draft-panel__item {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 12px;
-    align-items: flex-start;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 8px;
+    align-items: center;
     width: 100%;
     padding: 14px 16px;
     border: none;
@@ -2999,6 +2884,41 @@ a.menu-item:visited {
     cursor: pointer;
     font-family: inherit;
     transition: background-color 0.2s;
+}
+
+.draft-panel__item-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1d9bf0;
+}
+
+.draft-panel__item-load {
+    display: block;
+    border: none;
+    background: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    min-width: 0;
+}
+
+.draft-panel__item-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #536471;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.draft-panel__item-delete:hover {
+    background: rgba(15, 20, 25, 0.1);
+    color: #0f1419;
 }
 
 .draft-panel__item:hover {
@@ -3036,6 +2956,72 @@ a.menu-item:visited {
     border-color: #1d9bf0;
     background: #1d9bf0;
     color: #ffffff;
+}
+
+.tweet-modal__selected-product {
+    margin-top: 12px;
+    padding: 0 4px;
+}
+
+.selected-product__card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.selected-product__image {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.selected-product__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.selected-product__name {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f1419;
+}
+
+.selected-product__price {
+    font-size: 13px;
+    color: #536471;
+}
+
+.selected-product__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #536471;
+    flex-shrink: 0;
+}
+
+.selected-product__remove:hover {
+    background: rgba(15, 20, 25, 0.1);
+    color: #0f1419;
+}
+
+.selected-product__remove svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
 }
 
 .draft-panel__avatar {
@@ -3098,12 +3084,13 @@ a.menu-item:visited {
     font-size: 28px;
     font-weight: 800;
     line-height: 32px;
+    text-align: center;
 }
 
 .draft-panel__empty-body {
     color: #536471;
     font-size: 15px;
-    line-height: 20px;
+    text-align: center;
 }
 
 .draft-panel__footer {
@@ -3230,10 +3217,228 @@ a.menu-item:visited {
     background: #f7f9f9;
 }
 
+.composerAudience {
+    position: relative;
+    margin-bottom: 4px;
+}
 
+.composerMeta {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px 16px 0px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eff3f4;
+}
 
+.composerMetaRow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0px 0px 4px;
+}
 
+.replyAudience {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
 
+.replyAudience .tweet-modal__location-display {
+    margin-left: auto;
+}
+
+.composerTagLabel {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #1d9bf0;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.composerTagLabel:hover {
+    text-decoration: underline;
+}
+
+.composerCategoryBanner {
+    width: 100%;
+}
+
+.composerTagEditor {
+    width: clamp(180px, 44%, 248px);
+    max-width: 100%;
+    min-height: 27px;
+    padding: 0px 10px;
+    border: 1px solid transparent;
+    border-radius: 16px;
+    background: #f7f9f9;
+    box-shadow: inset 0 0 0 1px rgba(15, 20, 25, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+
+}
+
+.composerTagEditor.off {
+    display: none;
+}
+
+.composerTagEditor:focus-within {
+    border-color: rgba(29, 155, 240, 0.45);
+    background: #ffffff;
+    box-shadow:
+            0 0 0 4px rgba(29, 155, 240, 0.12),
+            inset 0 0 0 1px rgba(29, 155, 240, 0.16);
+}
+
+.composerTagField {
+    min-width: 50px;
+    flex: 1 1 auto;
+    min-height: 25px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f1419;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.composerTagField::placeholder {
+    color: #536471;
+}
+
+.tagDiv {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 9999px;
+    background: rgba(29, 155, 240, 0.12);
+    color: #1d9bf0;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.category-banner {
+    padding-top: 4px;
+}
+
+.category-scroll-wrap {
+    position: relative;
+    overflow: hidden;
+}
+
+.category-scroll {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0 0 9px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.category-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.cat-chip {
+    flex-shrink: 0;
+    padding: 6px 16px;
+    border: 1px solid #cfd9de;
+    border-radius: 9999px;
+    background: #fff;
+    color: #0f1419;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.cat-chip.has-subs {
+    padding-right: 16px;
+}
+
+.cat-chip:hover {
+    background: #f7f9f9;
+    border-color: #b0bec5;
+}
+
+.cat-chip.active,
+.cat-chip.parent-highlight,
+.cat-chip.sub-active {
+    border-color: #1d9bf0;
+    background: #1d9bf0;
+    color: #fff;
+    font-weight: 700;
+}
+
+.category-scroll-arrow {
+    position: absolute;
+    top: 0;
+    bottom: 12px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    border: none;
+    color: #0f1419;
+    cursor: pointer;
+}
+
+.category-scroll-arrow.off {
+    display: none;
+}
+
+.category-scroll-left {
+    left: 0;
+    background: linear-gradient(to right, #fff 60%, transparent);
+}
+
+.category-scroll-right {
+    right: 0;
+    background: linear-gradient(to left, #fff 60%, transparent);
+}
+
+.composerAudienceRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.composerAudienceTagDock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+
+.tag-input {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-input.off {
+    display: none;
+}
 
 .audienceButton,
 .audienceNotice {
@@ -3269,7 +3474,7 @@ a.menu-item:visited {
     position: fixed;
     top: 16px;
     left: 16px;
-    z-index: 1300;
+    z-index: 2100;
     width: min(320px, calc(100vw - 32px));
     max-height: min(520px, calc(100vh - 32px));
     overflow: hidden auto;
@@ -3433,313 +3638,12 @@ a.menu-item:visited {
     opacity: 1;
 }
 
-
-
-
-
-/* 첨부 미리보기 레이아웃: 게시글/댓글 모달에서 공용으로 쓰는 이미지 그리드와 파일 카드 톤을 정의한다. */
-.tweet-modal__input-wrap {
-    min-width: 0;
-    flex: 1;
-    padding-top: 2px;
-}
-
-.tweet-modal__attachment {
-    margin-top: 12px;
-}
-
-.tweet-modal__attachment.off {
-    display: none;
-}
-
-
-
-.media-aspect-ratio {
-    width: 100%;
-    padding-bottom: 50%;
-}
-
-.media-aspect-ratio--single {
-    padding-bottom: 56.25%;
-}
-
-.media-absolute-layer {
-    position: absolute;
-    inset: 0;
-}
-
-.media-row {
-    display: flex;
-    width: 100%;
-    height: 100%;
-}
-
-.media-col {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-    height: 100%;
-    gap: 2px;
-}
-
-.media-col:not(:last-child) {
-    margin-right: 2px;
-}
-
-.media-cell {
-    position: relative;
-    flex: 1 1 0%;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.media-cell--single {
-    border-radius: 16px;
-    height: 100%;
-}
-
-.media-cell--left {
-    border-radius: 16px 4px 4px 16px;
-}
-
-.media-cell--right {
-    border-radius: 4px 16px 16px 4px;
-}
-
-.media-cell--left-tall {
-    border-radius: 16px 4px 4px 16px;
-}
-
-.media-cell--right-top {
-    border-radius: 4px 16px 4px 4px;
-}
-
-.media-cell--right-bottom {
-    border-radius: 4px 4px 16px 4px;
-}
-
-.media-cell--top-left {
-    border-radius: 16px 4px 4px 4px;
-}
-
-.media-cell--top-right {
-    border-radius: 4px 16px 4px 4px;
-}
-
-.media-cell--bottom-left {
-    border-radius: 4px 4px 4px 16px;
-}
-
-.media-cell--bottom-right {
-    border-radius: 4px 4px 16px 4px;
-}
-
-.media-cell-inner {
-    position: absolute;
-    inset: 0;
-}
-
-.media-img-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-.media-bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: brightness(1);
-}
-
-.media-img,
-.tweet-modal__attachment-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-.tweet-modal__attachment-file {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 180px;
-    padding: 20px;
-    border-radius: 16px;
-    background: #eff3f4;
-    color: #0f1419;
-}
-
-
-.tweet-modal__attachment-file svg {
-    flex-shrink: 0;
-    fill: #536471;
-}
-
-.tweet-modal__attachment-file-name {
-    font-size: 15px;
-    line-height: 20px;
-    font-weight: 700;
-    word-break: break-word;
-}
-
-.media-actions-bar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 8px;
-    padding: 0 4px;
-}
-
-.media-action-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    border: none;
-    padding: 0;
-    background: transparent;
-    color: rgb(83, 100, 113);
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 20px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-    font-family: inherit;
-}
-
-.media-action-link:hover {
-    color: rgb(29, 155, 240);
-}
-
-.media-action-link svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-    flex-shrink: 0;
-}
-
-.tweet-modal__attachment-meta-btn.off {
-    display: none;
-}
-
-.media-action-link span {
-    white-space: nowrap;
-}
-
-.media-btn-row {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 10;
-}
-
-.media-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid transparent;
-    border-radius: 9999px;
-    padding: 4px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 20px;
-    color: #ffffff;
-    background-color: rgba(15, 20, 25, 0.75);
-    backdrop-filter: blur(4px);
-    transition: background-color 0.2s ease;
-    white-space: nowrap;
-    font-family: inherit;
-}
-
-.media-btn:hover {
-    background-color: rgba(15, 20, 25, 0.9);
-}
-
-.media-btn-delete {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 9999px;
-    cursor: pointer;
-    color: #ffffff;
-    background-color: rgba(15, 20, 25, 0.75);
-    backdrop-filter: blur(4px);
-    transition: background-color 0.2s ease;
-    z-index: 10;
-}
-
-.media-btn-delete:hover {
-    background-color: rgba(15, 20, 25, 0.9);
-}
-
-.media-btn-delete svg {
-    width: 18px;
-    height: 18px;
-    fill: #ffffff;
-    color: #ffffff;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-.tagDiv {
-    display: inline-flex;
-    align-items: center;
-    height: 28px;
-    padding: 0 12px;
-    border-radius: 9999px;
-    background: rgba(29, 155, 240, 0.12);
-    color: #1d9bf0;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-
-
-
-
-
-
-
-
-
-
-
 .cat-back-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 33.38px;
+    height: 33.38px;
     flex-shrink: 0;
     border: 1px solid #cfd9de;
     border-radius: 50%;
@@ -3755,1004 +3659,6 @@ a.menu-item:visited {
     width: 18px;
     height: 18px;
     fill: #0f1419;
-}
-
-
-
-
-
-.composerActions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.composerGauge {
-    --gauge-progress: 0deg;
-    position: relative;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: conic-gradient(#1d9bf0 var(--gauge-progress), #d7dfe4 0deg);
-}
-
-.composerGauge::before {
-    content: "";
-    position: absolute;
-    inset: 3px;
-    border-radius: 50%;
-    background: #ffffff;
-}
-
-.composerGaugeText {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: #536471;
-    z-index: 1;
-}
-
-
-.tweet-modal__toolbar {
-    display: flex;
-    gap: 4px;
-    flex-wrap: nowrap;
-    align-items: center;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.tweet-modal__toolbar::-webkit-scrollbar {
-    display: none;
-}
-
-.tweet-modal__tool-file {
-    position: relative;
-}
-
-.tweet-modal__tool-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border: 0;
-    background: transparent;
-    border-radius: 50%;
-    color: #1d9bf0;
-    fill: currentColor;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.tweet-modal__tool-btn:hover {
-    background-color: rgba(29, 155, 240, 0.1);
-}
-
-.tweet-modal__tool-btn:disabled {
-    opacity: 0.45;
-    cursor: default;
-}
-
-.tweet-modal__tool-btn svg {
-    fill: currentColor;
-}
-
-.tweet-modal__tool-btn.off {
-    display: none;
-}
-
-.tweet-modal__tool-btn--geo,
-.tweet-modal__tool-btn--format {
-    width: 32px;
-    height: 32px;
-}
-
-.tweet-modal__tool-btn--active {
-    background: #1d9bf0;
-    color: #ffffff !important;
-}
-
-.tweet-modal__tool-btn--active:hover {
-    background-color: #1a8cd8;
-}
-
-.tweet-modal__tool-btn-inner,
-.tweet-modal__tool-btn-text-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.tweet-modal__tool-btn-inner {
-    min-width: 18px;
-    min-height: 18px;
-    color: inherit;
-}
-
-.tweet-modal__tool-btn-icon {
-    display: block;
-    flex-shrink: 0;
-    fill: currentColor;
-}
-
-.tweet-modal__tool-btn-icon--geo {
-    width: 18px;
-    height: 18px;
-}
-
-.tweet-modal__tool-btn-text {
-    display: block;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-}
-
-.tweet-modal__tool-btn--format {
-    color: #1d9bf0;
-}
-
-.tweet-modal__tool-format-icon {
-    display: block;
-    fill: currentColor;
-    border-radius: 4px;
-}
-
-.tweet-modal__file-input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* 이모티콘 피커 패널: position:fixed로 overflow 제약을 벗어나 모달 위에 떠 표시된다 */
-/* 이모티콘 피커: Notification과 동일 */
-.tweet-modal__emoji-picker {
-    position: fixed;
-    left: 16px;
-    top: 16px;
-    width: min(565px, calc(100vw - 32px));
-    max-height: 560px;
-    overflow: hidden;
-    border: 1px solid #d7dbdf;
-    border-radius: 18px;
-    background-color: #ffffff;
-    box-shadow: 0 10px 32px rgba(15, 20, 25, 0.2);
-    z-index: 2100;
-}
-
-.tweet-modal__emoji-picker.off {
-    display: none;
-}
-
-.tweet-modal__emoji-search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid #eff3f4;
-}
-
-.tweet-modal__emoji-search-icon {
-    color: #536471;
-    fill: currentColor;
-    flex-shrink: 0;
-}
-
-.tweet-modal__emoji-search-input {
-    width: 100%;
-    height: 44px;
-    padding: 0 18px;
-    border: 2px solid #1d9bf0;
-    border-radius: 9999px;
-    outline: none;
-    font-size: 15px;
-    font-family: inherit;
-    color: #0f1419;
-}
-
-.tweet-modal__emoji-search-input::placeholder {
-    color: #536471;
-}
-
-.tweet-modal__emoji-tabs {
-    display: grid;
-    grid-template-columns: repeat(9, minmax(0, 1fr));
-    align-items: end;
-    height: 52px;
-    padding: 0 4px;
-    border-bottom: 1px solid #eff3f4;
-    background-color: #ffffff;
-}
-
-.tweet-modal__emoji-tab {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 51px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: #9aa4af;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.tweet-modal__emoji-tab:hover {
-    background-color: rgba(15, 20, 25, 0.04);
-}
-
-.tweet-modal__emoji-tab--active {
-    color: #1d9bf0;
-}
-
-.tweet-modal__emoji-tab--active::after {
-    content: "";
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 0;
-    height: 4px;
-    border-radius: 9999px;
-    background-color: #1d9bf0;
-}
-
-.tweet-modal__emoji-tab-icon {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-    color: inherit;
-}
-
-.tweet-modal__emoji-content {
-    max-height: 454px;
-    overflow-y: auto;
-    padding: 0;
-}
-
-.tweet-modal__emoji-content::-webkit-scrollbar {
-    width: 10px;
-}
-
-.tweet-modal__emoji-content::-webkit-scrollbar-thumb {
-    background-color: #c3c9cf;
-    border-radius: 9999px;
-    border: 2px solid #ffffff;
-}
-
-.tweet-modal__emoji-section {
-    padding: 18px 0 10px;
-    border-top: 1px solid #eff3f4;
-}
-
-.tweet-modal__emoji-section:first-child {
-    border-top: none;
-}
-
-.tweet-modal__emoji-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    margin-bottom: 18px;
-}
-
-.tweet-modal__emoji-section-title {
-    font-size: 19px;
-    font-weight: 800;
-    color: #0f1419;
-    line-height: 24px;
-}
-
-.tweet-modal__emoji-clear {
-    border: none;
-    background: transparent;
-    color: #1d9bf0;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.tweet-modal__emoji-grid {
-    display: grid;
-    grid-template-columns: repeat(9, minmax(0, 1fr));
-    gap: 2px 4px;
-    padding: 0 24px 14px;
-}
-
-.tweet-modal__emoji-option {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    margin: 0 auto;
-    border: none;
-    border-radius: 9999px;
-    background: transparent;
-    cursor: pointer;
-    font-size: 28px;
-    transition: background-color 0.2s;
-}
-
-.tweet-modal__emoji-option:hover {
-    background-color: rgba(29, 155, 240, 0.08);
-}
-
-.tweet-modal__emoji-option img,
-.tweet-modal__emoji-option .emoji {
-    width: 28px;
-    height: 28px;
-}
-
-.tweet-modal__emoji-empty {
-    padding: 0 28px 18px;
-    color: #536471;
-    font-size: 15px;
-    line-height: 20px;
-}
-
-/* 판매글 선택 서브뷰: compose-view와 동일한 레이아웃을 사용한다 */
-.tweet-modal__product-view {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-}
-
-.tweet-modal__location-view {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-}
-
-.tweet-modal__location-modal {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.tweet-modal__location-header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 48px;
-    padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(12px);
-}
-
-.tweet-modal__location-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    margin-left: -4px;
-    border: none;
-    border-radius: 9999px;
-    background: transparent;
-    color: #0f1419;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.tweet-modal__location-close:hover {
-    background: rgba(15, 20, 25, 0.08);
-}
-
-.tweet-modal__location-close svg {
-    fill: currentColor;
-}
-
-.tweet-modal__location-title {
-    margin: 0;
-    color: #0f1419;
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 24px;
-}
-
-.tweet-modal__location-actions {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.tweet-modal__location-action {
-    min-height: 38px;
-    min-width: 38px;
-    padding: 0 18px;
-    border: 1px solid transparent;
-    border-radius: 9999px;
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 38px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background-color 0.2s, color 0.2s, opacity 0.2s;
-}
-
-.tweet-modal__location-action--ghost {
-    min-width: auto;
-    min-height: auto;
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
-    color: #0f1419;
-    line-height: 1.2;
-}
-
-.tweet-modal__location-action--solid {
-    background: #0f1419;
-    color: #ffffff;
-}
-
-.tweet-modal__location-action--solid:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.tweet-modal__location-search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 16px 8px;
-    padding: 0 14px;
-    border: 1px solid #cfd9de;
-    border-radius: 9999px;
-    min-height: 44px;
-}
-
-.tweet-modal__location-search-icon {
-    flex-shrink: 0;
-    color: #536471;
-    fill: currentColor;
-}
-
-.tweet-modal__location-search-input {
-    width: 100%;
-    min-height: 36px;
-    border: none;
-    outline: none;
-    color: #0f1419;
-    font-size: 13px;
-    line-height: 14px;
-    font-family: inherit;
-    caret-color: #1d9bf0;
-}
-
-.tweet-modal__location-search-input::placeholder {
-    color: #536471;
-}
-
-.tweet-modal__location-list {
-    overflow-y: auto;
-    padding-bottom: 12px;
-}
-
-.tweet-modal__location-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    padding: 11px 14px;
-    border: 0;
-    background: transparent;
-    color: #0f1419;
-    text-align: left;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 20px;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.tweet-modal__location-item-check {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 18px;
-    color: #1d9bf0;
-    flex-shrink: 0;
-}
-
-.tweet-modal__location-item-check svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
-.tweet-modal__location-empty {
-    margin: 0;
-    padding: 18px 14px 8px;
-    color: #536471;
-    font-size: 15px;
-    line-height: 20px;
-}
-
-.tweet-modal__media-view {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-}
-
-.tweet-modal__media-editor {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: #ffffff;
-}
-
-.tweet-modal__media-header {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 56px;
-    padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(12px);
-}
-
-.tweet-modal__media-title {
-    margin: 0;
-    color: #0f1419;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 22px;
-}
-
-.tweet-modal__media-header-actions {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.tweet-modal__media-header-btn {
-    min-height: 32px;
-    padding: 0 14px;
-    border: 1px solid #cfd9de;
-    border-radius: 9999px;
-    background: #ffffff;
-    color: #0f1419;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 32px;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.tweet-modal__media-header-btn[disabled] {
-    opacity: 0.45;
-    cursor: default;
-}
-
-.tweet-modal__media-header-btn--ghost {
-    width: 32px;
-    min-width: 32px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-}
-
-.tweet-modal__media-header-btn--ghost svg {
-    fill: currentColor;
-}
-
-.tweet-modal__media-header-btn--solid {
-    border-color: transparent;
-    background: #0f1419;
-    color: #ffffff;
-}
-
-.tweet-modal__media-body {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-}
-
-.tweet-modal__media-panel {
-    display: none;
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-}
-
-.tweet-modal__media-panel--active {
-    display: flex;
-}
-
-.tweet-modal__media-alt-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 280px;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #f7f9f9;
-}
-
-.tweet-modal__media-preview-image--alt {
-    max-width: 100%;
-    max-height: 320px;
-    object-fit: contain;
-    background: #000000;
-}
-
-.tweet-modal__media-alt-field {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 14px;
-    border: 1px solid #cfd9de;
-    border-radius: 16px;
-}
-
-.tweet-modal__media-alt-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.tweet-modal__media-alt-label {
-    color: #0f1419;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.tweet-modal__media-alt-count {
-    color: #536471;
-    font-size: 13px;
-    line-height: 18px;
-}
-
-.tweet-modal__media-alt-input {
-    min-height: 160px;
-    border: 0;
-    outline: none;
-    resize: vertical;
-    color: #0f1419;
-    font-size: 15px;
-    line-height: 22px;
-    font-family: inherit;
-}
-
-.tweet-modal__submit {
-    min-width: 74px;
-    padding: 8px 16px;
-    border: 0;
-    border-radius: 9999px;
-    background: #0f1419;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.tweet-modal__submit:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-@media (max-width: 600px) {
-    .tweet-modal-overlay {
-        padding: 0;
-        background: #ffffff;
-    }
-
-    [data-reply-modal] .tweet-modal {
-        width: 100%;
-        max-height: 100vh;
-        min-height: 100vh;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    [data-reply-modal] .tweet-modal__header,
-    [data-reply-modal] .tweet-modal__body,
-    [data-reply-modal] .tweet-modal__footer {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-}
-
-/* 위치 선택/사용자 태그/미디어 설명 편집 같은 서브뷰는 작성 모달 내부의 독립 화면처럼 보이도록 맞춘다. */
-.tweet-modal__tag-modal {
-    width: 100%;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    background-color: #ffffff;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.tweet-modal__tag-header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 48px;
-    padding: 10px 14px;
-    background-color: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(12px);
-}
-
-.tweet-modal__tag-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    margin-left: -4px;
-    border: none;
-    border-radius: 9999px;
-    background: transparent;
-    color: #0f1419;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.tweet-modal__tag-close:hover {
-    background-color: rgba(15, 20, 25, 0.08);
-}
-
-.tweet-modal__tag-close svg {
-    fill: currentColor;
-}
-
-.tweet-modal__tag-title {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 800;
-    color: #0f1419;
-    line-height: 24px;
-}
-
-.tweet-modal__tag-actions {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-}
-
-.tweet-modal__tag-action {
-    min-height: 32px;
-    padding: 0 16px;
-    border: 1px solid transparent;
-    border-radius: 9999px;
-    background: #0f1419;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 32px;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.tweet-modal__tag-search {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-}
-
-.tweet-modal__tag-search-form {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.tweet-modal__tag-search-shell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin: 0 16px 12px;
-    padding: 4px 12px;
-    border-radius: 9999px;
-    background: #e7e9ea;
-    min-height: 44px;
-}
-
-.tweet-modal__tag-search-icon {
-    flex-shrink: 0;
-    color: #536471;
-    fill: currentColor;
-}
-
-.tweet-modal__tag-chip-list {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    min-width: 0;
-}
-
-.tweet-modal__tag-search-input {
-    flex: 1 1 120px;
-    min-width: 120px;
-    min-height: 32px;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: #0f1419;
-    font-size: 15px;
-    line-height: 20px;
-    font-family: inherit;
-    caret-color: #1d9bf0;
-}
-
-.tweet-modal__tag-search-input::placeholder {
-    color: #536471;
-}
-
-.tweet-modal__tag-results {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding-bottom: 12px;
-}
-
-.tweet-modal__tag-results:empty {
-    padding-bottom: 0;
-}
-
-.tweet-modal__tag-option {
-    display: block;
-}
-
-.tweet-modal__tag-checkbox {
-    display: flex;
-    width: 100%;
-    color: #0f1419;
-}
-
-.tweet-modal__tag-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px 16px;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.tweet-modal__tag-user:hover:not([disabled]) {
-    background: rgba(15, 20, 25, 0.03);
-}
-
-.tweet-modal__tag-user[disabled] {
-    cursor: default;
-}
-
-.tweet-modal__tag-checkbox[aria-disabled="true"] {
-    opacity: 0.55;
-}
-
-.tweet-modal__tag-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 9999px;
-    overflow: hidden;
-    background: #eff3f4;
-    flex-shrink: 0;
-}
-
-.tweet-modal__tag-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.tweet-modal__tag-user-body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.tweet-modal__tag-user-name {
-    font-size: 15px;
-    line-height: 20px;
-    font-weight: 700;
-    color: #0f1419;
-}
-
-.tweet-modal__tag-user-handle {
-    font-size: 15px;
-    line-height: 20px;
-    color: #536471;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.tweet-modal__tag-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 29px;
-    max-width: 220px;
-    padding: 3px 11px 3px 3px;
-    border: 1px solid #cfd9de;
-    border-radius: 9999px;
-    background: #ffffff;
-    color: #0f1419;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.tweet-modal__tag-chip:hover {
-    background: rgba(15, 20, 25, 0.06);
-}
-
-.tweet-modal__tag-chip-avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 9999px;
-    overflow: hidden;
-    background: #eff3f4;
-    flex-shrink: 0;
-}
-
-.tweet-modal__tag-chip-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.tweet-modal__tag-chip-name {
-    min-width: 0;
-    font-size: 14px;
-    line-height: 18px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.tweet-modal__tag-chip-icon {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-    flex-shrink: 0;
-}
-
-.tweet-modal__tag-empty {
-    margin: 0;
-    padding: 24px 16px 12px;
-    color: #536471;
-    font-size: 15px;
-    line-height: 20px;
 }
 
 .locationModal {
@@ -4907,6 +3813,7 @@ a.menu-item:visited {
     display: flex;
     gap: 12px;
     padding: 16px;
+    border-bottom: 1px solid #eff3f4;
 }
 
 .postCard:hover {
@@ -4932,6 +3839,8 @@ a.menu-item:visited {
     gap: 4px 8px;
     align-items: center;
     min-width: 0;
+    overflow: hidden;
+    flex: 1;
 }
 
 .postName {
@@ -4945,7 +3854,7 @@ a.menu-item:visited {
 }
 
 .postText {
-    margin: 8px 0 4px;
+    margin: 8px 0 12px;
     font-size: 15px;
     line-height: 20px;
     display: -webkit-box;
@@ -5005,6 +3914,7 @@ a.menu-item:visited {
     color: #536471;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
+    flex-shrink: 0;
 }
 
 .postMoreButton:hover {
@@ -5292,7 +4202,7 @@ img.postMediaImage {
 }
 
 .searchForm {
-    padding: 4px 0 12px;
+    padding: 4px 0px 0px;
 }
 
 .search-icon {
@@ -5307,14 +4217,14 @@ img.postMediaImage {
     gap: 12px;
     padding: 12px 16px;
     border-radius: 9999px;
-    border: 1px solid var(--sidebar-search-border);
+    border: 1px solid #dbe3e8;
     max-height: 40px;
 }
 
 .searchForm.isFocused .searchField {
     background: #ffffff;
-    border-color: var(--sidebar-link-color);
-    box-shadow: 0 0 0 1px var(--sidebar-link-color);
+    border-color: #1d9bf0;
+    box-shadow: 0 0 0 1px #1d9bf0;
 }
 
 .searchIcon {
@@ -5331,7 +4241,7 @@ img.postMediaImage {
 }
 
 .searchForm.isFocused .searchIcon {
-    color: var(--sidebar-link-color);
+    color: #1d9bf0;
 }
 
 .searchInput {
@@ -5341,7 +4251,7 @@ img.postMediaImage {
     background: transparent;
     color: #0f1419;
     font-size: 15px;
-    caret-color: var(--sidebar-link-color);
+    caret-color: #1d9bf0;
 }
 
 .searchInput::placeholder {
@@ -5350,10 +4260,11 @@ img.postMediaImage {
 
 .searchPanel {
     position: absolute;
-    left: 0;
-    right: 0;
-    margin-top: 2px;
-    /* min-height: 100px; */
+    /* left: 0;
+    right: 0; */
+    margin-top: 8px;
+    width: 318px;
+    min-height: 40px;
     max-height: calc(-53px + 80vh);
     border-radius: 16px;
     background: #ffffff;
@@ -5363,7 +4274,7 @@ img.postMediaImage {
 }
 
 .searchPanelEmpty {
-    padding: 24px 40px;
+    padding: 18px 16px;
 }
 
 .searchPanelText {
@@ -5451,7 +4362,7 @@ img.postMediaImage {
 }
 
 .sidebarCard {
-    border: 1px solid var(--sidebar-card-border);
+    border: 1px solid #e3e8ec;
     border-radius: 24px;
     box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04);
 }
@@ -5459,14 +4370,14 @@ img.postMediaImage {
 .sidebarMoreLink {
     display: block;
     padding: 14px 20px 16px;
-    color: var(--sidebar-link-color);
+    color: #1d9bf0;
     font-size: 15px;
     font-weight: 700;
     text-decoration: none;
 }
 
 .sidebarMoreLink:hover {
-    background: var(--sidebar-card-hover);
+    background: #ebeff2;
 }
 
 .suggestionTitle {
@@ -5485,7 +4396,7 @@ img.postMediaImage {
 }
 
 .suggestionItem:hover {
-    background: var(--sidebar-card-hover);
+    background: #ebeff2;
 }
 
 .suggestionProfile {
@@ -5511,7 +4422,7 @@ img.postMediaImage {
 }
 
 .suggestionLink:hover {
-    background: var(--sidebar-card-hover);
+    background: #ebeff2;
     border-bottom-left-radius: 24px;
     border-bottom-right-radius: 24px;
 }
@@ -5565,7 +4476,7 @@ img.postMediaImage {
 }
 
 .exchangeRateRow:hover {
-    background: var(--sidebar-card-hover);
+    background: #ebeff2;
 }
 
 .exchangeRateMain {
@@ -5624,14 +4535,11 @@ img.postMediaImage {
 
 .newsFeedItem {
     padding: 14px 20px;
+    border-top: 1px solid #e8eef1;
 }
 
 .newsFeedItem:hover {
-    background: var(--sidebar-card-hover);
-}
-
-.newsFeedItem {
-    border-top: 1px solid #e8eef1;
+    background: #ebeff2;
 }
 
 .newsFeedContent {
@@ -5661,7 +4569,7 @@ img.postMediaImage {
 }
 
 .newsFeedLink:hover {
-    background: var(--sidebar-card-hover);
+    background: #ebeff2;
 }
 
 .footerSection {

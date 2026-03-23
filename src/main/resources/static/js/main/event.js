@@ -24,8 +24,9 @@ window.onload = () => {
         feedSection.classList.remove("isActive");
 
         if (!expertLoaded) {
-            expertService.getList(expertPage, memberId, (experts) => {
-                expertLayout.showList(experts, expertPage);
+            expertService.getList(expertPage, memberId, (data) => {
+                expertLayout.showList(data.experts, expertPage);
+                expertHasMore = data.criteria.hasMore;
             });
             expertLoaded = true;
         }
@@ -37,31 +38,34 @@ window.onload = () => {
     let expertPage = 1;
     let expertCheckScroll = true;
     let expertLoaded = false;
+    let postHasMore = true;
+    let expertHasMore = true;
 
-    service.getList(postPage, memberId, (posts) => {
-        layout.showList(posts, postPage);
+    service.getList(postPage, memberId, (data) => {
+        layout.showList(data.posts, postPage);
+        postHasMore = data.criteria.hasMore;
     });
 
     window.addEventListener("scroll", () => {
         const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
         if (scrollTop + clientHeight < scrollHeight - 1) return;
 
-        if (activeTab === "feed" && postCheckScroll) {
+        if (activeTab === "feed" && postCheckScroll && postHasMore) {
             postCheckScroll = false;
             postPage++;
-            service.getList(postPage, memberId, (posts) => {
-                if (posts.length === 0) return;
-                layout.showList(posts, postPage);
+            service.getList(postPage, memberId, (data) => {
+                layout.showList(data.posts, postPage);
+                postHasMore = data.criteria.hasMore;
             });
             setTimeout(() => { postCheckScroll = true; }, 1000);
         }
 
-        if (activeTab === "expert" && expertCheckScroll) {
+        if (activeTab === "expert" && expertCheckScroll && expertHasMore) {
             expertCheckScroll = false;
             expertPage++;
-            expertService.getList(expertPage, memberId, (experts) => {
-                if (experts.length === 0) return;
-                expertLayout.showList(experts, expertPage);
+            expertService.getList(expertPage, memberId, (data) => {
+                expertLayout.showList(data.experts, expertPage);
+                expertHasMore = data.criteria.hasMore;
             });
             setTimeout(() => { expertCheckScroll = true; }, 1000);
         }
