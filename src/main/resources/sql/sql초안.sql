@@ -550,6 +550,7 @@ create type report_status as enum (
 );
 
 -- 신고 대상 유형
+
 create type report_target_type as enum (
 'post',         -- 게시글
 'member'        -- 회원
