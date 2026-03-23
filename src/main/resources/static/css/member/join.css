@@ -83,54 +83,75 @@ body {
     width: min(420px, 100%);
     display: flex;
     flex-direction: column;
+    gap: 12px;
 }
 
 .chip-btn-img {
-    object-fit: cover;
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
 }
 
 .chip-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 9999px;
     border: 1px solid var(--line);
-    min-height: 80px;
-    padding: 0 16px;
+    height: 50px;
+    min-height: 50px;
+    padding: 0;
     cursor: pointer;
+    background: transparent;
+    overflow: hidden;
 }
 
-#naver-login {
+.join-actions .naver-login,
+.join-actions .kakao-login,
+.join-actions .facebook-login,
+.join-actions .google-login {
     border: none;
     background: transparent;
     padding: 0;
     cursor: pointer;
 }
 
-#naver-login img {
-    width: 420px;     /* 원하는 크기로 조절 */
-    height: 80px;
+.join-actions .naver-login img,
+.join-actions .kakao-login img {
+    width: 100%;
     display: block;
     object-fit: contain;
+    border-radius: 9999px;
 }
 
-#kakao-login {
-    border: none;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
+.join-actions .facebook-login #spinner {
+    width: 100% !important;
+    height: 50px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    border-radius: 9999px !important;
+    box-sizing: border-box;
+    font-size: 18px;
+    font-weight: 600;
 }
 
-#kakao-login img {
-    width: 420px;     /* 원하는 크기로 조절 */
-    height: 80px;
-    display: block;
-    object-fit: contain;
+.join-actions .facebook-login .fb-login-button,
+.join-actions .facebook-login iframe {
+    max-width: 100%;
 }
 
-.nsm7Bb-HzV7m-LgbsSe {
+.join-actions .nsm7Bb-HzV7m-LgbsSe {
     cursor: pointer !important;
-    width: 420px !important;   /* 원하는 크기로 조절 */
-    height: 80px !important;
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
     object-fit: contain !important;
-    border-radius: 4px;
+    border-radius: 9999px !important;
     box-sizing: border-box;
     -webkit-transition: background-color .218s, border-color .218s;
     transition: background-color .218s, border-color .218s;
@@ -144,7 +165,6 @@ body {
     color: #3c4043;
     cursor: pointer;
     font-family: "Google Sans", arial, sans-serif;
-    font-size: 18px;
     letter-spacing: .25px;
     outline: none;
     overflow: hidden;
@@ -153,6 +173,15 @@ body {
     text-align: center;
     vertical-align: middle;
     white-space: nowrap;
+}
+
+.join-actions .google-login .g_id_signin,
+.join-actions .google-login > div:last-child,
+.join-actions .google-login > div,
+.join-actions .google-login iframe {
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
 }
 
 .chip-google {

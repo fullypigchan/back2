@@ -46,8 +46,14 @@
     // 프로필 → 아이디
     document.querySelector('#modal-profile .ghost-button').addEventListener('click', () => { hide('modal-profile'); show('modal-username'); });
 
-    // 아이디 → 알림
-    document.querySelector('#modal-username .next-button').addEventListener('click', () => { hide('modal-username'); show('modal-notification'); });
+    // 아이디 → 언어
+    document.querySelector('#modal-username .next-button').addEventListener('click', () => { hide('modal-username'); show('modal-language'); });
+
+    // 언어 → 카테고리
+    document.querySelector('#modal-language .next-button').addEventListener('click', () => { hide('modal-language'); show('modal-category'); });
+
+    // 카테고리 → 알림
+    document.querySelector('#modal-category .js-next-button').addEventListener('click', () => { hide('modal-category'); show('modal-notification'); });
 
     // 알림 → 회원가입 확인
     document.querySelectorAll('#modal-notification .notification-btn').forEach(btn => {
@@ -62,17 +68,21 @@
         });
     });
 
-    // 언어 → 카테고리
-    document.querySelector('#modal-language .next-button').addEventListener('click', () => { hide('modal-language'); show('modal-category'); });
 
-    // 카테고리 → 완료
-    document.querySelector('#modal-category .js-next-button').addEventListener('click', () => { hide('modal-category'); });
 
-//     input 받아올 데이터 선언
+//     이메일, 휴대폰 번호 유효성 검사
+    const identityInput = document.getElementById("identity-input")
+    let check = false;
+    let emailcheck = false;
+    let phonecheck = false;
+    const okMessage = "사용가능한 이메일입니다."
+    const noMessage = "중복된 이메일입니다."
 
+
+
+//     회원 정보 입력 후 formData로 서버에 전송
     const joinBtn = document.querySelector('.join-submit-button');
     const notificationBtn = document.querySelector('.notification-yes');
-
     let pushEnabled = false;
 
     if (notificationBtn) {
@@ -97,8 +107,8 @@
         const addressDetail = document.getElementById('addr-detail');
         const businessType = document.getElementById('business-type');
         const profile = document.querySelector('.avatar-upload');
-
-
+        const selectedLanguage = window.selectedLanguage;
+        const selectedCategory = window.selectedCategory;
 
         const file = profile?.files?.[0];
         const maxSize = 10 * 1024 * 1024;
@@ -129,17 +139,24 @@
 
         const formData = new FormData();
         formData.append('memberName', memberName.value);
-        formData.append('memberEmail', subMemberEmail);
-        formData.append('memberPhone', subMemberPhone);
         formData.append('birthDate', birthDate.value);
         formData.append('memberPassword', memberPassword.value);
         formData.append('memberHandle', memberHandle.value);
         formData.append('memberRegion', memberRegion);
+        formData.append('memberLanguage', selectedLanguage);
+        formData.append('categoryName', selectedCategory);
         formData.append('pushEnabled', pushEnabled);
         formData.append('businessNumber', businessNumber.value);
         formData.append('companyName', companyName.value);
         formData.append('ceoName', ceoName.value);
         formData.append('businessType', businessType.value);
+
+        if (subMemberEmail !== null) {
+            formData.append('memberEmail', subMemberEmail);
+        }
+        if (subMemberPhone !== null) {
+            formData.append('memberPhone', subMemberPhone);
+        }
 
         if (file) {
             formData.append('file', file);

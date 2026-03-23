@@ -4,10 +4,7 @@ import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.enumeration.MemberRole;
 import com.app.globalgates.common.enumeration.OAuthProvider;
 import com.app.globalgates.common.enumeration.Status;
-import com.app.globalgates.domain.BusinessMemberVO;
-import com.app.globalgates.domain.FileVO;
-import com.app.globalgates.domain.MemberVO;
-import com.app.globalgates.domain.OAuthVO;
+import com.app.globalgates.domain.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -35,15 +32,17 @@ public class MemberDTO implements Serializable {
     private String memberPhone;
     private String memberBio;
     private String memberRegion;
+    private boolean memberLoginVerified;
     private Status memberStatus;
     private MemberRole memberRole;
     private boolean pushEnabled;
-    private String websiteUrl;
+    private String memberLanguage;
     private String birthDate;
     private String lastLoginAt;
     private String loginId;
     private String createdDatetime;
     private String updatedDatetime;
+    private boolean isRemember;
 //    oauth
     private String providerId;
     private OAuthProvider provider;
@@ -54,6 +53,8 @@ public class MemberDTO implements Serializable {
     private String companyName;
     private String ceoName;
     private String businessType;
+//    category
+    private String categoryName;
 //    file
     private String originalName;
     private String fileName;
@@ -72,10 +73,11 @@ public class MemberDTO implements Serializable {
                 .memberPhone(memberPhone)
                 .memberBio(memberBio)
                 .memberRegion(memberRegion)
+                .memberLoginVerified(memberLoginVerified)
                 .memberStatus(memberStatus)
                 .memberRole(memberRole)
                 .pushEnabled(pushEnabled)
-                .websiteUrl(websiteUrl)
+                .memberLanguage(memberLanguage)
                 .birthDate(birthDate)
                 .lastLoginAt(lastLoginAt)
                 .build();
@@ -98,6 +100,12 @@ public class MemberDTO implements Serializable {
                 .companyName(companyName)
                 .ceoName(ceoName)
                 .businessType(businessType)
+                .build();
+    }
+
+    public CategoryVO toCategoryVO(){
+        return CategoryVO.builder()
+                .categoryName(categoryName)
                 .build();
     }
 

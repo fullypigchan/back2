@@ -40,8 +40,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(provider, userNameAttributeName, oAuth2User.getAttributes());
         Map<String, Object> oAuth2AttributeMap = oAuth2Attribute.convertToMap();
 
-        Optional<MemberDTO> foundMember = oAuthDAO.findMemberByMemberEmail(oAuth2Attribute.getEmail(), OAuthProvider.getOAuthProvider(provider));
-        oAuth2AttributeMap.put("exist", !foundMember.isEmpty());
+        String loginId = "";
+        if (oAuth2Attribute.getEmail() != null && !
+                oAuth2Attribute.getEmail().isBlank()) {
+            loginId = oAuth2Attribute.getEmail();
+        } else if (oAuth2Attribute.getPhone() != null && !
+                oAuth2Attribute.getPhone().isBlank()) {
+            loginId = oAuth2Attribute.getPhone();
+        }
+
+        Optional<MemberDTO> foundMember = Optional.empty();
+
+        if (!loginId.isBlank()) {
+            foundMember = oAuthDAO.findMemberByMemberLoginId(
+                    loginId,
+                    OAuthProvider.getOAuthProvider(provider)
+            );
+        }
+
+        oAuth2AttributeMap.put("exist", foundMember.isPresent());
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + (foundMember.isEmpty() ? MemberRole.BUSINESS.name() : foundMember.get().getMemberRole().name()))),

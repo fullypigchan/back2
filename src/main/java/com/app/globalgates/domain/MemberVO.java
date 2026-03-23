@@ -21,11 +21,12 @@ public class MemberVO extends Period {
     private String memberHandle;
     private String memberPhone;
     private String memberBio;
+    private boolean memberLoginVerified;
     private String memberRegion;
     private Status memberStatus;
     private MemberRole memberRole;
     private boolean pushEnabled;
-    private String websiteUrl;
+    private String memberLanguage;
     private String birthDate;
     private String lastLoginAt;
 }

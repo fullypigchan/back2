@@ -17,7 +17,9 @@ public interface MemberMapper {
     Optional<MemberDTO> selectMemberByLoginId(String loginId);
     //  이메일로 조회
     public Optional<MemberDTO> selectMemberByMemberEmail(String memberEmail);
-//    닉네임 또는 핸들로 회원 검색
+    //  핸드폰 번호로 조회
+    public Optional<MemberDTO> selectMemberByMemberPhone(String memberPhone);
+    //  닉네임 또는 핸들로 회원 검색
     public List<MemberDTO> selectMembersByKeyword(String keyword);
     //  Handle로 조회
     public Optional<MemberDTO> selectMemberByMemberHandle(String memberHandle);

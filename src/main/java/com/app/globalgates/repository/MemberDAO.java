@@ -26,12 +26,15 @@ public class MemberDAO {
     public Optional<MemberDTO> findMemberByLoginId(String loginId){
         return memberMapper.selectMemberByLoginId(loginId);
     }
-    //  이메일로 조회
+    //  이메일 유효성 검사
     public Optional<MemberDTO> findMemberByMemberEmail(String memberEmail){
         return memberMapper.selectMemberByMemberEmail(memberEmail);
     }
-
-//    닉네임 또는 핸들로 회원 검색
+    //  핸드폰 유효성 검사
+    public Optional<MemberDTO> findMemberByMemberPhone(String memberPhone){
+        return memberMapper.selectMemberByMemberPhone(memberPhone);
+    }
+    //  닉네임 또는 핸들로 회원 검색
     public List<MemberDTO> findMembersByKeyword(String keyword) {
         return memberMapper.selectMembersByKeyword(keyword);
     }

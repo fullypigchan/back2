@@ -15,7 +15,7 @@ public interface OAuthMapper {
     //    로그인
     public Optional<MemberDTO> selectMemberForLogin(MemberDTO memberDTO);
     //    이메일로 조회
-    public Optional<MemberDTO> selectMemberByMemberEmail(@Param("memberEmail") String memberEmail,
+    public Optional<MemberDTO> selectMemberByLoginId(@Param("loginId") String loginId,
                                                          @Param("provider") OAuthProvider provider);
 }
 

@@ -71,17 +71,18 @@ alter column member_handle set not null;
 create table tbl_member (
 id            bigint        generated always as identity primary key,  -- pk | 회원 고유 id (자동 증가)
 member_name varchar(255),
-member_email         varchar(255)  not null unique,                           -- 로그인 이메일 (unique)
+member_email         varchar(255)  unique,                           -- 로그인 이메일 (unique)
 member_password      varchar(255),                                            -- 해시된 비밀번호 (oauth 전용이면 null)
 member_nickname      varchar(255) ,                                  -- 닉네임 (화면 표시용)
 member_handle        varchar(255)   unique not null,                                    -- @핸들 - 마이페이지 url 구분자 (unique)
 member_phone         varchar(255),                                             -- 연락처
 member_bio           text,                                                    -- 자기소개 / 프로필 설명 (mypage description)
 member_region        varchar(255),                                            -- 활동 지역 (mypage 표시)
+member_login_verified boolean default true,
 member_status        member_status not null default 'active', -- 계정 상태 (enum)
 member_role          member_role   not null default 'business',           -- 회원 역할 (enum)
 push_enabled     boolean       not null default true,                       -- 푸시 알림 허용 (join-modal-notification)
-website_url      varchar(255),                                              -- 웹사이트 URL (mypage 프로필 편집)
+member_language      varchar(255),                                              -- 웹사이트 URL (mypage 프로필 편집)
 birth_date       varchar(255),                                              -- 생년월일 (YYYYMMDD, join-modal)
 created_datetime    timestamp     not null default now(),                    -- 가입 일시
 updated_datetime    timestamp     not null default now(),                    -- 회원 정보 최종 수정 일시
@@ -111,7 +112,8 @@ references tbl_member(id)
 create type oauth_provider as enum (
 'kakao',
 'facebook',
-'naver'
+'naver',
+'google'
 );
 
 create table tbl_oauth (
@@ -149,7 +151,7 @@ references tbl_member(id)
 create table tbl_category (
 id            bigint           generated always as identity primary key,  -- pk | 카테고리 고유 id (자동 증가)
 product_category_parent_id   bigint,          -- 상품 카테고리 대분류
-category_name varchar(255)     not null unique,   -- 카테고리 표시명
+category_name varchar(255)     not null,   -- 카테고리 표시명
 created_datetime    timestamp        not null default now(),
 constraint fk_product_category_parent_id_category foreign key(product_category_parent_id)
 references tbl_category(id)
@@ -161,15 +163,16 @@ references tbl_category(id)
 
 -- -- [9] tbl_member_category_rel  ─ 회원 ↔ 카테고리 (n:n)
 --
--- create table tbl_member_category_rel (
--- member_id   bigint not null,  -- fk → tbl_member.id
--- category_id bigint not null,  -- fk → tbl_category.id
--- primary key (member_id, category_id),
--- constraint fk_member_category_rel_member foreign key(member_id)
--- references tbl_member(id),
--- constraint fk_member_category_rel_category foreign key(category_id)
--- references tbl_category(id)
--- );
+create table tbl_member_category_rel (
+id bigint not null primary key,
+member_id   bigint not null,  -- fk → tbl_member.id
+category_id bigint not null,  -- fk → tbl_category.id
+primary key (member_id, category_id),
+constraint fk_member_category_rel_member foreign key(member_id)
+references tbl_member(id),
+constraint fk_member_category_rel_category foreign key(category_id)
+references tbl_category(id)
+);
 
 
 

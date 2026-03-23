@@ -23,8 +23,8 @@ public class OAuthDAO {
         return oAuthMapper.selectMemberForLogin(memberDTO);
     }
     //    이메일로 조회
-    public Optional<MemberDTO> findMemberByMemberEmail(String memberEmail, OAuthProvider provider){
-        return oAuthMapper.selectMemberByMemberEmail(memberEmail, provider);
+    public Optional<MemberDTO> findMemberByMemberLoginId(String loginId, OAuthProvider provider){
+        return oAuthMapper.selectMemberByLoginId(loginId, provider);
     }
 }
 

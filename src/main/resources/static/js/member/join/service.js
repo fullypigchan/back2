@@ -15,8 +15,29 @@ const joinService = (() => {
 
         }
 
+        const checkEmail = async (memberEmail, callback) => {
+            const response = await fetch(`/api/member/checkEmail?memberEmail=${memberEmail}`);
+            const isAvaliable = await response.text() === "true";
+
+            if (callback) callback(isAvaliable);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Fetch error");
+            }
+        }
+
+        const checkPhone = async (memberPhone, callback) => {
+            const response = await fetch(`/api/member/checkPhone?memberPhone=${memberPhone}`);
+            const isAvaliable = await response.text() === "true";
+
+            if (callback) callback(isAvaliable);
+            if (!response.ok) {
+                const errorText = await response.text();
+            }
+        }
 
         return {
-            memberRegister: memberRegister
+            memberRegister: memberRegister,
+            checkEmail : checkEmail
         }
     })();

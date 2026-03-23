@@ -5,10 +5,7 @@ import com.app.globalgates.common.enumeration.ProfileImageType;
 import com.app.globalgates.common.exception.MemberLoginFailException;
 import com.app.globalgates.common.exception.MemberNotFoundException;
 import com.app.globalgates.dto.*;
-import com.app.globalgates.repository.BusinessMemberDAO;
-import com.app.globalgates.repository.FileDAO;
-import com.app.globalgates.repository.MemberDAO;
-import com.app.globalgates.repository.MemberProfileFileDAO;
+import com.app.globalgates.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,6 +26,8 @@ public class MemberService {
     private final MemberProfileFileDAO memberProfileFileDAO;
     private final BusinessMemberDAO businessMemberDAO;
     private final FileDAO fileDAO;
+    private final CategoryMemberDAO categoryMemberDAO;
+    private final CategoryDAO categoryDAO;
     private final PasswordEncoder passwordEncoder;
 
     //  회원가입
@@ -45,6 +44,15 @@ public class MemberService {
         businessMemberDTO.setCeoName(memberDTO.getCeoName());
         businessMemberDTO.setBusinessType(memberDTO.getBusinessType());
         businessMemberDAO.save(businessMemberDTO.toBusinessMemberVO());
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryName(memberDTO.getCategoryName());
+        categoryDAO.save(categoryDTO);
+
+        CategoryMemberDTO categoryMemberDTO = new CategoryMemberDTO();
+        categoryMemberDTO.setMemberId(memberDTO.getId());
+        categoryMemberDTO.setCategoryId(categoryDTO.getId());
+        categoryMemberDAO.save(categoryMemberDTO);
     }
     //  프로필 이미지 저장
     @Transactional
@@ -64,6 +72,15 @@ public class MemberService {
         memberProfileFileDAO.save(memberProfileFileDTO);
     }
 
+    //  이메일 검사(true : 사용가능)
+    public boolean checkEmail(String memberEmail){
+        return memberDAO.findMemberByMemberEmail(memberEmail).isEmpty();
+    }
+
+    //  핸드폰 검사(true : 사용가능)
+    public boolean checkPhone(String memberPhone){
+        return memberDAO.findMemberByMemberPhone(memberPhone).isEmpty();
+    }
 
     //    로그인
     @Transactional

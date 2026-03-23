@@ -37,6 +37,7 @@ public class MemberAPIController {
     private final HttpServletResponse response;
     private final S3Service s3Service;
 
+    //  회원가입
     @PostMapping("join")
     @LogStatus
     public ResponseEntity<?> join(MemberDTO memberDTO, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
@@ -70,6 +71,14 @@ public class MemberAPIController {
         return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
     }
 
+    @GetMapping("check-email")
+    public boolean checkEmail(@RequestParam String memberEmail){
+        return memberService.checkEmail(memberEmail);
+    }
+    @GetMapping("check-phone")
+    public boolean checkPhone(@RequestParam String memberPhone){
+        return memberService.checkPhone(memberPhone);
+    }
 
     @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody MemberDTO memberDTO){

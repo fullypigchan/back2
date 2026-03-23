@@ -17,6 +17,15 @@ select * from tbl_member;
 select * from tbl_member_profile_file;
 select * from tbl_file;
 select * from tbl_business_member;
+alter table tbl_member add member_language varchar(255);
+alter table tbl_member drop website_url;
+alter table tbl_member
+alter column member_email drop not null;
+ALTER TABLE tbl_member
+ADD CONSTRAINT member_email_unique UNIQUE (member_email);
+
+alter table tbl_member_category_rel add id bigint not null primary key ;
+select * from tbl_member_category_rel;
 
 create view vw_file_member as
 select
@@ -25,3 +34,14 @@ select
     pf.member_id
 from tbl_member_profile_file pf
          join tbl_file f on pf.id = f.id;
+
+create view vw_category_member as
+select *
+from tbl_member_category_rel mc join tbl_category c on mc.category_id = c.id;
+select * from vw_category_member;
+
+select * from tbl_category;
+select * from tbl_member_category_rel;
+
+drop table tbl_oauth
+drop type oauth_provider;

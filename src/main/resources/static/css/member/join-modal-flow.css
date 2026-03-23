@@ -236,6 +236,11 @@
 
 .join-flow-modal .name-input,
 .join-flow-modal .phone-input,
+.join-flow-modal .password-input,
+.join-flow-modal .handle-input,
+.join-flow-modal .company-name-input,
+.join-flow-modal .business-number-input,
+.join-flow-modal .ceo-name-input,
 .join-flow-modal .birth-date-input {
     width: 100%;
     border: 0;

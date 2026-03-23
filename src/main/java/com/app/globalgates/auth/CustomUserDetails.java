@@ -26,7 +26,7 @@ public class CustomUserDetails implements UserDetails {
     private Status memberStatus;
     private MemberRole memberRole;
     private boolean pushEnabled;
-    private String websiteUrl;
+    private String memberLanguage;
     private String birthDate;
     private String lastLoginAt;
     private String loginId;
@@ -46,7 +46,7 @@ public class CustomUserDetails implements UserDetails {
         this.memberStatus = memberDTO.getMemberStatus();
         this.memberRole = memberDTO.getMemberRole();
         this.pushEnabled = memberDTO.isPushEnabled();
-        this.websiteUrl = memberDTO.getWebsiteUrl();
+        this.memberLanguage = memberDTO.getMemberLanguage();
         this.birthDate = memberDTO.getBirthDate();
         this.lastLoginAt = memberDTO.getLastLoginAt();
         this.loginId = memberDTO.getLoginId();

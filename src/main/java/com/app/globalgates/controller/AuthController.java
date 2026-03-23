@@ -54,24 +54,24 @@ public class AuthController implements AuthControllerDocs {
             tokenMap.put("accessToken", accessToken);
 
             Cookie rememberEmailCookie = new Cookie("rememberEmail", memberDTO.getMemberEmail());
-//            Cookie rememberCookie = new Cookie("remember", String.valueOf(memberDTO.isRemember()));
+            Cookie rememberCookie = new Cookie("remember", String.valueOf(memberDTO.isRemember()));
 
             rememberEmailCookie.setPath("/");
-//            rememberCookie.setPath("/");
+            rememberCookie.setPath("/");
 
-//            if (memberDTO.isRemember()) {
-//                rememberEmailCookie.setMaxAge(60 * 60 * 24 * 30);
-//                response.addCookie(rememberEmailCookie);
-//
-//                rememberCookie.setMaxAge(60 * 60 * 24 * 30);
-//                response.addCookie(rememberCookie);
-//            } else {
-//                rememberEmailCookie.setMaxAge(0);
-//                response.addCookie(rememberEmailCookie);
-//
-//                rememberCookie.setMaxAge(0);
-//                response.addCookie(rememberCookie);
-//            }
+            if (memberDTO.isRemember()) {
+                rememberEmailCookie.setMaxAge(60 * 60 * 24 * 30);
+                response.addCookie(rememberEmailCookie);
+
+                rememberCookie.setMaxAge(60 * 60 * 24 * 30);
+                response.addCookie(rememberCookie);
+            } else {
+                rememberEmailCookie.setMaxAge(0);
+                response.addCookie(rememberEmailCookie);
+
+                rememberCookie.setMaxAge(0);
+                response.addCookie(rememberCookie);
+            }
             return ResponseEntity.ok(tokenMap);
 
         } catch (Exception e) {

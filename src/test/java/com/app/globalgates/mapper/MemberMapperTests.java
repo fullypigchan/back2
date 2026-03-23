@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Optional;
+
 @SpringBootTest
 @Slf4j
 public class MemberMapperTests {
@@ -61,14 +63,28 @@ public class MemberMapperTests {
         businessMemberDTO.setCeoName("홍성호");
         businessMemberDTO.setBusinessType("제조업");
 
-        businessMemberMapper.insert(businessMemberDTO);
+        businessMemberMapper.insert(businessMemberDTO.toBusinessMemberVO());
 
         log.info("memberDTO : {}", memberDTO);
         log.info("memberProfileFileDTO : {}", memberProfileFileDTO);
         log.info("fileDTO : {}", fileDTO);
         log.info("businessMemberDTO : {}", businessMemberDTO);
 
+    }
 
+//  이메일로 member 찾는 test
+    @Test
+    public void emailCheckTest(){
+        Optional<MemberDTO> memberDTO = memberMapper.selectMemberByMemberEmail("tjdgh1851@gmail.com");
+
+        log.info("memberDTO : {}", memberDTO);
+    }
+
+//  핸드폰번호로 member 찾는 test
+    @Test
+    public void phoneCheckTest(){
+        Optional<MemberDTO> memberDTO = memberMapper.selectMemberByMemberPhone("01012221234");
+        log.info("memberDTO : {}", memberDTO);
     }
 
 }

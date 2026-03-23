@@ -2,6 +2,7 @@
     const items = Array.from(document.querySelectorAll(".js-category-item"));
     const status = document.querySelector(".js-category-status");
     const nextButton = document.querySelector(".js-next-button");
+    window.selectedCategory = null;
 
     if (!items.length || !status || !nextButton) {
         return;
@@ -30,6 +31,10 @@
 
             if (!isAlreadySelected) {
                 item.classList.add("is-selected");
+                window.selectedCategory =
+                    item.childNodes[0].textContent.trim();
+            } else {
+                window.selectedCategory = null;
             }
 
             const selectedCount = document.querySelectorAll(".js-category-item.is-selected").length;

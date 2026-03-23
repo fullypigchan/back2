@@ -20,6 +20,7 @@ public class OAuth2Attribute {
     private String id;
     private String email;
     private String name;
+    private String phone;
     private String profile;
 
     public static OAuth2Attribute of(String provider, String userNameAttribute, Map<String, Object> attributes) {
@@ -28,6 +29,10 @@ public class OAuth2Attribute {
                 return ofKakao(provider, userNameAttribute, attributes);
             case "naver":
                 return ofNaver(provider, userNameAttribute, attributes);
+            case "facebook":
+                return ofFacebook(provider, userNameAttribute, attributes);
+            case "google":
+                return ofGoogle(provider, userNameAttribute, attributes);
             default:
                 throw new RuntimeException();
         }
@@ -61,6 +66,37 @@ public class OAuth2Attribute {
                 .name((String) naverResponse.get("name"))
                 .profile((String)naverResponse.get("profile_image"))
                 .attributes(naverResponse)
+                .userNameAttributeName(userNameAttribute)
+                .build();
+    }
+
+    //  facebook
+    private static OAuth2Attribute ofFacebook(String provider, String userNameAttribute, Map<String, Object> attributes) {
+        Map<String, Object> facebookResponse = (Map<String, Object>) attributes.get("response");
+
+        return OAuth2Attribute.builder()
+                .id((String)facebookResponse.get("id"))
+                .provider(provider)
+                .email((String)facebookResponse.get("email"))
+                .name((String) facebookResponse.get("name"))
+                .profile((String)facebookResponse.get("picture"))
+                .attributes(facebookResponse)
+                .userNameAttributeName(userNameAttribute)
+                .build();
+    }
+
+    //  google
+
+    private static OAuth2Attribute ofGoogle(String provider, String userNameAttribute, Map<String, Object> attributes) {
+        Map<String, Object> googleResponse = (Map<String, Object>) attributes.get("response");
+
+        return OAuth2Attribute.builder()
+                .id((String)googleResponse.get("sub"))
+                .provider(provider)
+                .email((String)googleResponse.get("email"))
+                .name((String) googleResponse.get("name"))
+                .profile((String)googleResponse.get("picture"))
+                .attributes(googleResponse)
                 .userNameAttributeName(userNameAttribute)
                 .build();
     }
