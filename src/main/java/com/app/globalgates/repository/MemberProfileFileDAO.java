@@ -14,4 +14,18 @@ public class MemberProfileFileDAO {
     public void save(MemberProfileFileDTO memberProfileFileDTO) {
         memberProfileFileMapper.insert(memberProfileFileDTO);
     }
+    //    memberId로 프로필 이미지 조회
+    public MemberProfileFileDTO findByMemberId(Long memberId) {
+       return memberProfileFileMapper.selectById(memberId);
+    }
+
+    //  프로필 이미지 삭제
+    public void delete(Long Id) {
+        memberProfileFileMapper.delete(Id);
+    }
+
+    //  memberId로 이미지 삭제
+    public void deleteByMemberId(Long memberId) {
+        memberProfileFileMapper.deleteByMemberId(memberId);
+    }
 }

@@ -1,6 +1,6 @@
 const loginService = (() => {
     const login = async ({loginId ,memberPassword}) => {
-        const response = await fetch("/api/auth/login",{
+        const response = await fetch("/api/member/login",{
             method: "POST",
             body: JSON.stringify({loginId,memberPassword}),
             headers: {

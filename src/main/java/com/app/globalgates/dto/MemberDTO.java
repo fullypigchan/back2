@@ -49,7 +49,7 @@ public class MemberDTO implements Serializable {
     private OAuthProvider provider;
     private String profileURL;
     private Long memberId;
-//     business
+//    business
     private String businessNumber;
     private String companyName;
     private String ceoName;

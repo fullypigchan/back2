@@ -18,7 +18,7 @@
             memberPassword: password.value
         });
         if(result.accessToken){
-            location.href = "/main";
+            location.href = "/main/main";
         }
     })
 

@@ -2,7 +2,7 @@ const joinService = (() => {
 
         const memberRegister = async (formData) => {
             console.log(formData);
-            const response = await fetch("/member/register", {
+            const response = await fetch("/api/member/join", {
                 method: "POST",
                 body : formData
             })
@@ -11,7 +11,7 @@ const joinService = (() => {
                 throw new Error(errorText || "Fetch error");
             }
 
-            return await response.json();
+            return await response.text();
 
         }
 

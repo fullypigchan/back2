@@ -69,20 +69,7 @@
     document.querySelector('#modal-category .js-next-button').addEventListener('click', () => { hide('modal-category'); });
 
 //     input 받아올 데이터 선언
-    const memberName = document.querySelector('.name-input');
-    const memberEmail = document.querySelector('.email-input');
-    const memberPhone = document.querySelector('.phone-input');
-    const birthDate = document.querySelector('.birth-date-input');
-    const memberPassword = document.querySelector('.password-input');
-    const memberHandle = document.querySelector('.handle-input');
-    const businessNumber = document.querySelector('.business-number-input');
-    const companyName = document.querySelector('.company-name-input');
-    const ceoName = document.querySelector('.ceo-name-input');
-    const postNumber = document.querySelector('.post-input');
-    const address = document.getElementById('addr-main');
-    const addressDetail = document.getElementById('addr-detail');
-    const businessType = document.getElementById('business-type');
-    const profile = document.querySelector('.avatar-upload');
+
     const joinBtn = document.querySelector('.join-submit-button');
     const notificationBtn = document.querySelector('.notification-yes');
 
@@ -96,8 +83,22 @@
 
     joinBtn.addEventListener('click', async () => {
         console.log("joinBtn");
-        const emailValue = memberEmail?.value || "";
-        const phoneValue = memberPhone?.value || "";
+        const memberName = document.querySelector('.name-input');
+        const memberEmail = document.querySelector('input[name="email"]');
+        const memberPhone = document.querySelector('input[name="phone"]');
+        const birthDate = document.querySelector('.birth-date-input');
+        const memberPassword = document.querySelector('.password-input');
+        const memberHandle = document.querySelector('.handle-input');
+        const businessNumber = document.querySelector('.business-number-input');
+        const companyName = document.querySelector('.company-name-input');
+        const ceoName = document.querySelector('.ceo-name-input');
+        const postNumber = document.querySelector('.post-input');
+        const address = document.getElementById('addr-main');
+        const addressDetail = document.getElementById('addr-detail');
+        const businessType = document.getElementById('business-type');
+        const profile = document.querySelector('.avatar-upload');
+
+
 
         const file = profile?.files?.[0];
         const maxSize = 10 * 1024 * 1024;
@@ -110,8 +111,8 @@
         const memberRegion = `${postNumber.value} ${address.value} ${addressDetail.value}`.trim();
 
         console.log('memberName', memberName.value)
-        console.log('emailValue', emailValue)
-        console.log('phoneValue', phoneValue)
+        console.log('emailValue', memberEmail?.value)
+        console.log('phoneValue', memberPhone?.value)
         console.log('birthDate.value', birthDate.value)
         console.log('memberPassword.value', memberPassword.value)
         console.log('memberHandle.value', memberHandle.value)
@@ -123,10 +124,13 @@
         console.log('file', file)
         console.log('businessType.value', businessType.value)
 
+        const subMemberEmail = memberEmail?.value?.trim() ? memberEmail.value.trim() : null;
+        const subMemberPhone = memberPhone?.value?.trim() ? memberPhone.value.trim() : null;
+
         const formData = new FormData();
         formData.append('memberName', memberName.value);
-        formData.append('memberEmail', emailValue);
-        formData.append('memberPhone', phoneValue);
+        formData.append('memberEmail', subMemberEmail);
+        formData.append('memberPhone', subMemberPhone);
         formData.append('birthDate', birthDate.value);
         formData.append('memberPassword', memberPassword.value);
         formData.append('memberHandle', memberHandle.value);
@@ -135,6 +139,7 @@
         formData.append('businessNumber', businessNumber.value);
         formData.append('companyName', companyName.value);
         formData.append('ceoName', ceoName.value);
+        formData.append('businessType', businessType.value);
 
         if (file) {
             formData.append('file', file);
@@ -142,6 +147,7 @@
 
         await joinService.memberRegister(formData);
 
+        location.href = "/member/join";
     })
 
 

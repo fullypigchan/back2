@@ -48,13 +48,13 @@ public class SecurityConfig {
                         .requestMatchers(
 //                                필터 체인(인증)을 제외할 경로
                                 "/api/auth/**",
+                                "/api/member/**",
                                 "/member/join",
                                 "/member/login",
                                 "/error",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/member/register",
                                 "/static/**",
                                 "/image/**").permitAll()
                         .requestMatchers("/admin/**").hasRole(MemberRole.ADMIN.name())

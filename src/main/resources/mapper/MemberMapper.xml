@@ -67,4 +67,25 @@
         from tbl_member
         where member_handle = #{memberHandle} and member_status = 'active'
     </select>
+
+    <select id="selectById">
+        select id, member_email, member_password, member_nickname
+             ,member_handle, member_phone, member_bio, member_region
+             ,member_status, member_role, push_enabled
+             ,website_url, birth_date, created_datetime
+             ,updated_datetime, last_login_at, member_name
+            from tbl_member
+        where id = #{id}
+    </select>
+
+    <delete id="delete">
+        delete from tbl_member
+        where id = #{id}
+    </delete>
+
+    <update id="softDelete">
+        update tbl_member
+        set member_status = 'inactive'
+        where id = #{id}
+    </update>
 </mapper>
