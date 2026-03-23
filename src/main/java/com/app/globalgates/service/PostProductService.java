@@ -1,5 +1,6 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.dto.PostFileDTO;
 import com.app.globalgates.dto.PostProductDTO;
@@ -43,6 +44,7 @@ public class PostProductService {
     }
 
 //    추천 상품 목록 조회
+    @LogStatusWithReturn
     public PostProductWithPagingDTO getRecommendProducts(int page) {
         PostProductWithPagingDTO postProductWithPagingDTO = new PostProductWithPagingDTO();
         Criteria criteria = new Criteria(page, postProductDAO.getTotal());

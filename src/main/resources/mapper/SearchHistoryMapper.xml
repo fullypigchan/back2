@@ -40,5 +40,14 @@
         where member_id = #{memberId}
           and search_keyword = #{searchKeyword}
     </select>
-
+    
+    <select id="selectSearchHistoryWithRank">
+        select rank() over (order by sum(search_count) desc) as ranking,
+               search_keyword,
+               sum(search_count) as total_count
+        from tbl_search_history
+        group by search_keyword
+        order by ranking
+        limit 10
+    </select>
 </mapper>

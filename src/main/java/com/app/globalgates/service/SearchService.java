@@ -1,6 +1,8 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.dto.MemberDTO;
+import com.app.globalgates.dto.RankedSearchHistoryDTO;
 import com.app.globalgates.dto.SearchHistoryDTO;
 import com.app.globalgates.repository.MemberDAO;
 import com.app.globalgates.repository.SearchHistoryDAO;
@@ -46,5 +48,11 @@ public class SearchService {
 //    회원 검색 (닉네임 또는 핸들)
     public List<MemberDTO> searchMembers(String keyword) {
         return memberDAO.findMembersByKeyword(keyword);
+    }
+
+//    실시간 검색어 조회
+    @LogStatusWithReturn
+    public List<RankedSearchHistoryDTO> getTop10Histories() {
+        return searchHistoryDAO.findTop10Histories();
     }
 }

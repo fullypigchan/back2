@@ -1,5 +1,6 @@
 package com.app.globalgates.repository;
 
+import com.app.globalgates.dto.RankedSearchHistoryDTO;
 import com.app.globalgates.dto.SearchHistoryDTO;
 import com.app.globalgates.mapper.SearchHistoryMapper;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,10 @@ public class SearchHistoryDAO {
 //    중복 검색어 조회
     public Optional<SearchHistoryDTO> findByMemberIdAndKeyword(Long memberId, String searchKeyword) {
         return searchHistoryMapper.selectByMemberIdAndKeyword(memberId, searchKeyword);
+    }
+
+//    실시간 검색어 조회
+    public List<RankedSearchHistoryDTO> findTop10Histories() {
+        return searchHistoryMapper.selectSearchHistoryWithRank();
     }
 }
