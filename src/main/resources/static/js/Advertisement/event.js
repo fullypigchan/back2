@@ -40,29 +40,61 @@ window.onload = () => {
     // ################# 무한 스크롤 #################
     let criteria = { hasMore: true };
     let page = 1;
-    let checkScroll = true;
+    let isLoading = false; // ✅ checkScroll + setTimeout 방식 → isLoading 플래그로 교체
 
-    window.addEventListener("scroll", async () => {
-        if (!checkScroll || !criteria.hasMore) return;
+    // ✅ sentinel 요소 생성 (광고 목록 테이블 바깥 하단에 붙임)
+    const sentinel = document.createElement("div");
+    sentinel.id = "adListSentinel";
+    sentinel.style.height = "1px"; // 레이아웃에 영향 없도록
 
-        const scrollCurrentPosition = window.scrollY;
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
+    // ✅ sentinel을 DOM에 붙이는 함수 (showAdList가 목록을 교체할 때마다 재호출)
+    function attachSentinel() {
+        // 기존 sentinel이 있으면 제거
+        const existing = document.getElementById("adListSentinel");
+        if (existing) existing.remove();
 
-        if (scrollCurrentPosition + windowHeight >= documentHeight - 1) {
-            console.log("바닥!");
-            checkScroll = false;
+        // 광고 목록을 감싸는 컨테이너 뒤에 추가
+        // (list 뷰 컨테이너에 맞게 선택자 수정 필요)
+        const listContainer = $(".MarketplaceAdView[data-view='list']");
+        if (listContainer) {
+            listContainer.appendChild(sentinel);
+            observer.observe(sentinel);
+        }
+    }
 
-            // ✅ 현재 검색어/필터 유지하면서 다음 페이지 조회 + append
+    const observer = new IntersectionObserver(async (entries) => {
+        const entry = entries[0];
+
+        // ✅ sentinel이 화면에 보이고, 로딩 중 아니고, 더 데이터 있을 때만 실행
+        if (!entry.isIntersecting || isLoading || !criteria.hasMore) return;
+
+        isLoading = true;
+
+        try {
             criteria = await advertisementService.list(++page, {
-                memberId: 1,  // 로그인 완성 후 state.member.id로 교체
+                memberId: 1,
                 keyword:  root.listSearch?.value.trim() || "",
                 filter:   state.listStatusFilter
-            }, (data) => advertisementLayout.showAdList(data, true));
+            }, (data) => advertisementLayout.showAdList(data, true)); // ✅ append 모드
+        } catch (e) {
+            console.error("광고 목록 추가 로드 실패:", e);
+            --page; // ✅ 실패 시 page 롤백
+        } finally {
+            isLoading = false;
         }
+    }, { threshold: 0.1 });
 
-        setTimeout(() => { checkScroll = true; }, 1000);
-    });
+    // ✅ 목록 초기화 + 첫 페이지 로드 함수
+    async function resetAndLoadList(params) {
+        page = 1;
+        criteria = { hasMore: true };
+        isLoading = false;
+
+        criteria = await advertisementService.list(page, params, (data) => {
+            advertisementLayout.showAdList(data, false); // ✅ 교체 모드
+            attachSentinel(); // ✅ 렌더 후 sentinel 재등록
+        });
+    }
 
     const state = {
         currentView: "apply",
@@ -565,7 +597,6 @@ window.onload = () => {
 
         setText(paymentStatus, "결제창을 준비 중입니다...");
 
-        // 데모 모드
         if (typeof Bootpay === "undefined") {
             updateDraftRowFromForm("데모 접수 완료", receiptId);
 
@@ -596,10 +627,10 @@ window.onload = () => {
                 pg: "라이트페이",
                 tax_free: 0,
                 user: {
-                    id:       "advertiser",                  // → String(state.member.id)
-                    username: "광고주",                      // → state.member.name
-                    phone:    "01000000000",                 // → state.member.phone
-                    email:    "advertiser@globalgates.com",  // → state.member.email
+                    id:       "advertiser",
+                    username: "광고주",
+                    phone:    "01000000000",
+                    email:    "advertiser@globalgates.com",
                 },
                 items: [
                     {
@@ -672,15 +703,13 @@ window.onload = () => {
             const target = viewButton.dataset.viewTarget;
             setView(target);
 
-            // ✅ list 뷰 진입 시 memberId만 가지고 전체 조회
+            // ✅ list 뷰 진입 시 resetAndLoadList로 교체
             if (target === "list") {
-                page = 1;
-                criteria.hasMore = true;
-                criteria = await advertisementService.list(page, {
-                    memberId: 1,  // 로그인 완성 후 state.member.id로 교체
+                await resetAndLoadList({
+                    memberId: 1,
                     keyword:  "",
                     filter:   "all"
-                }, advertisementLayout.showAdList);
+                });
             }
             return;
         }
@@ -744,33 +773,29 @@ window.onload = () => {
             return;
         }
 
-        // ✅ 검색어 입력 — 1초 디바운스 후 조회
+        // ✅ 검색어 입력 — 1초 디바운스 후 resetAndLoadList로 교체
         if (event.target.matches("[data-list-search]")) {
             clearTimeout(state.searchTimer);
             state.searchTimer = window.setTimeout(async () => {
-                page = 1;
-                criteria.hasMore = true;
-                criteria = await advertisementService.list(page, {
-                    memberId: 1,  // 로그인 완성 후 state.member.id로 교체
+                await resetAndLoadList({
+                    memberId: 1,
                     keyword:  event.target.value.trim(),
                     filter:   state.listStatusFilter
-                }, advertisementLayout.showAdList);
-            }, 1000);  // ✅ 1초
+                });
+            }, 1000);
             return;
         }
     });
 
     document.addEventListener("change", async (event) => {
-        // ✅ 필터 변경 — 즉시 조회
+        // ✅ 필터 변경 — resetAndLoadList로 교체
         if (event.target.matches("[data-list-status-filter]")) {
             state.listStatusFilter = event.target.value || "all";
-            page = 1;
-            criteria.hasMore = true;
-            criteria = await advertisementService.list(page, {
-                memberId: 1,  // 로그인 완성 후 state.member.id로 교체
+            await resetAndLoadList({
+                memberId: 1,
                 keyword:  root.listSearch?.value.trim() || "",
                 filter:   state.listStatusFilter
-            }, advertisementLayout.showAdList);
+            });
             return;
         }
 

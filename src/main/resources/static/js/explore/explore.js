@@ -43,7 +43,7 @@ window.onload = () => {
                             <strong class="Post-Name">판매자명</strong>
                             <div>
                                 <span class="Post-Handle">@seller</span>
-                                <span class="Post-Time">${formatTime(post.createdDatetime)}</span>
+                                <span class="Post-Time">${post.createdDatetime}</span>
                             </div>
                         </div>
                     </div>
@@ -95,15 +95,6 @@ window.onload = () => {
             `;
             productsSection.appendChild(card);
         });
-    }
-
-    function formatTime(datetime) {
-        if (!datetime) return "";
-        const diff = Math.floor((Date.now() - new Date(datetime).getTime()) / 1000);
-        if (diff < 60) return "방금";
-        if (diff < 3600) return `${Math.floor(diff / 60)}분`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}시간`;
-        return `${Math.floor(diff / 86400)}일`;
     }
 
     // 5. 추천 상품 로드 함수

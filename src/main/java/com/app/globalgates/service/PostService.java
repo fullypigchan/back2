@@ -4,18 +4,15 @@ package com.app.globalgates.service;
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.exception.PostNotFoundException;
 import com.app.globalgates.common.pagination.Criteria;
+import com.app.globalgates.common.search.PostSearch;
 import com.app.globalgates.domain.PostFileVO;
-import com.app.globalgates.dto.FileDTO;
-import com.app.globalgates.dto.PostDTO;
-import com.app.globalgates.dto.PostFileDTO;
-import com.app.globalgates.dto.PostHashtagDTO;
-import com.app.globalgates.dto.PostWithPagingDTO;
-import com.app.globalgates.dto.ReplyProductRelDTO;
+import com.app.globalgates.dto.*;
 import com.app.globalgates.repository.FileDAO;
 import com.app.globalgates.repository.PostDAO;
 import com.app.globalgates.repository.PostFileDAO;
 import com.app.globalgates.repository.PostHashtagDAO;
 import com.app.globalgates.repository.ReplyProductRelDAO;
+import com.app.globalgates.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,10 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +90,8 @@ public class PostService {
 
         posts.forEach(postDTO -> {
             postDTO.setHashtags(postHashtagDAO.findAllByPostId(postDTO.getId()));
-            postDTO.setPostFiles(postFileDAO.findAllByPostId(postDTO.getId()));
+            postDTO.setPostFiles(postFileDAO.findAllByPostId(postDTO.getId())
+                    .stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
         });
 
         PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
@@ -109,7 +106,8 @@ public class PostService {
                 .orElseThrow(PostNotFoundException::new);
 
         postDTO.setHashtags(postHashtagDAO.findAllByPostId(id));
-        postDTO.setPostFiles(postFileDAO.findAllByPostId(id));
+        postDTO.setPostFiles(postFileDAO.findAllByPostId(id)
+                .stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
         return postDTO;
     }
 
@@ -164,6 +162,36 @@ public class PostService {
                 fileDAO.delete(Long.valueOf(fileId));
             });
         }
+    }
+
+    // 인기순, 최신순 게시글 목록 조회
+    public PostWithPagingDTO getListBySearch(int page, PostSearch search) {
+        PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
+        Criteria criteria = new Criteria(page, postDAO.findSearchTotal(search));
+
+        // 이미지 불러오기
+        List<PostDTO> posts = postDAO.findBySearch(criteria, search).stream()
+                .map(postDTO -> {
+                    List<PostFileDTO> images = new ArrayList<>(postFileDAO.findAllByPostId(postDTO.getId()));
+                    if(!images.isEmpty()) {
+                        postDTO.setPostFiles(images.stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
+                    }
+                    return postDTO;
+                }).collect(Collectors.toList());
+
+        criteria.setHasMore(posts.size() > criteria.getRowCount());
+        postWithPagingDTO.setCriteria(criteria);
+
+        if(criteria.isHasMore()) {
+            posts.remove(posts.size() - 1);
+        }
+
+        for (PostDTO post: posts) {
+            post.setCreatedDatetime(DateUtils.toRelativeTime(post.getCreatedDatetime()));
+        };
+        postWithPagingDTO.setPosts(posts);
+
+        return postWithPagingDTO;
     }
 
     //    게시글 삭제 = 상태 inactive로.

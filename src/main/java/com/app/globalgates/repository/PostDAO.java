@@ -2,6 +2,7 @@
 package com.app.globalgates.repository;
 
 import com.app.globalgates.common.pagination.Criteria;
+import com.app.globalgates.common.search.PostSearch;
 import com.app.globalgates.domain.PostVO;
 import com.app.globalgates.dto.PostDTO;
 import com.app.globalgates.mapper.PostMapper;
@@ -44,5 +45,15 @@ public class PostDAO {
     //    게시글 전체 개수
     public int findTotal() {
         return postMapper.selectTotal();
+    }
+
+    //    게시글 검색 조회
+    public List<PostDTO> findBySearch(Criteria criteria, PostSearch search) {
+        return postMapper.selectBySearch(criteria, search);
+    }
+
+    //     검색한 게시글 총 개수
+    public int findSearchTotal(PostSearch search) {
+        return postMapper.selectTotalBySearch(search);
     }
 }
