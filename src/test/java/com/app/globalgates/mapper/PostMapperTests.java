@@ -28,7 +28,7 @@ public class PostMapperTests {
         PostDTO postDTO = new PostDTO();
         postDTO.setMemberId(1L);
         postDTO.setPostStatus(Status.ACTIVE);
-        postDTO.setPostTitle("글제목이에요");
+        postDTO.setPostTitle("글제목3333");
         postDTO.setPostContent("글내용이에요.");
         postDTO.setLocation("송파구 가락동");
 
@@ -55,14 +55,14 @@ public class PostMapperTests {
 
     @Test
     public void testSelectById() {
-        Optional<PostDTO> foundPost = postMapper.selectById(4L);
+        Optional<PostDTO> foundPost = postMapper.selectById(4L, null);
         log.info("게시글 단일로 조회하기: {}", foundPost);
     }
 
     @Test
     public void testSelectAll() {
         Criteria criteria = new Criteria(1, postMapper.selectTotal());
-        List<PostDTO> posts = postMapper.selectAll(criteria);
+        List<PostDTO> posts = postMapper.selectAll(criteria, null);
         log.info("게시글 목록: {}", posts);
     }
 

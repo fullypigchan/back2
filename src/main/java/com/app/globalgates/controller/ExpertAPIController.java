@@ -15,9 +15,9 @@ import java.util.List;
 public class ExpertAPIController {
     private final ExpertService expertService;
 
-    //    전문가 목록 조회 (무한스크롤)
+    //    전문가 목록 조회
     @GetMapping("/list/{page}")
-    public List<ExpertDTO> getList(@PathVariable int page, @RequestParam(required = false) Long memberId) {
+    public List<ExpertDTO> getList(@PathVariable int page, @RequestParam Long memberId) {
         return expertService.getList(page, memberId);
     }
 }

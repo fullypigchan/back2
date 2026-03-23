@@ -9,6 +9,13 @@
         order by created_datetime desc
     </select>
 
+    <select id="selectLatestInMain">
+        select id, news_title, news_content
+        from tbl_news
+        order by created_datetime desc
+        limit 2
+    </select>
+
     <select id="selectById">
         select id, admin_id, news_title, news_content, news_source_url,
                news_category, news_type, published_at, created_datetime, updated_datetime

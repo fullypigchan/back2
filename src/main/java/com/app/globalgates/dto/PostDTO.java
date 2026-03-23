@@ -29,12 +29,17 @@ public class PostDTO {
     private String memberHandle;
     private String memberProfileFileName;
 
-    // 좋아요,댓글개수
+    // 좋아요,댓글,북마크 개수
     private int likeCount;
     private int replyCount;
+    private int bookmarkCount;
 
-    // 북마크 여부
+    // 좋아요, 북마크 여부
+    private boolean isLiked;
     private boolean isBookmarked;
+
+    // 해시태그
+    private List<PostHashtagDTO> hashtags = new ArrayList<>();
 
     // 첨부파일
     private List<PostFileDTO> postFiles = new ArrayList<>();

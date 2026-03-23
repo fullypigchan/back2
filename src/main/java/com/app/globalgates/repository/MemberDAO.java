@@ -6,6 +6,7 @@ import com.app.globalgates.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,5 +29,10 @@ public class MemberDAO {
     //    이메일로 조회
     public Optional<MemberDTO> findMemberByMemberEmail(String memberEmail){
         return memberMapper.selectMemberByMemberEmail(memberEmail);
+    }
+
+//    닉네임 또는 핸들로 회원 검색
+    public List<MemberDTO> findMembersByKeyword(String keyword) {
+        return memberMapper.selectMembersByKeyword(keyword);
     }
 }

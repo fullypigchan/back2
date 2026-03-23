@@ -50,6 +50,17 @@
           and member_status = 'active'
     </select>
 
+    <select id="selectMembersByKeyword">
+        select id, member_name, member_nickname, member_handle,
+               member_bio, member_region, member_status, member_role,
+               created_datetime, updated_datetime
+        from tbl_member
+        where member_status = 'active'
+          and (member_nickname like concat('%', #{keyword}, '%')
+               or member_handle like concat('%', #{keyword}, '%'))
+        order by member_nickname
+    </select>
+
     <select id="selectMemberByMemberHandle">
         select id, member_email, member_password, member_handle, member_phone,
                member_region, member_status, member_role, created_datetime, updated_datetime,  member_name

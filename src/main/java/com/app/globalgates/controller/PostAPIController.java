@@ -19,19 +19,21 @@ public class PostAPIController {
     private final PostService postService;
     private final S3Service s3Service;
 
-    //    게시글 목록 조회 (무한스크롤)
+    //    게시글 목록 조회
     @GetMapping("list/{page}")
-    public List<PostDTO> getList(@PathVariable int page) {
-        return postService.getList(page);
+    public List<PostDTO> getList(@PathVariable int page, @RequestParam Long memberId) {
+        return postService.getList(page, memberId);
     }
 
-    //    게시글 작성 (모달로 씀)
+    //    게시글 작성
     @PostMapping("/write")
     public void write(PostDTO postDTO,
-                      @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
+                      @RequestParam("files") List<MultipartFile> files) throws IOException {
         if (files == null) {
             files = List.of();
         }
+        log.info("게시물 {}", postDTO);
+        log.info("파일 {}", files);
         String todayPath = postService.writePost(postDTO, files);
 
         if (!files.isEmpty()) {
@@ -52,8 +54,17 @@ public class PostAPIController {
     }
 
     //    게시글 삭제 - 상태만 변경
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public void delete(@PathVariable Long id) {
         postService.delete(id);
+    }
+
+//    댓글 작성 (판매품목 선택 시 productPostId 전달)
+    @PostMapping("/{postId}/replies")
+    public void writeReply(@PathVariable Long postId,
+                           @RequestBody PostDTO postDTO,
+                           @RequestParam(required = false) Long productPostId) {
+        postDTO.setReplyPostId(postId);
+        postService.writeReply(postDTO, productPostId);
     }
 }

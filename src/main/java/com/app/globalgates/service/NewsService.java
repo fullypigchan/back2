@@ -22,4 +22,9 @@ public class NewsService {
     public Optional<NewsDTO> getNews(Long id) {
         return newsDAO.findById(id);
     }
+
+//    메인 사이드바용 최신 뉴스 2개 조회
+    public List<NewsDTO> getLatestNewsInMain() {
+        return newsDAO.findLatestInMain();
+    }
 }

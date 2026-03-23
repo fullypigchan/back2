@@ -32,13 +32,13 @@ public class PostDAO {
     }
 
     //    게시글 단건 조회
-    public Optional<PostDTO> findById(Long id) {
-        return postMapper.selectById(id);
+    public Optional<PostDTO> findById(Long id, Long memberId) {
+        return postMapper.selectById(id, memberId);
     }
 
     //    게시글 목록 조회 (메인 피드)
-    public List<PostDTO> findAll(Criteria criteria) {
-        return postMapper.selectAll(criteria);
+    public List<PostDTO> findAll(Criteria criteria, Long memberId) {
+        return postMapper.selectAll(criteria, memberId);
     }
 
     //    게시글 전체 개수

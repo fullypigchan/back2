@@ -13,4 +13,7 @@ public interface NewsMapper {
 
     //    뉴스 단건 조회
     public Optional<NewsDTO> selectById(Long id);
+
+    //    [메인]에서 쓰임 뉴스 2개 조회
+    public List<NewsDTO> selectLatestInMain();
 }

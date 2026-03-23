@@ -22,4 +22,9 @@ public class NewsDAO {
     public Optional<NewsDTO> findById(Long id) {
         return newsMapper.selectById(id);
     }
+
+//    메인 사이드바용 최신 뉴스 2개 조회
+    public List<NewsDTO> findLatestInMain() {
+        return newsMapper.selectLatestInMain();
+    }
 }
