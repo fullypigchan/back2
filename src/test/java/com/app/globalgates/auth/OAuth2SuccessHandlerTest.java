@@ -52,7 +52,7 @@ class OAuth2SuccessHandlerTest {
     private OAuth2SuccessHandler successHandler;
 
     @Test
-    void onAuthenticationSuccess_redirectsNewNaverUserToBusinessModalWithoutClassCastException() throws Exception {
+    void onAuthenticationSuccess_redirectsNewNaverUserToOAuthBirthModalWithoutClassCastException() throws Exception {
         when(authentication.getPrincipal()).thenReturn(oAuth2User);
         when(oAuth2User.getAttribute("provider")).thenReturn("naver");
         when(oAuth2User.getAttribute("email")).thenReturn("naver-user@example.com");
@@ -67,7 +67,7 @@ class OAuth2SuccessHandlerTest {
 
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
-        verify(response).sendRedirect("/member/join?oauth=1&provider=naver&providerId=naver-provider-id&memberEmail=naver-user%40example.com&memberPhone=&memberName=Naver+User&profileUrl=https%3A%2F%2Fexample.com%2Fprofile.png#modal-business");
+        verify(response).sendRedirect("/member/join?oauth=1&provider=naver&providerId=naver-provider-id&memberEmail=naver-user%40example.com&memberPhone=&memberName=Naver+User&profileUrl=https%3A%2F%2Fexample.com%2Fprofile.png#modal-oauth-birth");
         verify(jwtTokenProvider, never()).createAccessToken(anyString(), anyString());
         verify(jwtTokenProvider, never()).createRefreshToken(anyString(), anyString());
     }

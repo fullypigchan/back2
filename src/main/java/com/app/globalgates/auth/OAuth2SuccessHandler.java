@@ -95,7 +95,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                         + "&memberPhone=" + enc(phone)
                         + "&memberName=" + enc(name)
                         + "&profileUrl=" + enc(profileUrl)
-                        + "#modal-business";
+                        + "#modal-oauth-birth";
 
                 // 아직 회원가입이 끝난 게 아니므로 JWT는 발급하지 않는다.
                 errorCreateTokens = true;

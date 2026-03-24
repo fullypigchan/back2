@@ -18,17 +18,17 @@ const show = id => document.getElementById(id).style.display = 'flex';
 const hide = id => document.getElementById(id).style.display = 'none';
 const MODALS = [
     'modal-create', 'overlay-phone', 'overlay-email',
-    'modal-code', 'modal-password', 'modal-business',
+    'modal-code', 'modal-password', 'modal-oauth-birth', 'modal-business',
     'modal-profile', 'modal-username', 'modal-notification',
     'modal-language', 'modal-category', 'modal-submit'
 ];
 const hideAll = () => MODALS.forEach(hide);
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 신규 SNS 회원이면 join 진입 직후 사업자 모달부터 연다.
-    if (window.oauthJoinData.enabled && window.location.hash === "#modal-business") {
+    // 신규 SNS 회원이면 join 진입 직후 생년월일 모달부터 연다.
+    if (window.oauthJoinData.enabled && window.location.hash === "#modal-oauth-birth") {
         hideAll();
-        show("modal-business");
+        show("modal-oauth-birth");
     }
 // SNS 프로필 사진을 프로필 모달 기본 미리보기로 사용
     if (window.oauthJoinData.enabled && window.oauthJoinData.profileUrl) {
@@ -49,9 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
 // 메인 버튼
 document.getElementById('btn-create').addEventListener('click', () => {
     hideAll();
-    // SNS 신규가입이면 앞단계(계정생성/인증/비밀번호)를 건너뛰고 사업자부터 시작
+    // SNS 신규가입이면 앞단계(계정생성/인증/비밀번호)를 건너뛰고 생년월일부터 시작
     if (window.oauthJoinData.enabled) {
-        show('modal-business');
+        show('modal-oauth-birth');
         return;
     }
     show('modal-create');
@@ -84,6 +84,28 @@ document.querySelector('#modal-code .next-button').addEventListener('click', () 
 
 // 비밀번호 → 사업자
 document.querySelector('#modal-password .next-button').addEventListener('click', () => { hide('modal-password'); show('modal-business'); });
+
+// SNS 생년월일 → 사업자
+const oauthBirthInput = document.querySelector('#modal-oauth-birth .oauth-birth-date-input');
+const oauthBirthError = document.querySelector('#modal-oauth-birth .field-error-message');
+if (oauthBirthInput) {
+    oauthBirthInput.addEventListener('input', () => {
+        oauthBirthInput.value = oauthBirthInput.value.replace(/\D/g, "").slice(0, 8);
+        oauthBirthError?.classList.remove('show');
+    });
+}
+document.querySelector('#modal-oauth-birth .next-button').addEventListener('click', () => {
+    const birthDateValue = oauthBirthInput?.value.trim() || "";
+    if (birthDateValue.length !== 8) {
+        oauthBirthError?.classList.add('show');
+        oauthBirthInput?.focus();
+        return;
+    }
+
+    oauthBirthError?.classList.remove('show');
+    hide('modal-oauth-birth');
+    show('modal-business');
+});
 
 // 사업자 → 프로필
 document.querySelector('#modal-business .next-button').addEventListener('click', () => { hide('modal-business'); show('modal-profile'); });
@@ -129,6 +151,10 @@ const noMessage = "중복된 이메일입니다."
 const joinBtn = document.querySelector('.join-submit-button');
 const notificationBtn = document.querySelector('.notification-yes');
 let pushEnabled = false;
+const getInputValue = (selector) => {
+    const element = document.querySelector(selector);
+    return element && "value" in element ? String(element.value).trim() : "";
+};
 
 if (notificationBtn) {
     notificationBtn.addEventListener('click', () => {
@@ -142,6 +168,7 @@ joinBtn.addEventListener('click', async () => {
     const memberEmail = document.querySelector('input[name="email"]');
     const memberPhone = document.querySelector('input[name="phone"]');
     const birthDate = document.querySelector('.birth-date-input');
+    const oauthBirthDate = document.querySelector('.oauth-birth-date-input');
     const memberPassword = document.querySelector('.password-input');
     const memberHandle = document.querySelector('.handle-input');
     const businessNumber = document.querySelector('.business-number-input');
@@ -186,6 +213,12 @@ joinBtn.addEventListener('click', async () => {
     const formData = new FormData();
     // SNS 신규 가입 분기
     if (window.oauthJoinData.enabled) {
+        const oauthBirthDateValue = oauthBirthDate?.value?.trim() || "";
+        if (oauthBirthDateValue.length !== 8) {
+            alert('생년월일을 8자리로 입력하세요.');
+            return;
+        }
+
         formData.append('provider', window.oauthJoinData.provider);
         formData.append('providerId', window.oauthJoinData.providerId);
         formData.append('memberName', window.oauthJoinData.memberName);
@@ -193,16 +226,16 @@ joinBtn.addEventListener('click', async () => {
         formData.append('memberPhone', window.oauthJoinData.memberPhone);
         formData.append('profileURL', window.oauthJoinData.profileUrl);
 
-        formData.append('birthDate', getValue('.birth-date-input'));
-        formData.append('memberHandle', memberHandle);
+        formData.append('birthDate', oauthBirthDateValue);
+        formData.append('memberHandle', submemberHandle);
         formData.append('memberRegion', memberRegion);
         formData.append('memberLanguage', selectedLanguage);
         formData.append('categoryName', selectedCategory);
         formData.append('pushEnabled', String(pushEnabled));
-        formData.append('businessNumber', getValue('.business-number-input'));
-        formData.append('companyName', getValue('.company-name-input'));
-        formData.append('ceoName', getValue('.ceo-name-input'));
-        formData.append('businessType', getValue('#business-type'));
+        formData.append('businessNumber', getInputValue('.business-number-input'));
+        formData.append('companyName', getInputValue('.company-name-input'));
+        formData.append('ceoName', getInputValue('.ceo-name-input'));
+        formData.append('businessType', getInputValue('#business-type'));
 
         if (file) {
             formData.append('file', file);

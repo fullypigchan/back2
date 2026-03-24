@@ -37,7 +37,7 @@ public class AuthController implements AuthControllerDocs {
     private final HttpServletResponse response;
     private final S3Service s3Service;
 
-    @PostMapping("join")
+    @PostMapping("oauth/join")
     public ResponseEntity<?> join(
             MemberDTO memberDTO,
             @RequestParam(value = "file", required = false) MultipartFile file

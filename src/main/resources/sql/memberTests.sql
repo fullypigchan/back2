@@ -35,6 +35,10 @@ select
 from tbl_member_profile_file pf
          join tbl_file f on pf.id = f.id;
 
+
+select *
+from tbl_oauth o join tbl_member m on o.member_id = m.id;
+
 create view vw_category_member as
 select *
 from tbl_member_category_rel mc join tbl_category c on mc.category_id = c.id;
@@ -42,6 +46,8 @@ select * from vw_category_member;
 
 select * from tbl_category;
 select * from tbl_member_category_rel;
+
+drop view  vw_category_member;
 
 drop table tbl_oauth
 drop type oauth_provider;
