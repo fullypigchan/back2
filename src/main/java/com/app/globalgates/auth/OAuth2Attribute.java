@@ -72,15 +72,16 @@ public class OAuth2Attribute {
 
     //  facebook
     private static OAuth2Attribute ofFacebook(String provider, String userNameAttribute, Map<String, Object> attributes) {
-        Map<String, Object> facebookResponse = (Map<String, Object>) attributes.get("response");
+        Map<String, Object> picture = (Map<String, Object>) attributes.get("picture");
+        Map<String, Object> data = (Map<String, Object>) picture.get("data");
 
         return OAuth2Attribute.builder()
-                .id((String)facebookResponse.get("id"))
+                .id((String) attributes.get("id"))
                 .provider(provider)
-                .email((String)facebookResponse.get("email"))
-                .name((String) facebookResponse.get("name"))
-                .profile((String)facebookResponse.get("picture"))
-                .attributes(facebookResponse)
+                .email((String) attributes.get("email"))
+                .name((String) attributes.get("name"))
+                .profile((String) data.get("url"))   // ⚠️ 여기 중요
+                .attributes(attributes)
                 .userNameAttributeName(userNameAttribute)
                 .build();
     }

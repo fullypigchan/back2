@@ -1,9 +1,16 @@
--- ============================================================
--- 채팅 시스템 마이그레이션 (스키마 + 뷰만, 더미데이터 없음)
--- ============================================================
+
+
+-- 0) 기존 의존 테이블 정리 (역순으로 drop)
+drop table if exists tbl_chat_file;
+drop table if exists tbl_message_deletion;
+drop table if exists tbl_message_reaction;
+drop table if exists tbl_message;
+drop table if exists tbl_conversation_setting;
+drop table if exists tbl_conversation_member_rel;
+drop table if exists tbl_conversation;
 
 -- 1) tbl_conversation - 채팅방
-create table if not exists tbl_conversation (
+create table tbl_conversation (
     id                bigint    generated always as identity primary key,
     title             varchar(255),
     created_datetime  timestamp not null default now(),
@@ -11,7 +18,7 @@ create table if not exists tbl_conversation (
 );
 
 -- 2) tbl_conversation_member_rel - 대화방 ↔ 회원 (n:n)
-create table if not exists tbl_conversation_member_rel (
+create table tbl_conversation_member_rel (
     id                bigint    generated always as identity primary key,
     conversation_id   bigint    not null,
     sender_id         bigint    not null,
@@ -26,7 +33,7 @@ create table if not exists tbl_conversation_member_rel (
 );
 
 -- 3) tbl_conversation_setting - 대화방별 회원 개인 설정
-create table if not exists tbl_conversation_setting (
+create table tbl_conversation_setting (
     conversation_id       bigint       not null,
     member_id             bigint       not null,
     alias                 varchar(255),
@@ -47,7 +54,7 @@ create table if not exists tbl_conversation_setting (
 );
 
 -- 4) tbl_message - 채팅 메시지
-create table if not exists tbl_message (
+create table tbl_message (
     id                bigint    generated always as identity primary key,
     conversation_id   bigint    not null,
     sender_id         bigint    not null,
@@ -63,7 +70,7 @@ create table if not exists tbl_message (
 );
 
 -- 5) tbl_message_reaction - 메시지 이모지 반응
-create table if not exists tbl_message_reaction (
+create table tbl_message_reaction (
     id                bigint       generated always as identity primary key,
     message_id        bigint       not null,
     member_id         bigint       not null,
@@ -76,7 +83,7 @@ create table if not exists tbl_message_reaction (
 );
 
 -- 6) tbl_message_deletion - 내 계정에서만 메시지 삭제 (per-member soft delete)
-create table if not exists tbl_message_deletion (
+create table tbl_message_deletion (
     message_id        bigint    not null,
     member_id         bigint    not null,
     deleted_datetime  timestamp not null default now(),
@@ -86,7 +93,7 @@ create table if not exists tbl_message_deletion (
 );
 
 -- 7) tbl_chat_file - 채팅 첨부파일
-create table if not exists tbl_chat_file (
+create table tbl_chat_file (
     id          bigint not null primary key,
     message_id  bigint not null,
     constraint fk_chat_file_file foreign key(id) references tbl_file(id),
@@ -102,7 +109,7 @@ create table if not exists tbl_block (
     unique(blocker_id, blocked_id)
 );
 
--- 9) v_my_chat VIEW - 채팅방 멤버 관계 + 상대방 정보 + 개인 설정
+-- 9) v_my_chat view
 drop view if exists v_conversation_partner;
 drop view if exists v_my_chat;
 

@@ -14,12 +14,13 @@
             m.push_enabled, m.member_language, m.birth_date,
             m.created_datetime, m.updated_datetime, m.last_login_at,
             o.provider_id, o.provider, o.profile_url
-        from tbl_member m join tbl_oauth o
-                               on m.id = o.member_id
-        where member_email = #{loginId} or member_phone = #{loginId} and
-            member_password = #{memberPassword} and
-            member_status = 'active' and
-            o.provider = #{provider}
+        from tbl_member m
+                 join tbl_oauth o
+                      on m.id = o.member_id
+        where (m.member_email = #{loginId} or m.member_phone = #{loginId})
+          and m.member_password = #{memberPassword}
+          and m.member_status = 'active'
+          and o.provider = #{provider}
     </select>
 
     <select id="selectMemberByLoginId">
@@ -30,10 +31,11 @@
             m.updated_datetime, m.last_login_at, m.member_name,
             m.member_language, m.member_login_verified,
             o.provider_id, o.provider, o.profile_url
-        from tbl_member m join tbl_oauth o
-                               on m.id = o.member_id
-        where member_email = #{loginId} or member_phone = #{loginId} and
-            member_status = 'active' and
-            o.provider = #{provider}
+        from tbl_member m
+                 join tbl_oauth o
+                      on m.id = o.member_id
+        where (m.member_email = #{loginId} or m.member_phone = #{loginId})
+          and m.member_status = 'active'
+          and o.provider = #{provider}
     </select>
 </mapper>

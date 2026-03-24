@@ -4,6 +4,7 @@ import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.auth.JwtTokenProvider;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.service.MemberService;
+import com.app.globalgates.service.S3Service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +18,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +35,64 @@ public class AuthController implements AuthControllerDocs {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate redisTemplate;
     private final HttpServletResponse response;
+    private final S3Service s3Service;
+
+    @PostMapping("join")
+    public ResponseEntity<?> join(
+            MemberDTO memberDTO,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+
+        // 프론트에서 provider/providerId/profileURL/memberName/memberEmail/memberPhone 과
+        // join.html 뒤쪽 모달에서 입력한 추가정보를 함께 전달받는다.
+        log.info("oauth join memberDTO: {}", memberDTO);
+
+        String uploadedKey = "";
+
+        try {
+            // 프로필 이미지를 직접 올린 경우 먼저 S3 업로드
+            // DB 저장이 실패하면 아래 catch에서 삭제한다.
+            if (file != null && !file.isEmpty()) {
+                String todayPath = memberService.getTodayPath();
+                uploadedKey = s3Service.uploadFile(file, todayPath);
+            }
+
+            // 회원 본체 저장, 사업자 정보 저장, 카테고리 저장, OAuth 연동 저장은 서비스가 담당
+            memberService.joinOAuth(memberDTO, file, uploadedKey);
+
+            // JWT 발급용 로그인 식별값은 기존 프로젝트 흐름과 맞춰 email 우선 사용
+            String loginId = "";
+
+            if (memberDTO.getMemberEmail() != null && !memberDTO.getMemberEmail().isBlank()) {
+                loginId = memberDTO.getMemberEmail();
+            } else if (memberDTO.getMemberPhone() != null && !memberDTO.getMemberPhone().isBlank()) {
+                loginId = memberDTO.getMemberPhone();
+            }
+
+            String provider = memberDTO.getProvider().name().toLowerCase();
+
+            // OAuth 회원도 가입 완료 후 일반 로그인과 동일하게 JWT 쿠키를 발급
+            String accessToken = jwtTokenProvider.createAccessToken(loginId, provider);
+            jwtTokenProvider.createRefreshToken(loginId, provider);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "SNS 회원가입 성공",
+                    "redirectUrl", "/main/main",
+                    "accessToken", accessToken
+            ));
+
+        } catch (Exception e) {
+            // 업로드 후 저장 실패 시 S3 파일 정리
+            if (!uploadedKey.isBlank()) {
+                s3Service.deleteFile(uploadedKey);
+            }
+
+            log.error("oauth join failed", e);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "SNS 회원가입 실패: " + e.getMessage()));
+        }
+    }
 
     //    로그인
     @PostMapping("login")

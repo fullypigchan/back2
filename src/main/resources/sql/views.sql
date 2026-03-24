@@ -40,3 +40,49 @@ select
     pf.member_id
 from tbl_member_profile_file pf
          join tbl_file f on pf.id = f.id;
+
+-- 조회자(member_id) 기준으로 상대방 정보 + 개인 설정을 한 행에 보여주는 뷰
+create view v_my_chat as
+select
+    c.id              as conversation_id,
+    rel.sender_id     as member_id,
+    rel.invited_id    as partner_id,
+    coalesce(partner.member_nickname, partner.member_name) as partner_name,
+    partner.member_handle as partner_handle,
+    cs.alias,
+    coalesce(cs.alias, partner.member_nickname, partner.member_name) as display_name,
+    cs.last_read_message_id as my_last_read,
+    cs_partner.last_read_message_id as partner_last_read,
+    coalesce(cs.is_muted, false) as is_muted,
+    coalesce(cs.is_deleted, false) as is_deleted,
+    c.created_datetime,
+    c.updated_datetime
+from tbl_conversation c
+         join tbl_conversation_member_rel rel on c.id = rel.conversation_id
+         join tbl_member partner on partner.id = rel.invited_id
+         left join tbl_conversation_setting cs
+                   on cs.conversation_id = c.id and cs.member_id = rel.sender_id
+         left join tbl_conversation_setting cs_partner
+                   on cs_partner.conversation_id = c.id and cs_partner.member_id = rel.invited_id
+union all
+select
+    c.id              as conversation_id,
+    rel.invited_id    as member_id,
+    rel.sender_id     as partner_id,
+    coalesce(partner.member_nickname, partner.member_name) as partner_name,
+    partner.member_handle as partner_handle,
+    cs.alias,
+    coalesce(cs.alias, partner.member_nickname, partner.member_name) as display_name,
+    cs.last_read_message_id as my_last_read,
+    cs_partner.last_read_message_id as partner_last_read,
+    coalesce(cs.is_muted, false) as is_muted,
+    coalesce(cs.is_deleted, false) as is_deleted,
+    c.created_datetime,
+    c.updated_datetime
+from tbl_conversation c
+         join tbl_conversation_member_rel rel on c.id = rel.conversation_id
+         join tbl_member partner on partner.id = rel.sender_id
+         left join tbl_conversation_setting cs
+                   on cs.conversation_id = c.id and cs.member_id = rel.invited_id
+         left join tbl_conversation_setting cs_partner
+                   on cs_partner.conversation_id = c.id and cs_partner.member_id = rel.sender_id;

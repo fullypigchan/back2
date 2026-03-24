@@ -208,6 +208,28 @@ window.addEventListener("load", () => {
     renderSelectedProduct();
     syncShareUsers();
 
+    const composerModalOverlay = document.getElementById("composerModalOverlay");
+    const composerSection = document.getElementById("composerSection");
+    const composerModalClose = document.getElementById("composerModalClose");
+
+    const openComposerModal = () => {
+        composerModalOverlay && (composerModalOverlay.hidden = false);
+        composerSection && (composerSection.hidden = false);
+    };
+
+    const closeComposerModal = () => {
+        composerModalOverlay && (composerModalOverlay.hidden = true);
+        composerSection && (composerSection.hidden = true);
+    };
+
+    createPostButton?.addEventListener("click", openComposerModal);
+    composerModalClose?.addEventListener("click", closeComposerModal);
+    composerModalOverlay?.addEventListener("click", closeComposerModal);
+
+// 자동 오픈
+    window.setTimeout(openComposerModal, 0);
+
+
     window.setTimeout(() => {
         createPostButton.click();
     }, 0);

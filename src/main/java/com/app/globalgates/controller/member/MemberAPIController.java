@@ -72,6 +72,17 @@ public class MemberAPIController {
         return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
     }
 
+    @PostMapping("oauth/join")
+    public ResponseEntity<?> oauthJoin(
+            MemberDTO memberDTO,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        // 프론트가 보내는 provider/providerId/profileURL/oauthJoin/memberName/memberEmail/memberPhone
+        // + 추가정보를 받아서
+        // OAuth 신규가입 전용 서비스로 넘김
+        return ResponseEntity.ok(Map.of("message", "SNS 회원가입 성공"));
+    }
+
     @GetMapping("check-email")
     public boolean checkEmail(@RequestParam String memberEmail){
         return memberService.checkEmail(memberEmail);
