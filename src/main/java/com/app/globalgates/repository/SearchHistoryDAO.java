@@ -39,6 +39,11 @@ public class SearchHistoryDAO {
         return searchHistoryMapper.selectAllByMemberId(memberId);
     }
 
+//    연관 검색어 목록 조회
+    public List<SearchHistoryDTO> findByKeyword(String keyword) {
+        return searchHistoryMapper.selectByKeyword(keyword);
+    }
+
 //    중복 검색어 조회
     public Optional<SearchHistoryDTO> findByMemberIdAndKeyword(Long memberId, String searchKeyword) {
         return searchHistoryMapper.selectByMemberIdAndKeyword(memberId, searchKeyword);

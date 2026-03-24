@@ -1,9 +1,11 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.enumeration.ProfileImageType;
 import com.app.globalgates.common.exception.MemberLoginFailException;
 import com.app.globalgates.common.exception.MemberNotFoundException;
+import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.dto.*;
 import com.app.globalgates.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,12 +101,35 @@ public class MemberService {
         return memberDAO.findMemberByLoginId(loginId).orElseThrow(MemberNotFoundException::new);
     }
 
+    // 검색 값에 따른 회원들 조회
+    @Cacheable(value="member", key="'page:' + #page" + " + ':keyword:' + #keyword")
+    @LogStatusWithReturn
+    public MemberWithPagingDTO getSearchMember(int page, String keyword) {
+        MemberWithPagingDTO memberWithPagingDTO = new MemberWithPagingDTO();
+        Criteria criteria = new Criteria(page, memberDAO.findMembersByKeyword(keyword).size());
+
+        List<MemberDTO> members = memberDAO.findMembersByKeyword(keyword).stream()
+                .map(memberDTO -> {
+                    MemberProfileFileDTO profile = memberProfileFileDAO.findByMemberId(memberDTO.getId());
+                    memberDTO.setProfileURL(profile.getFilePath());
+                    return memberDTO;
+                }).collect(Collectors.toList());
+
+        criteria.setHasMore(members.size() > criteria.getRowCount());
+        memberWithPagingDTO.setCriteria(criteria);
+
+        if(criteria.isHasMore()) {
+            members.remove(members.size() - 1);
+        }
+        memberWithPagingDTO.setMembers(members);
+
+        return memberWithPagingDTO;
+    }
+
     // 프로필 이미지 삭제
     public void delete(Long id) {
         MemberProfileFileDTO file = memberProfileFileDAO.findByMemberId(id);
-
         memberProfileFileDAO.deleteByMemberId(id);
-
         memberDAO.softDelete(id);
     }
 

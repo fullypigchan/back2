@@ -43,7 +43,6 @@ const exploreService = (() => {
     // 게시물 검색 조회 Search : memberId, keyword, type('popular', 'latest')
     const searchPosts = async (page, {memberId, keyword, type}, callback) => {
         const params = new URLSearchParams()
-        if(memberId) params.append('memberId', memberId);
         if(keyword) params.append('keyword', keyword);
         if(type) params.append('type', type);
 
@@ -62,7 +61,8 @@ const exploreService = (() => {
 
     // 검색 값에 따른 회원 조회
     const searchUsers = async (page, keyword, callback) => {
-        const response = await fetch(`/api/explore/search/user/${page}?keyword=${keyword}`);
+        console.log("회원 검색 들어옴");
+        const response = await fetch(`/api/explore/search/member/${page}?keyword=${keyword}`);
 
         if(!response.ok) {
             const errorText = await response.text();
@@ -75,5 +75,72 @@ const exploreService = (() => {
         return users.criteria;
     }
 
-    return {getRecommends: getRecommends, getNews: getNews, getTrends: getTrends, searchPosts: searchPosts};
+    // 연관 검색어 조회
+    const getSuggestions = async (keyword, callback) => {
+        const response = await fetch(`/api/search-history/suggestions?keyword=${encodeURIComponent(keyword)}`);
+
+        if(!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Fetch error");
+        }
+
+        const suggestions = await response.json();
+
+        // 검색어만 추출해서 callback으로 보냄
+        if(callback) callback(suggestions.map(s => s.searchKeyword));
+    }
+
+    // 최근 검색어 조회
+    const getRecentKeywords = async (callback) => {
+        const response = await fetch(`/api/search-history/recent-keywords`, { credentials: "include" });
+
+        if(!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Fetch error");
+        }
+
+        const keywords = await response.json();
+        if(callback) callback(keywords.map(k => ({
+            id: k.id,
+            keyword: k.searchKeyword
+        })));
+    }
+
+    // 검색어 하나 삭제
+    const deleteKeyword = async (id) => {
+        const response = await fetch(`/api/search-history/recent-keywords?id=${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if(!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Fetch error");
+        }
+    };
+
+    // 모든 검색어 비우기
+    const deleteAllKeywords = async () => {
+        const response = await fetch(`/api/search-history/recent-keywords/all`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if(!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Fetch error");
+        }
+    };
+
+    return {
+        getRecommends: getRecommends,
+        getNews: getNews,
+        getTrends: getTrends,
+        searchPosts: searchPosts,
+        searchUsers: searchUsers,
+        getSuggestions: getSuggestions,
+        getRecentKeywords: getRecentKeywords,
+        deleteKeyword: deleteKeyword,
+        deleteAllKeywords: deleteAllKeywords
+    };
 })();

@@ -21,9 +21,6 @@ window.onload = () => {
         const posts = productsPagingDTO.posts;
         if (!posts || posts.length === 0) return;
 
-        const tempSection = document.createElement("div");
-        // layout의 showPostList가 section을 직접 초기화하므로
-        // append용 임시 렌더링은 카드만 생성해서 붙임
         posts.forEach(post => {
             const firstImage = post.postFiles?.[0] ?? "/images/main/global-gates-logo.png";
             const hashtags = (post.hashtags ?? [])
@@ -112,7 +109,6 @@ window.onload = () => {
                 }
             });
 
-            // criteria.hasMore로 다음 페이지 여부 판단
             scrollState.hasMore = criteria.hasMore;
             scrollState.page++;
 
@@ -181,7 +177,6 @@ window.onload = () => {
 
         // 8. 탭 이벤트 바인딩
         tabProducts.addEventListener("click", async () => {
-            // 상태 초기화 후 첫 페이지 재요청
             scrollState.page = 1;
             scrollState.hasMore = true;
             scrollState.isLoading = false;
@@ -208,7 +203,7 @@ window.onload = () => {
     loadProducts(true);
     setupInfiniteScroll();
 
-    // 5. Trending 서브탭
+    // 10. Trending 서브탭
     const trendingSubtabs = document.querySelectorAll("#trendingSubtabs .trending-subtab");
     if (trendingSubtabs.length > 0) {
         trendingSubtabs.forEach((tab) => {
@@ -222,7 +217,7 @@ window.onload = () => {
         });
     }
 
-    // 6. 트렌딩 더보기 메뉴
+    // 11. 트렌딩 더보기 메뉴
     const trendReportMenu = document.getElementById("trendReportMenu");
 
     if (trendReportMenu) {
@@ -232,7 +227,6 @@ window.onload = () => {
             btn.addEventListener("click", (e) => {
                 e.stopPropagation();
 
-                // 같은 버튼 다시 누르면 닫기
                 if (activeBtn === btn && !trendReportMenu.hidden) {
                     trendReportMenu.hidden = true;
                     activeBtn = null;
@@ -253,7 +247,6 @@ window.onload = () => {
             });
         });
 
-        // 메뉴 아이템 클릭 시 해당 트렌딩 아이템 → dismissed 상태로 교체
         trendReportMenu.querySelectorAll(".more-menu").forEach((item) => {
             item.addEventListener("click", (e) => {
                 if (activeBtn) {
@@ -281,7 +274,6 @@ window.onload = () => {
             });
         });
 
-        // 외부 클릭 시 닫기
         document.addEventListener("click", (e) => {
             if (!trendReportMenu.hidden && !trendReportMenu.contains(e.target)) {
                 trendReportMenu.hidden = true;
@@ -289,7 +281,6 @@ window.onload = () => {
             }
         });
 
-        // 스크롤 시 닫기
         window.addEventListener("scroll", (e) => {
             if (!trendReportMenu.hidden) {
                 trendReportMenu.hidden = true;
@@ -298,9 +289,8 @@ window.onload = () => {
         }, {passive: true});
     }
 
-// 7. Post-Card 인터랙션 (Like / Bookmark / 이미지 프리뷰)
+    // 12. Post-Card 인터랙션 (Like / Bookmark / 이미지 프리뷰)
     (function () {
-        // Toast 알림
         function showToast(message, extraClass) {
             const toast = document.createElement("div");
             toast.className = "toast";
@@ -314,7 +304,6 @@ window.onload = () => {
             }, 2500);
         }
 
-        // Like 토글
         function handleLike(btn) {
             const isLiked = btn.classList.contains("liked");
             btn.classList.toggle("liked", !isLiked);
@@ -330,7 +319,6 @@ window.onload = () => {
             showToast(isLiked ? "좋아요를 취소했습니다." : "좋아요를 눌렀습니다.", "toast--like");
         }
 
-        // Bookmark 토글
         function handleBookmark(btn) {
             const isBookmarked = btn.classList.contains("bookmarked");
             btn.classList.toggle("bookmarked", !isBookmarked);
@@ -341,7 +329,6 @@ window.onload = () => {
             showToast(isBookmarked ? "북마크가 해제되었습니다." : "북마크에 저장되었습니다.");
         }
 
-        // 이미지 프리뷰
         const previewOverlay = document.getElementById("postMediaPreviewOverlay");
         const previewImg = document.getElementById("postMediaPreviewImage");
         const previewClose = document.getElementById("postMediaPreviewClose");
@@ -361,9 +348,7 @@ window.onload = () => {
             document.body.style.overflow = "";
         }
 
-        if (previewClose) previewClose.addEventListener("click", (e) => {
-            closePreview();
-        });
+        if (previewClose) previewClose.addEventListener("click", () => closePreview());
         if (previewOverlay) {
             previewOverlay.addEventListener("click", (e) => {
                 if (e.target === previewOverlay) closePreview();
@@ -375,82 +360,110 @@ window.onload = () => {
             }
         });
 
-        // 이벤트 위임 (productsSection)
         if (productsSection) {
             productsSection.addEventListener("click", (e) => {
                 const likeBtn = e.target.closest(".Post-Action-Btn.Like");
                 const bookmarkBtn = e.target.closest(".Post-Action-Btn.Bookmark");
                 const mediaImg = e.target.closest(".Post-Media-Img");
 
-                if (likeBtn) {
-                    handleLike(likeBtn);
-                    return;
-                }
-                if (bookmarkBtn) {
-                    handleBookmark(bookmarkBtn);
-                    return;
-                }
-                if (mediaImg) {
-                    openPreview(mediaImg.src, mediaImg.alt);
-                    return;
-                }
+                if (likeBtn) { handleLike(likeBtn); return; }
+                if (bookmarkBtn) { handleBookmark(bookmarkBtn); return; }
+                if (mediaImg) { openPreview(mediaImg.src, mediaImg.alt); return; }
             });
         }
     })();
 
-// 8. 검색창 포커스 드롭다운 + 최근검색 삭제
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
+    // 13. 검색창 포커스 드롭다운 + 최근검색 + 연관검색어 + 검색 이동
+    const searchForm     = document.getElementById("searchForm");
+    const searchInput    = document.getElementById("searchInput");
     const searchClearBtn = document.getElementById("searchClearBtn");
-    const searchPanel = document.getElementById("searchPanel");
-    const searchPanelEmpty = document.getElementById("searchPanelEmpty");
-    const searchRecentSec = document.getElementById("searchRecentSection");
-    const searchResultsEl = document.getElementById("searchResults");
+    const searchPanel    = document.getElementById("searchPanel");
+    const searchPanelEmpty  = document.getElementById("searchPanelEmpty");
+    const searchRecentSec   = document.getElementById("searchRecentSection");
+    const searchResultsEl   = document.getElementById("searchResults");
     const searchResultTopic = document.getElementById("searchResultTopic");
     const searchResultLabel = document.getElementById("searchResultLabel");
+    const searchResultList  = document.getElementById("searchResultList");
+
+    let suggestionTimer = null;
 
     if (searchForm && searchInput && searchPanel) {
 
+        // ── 최근검색 항목 개수 확인 ───────────────────────────
         function hasRecentItems() {
             return searchRecentSec &&
-                searchRecentSec.querySelectorAll(".searchResultItem").length > 0;
+                searchRecentSec.querySelectorAll(".searchResultItem--recent").length > 0;
         }
 
-        // 케이스 1: 입력 없음 + 최근검색 없음
+        // ── 패널 케이스별 표시 ────────────────────────────────
         function showEmpty() {
             if (searchPanelEmpty) searchPanelEmpty.hidden = false;
-            if (searchRecentSec) searchRecentSec.hidden = true;
-            if (searchResultsEl) searchResultsEl.hidden = true;
+            if (searchRecentSec)  searchRecentSec.hidden  = true;
+            if (searchResultsEl)  searchResultsEl.hidden  = true;
         }
 
-        // 케이스 2: 입력 없음 + 최근검색 있음
         function showRecent() {
             if (searchPanelEmpty) searchPanelEmpty.hidden = true;
-            if (searchRecentSec) searchRecentSec.hidden = false;
-            if (searchResultsEl) searchResultsEl.hidden = true;
+            if (searchRecentSec)  searchRecentSec.hidden  = false;
+            if (searchResultsEl)  searchResultsEl.hidden  = true;
         }
 
-        // 케이스 3: 입력 있음
         function showResults(val) {
-            if (searchResultLabel) searchResultLabel.textContent = val;
-            if (searchPanelEmpty) searchPanelEmpty.hidden = true;
-            if (searchRecentSec) searchRecentSec.hidden = true;
-            if (searchResultsEl) searchResultsEl.hidden = false;
+            if (searchResultLabel) searchResultLabel.textContent = `"${val}" 검색`;
+            if (searchPanelEmpty)  searchPanelEmpty.hidden = true;
+            if (searchRecentSec)   searchRecentSec.hidden  = true;
+            if (searchResultsEl)   searchResultsEl.hidden  = false;
         }
 
+        // ── 검색 결과 페이지로 이동 ───────────────────────────
+        function goToSearch(keyword) {
+            if (!keyword.trim()) return;
+            searchForm.classList.remove("isFocused");
+            searchPanel.hidden = true;
+            location.href = `/explore/search?keyword=${encodeURIComponent(keyword.trim())}`;
+        }
+
+        // ── 최근 검색어를 서버에서 받아 렌더링 ───────────────
+        function loadRecentKeywords() {
+            exploreService.getRecentKeywords((keywords) => {
+                exploreLayout.showRecentKeywords(
+                    keywords,
+                    // 클릭 시 검색 이동
+                    (keyword) => goToSearch(keyword),
+                    // 삭제 시 서버 요청
+                    (id) => exploreService.deleteKeyword(id)
+                );
+                // 렌더 후 패널 상태 업데이트
+                updatePanel();
+            });
+        }
+
+        // ── 연관 검색어를 서버에서 받아 렌더링 ───────────────
+        function loadSuggestions(keyword) {
+            exploreService.getSuggestions(keyword, (suggestions) => {
+                exploreLayout.showSuggestions(suggestions, (suggestion) => {
+                    goToSearch(suggestion);
+                });
+            });
+        }
+
+        // ── clear 버튼 표시 동기화 ────────────────────────────
         function updateSearchClearButton() {
-            if (!searchClearBtn) {
-                return;
+            if (searchClearBtn) {
+                searchClearBtn.hidden = searchInput.value.length === 0;
             }
-
-            searchClearBtn.hidden = searchInput.value.length === 0;
         }
 
+        // ── 패널 상태 통합 업데이트 ───────────────────────────
         function updatePanel() {
             const val = searchInput.value.trim();
             updateSearchClearButton();
             if (val.length > 0) {
                 showResults(val);
+                clearTimeout(suggestionTimer);
+                suggestionTimer = setTimeout(() => {
+                    loadSuggestions(val);
+                }, 300);
             } else if (hasRecentItems()) {
                 showRecent();
             } else {
@@ -458,17 +471,19 @@ window.onload = () => {
             }
         }
 
+        // ── 이벤트 바인딩 ─────────────────────────────────────
         searchPanel.addEventListener("mousedown", (e) => {
             e.preventDefault();
         });
 
-        searchInput.addEventListener("focus", (e) => {
+        searchInput.addEventListener("focus", () => {
             searchForm.classList.add("isFocused");
             searchPanel.hidden = false;
+            loadRecentKeywords();
             updatePanel();
         });
 
-        searchInput.addEventListener("input", (e) => {
+        searchInput.addEventListener("input", () => {
             updatePanel();
         });
 
@@ -482,15 +497,17 @@ window.onload = () => {
             });
         }
 
-        searchInput.addEventListener("blur", (e) => {
-            if (!document.hasFocus()) {
-                return;
-            }
+        searchInput.addEventListener("blur", () => {
+            if (!document.hasFocus()) return;
             searchForm.classList.remove("isFocused");
             searchPanel.hidden = true;
         });
 
         searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                goToSearch(searchInput.value);
+            }
             if (e.key === "Escape") {
                 searchForm.classList.remove("isFocused");
                 searchPanel.hidden = true;
@@ -499,39 +516,28 @@ window.onload = () => {
         });
 
         if (searchResultTopic) {
-            searchResultTopic.addEventListener("click", (e) => {
-                searchForm.classList.remove("isFocused");
-                searchPanel.hidden = true;
+            searchResultTopic.addEventListener("click", () => {
+                goToSearch(searchInput.value);
             });
+        }
+
+        // 모두 지우기
+        if (searchRecentSec) {
+            const clearAllBtn = searchRecentSec.querySelector(".searchRecentClearAll");
+            if (clearAllBtn) {
+                clearAllBtn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    await exploreService.deleteAllKeywords();
+                    searchRecentSec
+                        .querySelectorAll(".searchResultItem--recent")
+                        .forEach(el => el.remove());
+                    const header = searchRecentSec.querySelector(".searchRecentHeader");
+                    if (header) header.hidden = true;
+                    showEmpty();
+                });
+            }
         }
 
         updateSearchClearButton();
     }
-
-    // 개별 삭제 버튼
-    if (searchRecentSec) {
-        searchRecentSec.addEventListener("click", (e) => {
-            const deleteBtn = e.target.closest(".searchRecentDeleteBtn");
-            if (deleteBtn) {
-                e.stopPropagation();
-                deleteBtn.closest(".searchResultItem").remove();
-                if (!hasRecentItems()) {
-                    showEmpty();
-                }
-            }
-        });
-
-        // 모두 지우기
-        const clearAllBtn = searchRecentSec.querySelector(".searchRecentClearAll");
-        if (clearAllBtn) {
-            clearAllBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                searchRecentSec.querySelectorAll(".searchResultItem").forEach((item) => {
-                    item.remove();
-                });
-                showEmpty();
-            });
-        }
-    }
-
 };

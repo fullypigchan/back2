@@ -56,29 +56,51 @@
         limit #{criteria.count}
         offset #{criteria.offset}
     </select>
+
     <!--  게시글 검색 조회  -->
-    <select id="">
-        select v.*,
-               case when exists (
-                   select 1 from tbl_post_like pl2
-                   where pl2.post_id = v.id and pl2.member_id = #{memberId}
-               ) then true else false end as is_liked,
-               case when exists (
-                   select 1 from tbl_bookmark b
-                   where b.post_id = v.id and b.member_id = #{memberId}
-               ) then true else false end as is_bookmarked
+    <select id="selectBySearch">
+        select v.id,
+        v.member_id,
+        v.post_status,
+        v.post_title,
+        v.post_content,
+        v.location,
+        v.reply_post_id,
+        v.created_datetime,
+        v.updated_datetime,
+        v.member_nickname,
+        v.member_handle,
+        v.member_profile_file_name,
+        v.like_count,
+        v.reply_count,
+        v.bookmark_count,
+        case when exists (
+        select 1 from tbl_post_like pl2
+        where pl2.post_id = v.id and pl2.member_id = #{postSearch.memberId}
+        ) then true else false end as is_liked,
+        case when exists (
+        select 1 from tbl_bookmark b
+        where b.post_id = v.id and b.member_id = #{postSearch.memberId}
+        ) then true else false end as is_bookmarked
         from view_post_feed v
-        where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
-        and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
-        and v.id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'post')
-        order by v.created_datetime desc
-        <if test="postSearch != null and postSearch.keyword != null and postSearch.keyword != ''">
-            and (v.title like concat('%', #{postSearch.keyword}, '%')
-            or v.content like concat('%', #{postSearch.keyword}, '%'))
+        where v.member_id not in (
+        select bl.blocked_id from tbl_block bl where bl.blocker_id = #{postSearch.memberId}
+        )
+        and v.member_id not in (
+        select r.target_id from tbl_report r
+        where r.reporter_id = #{postSearch.memberId} and r.target_type = 'member'
+        )
+        and v.id not in (
+        select r.target_id from tbl_report r
+        where r.reporter_id = #{postSearch.memberId} and r.target_type = 'post'
+        )
+        <if test="postSearch.keyword != null and postSearch.keyword != ''">
+            and (v.post_title like concat('%', #{postSearch.keyword}, '%')
+            or v.post_content like concat('%', #{postSearch.keyword}, '%'))
         </if>
         <choose>
-            <when test="postSearch != null and postSearch.type == 'popular'">
-                order by v.view_count desc
+            <when test="postSearch.type == 'popular'">
+                order by v.like_count desc, v.created_datetime desc
             </when>
             <otherwise>
                 order by v.created_datetime desc

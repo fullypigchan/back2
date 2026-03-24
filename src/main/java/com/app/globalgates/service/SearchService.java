@@ -35,6 +35,11 @@ public class SearchService {
         return searchHistoryDAO.findAllByMemberId(memberId);
     }
 
+//    관련 검색어들 조회
+    public List<SearchHistoryDTO> getSuggestions(String keyword) {
+        return searchHistoryDAO.findByKeyword(keyword);
+    }
+
 //    검색 기록 개별 삭제
     public void deleteSearchHistory(Long id) {
         searchHistoryDAO.delete(id);

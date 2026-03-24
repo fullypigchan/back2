@@ -34,6 +34,13 @@
         order by created_datetime desc
     </select>
 
+    <select id="selectByKeyword">
+        select id, member_id, search_keyword, search_count, created_datetime
+        from tbl_search_history
+        where search_keyword like '%' || #{keyword} || '%'
+        order by created_datetime desc
+    </select>
+
     <select id="selectByMemberIdAndKeyword">
         select id, member_id, search_keyword, search_count, created_datetime
         from tbl_search_history

@@ -32,7 +32,7 @@ public interface PostMapper {
     public int selectTotal();
 
     //    게시글 검색 조회
-    public List<PostDTO> selectBySearch(@Param("criteria") Criteria criteria, @Param("search") PostSearch search);
+    public List<PostDTO> selectBySearch(@Param("criteria") Criteria criteria, @Param("postSearch") PostSearch postSearch);
 
     //     검색한 게시글 총 개수
     public int selectTotalBySearch(@Param("search") PostSearch search);

@@ -1,6 +1,8 @@
 
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
+import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.exception.PostNotFoundException;
 import com.app.globalgates.common.pagination.Criteria;
@@ -15,6 +17,8 @@ import com.app.globalgates.repository.ReplyProductRelDAO;
 import com.app.globalgates.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +43,6 @@ public class PostService {
     private final S3Service s3Service;
 
 //    게시글 작성
-
     public String writePost(PostDTO postDTO, List<MultipartFile> files) {
         String path = getTodayPath();
 
@@ -81,6 +84,7 @@ public class PostService {
     }
 
     //    게시글 목록 조회
+    @Cacheable(value="post:list", key="'page:' + #page" + " + 'memberId:' + #memberId")
     public PostWithPagingDTO getList(int page, Long memberId) {
         Criteria criteria = new Criteria(page, postDAO.findTotal());
         List<PostDTO> posts = postDAO.findAll(criteria, memberId);
@@ -101,6 +105,7 @@ public class PostService {
     }
 
     //    게시글 단건 조회
+    @Cacheable(value="post", key="'page:' + #page" + " + 'memberId:' + #memberId")
     public PostDTO getDetail(Long id, Long memberId) {
         PostDTO postDTO = postDAO.findById(id, memberId)
                 .orElseThrow(PostNotFoundException::new);
@@ -165,6 +170,11 @@ public class PostService {
     }
 
     // 인기순, 최신순 게시글 목록 조회
+    @Cacheable(value="page:search", key="'page:' + #page" +
+            " + ':memberId:' + (#search.memberId)" +
+            " + ':keyword:' + (#search.keyword ?: '')" +
+            " + ':filter:' + (#search.type ?: 'all')")
+    @LogStatusWithReturn
     public PostWithPagingDTO getListBySearch(int page, PostSearch search) {
         PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
         Criteria criteria = new Criteria(page, postDAO.findSearchTotal(search));

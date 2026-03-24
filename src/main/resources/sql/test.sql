@@ -17,3 +17,5 @@ select * from tbl_category;
 select * from tbl_advertisement;
 
 select * from tbl_payment_advertisement;
+
+select * from tbl_search_history;

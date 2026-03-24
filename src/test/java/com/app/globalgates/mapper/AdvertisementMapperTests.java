@@ -44,13 +44,12 @@ public class AdvertisementMapperTests {
     @Test
     public void testSelectWithSearchAndFilter() {
         AdSearch search = new AdSearch();
-        search.setMemberId(1L);
+        Long memberId = 1L;
+        Criteria criteria = new Criteria(1, advertisementMapper.selectTotal(search, memberId));
 
-        Criteria criteria = new Criteria(1, advertisementMapper.selectTotal(search));
-
-        List<AdvertisementDTO> foundAds = advertisementMapper.selectBySearch(criteria, search);
+        List<AdvertisementDTO> foundAds = advertisementMapper.selectBySearch(criteria, search, memberId);
         log.info("검색된 광고 : {}", foundAds);
-        log.info("검색된 모든 광고 수: {}", advertisementMapper.selectTotal(search));
+        log.info("검색된 모든 광고 수: {}", advertisementMapper.selectTotal(search, memberId));
     }
 
     @Test
