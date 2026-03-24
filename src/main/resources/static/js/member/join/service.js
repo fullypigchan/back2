@@ -36,8 +36,25 @@ const joinService = (() => {
             }
         }
 
-        return {
+        const oauthMemberRegister = async (formData) => {
+            const response = await fetch("/api/auth/oauth/join", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "OAuth join failed");
+            }
+
+            return await response.json();
+        };
+
+
+    return {
             memberRegister: memberRegister,
-            checkEmail : checkEmail
+            checkEmail : checkEmail,
+            checkPhone : checkPhone,
+            oauthMemberRegister : oauthMemberRegister
         }
     })();

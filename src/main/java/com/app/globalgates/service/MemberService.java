@@ -28,9 +28,10 @@ public class MemberService {
     private final FileDAO fileDAO;
     private final CategoryMemberDAO categoryMemberDAO;
     private final CategoryDAO categoryDAO;
+    private final OAuthDAO oAuthDAO;
     private final PasswordEncoder passwordEncoder;
 
-    //  회원가입
+    //  일반 회원가입
     @Transactional
     public void join(MemberDTO memberDTO, MultipartFile profile){
         memberDTO.setMemberPassword(passwordEncoder.encode(memberDTO.getMemberPassword()));
@@ -55,6 +56,47 @@ public class MemberService {
         categoryMemberDTO.setCategoryId(categoryDTO.getId());
         categoryMemberDAO.save(categoryMemberDTO);
     }
+
+    @Transactional
+    public void joinOAuth(MemberDTO memberDTO, MultipartFile profile, String s3Key) {
+        // OAuth 신규가입은 일반 회원가입과 달리 비밀번호 암호화를 하지 않는다.
+        // 이미 OAuth 인증을 마친 사용자가 추가정보만 입력한 뒤 최종 가입하는 흐름이다.
+
+        // 1. 회원 본체 저장
+        memberDAO.save(memberDTO);
+
+        // 2. 사업자 정보 저장
+        BusinessMemberDTO businessMemberDTO = new BusinessMemberDTO();
+        businessMemberDTO.setId(memberDTO.getId());
+        businessMemberDTO.setBusinessNumber(memberDTO.getBusinessNumber());
+        businessMemberDTO.setCompanyName(memberDTO.getCompanyName());
+        businessMemberDTO.setCeoName(memberDTO.getCeoName());
+        businessMemberDTO.setBusinessType(memberDTO.getBusinessType());
+        businessMemberDAO.save(businessMemberDTO.toBusinessMemberVO());
+
+        // 3. 카테고리 조회 후 회원 관심사 저장
+        CategoryDTO categoryDTO = categoryDAO.findByCategoryName(memberDTO.getCategoryName())
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다."));
+
+        CategoryMemberDTO categoryMemberDTO = new CategoryMemberDTO();
+        categoryMemberDTO.setMemberId(memberDTO.getId());
+        categoryMemberDTO.setCategoryId(categoryDTO.getId());
+        categoryMemberDAO.save(categoryMemberDTO);
+
+        // 4. OAuth 연동 정보 저장
+        OAuthDTO oAuthDTO = new OAuthDTO();
+        oAuthDTO.setProvider(memberDTO.getProvider());
+        oAuthDTO.setProviderId(memberDTO.getProviderId());
+        oAuthDTO.setProfileURL(memberDTO.getProfileURL());
+        oAuthDTO.setMemberId(memberDTO.getId());
+        oAuthDAO.save(oAuthDTO.toOAuthVO());
+
+        // 5. 프로필 이미지를 직접 업로드한 경우 파일 정보 저장
+        if (profile != null && !profile.isEmpty() && s3Key != null && !s3Key.isBlank()) {
+            saveFile(memberDTO.getId(), profile, s3Key);
+        }
+    }
+
     //  프로필 이미지 저장
     @Transactional
     public void saveFile(Long memberId, MultipartFile image, String s3Key) {
