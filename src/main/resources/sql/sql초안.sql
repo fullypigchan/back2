@@ -71,7 +71,6 @@ alter column member_handle set not null;
 
 -- 3/23일 수정사항
 alter table tbl_member add member_language varchar(255);
-alter table tbl_member drop website_url;
 alter table tbl_member
 alter column member_email drop not null;
 alter table tbl_member
@@ -117,7 +116,6 @@ references tbl_member(id)
 );
 
 -- [5] tbl_oauth  ─ oauth 인증 정보 (1:1 → tbl_member)
-
 -- oauth 공급자
 create type oauth_provider as enum (
 'kakao',
@@ -125,7 +123,6 @@ create type oauth_provider as enum (
 'naver',
 'google'
 );
-
 create table tbl_oauth (
 id               bigint         generated always as identity primary key,
 provider_id varchar(255) unique not null,          -- 공급자 측 고유 사용자 식별자
@@ -184,7 +181,6 @@ constraint fk_member_category_rel_category foreign key(category_id)
 references tbl_category(id)
 );
 
-=======
 -- -- [9] tbl_member_category_rel  ─ 회원 ↔ 카테고리 (n:n)
 --
 -- create table tbl_member_category_rel (
@@ -197,12 +193,11 @@ references tbl_category(id)
 -- references tbl_category(id)
 -- );
 alter table tbl_member add member_language varchar(255);
-alter table tbl_member drop website_url;
 alter table tbl_member
     alter column member_email drop not null;
 ALTER TABLE tbl_member
     ADD CONSTRAINT member_email_unique UNIQUE (member_email);
->>>>>>> estimate
+
 
 
 -- [12] tbl_post  ─ 게시글 (피드 / 상품 / 견적 등 통합)
