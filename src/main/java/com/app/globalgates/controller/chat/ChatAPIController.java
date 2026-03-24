@@ -1,17 +1,17 @@
-package com.app.globalgates.controller;
+package com.app.globalgates.controller.chat;
 
 import com.app.globalgates.domain.FileVO;
-import com.app.globalgates.dto.ChatMessageDTO;
-import com.app.globalgates.dto.ChatReadReceiptDTO;
-import com.app.globalgates.dto.ChatRoomDTO;
-import com.app.globalgates.dto.ChatExpertDTO;
+import com.app.globalgates.dto.chat.ChatMessageDTO;
+import com.app.globalgates.dto.chat.ChatReadReceiptDTO;
+import com.app.globalgates.dto.chat.ChatRoomDTO;
+import com.app.globalgates.dto.chat.ChatExpertDTO;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.dto.MessageReactionDTO;
-import com.app.globalgates.service.ChatFileService;
-import com.app.globalgates.service.ChatMessageService;
-import com.app.globalgates.service.ChatRoomService;
+import com.app.globalgates.service.chat.ChatFileService;
+import com.app.globalgates.service.chat.ChatMessageService;
+import com.app.globalgates.service.chat.ChatRoomService;
 import com.app.globalgates.service.ExpertService;
-import com.app.globalgates.service.MessageReactionService;
+import com.app.globalgates.service.chat.MessageReactionService;
 import com.app.globalgates.service.ProducerService;
 import com.app.globalgates.service.S3Service;
 import com.app.globalgates.repository.FileDAO;

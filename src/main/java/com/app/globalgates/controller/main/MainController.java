@@ -52,7 +52,13 @@ public class MainController {
     @GetMapping("/post/detail/{id}")
     public String goToPostDetail(@PathVariable Long id, @RequestParam Long memberId, Model model) {
         PostDTO postDTO = postService.getDetail(id, memberId);
-        postDTO.setPostFiles(convertToPresignedUrl(postDTO.getPostFiles()));
+        postDTO.getPostFiles().forEach(pf -> {
+            try {
+                pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                throw new RuntimeException("Presigned URL 생성 실패", e);
+            }
+        });
         model.addAttribute("post", postDTO);
         return "post-detailed/post-detailed";
     }

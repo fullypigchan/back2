@@ -26,16 +26,16 @@ public class SearchController {
     private final S3Service s3service;
 
     // search 값의 type이 'popular'이면 인기순, 그 외는 최신순으로 조회
-    @GetMapping("search/{page}")
-    public ResponseEntity<?> getPopularPosts(@PathVariable int page, PostSearch search) {
-        PostWithPagingDTO postWithPagingDTO = postService.getListBySearch(page, search);
-
-        postWithPagingDTO.getPosts().forEach(post -> {
-            post.setPostFiles(convertToPresignedUrl(post.getPostFiles()));
-        });
-
-        return ResponseEntity.ok(postWithPagingDTO);
-    }
+//    @GetMapping("search/{page}")
+//    public ResponseEntity<?> getPopularPosts(@PathVariable int page, PostSearch search) {
+//        PostWithPagingDTO postWithPagingDTO = postService.getListBySearch(page, search);
+//
+//        postWithPagingDTO.getPosts().forEach(post -> {
+//            post.setPostFiles(convertToPresignedUrl(post.getPostFiles()));
+//        });
+//
+//        return ResponseEntity.ok(postWithPagingDTO);
+//    }
 
 
     // 이미지 경로 변환 공통 로직

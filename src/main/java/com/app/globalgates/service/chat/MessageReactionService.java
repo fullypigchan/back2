@@ -1,4 +1,4 @@
-package com.app.globalgates.service;
+package com.app.globalgates.service.chat;
 
 import com.app.globalgates.dto.MessageReactionDTO;
 import com.app.globalgates.repository.MessageReactionDAO;

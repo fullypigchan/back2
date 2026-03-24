@@ -1,4 +1,4 @@
-package com.app.globalgates.controller;
+package com.app.globalgates.controller.chat;
 
 import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.dto.MemberDTO;

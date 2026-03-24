@@ -42,7 +42,7 @@ public class PostDTO {
     private List<PostHashtagDTO> hashtags = new ArrayList<>();
 
     // 첨부파일
-    private List<String> postFiles = new ArrayList<>();
+    private List<PostFileDTO> postFiles;
     private String[] fileIdsToDelete;
 
     public PostVO toPostVO() {

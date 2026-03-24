@@ -31,13 +31,12 @@ public class MainAPIController {
     private final S3Service s3Service;
     private final AdvertisementService advertisementService;
 
-//    광고 목록 조회 (피드 삽입용)
+//    피드에 광고
     @GetMapping("/ads")
     public List<AdvertisementDTO> getAds() {
         log.info("광고 목록 조회 (피드 삽입용)");
-        AdWithPagingDTO result = advertisementService.list(1, new com.app.globalgates.common.search.AdSearch());
-        List<AdvertisementDTO> ads = result.getAdvertisements();
-        ads.forEach(ad -> ad.setAdImageList(convertToPresignedUrl(ad.getAdImageList())));
+        List<AdvertisementDTO> ads = advertisementService.getAdsInMain();
+        ads.forEach(ad -> ad.setImgUrls(convertToPresignedUrl(ad.getImgUrls())));
         return ads;
     }
 
@@ -47,7 +46,13 @@ public class MainAPIController {
         log.info("게시글 목록 조회 — page: {}, memberId: {}", page, memberId);
         PostWithPagingDTO result = postService.getList(page, memberId);
         result.getPosts().forEach(post ->
-                post.setPostFiles(convertToPresignedUrl(post.getPostFiles()))
+                post.getPostFiles().forEach(pf -> {
+                    try {
+                        pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Presigned URL 생성 실패", e);
+                    }
+                })
         );
         return result;
     }
@@ -56,11 +61,11 @@ public class MainAPIController {
     @PostMapping("/posts/write")
     public void writePost(PostDTO postDTO,
                           @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
-        log.info("게시글 작성됐나요? 작성자(내아디)(memberId)는: {}, 내용은(content): {}", postDTO.getMemberId(), postDTO.getPostContent());
-        String todayPath = postService.writePost(postDTO);
-        log.info("ㅇㅇ됨");
+        log.info("게시글 작성 — memberId: {}, content: {}", postDTO.getMemberId(), postDTO.getPostContent());
+        postService.writePost(postDTO);
+
         if (files != null && !files.isEmpty()) {
-            log.info("파일인식됨");
+            String todayPath = postService.getTodayPath();
             List<String> uploadedKeys = new ArrayList<>();
 
             try {
@@ -68,7 +73,6 @@ public class MainAPIController {
                     String s3Key = s3Service.uploadFile(file, todayPath);
                     uploadedKeys.add(s3Key);
                     postService.saveFile(postDTO.getId(), file, s3Key);
-                    log.info("파일들어감");
                 }
             } catch (Exception e) {
                 uploadedKeys.forEach(s3Service::deleteFile);
@@ -80,12 +84,25 @@ public class MainAPIController {
 //    게시글 수정
     @PostMapping("/posts/update/{id}")
     public void updatePost(@PathVariable Long id, PostDTO postDTO,
-                           @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+                           @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
         log.info("게시글 수정 — postId: {}, memberId: {}", id, postDTO.getMemberId());
-        if (files == null) {
-            files = List.of();
+        postService.update(postDTO);
+
+        if (files != null && !files.isEmpty()) {
+            String todayPath = postService.getTodayPath();
+            List<String> uploadedKeys = new ArrayList<>();
+
+            try {
+                for (MultipartFile file : files) {
+                    String s3Key = s3Service.uploadFile(file, todayPath);
+                    uploadedKeys.add(s3Key);
+                    postService.saveFile(postDTO.getId(), file, s3Key);
+                }
+            } catch (Exception e) {
+                uploadedKeys.forEach(s3Service::deleteFile);
+                throw new RuntimeException("파일 업로드 실패", e);
+            }
         }
-        postService.update(postDTO, files);
     }
 
 //    게시글 삭제

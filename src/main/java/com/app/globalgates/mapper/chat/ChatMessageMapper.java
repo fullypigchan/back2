@@ -1,6 +1,6 @@
-package com.app.globalgates.mapper;
+package com.app.globalgates.mapper.chat;
 
-import com.app.globalgates.dto.ChatMessageDTO;
+import com.app.globalgates.dto.chat.ChatMessageDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

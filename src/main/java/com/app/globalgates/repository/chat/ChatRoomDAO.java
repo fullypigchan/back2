@@ -1,7 +1,7 @@
-package com.app.globalgates.repository;
+package com.app.globalgates.repository.chat;
 
-import com.app.globalgates.dto.ChatRoomDTO;
-import com.app.globalgates.mapper.ChatRoomMapper;
+import com.app.globalgates.dto.chat.ChatRoomDTO;
+import com.app.globalgates.mapper.chat.ChatRoomMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

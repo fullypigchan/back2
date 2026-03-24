@@ -2,7 +2,7 @@
 package com.app.globalgates.mapper;
 
 import com.app.globalgates.common.pagination.Criteria;
-import com.app.globalgates.dto.ChatExpertDTO;
+import com.app.globalgates.dto.chat.ChatExpertDTO;
 import com.app.globalgates.dto.ExpertDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

@@ -1,4 +1,4 @@
-package com.app.globalgates.dto;
+package com.app.globalgates.dto.chat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

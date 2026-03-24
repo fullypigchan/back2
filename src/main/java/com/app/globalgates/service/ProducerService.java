@@ -1,12 +1,13 @@
 package com.app.globalgates.service;
 
 import com.app.globalgates.config.RabbitmqConfig;
-import com.app.globalgates.dto.ChatMessageDTO;
-import com.app.globalgates.dto.ChatRoomDTO;
+import com.app.globalgates.dto.chat.ChatMessageDTO;
+import com.app.globalgates.dto.chat.ChatRoomDTO;
 import com.app.globalgates.dto.FileDTO;
 import com.app.globalgates.repository.BlockDAO;
-import com.app.globalgates.repository.ChatMessageDAO;
-import com.app.globalgates.repository.ChatRoomDAO;
+import com.app.globalgates.repository.chat.ChatMessageDAO;
+import com.app.globalgates.repository.chat.ChatRoomDAO;
+import com.app.globalgates.service.chat.ChatFileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

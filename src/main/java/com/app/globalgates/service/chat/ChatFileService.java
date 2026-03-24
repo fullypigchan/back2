@@ -1,9 +1,10 @@
-package com.app.globalgates.service;
+package com.app.globalgates.service.chat;
 
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.dto.FileDTO;
-import com.app.globalgates.repository.ChatFileDAO;
+import com.app.globalgates.repository.chat.ChatFileDAO;
 import com.app.globalgates.repository.FileDAO;
+import com.app.globalgates.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

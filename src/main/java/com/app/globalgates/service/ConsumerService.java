@@ -1,7 +1,7 @@
 package com.app.globalgates.service;
 
 import com.app.globalgates.config.RabbitmqConfig;
-import com.app.globalgates.dto.ChatMessageDTO;
+import com.app.globalgates.dto.chat.ChatMessageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

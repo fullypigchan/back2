@@ -1,4 +1,4 @@
-package com.app.globalgates.mapper;
+package com.app.globalgates.mapper.chat;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

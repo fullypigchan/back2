@@ -39,10 +39,7 @@ public class PostService {
     private final S3Service s3Service;
 
 //    게시글 작성
-
-    public String writePost(PostDTO postDTO, List<MultipartFile> files) {
-        String path = getTodayPath();
-
+    public void writePost(PostDTO postDTO) {
         postDAO.save(postDTO);
 
         //    태그 저장 (없으면 생성, 있으면 기존꺼 쓰기)
@@ -57,27 +54,24 @@ public class PostService {
 
             postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
         });
+    }
 
-        if(!files.isEmpty()) {
-            files.forEach((file) -> {
-                UUID uuid = UUID.randomUUID();
-                FileDTO fileDTO = new FileDTO();
-                fileDTO.setOriginalName(file.getOriginalFilename());
-                fileDTO.setFileName(uuid.toString() + "_" + file.getOriginalFilename());
-                fileDTO.setFilePath(path);
-                fileDTO.setFileSize(file.getSize());
-                fileDTO.setContentType(file.getContentType().contains("image") ? FileContentType.IMAGE
-                        : file.getContentType().contains("video")
-                        ? FileContentType.VIDEO : FileContentType.ETC);
-                fileDAO.save(fileDTO);
+//    게시글 파일 저장 (S3 키 기반)
+    public void saveFile(Long postId, MultipartFile file, String s3Key) {
+        FileDTO fileDTO = new FileDTO();
+        fileDTO.setOriginalName(file.getOriginalFilename());
+        fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
+        fileDTO.setFilePath(s3Key);
+        fileDTO.setFileSize(file.getSize());
+        fileDTO.setContentType(file.getContentType().contains("image") ? FileContentType.IMAGE
+                : file.getContentType().contains("video")
+                ? FileContentType.VIDEO : FileContentType.ETC);
+        fileDAO.save(fileDTO);
 
-                PostFileDTO postFileDTO = new PostFileDTO();
-                postFileDTO.setId(fileDTO.getId());
-                postFileDTO.setPostId(postDTO.getId());
-                postFileDAO.save(postFileDTO.toPostFileVO());
-            });
-        }
-        return path;
+        PostFileDTO postFileDTO = new PostFileDTO();
+        postFileDTO.setFileId(fileDTO.getId());
+        postFileDTO.setPostId(postId);
+        postFileDAO.save(postFileDTO.toPostFileVO());
     }
 
     //    게시글 목록 조회
@@ -90,8 +84,7 @@ public class PostService {
 
         posts.forEach(postDTO -> {
             postDTO.setHashtags(postHashtagDAO.findAllByPostId(postDTO.getId()));
-            postDTO.setPostFiles(postFileDAO.findAllByPostId(postDTO.getId())
-                    .stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
+            postDTO.setPostFiles(postFileDAO.findAllByPostId(postDTO.getId()));
         });
 
         PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
@@ -106,13 +99,12 @@ public class PostService {
                 .orElseThrow(PostNotFoundException::new);
 
         postDTO.setHashtags(postHashtagDAO.findAllByPostId(id));
-        postDTO.setPostFiles(postFileDAO.findAllByPostId(id)
-                .stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
+        postDTO.setPostFiles(postFileDAO.findAllByPostId(id));
         return postDTO;
     }
 
     //    게시글 수정
-    public void update(PostDTO postDTO, List<MultipartFile> multipartFiles) {
+    public void update(PostDTO postDTO) {
         postDAO.setPost(postDTO.toPostVO());
 
         //    태그 수정 (원래 묶인 관계 삭제하고 저장)
@@ -126,37 +118,11 @@ public class PostService {
             postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
         });
 
-        //    새 파일 추가
-        multipartFiles.forEach(multipartFile -> {
-            if (multipartFile.getOriginalFilename().isEmpty()) {
-                return;
-            }
-
-            try {
-                String fileName = s3Service.uploadFile(multipartFile, "post");
-
-                FileDTO fileDTO = new FileDTO();
-                fileDTO.setOriginalName(multipartFile.getOriginalFilename());
-                fileDTO.setFileName(fileName);
-                fileDTO.setFilePath("post");
-                fileDTO.setFileSize(multipartFile.getSize());
-                fileDAO.save(fileDTO);
-
-                PostFileVO postFileVO = PostFileVO.builder()
-                        .postId(postDTO.getId())
-                        .fileId(fileDTO.getId())
-                        .build();
-                postFileDAO.save(postFileVO);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
         //    기존 파일 삭제 (S3 + DB)
         if (postDTO.getFileIdsToDelete() != null) {
             Arrays.stream(postDTO.getFileIdsToDelete()).forEach(fileId -> {
                 fileDAO.findById(Long.valueOf(fileId)).ifPresent(fileVO -> {
-                    s3Service.deleteFile(fileVO.getFileName());
+                    s3Service.deleteFile(fileVO.getFilePath());
                 });
                 postFileDAO.delete(Long.valueOf(fileId));
                 fileDAO.delete(Long.valueOf(fileId));
@@ -174,7 +140,7 @@ public class PostService {
                 .map(postDTO -> {
                     List<PostFileDTO> images = new ArrayList<>(postFileDAO.findAllByPostId(postDTO.getId()));
                     if(!images.isEmpty()) {
-                        postDTO.setPostFiles(images.stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
+                        postDTO.setPostFiles(images);
                     }
                     return postDTO;
                 }).collect(Collectors.toList());

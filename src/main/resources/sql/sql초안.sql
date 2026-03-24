@@ -71,7 +71,6 @@ alter column member_handle set not null;
 
 -- 3/23일 수정사항
 alter table tbl_member add member_language varchar(255);
-alter table tbl_member drop website_url;
 alter table tbl_member
 alter column member_email drop not null;
 alter table tbl_member
@@ -117,7 +116,6 @@ references tbl_member(id)
 );
 
 -- [5] tbl_oauth  ─ oauth 인증 정보 (1:1 → tbl_member)
-
 -- oauth 공급자
 create type oauth_provider as enum (
 'kakao',
@@ -125,7 +123,6 @@ create type oauth_provider as enum (
 'naver',
 'google'
 );
-
 create table tbl_oauth (
 id               bigint         generated always as identity primary key,
 provider_id varchar(255) unique not null,          -- 공급자 측 고유 사용자 식별자
@@ -184,6 +181,23 @@ constraint fk_member_category_rel_category foreign key(category_id)
 references tbl_category(id)
 );
 
+-- -- [9] tbl_member_category_rel  ─ 회원 ↔ 카테고리 (n:n)
+--
+-- create table tbl_member_category_rel (
+-- member_id   bigint not null,  -- fk → tbl_member.id
+-- category_id bigint not null,  -- fk → tbl_category.id
+-- primary key (member_id, category_id),
+-- constraint fk_member_category_rel_member foreign key(member_id)
+-- references tbl_member(id),
+-- constraint fk_member_category_rel_category foreign key(category_id)
+-- references tbl_category(id)
+-- );
+alter table tbl_member add member_language varchar(255);
+alter table tbl_member
+    alter column member_email drop not null;
+ALTER TABLE tbl_member
+    ADD CONSTRAINT member_email_unique UNIQUE (member_email);
+
 
 
 -- [12] tbl_post  ─ 게시글 (피드 / 상품 / 견적 등 통합)
@@ -193,6 +207,9 @@ create type post_status as enum (
 'inactive'      -- 삭제됨
 );
 
+
+alter table tbl_post
+    alter column title drop not null;
 -- 게시글 (게시물 + 댓글 대댓글 : reply_post_id)
 create table tbl_post (
 id             bigint          generated always as identity primary key,  -- pk | 게시글 고유 id (자동 증가)

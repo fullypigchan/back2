@@ -1,6 +1,6 @@
-package com.app.globalgates.dto;
+package com.app.globalgates.dto.chat;
 
-import com.app.globalgates.domain.ChatMessageVO;
+import com.app.globalgates.domain.chat.ChatMessageVO;
 import lombok.*;
 
 @Getter @Setter @ToString

@@ -1,7 +1,7 @@
-package com.app.globalgates.service;
+package com.app.globalgates.service.chat;
 
-import com.app.globalgates.dto.ChatMessageDTO;
-import com.app.globalgates.repository.ChatMessageDAO;
+import com.app.globalgates.dto.chat.ChatMessageDTO;
+import com.app.globalgates.repository.chat.ChatMessageDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

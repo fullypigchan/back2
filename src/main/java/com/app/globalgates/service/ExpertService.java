@@ -1,7 +1,7 @@
 package com.app.globalgates.service;
 
 import com.app.globalgates.common.pagination.Criteria;
-import com.app.globalgates.dto.ChatExpertDTO;
+import com.app.globalgates.dto.chat.ChatExpertDTO;
 import com.app.globalgates.dto.ExpertDTO;
 import com.app.globalgates.dto.ExpertWithPagingDTO;
 import com.app.globalgates.repository.ExpertDAO;

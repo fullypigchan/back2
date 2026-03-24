@@ -1,4 +1,4 @@
-package com.app.globalgates.domain;
+package com.app.globalgates.domain.chat;
 
 import com.app.globalgates.audit.Period;
 import lombok.EqualsAndHashCode;
@@ -10,9 +10,11 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 @EqualsAndHashCode(of = "id", callSuper = false)
 @SuperBuilder
-public class ChatRoomVO extends Period {
+public class ChatMessageVO extends Period {
     private Long id;
-    private String title;
+    private Long conversationId;
     private Long senderId;
-    private Long invitedId;
+    private String content;
+    private Long replyMessageId;
+    private boolean isDeleted;
 }
