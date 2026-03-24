@@ -68,6 +68,15 @@ alter column member_nickname drop not null;
 alter table tbl_member
 alter column member_handle set not null;
 -- 수정사항: member_name 컬럼 추가, nickname에 not null제거, handle에 not null 추가.
+
+-- 3/23일 수정사항
+alter table tbl_member add member_language varchar(255);
+alter table tbl_member drop website_url;
+alter table tbl_member
+alter column member_email drop not null;
+alter table tbl_member
+add constraint member_email_unique unique (member_email);
+
 create table tbl_member (
 id            bigint        generated always as identity primary key,  -- pk | 회원 고유 id (자동 증가)
 member_name varchar(255),
@@ -161,13 +170,13 @@ references tbl_category(id)
 --3/17일
 
 
--- -- [9] tbl_member_category_rel  ─ 회원 ↔ 카테고리 (n:n)
---
+-- [9] tbl_member_category_rel  ─ 회원 ↔ 카테고리 (n:n)
+drop table tbl_member_category_rel;
+
 create table tbl_member_category_rel (
-id bigint not null primary key,
+id bigint generated always as identity primary key,
 member_id   bigint not null,  -- fk → tbl_member.id
 category_id bigint not null,  -- fk → tbl_category.id
-primary key (member_id, category_id),
 constraint fk_member_category_rel_member foreign key(member_id)
 references tbl_member(id),
 constraint fk_member_category_rel_category foreign key(category_id)
@@ -509,6 +518,8 @@ create type payment_status as enum (
 'cancelled',    -- 결제 취소
 'failed'        -- 결제 실패
 );
+alter type payment_status add value 'cancelled';
+drop table tbl_payment_advertisement;
 select * from tbl_payment_advertisement;
 -- 결제 내역 광고
 create table tbl_payment_advertisement (
