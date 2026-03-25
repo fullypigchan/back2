@@ -2,9 +2,7 @@ package com.app.globalgates.service;
 
 import com.app.globalgates.config.RabbitmqConfig;
 import com.app.globalgates.dto.chat.ChatMessageDTO;
-import com.app.globalgates.dto.chat.ChatRoomDTO;
 import com.app.globalgates.dto.FileDTO;
-import com.app.globalgates.repository.BlockDAO;
 import com.app.globalgates.repository.chat.ChatMessageDAO;
 import com.app.globalgates.repository.chat.ChatRoomDAO;
 import com.app.globalgates.service.chat.ChatFileService;
@@ -19,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,15 +24,12 @@ import java.util.Optional;
 public class ProducerService {
     private final ChatMessageDAO chatMessageDAO;
     private final ChatRoomDAO chatRoomDAO;
-    private final BlockDAO blockDAO;
     private final RabbitTemplate rabbitTemplate;
     private final ChatFileService chatFileService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     public ChatMessageDTO sendMessage(ChatMessageDTO chatMessageDTO) {
-        checkBlocked(chatMessageDTO.getConversationId(), chatMessageDTO.getSenderId());
-
         ChatMessageDTO saved = chatMessageDAO.save(chatMessageDTO);
         log.info("메시지 DB 저장 완료 - id: {}", saved.getId());
 
@@ -62,8 +56,6 @@ public class ProducerService {
 
     @Transactional
     public ChatMessageDTO sendMessageWithFile(ChatMessageDTO chatMessageDTO, MultipartFile file) throws IOException {
-        checkBlocked(chatMessageDTO.getConversationId(), chatMessageDTO.getSenderId());
-
         ChatMessageDTO saved = chatMessageDAO.save(chatMessageDTO);
         log.info("메시지 DB 저장 완료 - id: {}", saved.getId());
 
@@ -93,16 +85,6 @@ public class ProducerService {
         notifyRestoredMembers(deletedMemberIds, saved.getConversationId());
 
         return saved;
-    }
-
-    private void checkBlocked(Long conversationId, Long senderId) {
-        Optional<ChatRoomDTO> partnerOpt = chatRoomDAO.findPartnerByConversation(conversationId, senderId);
-        if (partnerOpt.isPresent()) {
-            Long partnerId = partnerOpt.get().getInvitedId();
-            if (blockDAO.isBlockedEither(senderId, partnerId)) {
-                throw new IllegalStateException("차단된 사용자에게 메시지를 보낼 수 없습니다.");
-            }
-        }
     }
 
     private void notifyRestoredMembers(List<Long> memberIds, Long conversationId) {

@@ -3,6 +3,7 @@
 <mapper namespace="com.app.globalgates.mapper.chat.ChatRoomMapper">
 
     <select id="selectAllByMemberId">
+        <![CDATA[
         with ranked as (
             select
                 v.conversation_id as id,
@@ -31,19 +32,21 @@
             ) sub_msg on true
             left join lateral (
                 select count(*) as cnt
-                from tbl_message
-                where conversation_id = v.conversation_id
-                  and is_deleted = false
-                  and sender_id != #{memberId}
-                  and id > coalesce(v.my_last_read, 0)
+                from tbl_message msg2
+                join tbl_conversation_setting cs2
+                    on cs2.conversation_id = v.conversation_id and cs2.member_id = #{memberId}
+                where msg2.conversation_id = v.conversation_id
+                  and msg2.is_deleted = false
+                  and msg2.sender_id != #{memberId}
+                  and msg2.id > coalesce(v.my_last_read, 0)
+                  and not (
+                      cs2.blocked_after_message_id is not null
+                      and msg2.id > cs2.blocked_after_message_id
+                      and (cs2.block_released_message_id is null or msg2.id <= cs2.block_released_message_id)
+                  )
             ) unread_msg on true
             where v.member_id = #{memberId}
               and coalesce(v.is_deleted, false) = false
-              and not exists (
-                  select 1 from tbl_block
-                  where (blocker_id = #{memberId} and blocked_id = v.partner_id)
-                     or (blocker_id = v.partner_id and blocked_id = #{memberId})
-              )
         )
         select id, title, invited_id, invited_name, invited_handle,
                last_message, last_message_time, unread_count, muted,
@@ -51,6 +54,7 @@
         from ranked
         where rn = 1
         order by coalesce(last_message_time, created_datetime) desc, id desc
+        ]]>
     </select>
 
     <select id="selectByMembers">
@@ -160,6 +164,18 @@
                 select max(id) from tbl_message where conversation_id = #{conversationId}
             ),
             updated_datetime = now()
+        where conversation_id = #{conversationId} and member_id = #{memberId}
+    </update>
+
+    <update id="updateBlockedAfterMessageId">
+        update tbl_conversation_setting
+        set blocked_after_message_id = #{messageId}, updated_datetime = now()
+        where conversation_id = #{conversationId} and member_id = #{memberId}
+    </update>
+
+    <update id="updateBlockReleasedMessageId">
+        update tbl_conversation_setting
+        set block_released_message_id = #{messageId}, updated_datetime = now()
         where conversation_id = #{conversationId} and member_id = #{memberId}
     </update>
 

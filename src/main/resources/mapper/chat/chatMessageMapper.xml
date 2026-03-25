@@ -11,6 +11,7 @@
     </insert>
 
     <select id="selectAllByConversationId">
+        <![CDATA[
         select
             msg.id,
             msg.conversation_id,
@@ -51,7 +52,19 @@
               (select deleted_after_message_id from tbl_conversation_setting
                where conversation_id = #{conversationId} and member_id = #{memberId}), 0
           )
+          and not (
+              msg.sender_id != #{memberId}
+              and exists (
+                  select 1 from tbl_conversation_setting cs_block
+                  where cs_block.conversation_id = #{conversationId}
+                    and cs_block.member_id = #{memberId}
+                    and cs_block.blocked_after_message_id is not null
+                    and msg.id > cs_block.blocked_after_message_id
+                    and (cs_block.block_released_message_id is null or msg.id <= cs_block.block_released_message_id)
+              )
+          )
         order by msg.created_datetime asc
+        ]]>
     </select>
 
     <insert id="softDeleteForMember">

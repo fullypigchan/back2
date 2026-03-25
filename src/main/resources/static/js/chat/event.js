@@ -65,6 +65,7 @@ window.onload = () => {
     let activeEmoteBtn = null;
     let picker = null;
     let isCurrentRoomMuted = false;
+    let isCurrentPartnerBlocked = false;
 
     // 2.채팅방 목록 관련 함수
 
@@ -863,7 +864,7 @@ window.onload = () => {
     const userInfoClose = userInfoModal.querySelector(".Big-Modal-Button.Close");
     userInfoClose.addEventListener("click", () => closeModal(userInfoModal));
 
-    userInfoModal.addEventListener("click", (e) => {
+    userInfoModal.addEventListener("click", async (e) => {
         let toggle = false;
         const btn = e.target.closest("button");
         const setting = e.target.closest(".Modal-Bottom-Setting");
@@ -891,6 +892,12 @@ window.onload = () => {
         if (setting) {
             // 사용자 차단 해제 (이미 차단된 상태면 모달 없이 바로 해제)
             if (setting.classList.contains("BanUser") && setting.classList.contains("banned")) {
+                try {
+                    await ChatService.unblockUser(currentMemberId, currentPartnerId, currentRoomId);
+                    isCurrentPartnerBlocked = false;
+                } catch (err) {
+                    console.error("차단 해제 실패", err);
+                }
                 setting.classList.remove("banned");
                 const banText = setting.querySelector(".BanUser-Text");
                 if (banText) banText.textContent = "사용자 차단하기";
@@ -1034,8 +1041,14 @@ window.onload = () => {
         alert("추후 추가 예정");
     });
 
-    banUserModal.querySelector(".Small-Button.Ban").addEventListener("click", (e) => {
+    banUserModal.querySelector(".Small-Button.Ban").addEventListener("click", async (e) => {
         e.stopPropagation();
+        try {
+            await ChatService.blockUser(currentMemberId, currentPartnerId, currentRoomId);
+            isCurrentPartnerBlocked = true;
+        } catch (err) {
+            console.error("차단 실패", err);
+        }
         const banSettingDiv = userInfoModal.querySelector(".Modal-Bottom-Setting.BanUser");
         const banText = banSettingDiv?.querySelector(".BanUser-Text");
         banSettingDiv?.classList.add("banned");
@@ -1143,6 +1156,23 @@ window.onload = () => {
 
         await refreshStageOnePartnerProfile(roomId);
 
+        // 차단 상태 확인 후 UI 동기화
+        try {
+            const blocked = await ChatService.isBlocked(currentMemberId, currentPartnerId);
+            isCurrentPartnerBlocked = blocked;
+            const banSettingDiv = userInfoModal.querySelector(".Modal-Bottom-Setting.BanUser");
+            const banText = banSettingDiv?.querySelector(".BanUser-Text");
+            if (blocked) {
+                banSettingDiv?.classList.add("banned");
+                if (banText) banText.textContent = "사용자 차단 해제하기";
+            } else {
+                banSettingDiv?.classList.remove("banned");
+                if (banText) banText.textContent = "사용자 차단하기";
+            }
+        } catch (err) {
+            console.error("차단 상태 확인 실패", err);
+        }
+
         // 메시지 렌더링 후 즉시 표시 (column-reverse로 스크롤 불필요)
         try {
             const messages = await ChatService.getMessages(currentRoomId, currentMemberId);
@@ -1160,10 +1190,12 @@ window.onload = () => {
             chatDiv.style.visibility = "";
         }
 
-        try {
-            await ChatService.markAsRead(roomId, currentMemberId);
-        } catch (e) {
-            console.error("읽음 처리 실패", e);
+        if (!isCurrentPartnerBlocked) {
+            try {
+                await ChatService.markAsRead(roomId, currentMemberId);
+            } catch (e) {
+                console.error("읽음 처리 실패", e);
+            }
         }
         await loadStageOneRoomList();
         markCurrentStageOneRoom(roomId);
@@ -1289,9 +1321,14 @@ window.onload = () => {
         if (!roomId) return;
         const isMine = Number(message?.senderId || 0) === currentMemberId;
 
+        // 차단된 상대방의 메시지는 렌더링하지 않고 읽음 처리도 하지 않음
+        if (!isMine && Number(message?.senderId || 0) === currentPartnerId && isCurrentPartnerBlocked) {
+            return;
+        }
+
         if (Number(currentRoomId) === roomId) {
             appendStageOneMessage(message, { refreshRoomList: false });
-            if (!isMine) {
+            if (!isMine && !isCurrentPartnerBlocked) {
                 try {
                     await ChatService.markAsRead(roomId, currentMemberId);
                 } catch (e) {

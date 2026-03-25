@@ -2,7 +2,6 @@ package com.app.globalgates.service.chat;
 
 import com.app.globalgates.dto.chat.ChatReadReceiptDTO;
 import com.app.globalgates.dto.chat.ChatRoomDTO;
-import com.app.globalgates.repository.BlockDAO;
 import com.app.globalgates.repository.chat.ChatRoomDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,20 +16,15 @@ import java.util.Optional;
 @Slf4j
 public class ChatRoomService {
     private final ChatRoomDAO chatRoomDAO;
-    private final BlockDAO blockDAO;
 
 //    채팅방 목록 조회
     public List<ChatRoomDTO> getRooms(Long memberId) {
         return chatRoomDAO.findAllByMemberId(memberId);
     }
 
-//    채팅방 생성 또는 기존 방 반환 (차단 상태면 예외)
+//    채팅방 생성 또는 기존 방 반환
     @Transactional
     public ChatRoomDTO createOrGetRoom(String title, Long senderId, Long invitedId) {
-        if (blockDAO.isBlockedEither(senderId, invitedId)) {
-            throw new IllegalStateException("차단된 사용자와는 대화할 수 없습니다.");
-        }
-
         Optional<ChatRoomDTO> existing = chatRoomDAO.findByMembers(senderId, invitedId);
         if (existing.isPresent()) {
             Long roomId = existing.get().getId();

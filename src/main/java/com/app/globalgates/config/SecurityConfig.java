@@ -56,7 +56,9 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**",
                                 "/static/**",
-                                "/image/**").permitAll()
+                                "/image/**",
+                                "/api/v1/blocks/**",
+                                "/api/v1/chat/**").permitAll()
                         .requestMatchers("/admin/**").hasRole(MemberRole.ADMIN.name())
                         .anyRequest().authenticated()
                 )

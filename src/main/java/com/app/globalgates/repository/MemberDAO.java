@@ -58,6 +58,10 @@ public class MemberDAO {
     public void softDelete(Long memberId){
         memberMapper.softDelete(memberId);
     }
+//  Handle로 조회 (간소화 - 차단용)
+    public Optional<MemberDTO> findByHandle(String memberHandle) {
+        return memberMapper.selectMemberByHandle(memberHandle);
+    }
 //  채팅 유저 검색 (차단 사용자 제외)
     public List<MemberDTO> searchByKeyword(String keyword, Long memberId){
         return memberMapper.searchByKeyword(keyword, memberId);

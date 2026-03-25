@@ -90,4 +90,14 @@ public class ChatRoomDAO {
     public void restoreAllMembers(Long conversationId) {
         chatRoomMapper.restoreAllMembers(conversationId);
     }
+
+//    차단 시점 메시지 ID 저장
+    public void updateBlockedAfterMessageId(Long conversationId, Long memberId, Long messageId) {
+        chatRoomMapper.updateBlockedAfterMessageId(conversationId, memberId, messageId);
+    }
+
+//    차단 해제 시점 메시지 ID 저장
+    public void updateBlockReleasedMessageId(Long conversationId, Long memberId, Long messageId) {
+        chatRoomMapper.updateBlockReleasedMessageId(conversationId, memberId, messageId);
+    }
 }

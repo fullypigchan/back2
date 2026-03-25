@@ -234,7 +234,7 @@ const ChatService = (() => {
         return await response.json();
     };
 
-    // 19.파일 다운로드 URL 조회
+    // 17.파일 다운로드 URL 조회
     const getFileDownloadUrl = async (fileId) => {
         const response = await fetch(`/api/v1/chat/files/${fileId}/download`);
         if (!response.ok) throw new Error("파일 다운로드 URL 조회 실패");
@@ -242,12 +242,46 @@ const ChatService = (() => {
         return data.url;
     };
 
-    // 20.파일 미리보기 URL 조회
+    // 18.파일 미리보기 URL 조회
     const getFilePreviewUrl = async (fileId) => {
         const response = await fetch(`/api/v1/chat/files/${fileId}/preview`);
         if (!response.ok) throw new Error("파일 미리보기 URL 조회 실패");
         const data = await response.json();
         return data.url;
+    };
+
+    // 19.차단 여부 확인
+    const isBlocked = async (blockerId, blockedId) => {
+        const response = await fetch(
+            `/api/v1/blocks/check?blockerId=${blockerId}&blockedId=${blockedId}`
+        );
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.blocked;
+    };
+
+    // 20.사용자 차단
+    const blockUser = async (blockerId, blockedId, conversationId) => {
+        const response = await fetch("/api/v1/blocks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ blockerId, blockedId, conversationId }),
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "차단 실패");
+        }
+    };
+
+    // 21.사용자 차단 해제
+    const unblockUser = async (blockerId, blockedId, conversationId) => {
+        let url = `/api/v1/blocks?blockerId=${blockerId}&blockedId=${blockedId}`;
+        if (conversationId) url += `&conversationId=${conversationId}`;
+        const response = await fetch(url, { method: "DELETE" });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "차단 해제 실패");
+        }
     };
 
     return {
@@ -271,5 +305,8 @@ const ChatService = (() => {
         sendMessageWithFile,
         getFileDownloadUrl,
         getFilePreviewUrl,
+        isBlocked,
+        blockUser,
+        unblockUser,
     };
 })();

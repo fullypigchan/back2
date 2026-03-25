@@ -52,4 +52,12 @@ public interface ChatRoomMapper {
     List<Long> selectDeletedMemberIds(@Param("conversationId") Long conversationId);
 //    대화방 복원 (전체 참여자)
     void restoreAllMembers(@Param("conversationId") Long conversationId);
+//    차단 시점 메시지 ID 저장
+    void updateBlockedAfterMessageId(@Param("conversationId") Long conversationId,
+                                      @Param("memberId") Long memberId,
+                                      @Param("messageId") Long messageId);
+//    차단 해제 시점 메시지 ID 저장
+    void updateBlockReleasedMessageId(@Param("conversationId") Long conversationId,
+                                       @Param("memberId") Long memberId,
+                                       @Param("messageId") Long messageId);
 }

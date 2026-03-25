@@ -31,6 +31,8 @@ public interface MemberMapper {
     public void delete(Long memberId);
     //  memberId로 soft delete
     public void softDelete(Long memberId);
+    //  Handle로 조회 (간소화)
+    public Optional<MemberDTO> selectMemberByHandle(String memberHandle);
     //  채팅 유저 검색 (차단 사용자 제외)
     public List<MemberDTO> searchByKeyword(@org.apache.ibatis.annotations.Param("keyword") String keyword,
                                            @org.apache.ibatis.annotations.Param("memberId") Long memberId);
