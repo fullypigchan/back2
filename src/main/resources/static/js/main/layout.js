@@ -81,6 +81,11 @@ const layout = (() => {
                         </div>
                     </header>
                     <p class="postText">${post.postContent || ""}</p>
+                    ${post.location ? `
+                    <div class="postLocation">
+                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="postLocation__icon"><g><path d="M12 2c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 11.5c-1.65 0-3-1.34-3-3s1.35-3 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3z"></path></g></svg>
+                        <span class="postLocation__text">${post.location}</span>
+                    </div>` : ''}
                     ${hashtagHtml}
                     ${mediaHtml}
                     <footer class="postMetrics">

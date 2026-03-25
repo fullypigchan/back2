@@ -865,6 +865,11 @@ window.onload = () => {
             formData.append(`hashtags[${i}].tagName`, tag.textContent.replace("#", ""));
         });
 
+        const location = composeCtx.getSelectedLocation();
+        if (location) {
+            formData.append("location", location);
+        }
+
         await service.writePost(formData);
         closeComposeModal();
 
@@ -1273,8 +1278,8 @@ window.onload = () => {
 
         function updateLocationUI() {
             if (locationDisplay && locationDisplayText) {
-                if (selectedLocation) { locationDisplayText.textContent = selectedLocation; locationDisplay.removeAttribute("hidden"); }
-                else { locationDisplayText.textContent = ""; locationDisplay.setAttribute("hidden", ""); }
+                if (selectedLocation) { locationDisplayText.value = selectedLocation; locationDisplay.removeAttribute("hidden"); }
+                else { locationDisplayText.value = ""; locationDisplay.setAttribute("hidden", ""); }
             }
             if (locationDeleteBtn) { locationDeleteBtn.hidden = !selectedLocation; }
             if (locationCompleteBtn) { locationCompleteBtn.disabled = !selectedLocation; }
@@ -1571,7 +1576,7 @@ window.onload = () => {
             if (boardMenu) { boardMenu.classList.add("off"); }
             if (catScroll && originalChipsHTML) { catScroll.innerHTML = originalChipsHTML; }
             selectedLocation = null;
-            if (locationDisplay && locationDisplayText) { locationDisplayText.textContent = ""; locationDisplay.setAttribute("hidden", ""); }
+            if (locationDisplay && locationDisplayText) { locationDisplayText.value = ""; locationDisplay.setAttribute("hidden", ""); }
             if (locationList) { const allItems = locationList.querySelectorAll(".tweet-modal__location-item"); for (let i = 0; i < allItems.length; i++) { allItems[i].classList.remove("isSelected"); } }
             selectedPostTempIndexes = [];
             if (postTempConfirmOverlay) { postTempConfirmOverlay.classList.add("off"); }

@@ -3906,6 +3906,32 @@ a.menu-item:visited {
     overflow: hidden;
 }
 
+.postLocation {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    border-radius: 9999px;
+    background: rgba(29, 155, 240, 0.1);
+    color: #1d9bf0;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.postLocation__icon {
+    flex-shrink: 0;
+    fill: #1d9bf0;
+}
+
+.postLocation__text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
 a.postHashtag {
     font-size: 11px;
     color: #1d9bf0;
