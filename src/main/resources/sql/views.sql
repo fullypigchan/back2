@@ -86,3 +86,36 @@ from tbl_conversation c
                    on cs.conversation_id = c.id and cs.member_id = rel.invited_id
          left join tbl_conversation_setting cs_partner
                    on cs_partner.conversation_id = c.id and cs_partner.member_id = rel.sender_id;
+
+-- 거래처 등록 목록 페이지에서 거래저(사업자)를 조회하는 view
+create view vw_inquiry_member as
+select
+    m.id,
+    m.member_nickname,
+    m.member_handle,
+    m.member_bio,
+    m.member_status,
+    m.member_role,
+    tf.file_path,
+    (
+        select c.category_name
+        from tbl_member_category_rel mcr
+                 join tbl_category c on c.id = mcr.category_id
+        where mcr.member_id = m.id
+        limit 1
+    ) as category_name,
+    (
+        select m2.member_handle
+        from tbl_follow f2
+                 join tbl_member m2 on m2.id = f2.following_id
+        where f2.follower_id = m.id
+          and m2.member_role = 'expert'
+        order by (
+                     select count(*) from tbl_follow f3
+                     where f3.following_id = m2.id
+                 ) desc
+        limit 1
+    ) as expert_handle
+from tbl_member m
+left join tbl_member_profile_file mpf on mpf.member_id = m.id
+left join tbl_file tf on tf.id = mpf.id;

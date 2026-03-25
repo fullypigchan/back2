@@ -1,8 +1,11 @@
 package com.app.globalgates.mapper;
 
+import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.domain.MemberVO;
+import com.app.globalgates.dto.InquiryMemberDTO;
 import com.app.globalgates.dto.MemberDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,13 @@ public interface MemberMapper {
     //  memberId로 soft delete
     public void softDelete(Long memberId);
     //  채팅 유저 검색 (차단 사용자 제외)
-    public List<MemberDTO> searchByKeyword(@org.apache.ibatis.annotations.Param("keyword") String keyword,
-                                           @org.apache.ibatis.annotations.Param("memberId") Long memberId);
+    public List<MemberDTO> searchByKeyword(@Param("keyword") String keyword,
+                                           @Param("memberId") Long memberId);
+
+    // 전문가 페이지 - 조회된 회원 수
+    public int selectInquiryTotal(@Param("memberId") Long memberId);
+
+    // 전문가 페이지 - 거래처 회원 목록(카테고리 검색)
+    public List<InquiryMemberDTO> selectInquiryMembers(@Param("criteria") Criteria criteria,
+                                                       @Param("memberId") Long memberId);
 }

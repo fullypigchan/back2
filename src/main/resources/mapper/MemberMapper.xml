@@ -142,4 +142,27 @@
         order by member_name
         limit 20
     </select>
+
+    <select id="selectInquiryTotal">
+        select count(*),
+               case when exists (
+                   select 1 from tbl_follow fl
+                   where fl.follower_id = #{memberId}::bigint
+                     and fl.following_id = v.id
+               ) then true else false end as followed
+        from vw_inquiry_member v
+        where v.member_status = 'active'
+    </select>
+    
+    <select id="selectInquiryMembers">
+        select v.*,
+               case when exists (
+                   select 1 from tbl_follow fl
+                   where fl.follower_id = #{memberId}::bigint
+                     and fl.following_id = v.id
+               ) then true else false end as followed
+        from vw_inquiry_member v
+        where v.member_status = 'active'
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
 </mapper>

@@ -2,11 +2,9 @@ package com.app.globalgates.mapper;
 
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.enumeration.ProfileImageType;
+import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.domain.FileVO;
-import com.app.globalgates.dto.BusinessMemberDTO;
-import com.app.globalgates.dto.FileDTO;
-import com.app.globalgates.dto.MemberDTO;
-import com.app.globalgates.dto.MemberProfileFileDTO;
+import com.app.globalgates.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +91,15 @@ public class MemberMapperTests {
         String keyword = "아";
         List<MemberDTO> foundMembers = memberMapper.selectMembersByKeyword(keyword);
         log.info("조회한 회원들: {}", foundMembers);
+    }
+
+    @Test
+    public void testSelectInquiryMembers() {
+        Long memberId = 9L;
+        Criteria criteria = new Criteria(1, memberMapper.selectInquiryTotal(memberId));
+
+        List<InquiryMemberDTO> foundMembers = memberMapper.selectInquiryMembers(criteria, memberId);
+        log.info("받아온 members : {}", foundMembers);
     }
 
 }
