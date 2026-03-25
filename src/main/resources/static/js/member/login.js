@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loginTrigger = document.getElementById("btn-login");
+    const joinTrigger = document.getElementById("btn-create");
     const loginModal = document.getElementById("login-modal");
     const passwordModal = document.getElementById("login-password-modal");
 
@@ -28,6 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const identityLabel = passwordModal.querySelector(".mail-label");
     const identityValue = passwordModal.querySelector(".mail-value");
     const findPasswordLink = passwordModal.querySelector(".find-password");
+    const signupLinks = [
+        ...loginModal.querySelectorAll(".signup-text a"),
+        ...passwordModal.querySelectorAll(".signup-text a"),
+    ];
 
     let hadTypedIdentity = false;
 
@@ -126,6 +131,11 @@ document.addEventListener("DOMContentLoaded", () => {
         passwordInput?.focus();
     };
 
+    const openJoinModal = () => {
+        closeAllModals();
+        joinTrigger?.click();
+    };
+
     loginTrigger.addEventListener("click", (event) => {
         event.preventDefault();
         openLoginModal();
@@ -216,6 +226,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     findPasswordLink?.addEventListener("click", (event) => {
         event.preventDefault();
+    });
+
+    signupLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            openJoinModal();
+        });
     });
 
     document.addEventListener("keydown", (event) => {

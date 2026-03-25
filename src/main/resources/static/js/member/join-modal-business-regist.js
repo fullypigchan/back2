@@ -1,10 +1,19 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-  const nextButton = document.querySelector('.next-button');
-  const inputs = Array.from(document.querySelectorAll('.name-input, .phone-input'));
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('modal-business');
+  const nextButton = modal?.querySelector('.next-button');
+  const inputs = [
+    modal?.querySelector('.company-name-input'),
+    modal?.querySelector('.business-number-input'),
+    modal?.querySelector('.ceo-name-input'),
+    modal?.querySelector('#postcode'),
+    modal?.querySelector('#addr-main'),
+    modal?.querySelector('#addr-detail'),
+    modal?.querySelector('#business-type'),
+  ].filter(Boolean);
 
   if (!nextButton || inputs.length === 0) return;
 
-  const searchButton = document.getElementById('addr-search-btn');
+  const searchButton = modal.querySelector('#addr-search-btn');
   if (searchButton) {
     searchButton.style.display = 'none';
   }
@@ -16,7 +25,7 @@
   };
 
   Object.entries(textOverrides).forEach(([id, text]) => {
-    const input = document.getElementById(id);
+    const input = modal.querySelector(`#${id}`);
     if (!input) return;
     input.readOnly = false;
     const label = input.closest('.name-placeholder, .phone-placeholder');
@@ -79,6 +88,8 @@
       }
       syncNextButton();
     });
+
+    input.addEventListener('change', syncNextButton);
 
     input.addEventListener('blur', () => {
       setNeutral(labelBox);

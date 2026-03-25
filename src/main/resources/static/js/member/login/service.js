@@ -9,6 +9,7 @@ const loginService = (() => {
         });
         if(!response.ok){
             const errorText = await response.text();
+            alert("로그인 정보가 일치하지 않습니다.")
             throw new Error(errorText || "Fetch error");
         }
 
@@ -38,3 +39,4 @@ const loginService = (() => {
         info: info,
     }
 })();
+//

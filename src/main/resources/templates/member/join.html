@@ -27,61 +27,31 @@
             <h2 class="join-subtitle">지금 가입하세요.</h2>
 
             <div class="join-actions">
-                <button type="button" class="chip-btn naver-login">
-                    <img src="/images/NAVER_login_KR/NAVER_login_Light_KR_green_center_H56.png" alt="" class="chip-btn-img apple-mark">
-                </button>
-                <button type="button" class="chip-btn kakao-login">
-                    <img src="/images/kakao_login/ko/kakao_login_medium_wide.png" alt="" class="chip-btn-img apple-mark">
-                </button>
-                <button type="button" id="facebook-login" class="chip-btn facebook-login">
-                    <div id="spinner"
-                         style="
-                                background: #4267b2;
-                                border-radius: 5px;
-                                color: white;
-                                height: 80px;
-                                text-align: center;
-                                width: 420px;">
-                        facebook으로 로그인하기
-                        <div
-                                class="fb-login-button"
-                                data-max-rows="1"
-                                data-size="large"
-                                data-button-type="continue_with"
-                                data-use-continue-as="true"
-                        ></div>
-                    </div>
-                </button>
-                <button type="button" id="google-login" class="chip-btn chip-btn-img apple-mark google-login">
-                    <div id="g_id_onload"
-                         data-client_id="YOUR_GOOGLE_CLIENT_ID"
-                         data-login_uri="https://your.domain/your_login_endpoint"
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-size="large"
-                         data-theme="outline"
-                         data-text="sign_in_with"
-                         data-shape="pill"
-                         data-width="420"
-                         data-logo_alignment="left">
-                    </div>
-                </button>
-
-                <div class="join-or" aria-hidden="true">
-                    <span class="line"></span>
-                    <span class="or-text">또는</span>
-                    <span class="line"></span>
-                </div>
-
-                <button type="button" id="btn-create" class="primary-btn">계정 만들기</button>
-
-                <p class="join-terms">가입하시려면 쿠키 사용을 포함해 이용약관과 개인정보 처리방침에 동의해야 합니다.</p>
-
                 <div class="login-block">
                     <button type="button" id="btn-login" class="secondary-btn">로그인</button>
                 </div>
+
+                <button type="button" id="btn-create" class="primary-btn">계정 만들기</button>
+                <div class="sns-section">
+                    <div class="sns-divider">
+                        <h5>SNS 간편 로그인</h5>
+                    </div>
+                    <div class="sns-buttons">
+                        <button type="button" class="sns-btn sns-btn--kakao kakao-login" title="카카오 로그인" aria-label="카카오 로그인">
+                            <img alt="카카오 로고" src="https://static.cdn.kmong.com/assets/icon/kakao-logo_v2.png?w=24" width="24" height="24" loading="lazy">
+                        </button>
+                        <button type="button" class="sns-btn sns-btn--naver naver-login" title="네이버 로그인" aria-label="네이버 로그인">
+                            <img alt="네이버 로고" src="https://static.cdn.kmong.com/assets/icon/naver-logo_v2.png?w=24" width="24" height="24" loading="lazy">
+                        </button>
+                        <button type="button" id="google-login" class="sns-btn sns-btn--google google-login" title="구글 로그인" aria-label="구글 로그인">
+                            <img alt="구글 로고" src="https://static.cdn.kmong.com/assets/icon/google-logo_v2.png?w=24" width="24" height="24" loading="lazy">
+                        </button>
+                        <button type="button" id="facebook-login" class="sns-btn sns-btn--facebook facebook-login" title="페이스북 로그인" aria-label="페이스북 로그인">
+                            <img alt="페이스북 로고" src="https://static.cdn.kmong.com/assets/icon/facebook-logo_v2.png?w=24" width="24" height="24" loading="lazy">
+                        </button>
+                    </div>
+                </div>
+                <p class="join-terms">가입하시려면 쿠키 사용을 포함해 이용약관과 개인정보 처리방침에 동의해야 합니다.</p>
             </div>
         </section>
     </main>
@@ -1227,34 +1197,8 @@
                 </svg>
             </button>
 
-            <div class="login-logo" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                    <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
-                </svg>
-            </div>
-
             <div class="login-inner">
-                <h1 id="loginModalTitle" class="login-title">X 로그인하기</h1>
-
-                <div class="login-social-list">
-                    <button  type="button" class="login-social-btn login-social-btn--image naver-login">
-                        <img src="/images/NAVER_login_KR/NAVER_login_Light_KR_green_center_H56.png" alt="Naver로 로그인하기" class="login-social-image">
-                    </button>
-
-                    <button type="button" class="login-social-btn login-social-btn--image kakao-login">
-                        <img src="/images/kakao_login/ko/kakao_login_medium_wide.png" alt="Kakao로 로그인하기" class="login-social-image">
-                    </button>
-
-                    <button type="button" id="login-facebook-login" class="login-social-btn login-social-btn--oauth facebook-login" aria-label="Facebook으로 로그인하기"></button>
-
-                    <button type="button" id="login-google-login" class="login-social-btn login-social-btn--oauth google-login" aria-label="Google로 로그인하기"></button>
-                </div>
-
-                <div class="divider" aria-hidden="true">
-                    <span></span>
-                    <b>또는</b>
-                    <span></span>
-                </div>
+                <h1 id="loginModalTitle" class="login-title">GlobalGates 로그인하기</h1>
 
                 <label class="input-wrap" for="loginIdentity">
                     <input id="loginIdentity" type="text" placeholder="휴대폰 번호 또는 이메일 주소" autocomplete="username" value="">
@@ -1263,6 +1207,21 @@
 
                 <button type="button" class="btn-primary" id="nextBtn" disabled>다음</button>
                 <button type="button" class="btn-secondary">비밀번호를 잊으셨나요?</button>
+                <div class="sns-section sns-section--modal">
+                    <div class="sns-divider">
+                        <h5>SNS 간편 로그인</h5>
+                    </div>
+                    <div class="sns-buttons">
+                        <button type="button" class="sns-btn sns-btn--kakao kakao-login" title="카카오 로그인" aria-label="카카오 로그인">
+                            <img alt="카카오 로고" src="https://static.cdn.kmong.com/assets/icon/kakao-logo_v2.png?w=24" width="24" height="24" loading="lazy">
+                        </button>
+                        <button type="button" class="sns-btn sns-btn--naver naver-login" title="네이버 로그인" aria-label="네이버 로그인">
+                            <img alt="네이버 로고" src="https://static.cdn.kmong.com/assets/icon/naver-logo_v2.png?w=24" width="24" height="24" loading="lazy">
+                        </button>
+                        <button type="button" id="login-google-login" class="sns-btn sns-btn--google google-login" title="구글 로그인" aria-label="구글 로그인"></button>
+                        <button type="button" id="login-facebook-login" class="sns-btn sns-btn--facebook facebook-login" title="페이스북 로그인" aria-label="페이스북 로그인"></button>
+                    </div>
+                </div>
 
                 <p class="signup-text">계정이 없으신가요? <a href="#">가입하기</a></p>
             </div>
@@ -1316,18 +1275,6 @@
             </div>
         </section>
     </div>
-    <script src="https://accounts.google.com/gsi/client" async></script>
-<!--    <script async defer crossorigin="anonymous"-->
-<!--            src="https:/conne/ct.facebook.net/ko_KR/sdk.js"></script>-->
-    <script>
-        var finished_rendering = function() {
-            console.log("finished rendering plugins");
-            var spinner = document.getElementById("spinner");
-            spinner.removeAttribute("style");
-            spinner.removeChild(spinner.childNodes[0]);
-        }
-        FB.Event.subscribe('xfbml.render', finished_rendering);
-    </script>
     <footer class="join-footer">2026 X Corp.</footer>
     <script src="/js/member/join/service.js"></script>
     <script src="/js/member/join/event.js"></script>

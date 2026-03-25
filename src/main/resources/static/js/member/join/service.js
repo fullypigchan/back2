@@ -33,6 +33,7 @@ const joinService = (() => {
             if (callback) callback(isAvaliable);
             if (!response.ok) {
                 const errorText = await response.text();
+                throw new Error(errorText || "Fetch error");
             }
         }
 

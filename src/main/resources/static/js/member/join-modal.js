@@ -1,12 +1,13 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-    const nextButton = document.querySelector(".next-button");
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modal-create");
+    const nextButton = modal?.querySelector(".next-button");
 
     const fields = [
         {
-            input: document.querySelector(".name-input"),
-            box: document.querySelector(".name-placeholder"),
-            label: document.querySelector(".name-text"),
-            errorHost: document.querySelector(".name-placeholder-wrap"),
+            input: modal?.querySelector(".name-input"),
+            box: modal?.querySelector(".name-placeholder"),
+            label: modal?.querySelector(".name-text"),
+            errorHost: modal?.querySelector(".name-placeholder-wrap"),
             shrink: (label) => {
                 if (!label) return;
                 label.style.fontSize = "12px";
@@ -21,10 +22,10 @@
             },
         },
         {
-            input: document.querySelector(".phone-input"),
-            box: document.querySelector(".phone-placeholder"),
-            label: document.querySelector(".phone-text"),
-            errorHost: document.querySelector(".phone-number-placeholder"),
+            input: modal?.querySelector(".phone-input"),
+            box: modal?.querySelector(".phone-placeholder"),
+            label: modal?.querySelector(".phone-text"),
+            errorHost: modal?.querySelector(".phone-number-placeholder"),
             shrink: (label) => {
                 if (!label) return;
                 label.style.fontSize = "12px";
@@ -39,10 +40,10 @@
             },
         },
         {
-            input: document.querySelector(".birth-date-input"),
-            box: document.querySelector(".birth-date-input"),
-            label: document.querySelector(".birth-date-text-input"),
-            errorHost: document.querySelector(".birth-date"),
+            input: modal?.querySelector(".birth-date-input"),
+            box: modal?.querySelector(".birth-date-input"),
+            label: modal?.querySelector(".birth-date-text-input"),
+            errorHost: modal?.querySelector(".birth-date"),
             shrink: (_, input) => {
                 if (!input) return;
                 input.classList.add("birth-focus-placeholder");
@@ -52,7 +53,7 @@
                 input.classList.remove("birth-focus-placeholder");
             },
         },
-    ].filter((f) => f.input && f.box);
+    ].filter((field) => field.input && field.box);
 
     const states = new WeakMap();
 
@@ -99,7 +100,10 @@
 
     const syncNextButton = () => {
         if (!nextButton) return;
-        const canNext = fields.every((field) => field.input.value.trim().length > 0);
+        const canNext = fields.every((field) => {
+            const value = field.input.value.trim();
+            return field.input.classList.contains("birth-date-input") ? value.length === 8 : value.length > 0;
+        });
         nextButton.style.opacity = canNext ? "1" : "0.5";
         nextButton.disabled = !canNext;
     };
@@ -165,11 +169,10 @@
 
     syncNextButton();
 
-    // 휴대폰/이메일 전환
-    const changeButton = document.querySelector(".change");
-    const replaceEmailText = document.querySelector(".replace-email");
-    const phoneLabelText = document.querySelector(".phone-text-in");
-    const phoneInput = document.querySelector(".phone-input");
+    const changeButton = modal?.querySelector(".change");
+    const replaceEmailText = modal?.querySelector(".replace-email");
+    const phoneLabelText = modal?.querySelector(".phone-text-in");
+    const phoneInput = modal?.querySelector(".phone-input");
 
     if (changeButton && replaceEmailText && phoneLabelText && phoneInput) {
         let useEmail = false;
@@ -196,19 +199,20 @@
             useEmail = !useEmail;
             phoneInput.value = "";
             syncPhoneEmailMode();
+            syncNextButton();
         });
     }
-    const closeButton = document.querySelector(".join-modal-header-close-button, .join-modal-close");
-    const modalRoot = document.querySelector(".join-modal, .join-modal-overlay");
+
+    const closeButton = modal?.querySelector(".join-modal-header-close-button, .join-modal-close");
+    const modalRoot = modal?.querySelector(".join-modal, .join-modal-overlay");
     if (closeButton && modalRoot) {
         closeButton.addEventListener("click", () => {
             modalRoot.style.display = "none";
         });
     }
 
-    // birth-date-input 8자 제한(숫자만)
-    const birthInput = document.querySelector(".birth-date-input");
-    const birthHost = document.querySelector(".birth-date");
+    const birthInput = modal?.querySelector(".birth-date-input");
+    const birthHost = modal?.querySelector(".birth-date");
     const birthState = birthInput ? states.get(birthInput) : null;
     if (birthInput) {
         birthInput.addEventListener("input", () => {
@@ -217,6 +221,7 @@
                 birthState.errorNode.classList.remove("show");
                 setBlue(birthInput);
             }
+            syncNextButton();
         });
     }
 

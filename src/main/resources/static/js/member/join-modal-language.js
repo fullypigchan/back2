@@ -1,4 +1,4 @@
-﻿const LANGUAGES = [
+const LANGUAGES = [
     { code: "en", label: "영어 - English" },
     { code: "ko", label: "한국어" },
     { code: "gu", label: "구자라트어 - ગુજરાતી" },
@@ -70,12 +70,20 @@
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-    const list = document.querySelector(".language-list");
-    if (!list) {
+    const modal = document.getElementById("modal-language");
+    const list = modal?.querySelector(".language-list");
+    const nextButton = modal?.querySelector(".next-button");
+    if (!list || !nextButton) {
         return;
     }
 
     let isExpanded = false;
+    const syncNextButton = () => {
+        const hasLanguage = Boolean(window.selectedLanguage);
+        nextButton.disabled = !hasLanguage;
+        nextButton.style.opacity = hasLanguage ? "1" : "0.5";
+        nextButton.style.cursor = hasLanguage ? "pointer" : "default";
+    };
 
     const fragment = document.createDocumentFragment();
 
@@ -146,5 +154,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             window.selectedLanguage = null;
         }
+
+        syncNextButton();
     });
+
+    window.selectedLanguage = null;
+    syncNextButton();
 });

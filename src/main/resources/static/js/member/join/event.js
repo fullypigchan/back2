@@ -144,6 +144,14 @@ let emailcheck = false;
 let phonecheck = false;
 const okMessage = "사용가능한 이메일입니다."
 const noMessage = "중복된 이메일입니다."
+identityInput.addEventListener("blur", (e) => {
+    if (identityInput.value.length === joinService.checkEmail()) {
+        emailcheck = true;
+        identityInput.style.borderColor = "green";
+        identityInput.nextElementSibling.textContent = okMessage;
+    }
+
+})
 
 
 

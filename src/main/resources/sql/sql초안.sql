@@ -227,6 +227,8 @@ constraint fk_post_reply_post foreign key(reply_post_id)
 references tbl_post(id)
 );
 
+drop table tbl_reply_product_rel;
+
 create table tbl_reply_product_rel (
 id              bigint generated always as identity primary key,
 reply_post_id   bigint not null,

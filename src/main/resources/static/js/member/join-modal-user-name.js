@@ -1,6 +1,7 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-    const wraps = document.querySelectorAll(".name-placeholder-wrap, .phone-number-placeholder");
-    const userIdInput = document.querySelector(".phone-number-placeholder .phone-input");
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modal-username");
+    const wraps = modal?.querySelectorAll(".name-placeholder-wrap, .phone-number-placeholder") || [];
+    const userIdInput = modal?.querySelector(".handle-input");
 
     wraps.forEach((wrap) => {
         const input = wrap.querySelector("input");
@@ -23,7 +24,7 @@
 
         input.addEventListener("input", () => {
             shrink(labelText);
-            updateNextButtonState(userIdInput);
+            updateNextButtonState(modal, userIdInput);
         });
 
         input.addEventListener("blur", () => {
@@ -33,10 +34,12 @@
             if (input.value.trim() === "" && !input.readOnly) {
                 expand(labelText);
             }
+
+            updateNextButtonState(modal, userIdInput);
         });
     });
 
-    updateNextButtonState(userIdInput);
+    updateNextButtonState(modal, userIdInput);
 });
 
 function shrink(labelText) {
@@ -51,22 +54,22 @@ function expand(labelText) {
     labelText.style.color = "rgb(83, 100, 113)";
 }
 
-function updateNextButtonState(input) {
-    const nextButton = document.querySelector(".next-button");
-    const nextText = document.querySelector(".next-button-wrap-in-text-next");
+function updateNextButtonState(modal, input) {
+    const nextButton = modal?.querySelector(".next-button");
+    const nextText = modal?.querySelector(".next-button-wrap-in-text-next");
 
     if (!input || !nextButton || !nextText) {
         return;
     }
 
     const hasUserId = input.value.trim() !== "";
-    nextText.textContent = hasUserId ? "\uB2E4\uC74C" : "\uAC74\uB108\uB6F0\uAE30";
+    nextText.textContent = "다음";
+    nextButton.disabled = !hasUserId;
     nextButton.style.backgroundColor = "rgb(15, 20, 25)";
     nextButton.style.opacity = hasUserId ? "1" : "0.5";
+    nextButton.style.cursor = hasUserId ? "pointer" : "default";
 }
 
-
-// 공통 X(닫기) 버튼 동작
 function bindJoinModalClose() {
     const closeButtons = document.querySelectorAll(".join-modal-header-close-button, .join-modal-close");
     if (!closeButtons.length) return;
