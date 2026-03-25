@@ -36,4 +36,11 @@ public interface PostMapper {
 
     //     검색한 게시글 총 개수
     public int selectTotalBySearch(@Param("search") PostSearch search);
+
+//    댓글 목록 조회 (특정 게시글의)
+    public List<PostDTO> selectRepliesByPostId(@Param("postId") Long postId, @Param("memberId") Long memberId);
+
+//    대댓글 목록 조회 (여러 댓글의 대댓글을 한번에)
+    public List<PostDTO> selectSubRepliesByParentIds(@Param("parentIds") List<Long> parentIds, @Param("memberId") Long memberId);
+
 }

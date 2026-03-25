@@ -4,7 +4,15 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>게시물 / X</title>
-    <link rel="stylesheet" href="../../static/css/post-detailed/post-detailed.css"/>
+    <link rel="stylesheet" href="/css/post-detailed/post-detailed.css"/>
+    <script th:inline="javascript">
+        const memberId = [[${memberId}]];
+        const postId = [[${post.id}]];
+        const postMemberId = [[${post.memberId}]];
+    </script>
+    <script src="/js/post-detailed/service.js"></script>
+    <script src="/js/post-detailed/event.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
 <div class="post-detail-shell" id="postDetail">
@@ -19,21 +27,23 @@
         </header>
 
         <section class="post-detail-thread" aria-label="게시물 상세">
-            <div class="post-detail-hero postCard" data-post-card data-post-id="101">
+            <div class="post-detail-hero postCard" data-post-card th:data-post-id="${post.id}" th:data-member-id="${post.memberId}">
                 <div class="post-detail-hero-top">
                     <div class="post-detail-profile">
-                        <div class="post-detail-avatar post-detail-avatar--brand"><span>T</span></div>
+                        <div th:if="${post.memberProfileFileName != null}" class="post-detail-avatar post-detail-avatar--image">
+                            <img th:src="${post.memberProfileFileName}" alt="프로필"/>
+                        </div>
+                        <div th:unless="${post.memberProfileFileName != null}" class="post-detail-avatar post-detail-avatar--brand">
+                            <span th:text="${post.memberNickname != null ? post.memberNickname.substring(0,1) : '?'}"></span>
+                        </div>
                         <div class="post-detail-profile-copy">
                             <div class="post-detail-name-row">
-                                <strong class="post-detail-name postName">Trending Bitcoin</strong>
-                                <svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img" class="post-detail-verified">
-                                    <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                </svg>
+                                <strong class="post-detail-name postName" th:text="${post.memberNickname ?: post.memberHandle}"></strong>
                             </div>
                             <div class="post-detail-handle-row">
-                                <span class="post-detail-handle postHandle">@TrendingBitcoin</span>
+                                <span class="post-detail-handle postHandle" th:text="${post.memberHandle}"></span>
                                 <span class="post-detail-handle-sep">·</span>
-                                <span class="post-detail-handle">2시간</span>
+                                <span class="post-detail-handle" th:text="${post.createdDatetime}"></span>
                             </div>
                         </div>
                     </div>
@@ -50,53 +60,52 @@
                 </div>
 
                 <div class="post-detail-body-copy">
-                    <p class="post-detail-body-text">BILLIONAIRE ARTHUR HAYES SAID <a href="#" class="post-detail-link">#BITCOIN</a>
-                        WILL SURGE AS THE FED PRINTS TO SAVE THE YEN</p>
-                    <p class="post-detail-body-text">HE'S CALLING FOR $575,000 THIS YEAR <span
-                            aria-hidden="true">🚀</span></p>
-                    <button class="post-detail-link-button" type="button">게시물 번역하기</button>
+                    <p class="post-detail-body-text" th:text="${post.postContent}"></p>
+                    <div th:if="${post.hashtags != null and !post.hashtags.isEmpty()}" class="postHashtags">
+                        <a th:each="tag : ${post.hashtags}" class="postHashtag"
+                           th:href="'/explore/search?keyword=' + ${tag.tagName}"
+                           th:text="'#' + ${tag.tagName}"></a>
+                    </div>
                 </div>
 
-                <div class="post-detail-media-grid">
-                    <img src="/static/images/main/KakaoTalk_20260310_145435590_01.jpg" alt="Arthur Hayes 사진"
-                         class="post-detail-media-image"/>
-                    <img src="/static/images/main/KakaoTalk_20260310_145435590_02.jpg" alt="상승 그래프 이미지"
-                         class="post-detail-media-image"/>
+                <div th:if="${post.postFiles != null and !post.postFiles.isEmpty()}" class="post-detail-media-grid">
+                    <th:block th:each="pf : ${post.postFiles}">
+                        <img th:src="${pf.filePath}" alt="첨부 이미지" class="post-detail-media-image"/>
+                    </th:block>
                 </div>
 
                 <div class="post-detail-meta">
-                    <span>오후 2:04 · 2026년 3월 12일</span>
-                    <span class="post-detail-meta-sep">·</span>
-                    <strong>4,354</strong>
-                    <span>조회수</span>
+                    <span th:text="${post.createdDatetime}"></span>
                 </div>
 
-                <div class="post-detail-actions tweet-action-bar" aria-label="27 답글, 146 마음, 2 북마크">
+                <div class="post-detail-actions tweet-action-bar">
                     <div class="post-detail-action-slot">
                         <button class="post-detail-action-button tweet-action-btn" type="button" data-testid="reply"
-                                aria-label="답글 27">
+                                th:attr="aria-label='답글 ' + ${post.replyCount}">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-1.08 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
+                                <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
                             </svg>
-                            <span class="tweet-action-count">27</span></button>
+                            <span class="tweet-action-count" th:text="${post.replyCount}">0</span></button>
                     </div>
                     <div class="post-detail-action-slot">
                         <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like"
-                                type="button" data-testid="like" aria-label="마음 146">
+                                th:classappend="${post.liked} ? ' active' : ''"
+                                type="button" data-testid="like">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
                                       data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                      d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path>
+                                      th:attr="d=${post.liked} ? 'M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z' : 'M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z'"></path>
                             </svg>
-                            <span class="tweet-action-count">146</span></button>
+                            <span class="tweet-action-count" th:text="${post.likeCount}">0</span></button>
                     </div>
                     <div class="post-detail-action-slot">
                         <button class="post-detail-action-button post-detail-action-button--bookmark tweet-action-btn tweet-action-btn--bookmark"
+                                th:classappend="${post.bookmarked} ? ' active' : ''"
                                 type="button" data-testid="bookmark" aria-label="북마크">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
                                       data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                      d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path>
+                                      th:attr="d=${post.bookmarked} ? 'M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z' : 'M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z'"></path>
                             </svg>
                         </button>
                     </div>
@@ -117,14 +126,16 @@
                 <div class="post-detail-inline-reply">
                     <div class="post-detail-inline-reply-context">
                         <button class="post-detail-inline-reply-context-button" type="button">
-                            <span class="post-detail-inline-reply-context-handle">@Semicon_player</span>님에게 보내는 답글
+                            <span class="post-detail-inline-reply-context-handle" th:text="${post.memberHandle}"></span>님에게 보내는 답글
                         </button>
                     </div>
 
                     <div class="post-detail-inline-reply-card tweet-modal__composer">
                         <div class="post-detail-inline-reply-avatar">
-                            <img src="/static/images/main/KakaoTalk_20260310_145435590_01.jpg" alt="내 프로필"
+                            <img th:if="${loginMember.fileName != null}" th:src="${loginMember.fileName}" alt="내 프로필"
                                  class="tweet-modal__avatar-image"/>
+                            <span th:unless="${loginMember.fileName != null}" class="tweet-modal__avatar-initial"
+                                  th:text="${loginMember.memberNickname != null ? loginMember.memberNickname.substring(0,1) : '?'}"></span>
                         </div>
                         <div class="post-detail-inline-reply-body tweet-modal__input-wrap">
                             <div class="composerField">
@@ -167,24 +178,6 @@
                                             </g>
                                         </svg>
                                         <span data-media-alt-label>설명 추가</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="tweet-modal__selected-product" data-selected-product hidden>
-                                <div class="selected-product__card">
-                                    <img class="selected-product__image" src="" alt="" data-selected-product-image>
-                                    <div class="selected-product__info">
-                                        <strong class="selected-product__name" data-selected-product-name></strong>
-                                        <span class="selected-product__price" data-selected-product-price></span>
-                                    </div>
-                                    <button type="button" class="selected-product__remove" aria-label="판매글 제거"
-                                            data-product-remove>
-                                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                            <g>
-                                                <path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
-                                            </g>
-                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -232,17 +225,6 @@
                                                     class="tweet-modal__file-input"
                                             />
                                         </div>
-                                        <button type="button" class="tweet-modal__tool-btn" aria-label="판매글 선택"
-                                                data-testid="productSelectButton">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                                <g>
-                                                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5S3.5 15.135 3.5 11z"></path>
-                                                </g>
-                                                <g>
-                                                    <path d="M7 9h10v1.5H7zm0 3h7v1.5H7z"></path>
-                                                </g>
-                                            </svg>
-                                        </button>
                                         <button type="button" class="tweet-modal__tool-btn" aria-label="이모티콘 추가하기"
                                                 data-testid="emojiButton" aria-expanded="false" aria-haspopup="menu">
                                             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -300,85 +282,6 @@
                             </div>
 
                             <!-- 상품 선택 서브뷰 -->
-                            <div class="tweet-modal__product-view" data-product-select-modal hidden>
-                                <div class="tweet-modal__product-modal" role="dialog" aria-modal="true"
-                                     aria-labelledby="postDetailProductTitle">
-                                    <div class="draft-panel__header">
-                                        <button type="button" class="draft-panel__back" data-product-select-close
-                                                aria-label="돌아가기">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                                <g>
-                                                    <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
-                                                </g>
-                                            </svg>
-                                        </button>
-                                        <h2 id="postDetailProductTitle" class="draft-panel__title">판매글 선택하기</h2>
-                                        <button type="button" class="draft-panel__action" data-product-select-complete
-                                                disabled>완료
-                                        </button>
-                                    </div>
-                                    <div class="draft-panel__content">
-                                        <div class="draft-panel__list" data-product-select-list>
-                                            <button type="button"
-                                                    class="draft-panel__item draft-panel__item--selectable"
-                                                    data-product-id="1" data-product-name="상품 이름 1"
-                                                    data-product-price="₩50,000"
-                                                    data-product-image="../../static/images/main/global-gates-logo.png"
-                                                    aria-pressed="false">
-                                                <span class="draft-panel__checkbox"><svg viewBox="0 0 24 24"
-                                                                                         aria-hidden="true"><g><path
-                                                        d="M9 20c-.264 0-.518-.104-.707-.293l-4.785-4.785 1.414-1.414L9 17.586 19.072 7.5l1.42 1.416L9.708 19.7c-.188.19-.442.3-.708.3z"></path></g></svg></span>
-                                                <img class="draft-panel__avatar"
-                                                     src="../../static/images/main/global-gates-logo.png" alt="상품 이미지">
-                                                <span class="draft-panel__item-body">
-                                                        <span class="draft-panel__text">상품 이름 1</span>
-                                                        <span class="draft-panel__meta">#부품 #전자</span>
-                                                        <span class="draft-panel__date">₩50,000 · 100개</span>
-                                                    </span>
-                                            </button>
-                                            <button type="button"
-                                                    class="draft-panel__item draft-panel__item--selectable"
-                                                    data-product-id="2" data-product-name="상품 이름 2"
-                                                    data-product-price="₩30,000"
-                                                    data-product-image="../../static/images/main/global-gates-logo.png"
-                                                    aria-pressed="false">
-                                                <span class="draft-panel__checkbox"><svg viewBox="0 0 24 24"
-                                                                                         aria-hidden="true"><g><path
-                                                        d="M9 20c-.264 0-.518-.104-.707-.293l-4.785-4.785 1.414-1.414L9 17.586 19.072 7.5l1.42 1.416L9.708 19.7c-.188.19-.442.3-.708.3z"></path></g></svg></span>
-                                                <img class="draft-panel__avatar"
-                                                     src="../../static/images/main/global-gates-logo.png" alt="상품 이미지">
-                                                <span class="draft-panel__item-body">
-                                                        <span class="draft-panel__text">상품 이름 2</span>
-                                                        <span class="draft-panel__meta">#부품 #기계</span>
-                                                        <span class="draft-panel__date">₩30,000 · 50개</span>
-                                                    </span>
-                                            </button>
-                                            <button type="button"
-                                                    class="draft-panel__item draft-panel__item--selectable"
-                                                    data-product-id="3" data-product-name="상품 이름 3"
-                                                    data-product-price="₩80,000"
-                                                    data-product-image="../../static/images/main/global-gates-logo.png"
-                                                    aria-pressed="false">
-                                                <span class="draft-panel__checkbox"><svg viewBox="0 0 24 24"
-                                                                                         aria-hidden="true"><g><path
-                                                        d="M9 20c-.264 0-.518-.104-.707-.293l-4.785-4.785 1.414-1.414L9 17.586 19.072 7.5l1.42 1.416L9.708 19.7c-.188.19-.442.3-.708.3z"></path></g></svg></span>
-                                                <img class="draft-panel__avatar"
-                                                     src="../../static/images/main/global-gates-logo.png" alt="상품 이미지">
-                                                <span class="draft-panel__item-body">
-                                                        <span class="draft-panel__text">상품 이름 3</span>
-                                                        <span class="draft-panel__meta">#부품 #소재</span>
-                                                        <span class="draft-panel__date">₩80,000 · 200개</span>
-                                                    </span>
-                                            </button>
-                                        </div>
-                                        <div class="draft-panel__empty" data-product-empty hidden>
-                                            <p class="draft-panel__empty-title">등록된 상품이 없습니다</p>
-                                            <p class="draft-panel__empty-body">마이페이지에서 상품을 먼저 등록해 주세요.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- 사용자 태그 서브뷰 -->
                             <div class="tweet-modal__tag-view" data-tag-modal hidden>
                                 <div class="tweet-modal__tag-modal" role="dialog" aria-modal="true"
@@ -527,352 +430,59 @@
 
 
             <section class="post-detail-replies" id="postDetailReplies" aria-label="답글 목록">
-                <div class="post-detail-thread-group" aria-label="연결된 답글 스레드">
-                    <div class="post-detail-thread-item post-detail-reply-card postCard" data-post-card
-                         data-post-id="201">
-                        <div class="post-detail-avatar post-detail-avatar--dark"><span>지</span></div>
-                        <div class="post-detail-reply-content">
-                            <header class="post-detail-reply-header">
-                                <div class="post-detail-reply-identity"><strong class="postName">지옥변곡점적</strong><span
-                                        class="postHandle">@hell_inflection</span><span>·</span><span>3월 11일</span>
-                                </div>
-                                <div class="post-detail-more-wrap">
-                                    <button class="post-detail-icon-button post-detail-more-trigger" type="button"
-                                            aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </header>
-                            <p class="post-detail-reply-text">유닉덕!</p>
-                            <div class="post-detail-actions post-detail-actions--reply"
-                                 aria-label="답글 1개, 마음 13개, 조회수 2400회, 댓글 액션">
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        data-testid="reply" aria-label="답글 1">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">1</span></button>
-                                <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like"
-                                        type="button" data-testid="like" aria-label="마음 13">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">13</span></button>
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        aria-label="조회수 2400">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">2.4천</span></button>
-                                <div class="post-detail-action-right">
-                                    <button class="post-detail-action-button post-detail-action-button--bookmark tweet-action-btn tweet-action-btn--bookmark"
-                                            type="button" data-testid="bookmark" aria-label="북마크">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                                  data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                                  d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path>
-                                        </svg>
-                                    </button>
-                                    <button class="post-detail-action-button tweet-action-btn tweet-action-btn--share"
-                                            type="button" aria-label="댓글 공유하기" aria-haspopup="menu"
-                                            aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="post-detail-thread-item post-detail-reply-card postCard post-detail-thread-item--media"
-                         data-post-card data-post-id="202">
-                        <div class="post-detail-avatar post-detail-avatar--teal"><span>M</span></div>
-                        <div class="post-detail-reply-content">
-                            <header class="post-detail-reply-header">
-                                <div class="post-detail-reply-identity"><strong class="postName">Mooni
-                                    Insight</strong><span class="postHandle">@Semicon_player</span><span>·</span><span>3월 11일</span>
-                                </div>
-                                <div class="post-detail-more-wrap">
-                                    <button class="post-detail-icon-button post-detail-more-trigger" type="button"
-                                            aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </header>
-                            <p class="post-detail-reply-text">닉 부장 발렌타인 맞추야?</p>
-                            <img src="../../static/images/main/ad.png" alt="답글 이미지 예시"
-                                 class="post-detail-thread-media"/>
-                            <div class="post-detail-actions post-detail-actions--reply"
-                                 aria-label="답글 2개, 마음 11개, 조회수 27000회, 댓글 액션">
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        data-testid="reply" aria-label="답글 2">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">2</span></button>
-                                <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like"
-                                        type="button" data-testid="like" aria-label="마음 11">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">11</span></button>
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        aria-label="조회수 27000">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">2.7천</span></button>
-                                <div class="post-detail-action-right">
-                                    <button class="post-detail-action-button post-detail-action-button--bookmark tweet-action-btn tweet-action-btn--bookmark"
-                                            type="button" data-testid="bookmark" aria-label="북마크">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                                  data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                                  d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path>
-                                        </svg>
-                                    </button>
-                                    <button class="post-detail-action-button tweet-action-btn tweet-action-btn--share"
-                                            type="button" aria-label="댓글 공유하기" aria-haspopup="menu"
-                                            aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="post-detail-thread-item post-detail-reply-card postCard" data-post-card
-                         data-post-id="203">
-                        <div class="post-detail-avatar post-detail-avatar--dark"><span>지</span></div>
-                        <div class="post-detail-reply-content">
-                            <header class="post-detail-reply-header">
-                                <div class="post-detail-reply-identity"><strong class="postName">지옥변곡점적</strong><span
-                                        class="postHandle">@hell_inflection</span><span>·</span><span>3월 11일</span>
-                                </div>
-                                <div class="post-detail-more-wrap">
-                                    <button class="post-detail-icon-button post-detail-more-trigger" type="button"
-                                            aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path>
-                                        </svg>
-                                    </button>
-                                    <div class="post-detail-more-menu" role="menu" hidden>
-                                        <button type="button" role="menuitem">게시물 신고하기</button>
-                                    </div>
-                                </div>
-                            </header>
-                            <p class="post-detail-reply-text">PLTZR?? ㅋㅋㅋㅋ</p>
-                            <div class="post-detail-actions post-detail-actions--reply"
-                                 aria-label="답글 1개, 마음 4개, 조회수 1100회, 댓글 액션">
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        data-testid="reply" aria-label="답글 1">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">1</span></button>
-                                <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like"
-                                        type="button" data-testid="like" aria-label="마음 4">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">4</span></button>
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        aria-label="조회수 1100">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">1.1천</span></button>
-                                <div class="post-detail-action-right">
-                                    <button class="post-detail-action-button post-detail-action-button--bookmark tweet-action-btn tweet-action-btn--bookmark"
-                                            type="button" data-testid="bookmark" aria-label="북마크">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                                  data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                                  d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path>
-                                        </svg>
-                                    </button>
-                                    <button class="post-detail-action-button tweet-action-btn tweet-action-btn--share"
-                                            type="button" aria-label="댓글 공유하기" aria-haspopup="menu"
-                                            aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="post-detail-thread-item post-detail-reply-card postCard" data-post-card
-                         data-post-id="204">
-                        <div class="post-detail-avatar post-detail-avatar--teal"><span>M</span></div>
-                        <div class="post-detail-reply-content">
-                            <header class="post-detail-reply-header">
-                                <div class="post-detail-reply-identity"><strong class="postName">Mooni
-                                    Insight</strong><span class="postHandle">@Semicon_player</span><span>·</span><span>3월 11일</span>
-                                </div>
-                                <div class="post-detail-more-wrap">
-                                    <button class="post-detail-icon-button post-detail-more-trigger" type="button"
-                                            aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path>
-                                        </svg>
-                                    </button>
-                                    <div class="post-detail-more-menu" role="menu" hidden>
-                                        <button type="button" role="menuitem">게시물 신고하기</button>
-                                    </div>
-                                </div>
-                            </header>
-                            <p class="post-detail-reply-text">ㅋㅋㅋㅋㅋㅋㅋㅋ</p>
-                            <div class="post-detail-actions post-detail-actions--reply"
-                                 aria-label="답글 0개, 마음 2개, 조회수 523회, 댓글 액션">
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        data-testid="reply" aria-label="답글 0">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">0</span></button>
-                                <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like"
-                                        type="button" data-testid="like" aria-label="마음 2">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                              d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">2</span></button>
-                                <button class="post-detail-action-button tweet-action-btn" type="button"
-                                        aria-label="조회수 523">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path>
-                                    </svg>
-                                    <span class="tweet-action-count">523</span></button>
-                                <div class="post-detail-action-right">
-                                    <button class="post-detail-action-button post-detail-action-button--bookmark tweet-action-btn tweet-action-btn--bookmark"
-                                            type="button" data-testid="bookmark" aria-label="북마크">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                                  data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                                  d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path>
-                                        </svg>
-                                    </button>
-                                    <button class="post-detail-action-button tweet-action-btn tweet-action-btn--share"
-                                            type="button" aria-label="댓글 공유하기" aria-haspopup="menu"
-                                            aria-expanded="false">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="post-detail-reply-card postCard" data-post-card data-post-id="205">
-                    <div class="post-detail-avatar post-detail-avatar--light"><span>나</span></div>
-                    <div class="post-detail-reply-content">
-                        <header class="post-detail-reply-header">
-                            <div class="post-detail-reply-identity"><strong class="postName">나이스</strong><span
-                                    class="postHandle">@niceshot_studio</span><span>·</span><span>3월 11일</span></div>
-                            <div class="post-detail-more-wrap">
-                                <button class="post-detail-icon-button post-detail-more-trigger" type="button"
-                                        aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </header>
-                        <p class="post-detail-reply-text">이 밈 짤은 진짜 오래 가겠다.</p>
-                        <div class="post-detail-actions post-detail-actions--reply"
-                             aria-label="답글 0개, 마음 9개, 조회수 781회, 댓글 액션">
-                            <button class="post-detail-action-button tweet-action-btn" type="button" data-testid="reply"
-                                    aria-label="답글 0">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
-                                </svg>
-                                <span class="tweet-action-count">0</span></button>
-                            <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like"
-                                    type="button" data-testid="like" aria-label="마음 9">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                          data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                          d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path>
-                                </svg>
-                                <span class="tweet-action-count">9</span></button>
-                            <button class="post-detail-action-button tweet-action-btn" type="button"
-                                    aria-label="조회수 781">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path>
-                                </svg>
-                                <span class="tweet-action-count">781</span></button>
-                            <div class="post-detail-action-right">
-                                <button class="post-detail-action-button post-detail-action-button--bookmark tweet-action-btn tweet-action-btn--bookmark"
-                                        type="button" data-testid="bookmark" aria-label="북마크">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                              data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                              d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path>
-                                    </svg>
-                                </button>
-                                <button class="post-detail-action-button tweet-action-btn tweet-action-btn--share"
-                                        type="button" aria-label="댓글 공유하기" aria-haspopup="menu" aria-expanded="false">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </section>
-        </section>
         </section>
     </main>
 </div>
+<!-- 모달/레이어 영역 -->
 <div class="layers-dropdown-container" id="postDetailMoreDropdown" hidden>
     <div class="layers-overlay"></div>
     <div class="layers-dropdown-inner">
         <div role="menu" class="dropdown-menu" id="postDetailMoreMenu">
             <div>
                 <div class="dropdown-inner" data-testid="Dropdown">
-                    <button type="button" role="menuitem" class="menu-item menu-item--follow-toggle"
-                            id="postDetailMoreFollow">
+                    <!-- 내 게시물: 수정/삭제 -->
+                    <div id="postDetailMoreOwner" style="display:none;">
+                        <button type="button" role="menuitem" class="menu-item menu-item--edit" id="postDetailMoreEdit">
                             <span class="menu-item__icon">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><g><path id="postDetailMoreFollowIconPath"
-                                                                                     d="M10 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM6 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4zm4 7c-3.053 0-5.563 1.193-7.443 3.596l1.548 1.207C5.573 15.922 7.541 15 10 15s4.427.922 5.895 2.803l1.548-1.207C15.563 14.193 13.053 13 10 13zm8-6V5h-3V3h-2v2h-3v2h3v3h2V7h3z"></path></g></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></g></svg>
                             </span>
-                        <span class="menu-item__label" id="postDetailMoreFollowLabel">@user 님 팔로우하기</span>
-                    </button>
-                    <button type="button" role="menuitem" class="menu-item menu-item--block" id="postDetailMoreBlock"
-                            data-testid="block">
+                            <span class="menu-item__label">게시물 수정하기</span>
+                        </button>
+                        <button type="button" role="menuitem" class="menu-item menu-item--delete" id="postDetailMoreDelete">
                             <span class="menu-item__icon">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><g><path
-                                        d="M12 3.75c-4.55 0-8.25 3.69-8.25 8.25 0 1.92.66 3.68 1.75 5.08L17.09 5.5C15.68 4.4 13.92 3.75 12 3.75zm6.5 3.17L6.92 18.5c1.4 1.1 3.16 1.75 5.08 1.75 4.56 0 8.25-3.69 8.25-8.25 0-1.92-.65-3.68-1.75-5.08zM1.75 12C1.75 6.34 6.34 1.75 12 1.75S22.25 6.34 22.25 12 17.66 22.25 12 22.25 1.75 17.66 1.75 12z"></path></g></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"></path></g></svg>
                             </span>
-                        <span class="menu-item__label" id="postDetailMoreBlockLabel">@user 님 차단하기</span>
-                    </button>
-                    <button type="button" role="menuitem" class="menu-item menu-item--report" id="postDetailMoreReport"
-                            data-testid="report">
-                            <span class="menu-item__icon">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><g><path
-                                        d="M3 2h18.61l-3.5 7 3.5 7H5v6H3V2zm2 12h13.38l-2.5-5 2.5-5H5v10z"></path></g></svg>
-                            </span>
-                        <span class="menu-item__label">게시물 신고하기</span>
-                    </button>
+                            <span class="menu-item__label">게시물 삭제하기</span>
+                        </button>
+                    </div>
+                    <!-- 남의 게시물: 팔로우/차단/신고 -->
+                    <div id="postDetailMoreOther" style="display:none;">
+                        <button type="button" role="menuitem" class="menu-item menu-item--follow-toggle"
+                                id="postDetailMoreFollow">
+                                <span class="menu-item__icon">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><g><path id="postDetailMoreFollowIconPath"
+                                                                                         d="M10 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM6 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4zm4 7c-3.053 0-5.563 1.193-7.443 3.596l1.548 1.207C5.573 15.922 7.541 15 10 15s4.427.922 5.895 2.803l1.548-1.207C15.563 14.193 13.053 13 10 13zm8-6V5h-3V3h-2v2h-3v2h3v3h2V7h3z"></path></g></svg>
+                                </span>
+                            <span class="menu-item__label" id="postDetailMoreFollowLabel">@user 님 팔로우하기</span>
+                        </button>
+                        <button type="button" role="menuitem" class="menu-item menu-item--block" id="postDetailMoreBlock"
+                                data-testid="block">
+                                <span class="menu-item__icon">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><g><path
+                                            d="M12 3.75c-4.55 0-8.25 3.69-8.25 8.25 0 1.92.66 3.68 1.75 5.08L17.09 5.5C15.68 4.4 13.92 3.75 12 3.75zm6.5 3.17L6.92 18.5c1.4 1.1 3.16 1.75 5.08 1.75 4.56 0 8.25-3.69 8.25-8.25 0-1.92-.65-3.68-1.75-5.08zM1.75 12C1.75 6.34 6.34 1.75 12 1.75S22.25 6.34 22.25 12 17.66 22.25 12 22.25 1.75 17.66 1.75 12z"></path></g></svg>
+                                </span>
+                            <span class="menu-item__label" id="postDetailMoreBlockLabel">@user 님 차단하기</span>
+                        </button>
+                        <button type="button" role="menuitem" class="menu-item menu-item--report" id="postDetailMoreReport"
+                                data-testid="report">
+                                <span class="menu-item__icon">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><g><path
+                                            d="M3 2h18.61l-3.5 7 3.5 7H5v6H3V2zm2 12h13.38l-2.5-5 2.5-5H5v10z"></path></g></svg>
+                                </span>
+                            <span class="menu-item__label">게시물 신고하기</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1381,9 +991,7 @@
 </div>
 
 <div id="layers" aria-hidden="true"></div>
-<!-- 이모지 라이브러리 -->
-<script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
-<script src="../../static/js/post-detailed/event.js"></script>
+
 </body>
 </html>
 

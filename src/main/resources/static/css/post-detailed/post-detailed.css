@@ -259,6 +259,20 @@ a {
     white-space: pre-line;
 }
 
+a.postHashtag {
+    font-size: 11px;
+    color: #1d9bf0;
+}
+
+div.postHashtags {
+    font-size: 11px;
+    color: #1d9bf0;
+    display: flex;
+    gap: 3px;
+    margin-bottom: 4px;
+    margin-top: 8px;
+}
+
 .post-detail-body-text + .post-detail-body-text {
     margin-top: 16px;
 }
@@ -1363,6 +1377,11 @@ a {
 .post-detail-thread-item .post-detail-avatar {
     position: relative;
     z-index: 1;
+}
+
+.post-detail-reply-card--sub {
+    margin-left: 40px;
+    border-left: 2px solid #2f3336;
 }
 
 .post-detail-reply-card:hover {

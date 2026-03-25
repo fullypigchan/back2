@@ -1,19 +1,21 @@
 package com.app.globalgates.controller.main;
 
 import com.app.globalgates.auth.JwtTokenProvider;
+import com.app.globalgates.dto.BlockDTO;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.dto.PostDTO;
+import com.app.globalgates.dto.ReportDTO;
+import com.app.globalgates.service.BlockService;
 import com.app.globalgates.service.MemberService;
 import com.app.globalgates.service.PostService;
+import com.app.globalgates.service.ReportService;
 import com.app.globalgates.service.S3Service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -28,6 +30,27 @@ public class MainController {
     private final S3Service s3Service;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
+    private final BlockService blockService;
+    private final ReportService reportService;
+
+//    메인 테스트 페이지
+    @GetMapping("/maintest")
+    public String goToMainTest(HttpServletRequest request, Model model) {
+        String token = jwtTokenProvider.parseTokenFromHeader(request);
+        String loginId = jwtTokenProvider.getUsername(token);
+        MemberDTO member = memberService.getMember(loginId);
+
+        if (member.getFileName() != null && !member.getFileName().isEmpty()) {
+            try {
+                member.setFileName(s3Service.getPresignedUrl(member.getFileName(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                member.setFileName(null);
+            }
+        }
+
+        model.addAttribute("member", member);
+        return "main/maintest";
+    }
 
 //    메인 페이지
     @GetMapping("/main")
@@ -50,7 +73,7 @@ public class MainController {
 
 //    게시글 상세 페이지
     @GetMapping("/post/detail/{id}")
-    public String goToPostDetail(@PathVariable Long id, @RequestParam Long memberId, Model model) {
+    public String goToPostDetail(@PathVariable Long id, @RequestParam Long memberId, HttpServletRequest request, Model model) {
         PostDTO postDTO = postService.getDetail(id, memberId);
         postDTO.getPostFiles().forEach(pf -> {
             try {
@@ -59,8 +82,43 @@ public class MainController {
                 throw new RuntimeException("Presigned URL 생성 실패", e);
             }
         });
+
+        String token = jwtTokenProvider.parseTokenFromHeader(request);
+        String loginId = jwtTokenProvider.getUsername(token);
+        MemberDTO loginMember = memberService.getMember(loginId);
+        if (loginMember.getFileName() != null && !loginMember.getFileName().isEmpty()) {
+            try {
+                loginMember.setFileName(s3Service.getPresignedUrl(loginMember.getFileName(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                loginMember.setFileName(null);
+            }
+        }
+
         model.addAttribute("post", postDTO);
+        model.addAttribute("memberId", memberId);
+        model.addAttribute("loginMember", loginMember);
         return "post-detailed/post-detailed";
+    }
+
+//    상세에서 차단하면 메인으로
+    @PostMapping("/post/detail/block")
+    public RedirectView blockFromDetail(BlockDTO blockDTO) {
+        blockService.block(blockDTO);
+        return new RedirectView("/main/main");
+    }
+
+//    상세에서 신고하면 메인으로
+    @PostMapping("/post/detail/report")
+    public RedirectView reportFromDetail(ReportDTO reportDTO) {
+        reportService.report(reportDTO);
+        return new RedirectView("/main/main");
+    }
+
+//    상세에서 삭제하면 메인으로
+    @PostMapping("/post/detail/delete/{id}")
+    public RedirectView deleteFromDetail(@PathVariable Long id) {
+        postService.delete(id);
+        return new RedirectView("/main/main");
     }
 
 //    S3 Presigned URL 변환

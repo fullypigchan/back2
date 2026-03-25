@@ -15,6 +15,7 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=5edccf3b451ef7d32d5c833781ba22dc&libraries=services"></script>
     <script src="/js/main/event.js"></script>
     <script src="/js/main/service.js"></script>
     <script src="/js/main/layout.js"></script>
@@ -292,33 +293,10 @@
                 </div>
                 <div class="tweet-modal__location-search">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="tweet-modal__location-search-icon"><g><path d="M10.5 3.75c-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c1.55 0 2.977-.522 4.114-1.4l4.893 4.893 1.06-1.06-4.892-4.893a6.714 6.714 0 001.4-4.114c0-3.728-3.022-6.75-6.75-6.75zm-5.25 6.75c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25-2.35 5.25-5.25 5.25-5.25-2.35-5.25-5.25z"></path></g></svg>
-                    <input type="search" class="tweet-modal__location-search-input" data-location-search placeholder="위치 검색" />
+                    <input type="text" class="tweet-modal__location-search-input" data-location-search placeholder="위치 검색" />
+                    <button type="button" class="tweet-modal__location-search-btn" data-location-search-btn>검색</button>
                 </div>
                 <div class="tweet-modal__location-list" data-location-list>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 서초구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 강남구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 송파구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 광진구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 동작구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 중구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -498,9 +476,6 @@
                             </button>
                             <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime" multiple class="tweet-modal__file-input" />
                         </div>
-                        <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--product">
-                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5S3.5 15.135 3.5 11z"></path></g><g><path d="M7 9h10v1.5H7zm0 3h7v1.5H7z"></path></g></svg>
-                        </button>
                         <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--emoji">
                             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm6 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm-8.071 3.971c.307-.298.771-.397 1.188-.253C9.07 16.154 10.52 16.75 12 16.75s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g></svg>
                         </button>
@@ -545,34 +520,11 @@
                 <!-- 위치 검색 입력 영역 -->
                 <div class="tweet-modal__location-search">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="tweet-modal__location-search-icon"><g><path d="M10.5 3.75c-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c1.55 0 2.977-.522 4.114-1.4l4.893 4.893 1.06-1.06-4.892-4.893a6.714 6.714 0 001.4-4.114c0-3.728-3.022-6.75-6.75-6.75zm-5.25 6.75c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25-2.35 5.25-5.25 5.25-5.25-2.35-5.25-5.25z"></path></g></svg>
-                    <input type="search" class="tweet-modal__location-search-input" data-location-search placeholder="위치 검색" />
+                    <input type="text" class="tweet-modal__location-search-input" data-location-search placeholder="위치 검색" />
+                    <button type="button" class="tweet-modal__location-search-btn" data-location-search-btn>검색</button>
                 </div>
                 <!-- 위치 목록: 서버 렌더링 시 같은 구조를 반복해서 넣으면 된다 -->
                 <div class="tweet-modal__location-list" data-location-list>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 서초구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 강남구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 송파구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 광진구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 동작구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item">
-                        <span class="tweet-modal__location-item-label">대한민국 중구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
                 </div>
             </div>
         </div><!-- /.tweet-modal__location-view -->
@@ -698,25 +650,6 @@
                 </div>
             </div>
         </div><!-- /.tweet-modal__draft-view -->
-        <!-- 판매글 선택 서브뷰: compose view를 숨기고 이 블록을 대신 표시한다 -->
-        <div class="tweet-modal__product-view off" data-product-select-modal>
-            <div class="draft-panel__header">
-                <button type="button" class="draft-panel__back" data-product-select-close>
-                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g></svg>
-                </button>
-                <h2 class="draft-panel__title">판매글 선택하기</h2>
-                <button type="button" class="draft-panel__action" data-product-select-complete disabled>완료</button>
-            </div>
-            <div class="draft-panel__content">
-                <div class="draft-panel__list" data-product-select-list>
-                    <!-- JS에서 동적으로 상품 목록 렌더링 -->
-                </div>
-                <div class="draft-panel__empty off" data-product-empty>
-                    <p class="draft-panel__empty-title">등록된 상품이 없습니다</p>
-                    <p class="draft-panel__empty-body">마이페이지에서 상품을 먼저 등록해 주세요.</p>
-                </div>
-            </div>
-        </div>
     </div><!-- /.tweet-modal -->
 </div><!-- /.tweet-modal-overlay -->
 <nav class="mobileBar" id="mobileBar">
@@ -922,6 +855,12 @@
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-bnwqim r-lrvibr r-m6rgpd r-18jsvk2 r-1q142lx"><g><path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"></path></g></svg>
                                     </span>
                             <span class="menu-item__label">Chat으로 전송하기</span>
+                        </button>
+                        <button class="menu-item share-menu-item share-menu-item--bookmark">
+                                    <span class="menu-item__icon share-menu-item__icon">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 3V0h2v3h3v2h-3v3h-2V5h-3V3zm-7.5 1a.5.5 0 00-.5.5V7h3.5A2.5 2.5 0 0116 9.5v3.48l3 2.1V11h2v7.92l-5-3.5v7.26l-6.5-3.54L3 22.68V9.5A2.5 2.5 0 015.5 7H8V4.5A2.5 2.5 0 0110.5 2H12v2zm-5 5a.5.5 0 00-.5.5v9.82l4.5-2.46 4.5 2.46V9.5a.5.5 0 00-.5-.5z"></path></svg>
+                                    </span>
+                            <span class="menu-item__label">폴더에 북마크 추가하기</span>
                         </button>
                     </div>
                 </div>

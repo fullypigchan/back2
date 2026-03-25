@@ -30,6 +30,7 @@ public class MainAPIController {
     private final ReportService reportService;
     private final S3Service s3Service;
     private final AdvertisementService advertisementService;
+    private final PostTempService postTempService;
 
 //    피드에 광고
     @GetMapping("/ads")
@@ -61,10 +62,12 @@ public class MainAPIController {
     @PostMapping("/posts/write")
     public void writePost(PostDTO postDTO,
                           @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
-        log.info("게시글 작성 — memberId: {}, content: {}", postDTO.getMemberId(), postDTO.getPostContent());
+        log.info("게시글 작성됐나요? 작성자(내아디)(memberId)는: {}, 내용은(content): {}", postDTO.getMemberId(), postDTO.getPostContent());
         postService.writePost(postDTO);
+        log.info("ㅇㅇ됨");
 
         if (files != null && !files.isEmpty()) {
+            log.info("파일인식함");
             String todayPath = postService.getTodayPath();
             List<String> uploadedKeys = new ArrayList<>();
 
@@ -73,6 +76,7 @@ public class MainAPIController {
                     String s3Key = s3Service.uploadFile(file, todayPath);
                     uploadedKeys.add(s3Key);
                     postService.saveFile(postDTO.getId(), file, s3Key);
+                    log.info("파일들어옴");
                 }
             } catch (Exception e) {
                 uploadedKeys.forEach(s3Service::deleteFile);
@@ -115,18 +119,26 @@ public class MainAPIController {
 //    댓글 작성
     @PostMapping("/posts/{postId}/replies")
     public void writeReply(@PathVariable Long postId,
-                           @RequestBody PostDTO postDTO,
-                           @RequestParam(required = false) Long productPostId) {
+                           @RequestBody PostDTO postDTO) {
         log.info("댓글 작성 — postId: {}, memberId: {}, content: {}", postId, postDTO.getMemberId(), postDTO.getPostContent());
         postDTO.setReplyPostId(postId);
-        postService.writeReply(postDTO, productPostId);
+        postService.writeReply(postDTO);
+    }
+
+//    댓글 목록
+    @GetMapping("/posts/{postId}/replies")
+    public List<PostDTO> getReplies(@PathVariable Long postId, @RequestParam Long memberId) {
+        log.info("댓글목록조회함 — postId: {}, memberId: {}", postId, memberId);
+        List<PostDTO> replies = postService.getReplies(postId, memberId);
+        replies.forEach(reply -> convertPostFilesUrl(reply));
+        return replies;
     }
 
 
 //    전문가 목록 조회
     @GetMapping("/experts/list/{page}")
     public ExpertWithPagingDTO getExpertList(@PathVariable int page, @RequestParam Long memberId) {
-        log.info("전문가 목록 조회 — page: {}, memberId: {}", page, memberId);
+        log.info("전문가 목록 조회하기 page: {}, memberId: {}", page, memberId);
         return expertService.getList(page, memberId);
     }
 
@@ -134,14 +146,14 @@ public class MainAPIController {
 //    좋아요 추가
     @PostMapping("/likes")
     public void addLike(@RequestBody PostLikeDTO postLikeDTO) {
-        log.info("좋아요 누름 — memberId: {}, postId: {}", postLikeDTO.getMemberId(), postLikeDTO.getPostId());
+        log.info("좋아요 누름~ memberId: {}, postId: {}", postLikeDTO.getMemberId(), postLikeDTO.getPostId());
         postLikeService.addLike(postLikeDTO);
     }
 
 //    좋아요 떼기
     @PostMapping("/likes/members/{memberId}/posts/{postId}/delete")
     public void deleteLike(@PathVariable Long memberId, @PathVariable Long postId) {
-        log.info("좋아요 뗌 — memberId: {}, postId: {}", memberId, postId);
+        log.info("좋아요 뗌~ memberId: {}, postId: {}", memberId, postId);
         postLikeService.deleteLike(memberId, postId);
     }
 
@@ -149,14 +161,14 @@ public class MainAPIController {
 //    검색
     @GetMapping("/search/members")
     public List<MemberDTO> searchMembers(@RequestParam String keyword) {
-        log.info("회원 검색 — keyword: {}", keyword);
+        log.info("회원 검색하기 keyword: {}", keyword);
         return searchService.searchMembers(keyword);
     }
 
 //    검색 기록 저장
     @PostMapping("/search/histories")
     public void saveSearchHistory(@RequestBody SearchHistoryDTO searchHistoryDTO) {
-        log.info("검색 기록 저장 — memberId: {}, keyword: {}", searchHistoryDTO.getMemberId(), searchHistoryDTO.getSearchKeyword());
+        log.info("검색기록 저장 memberId: {}, keyword: {}", searchHistoryDTO.getMemberId(), searchHistoryDTO.getSearchKeyword());
         searchService.saveSearchHistory(searchHistoryDTO);
     }
 
@@ -259,6 +271,57 @@ public class MainAPIController {
         log.info("신고합니다~ 내아이디: {}, 신고당한거아이디: {}, 신고한게 글인지 회원인지: {}, 사유는? {}", reportDTO.getReporterId(), reportDTO.getTargetId(), reportDTO.getTargetType(), reportDTO.getReason());
         reportService.report(reportDTO);
         log.info("게시물신고해서 방금 신고한 포스트만 안나옴 — targetId: {}", reportDTO.getTargetId());
+    }
+
+//    임시저장하기
+    @PostMapping("/post-temps")
+    public void savePostTemp(@RequestBody PostTempDTO postTempDTO) {
+        log.info("임시저장 memberId: {}, content: {}", postTempDTO.getMemberId(), postTempDTO.getPostTempContent());
+        postTempService.savePostTemp(postTempDTO);
+    }
+
+//    임시저장 조회=모달에서목록
+    @GetMapping("/post-temps/{memberId}")
+    public List<PostTempDTO> getPostTemps(@PathVariable Long memberId) {
+        log.info("임시저장 목록 조회 memberId: {}", memberId);
+        return postTempService.getPostTemps(memberId);
+    }
+
+//    임시저장한것 로드 = 삭제
+    @PostMapping("/post-temps/{id}/load")
+    public PostTempDTO loadPostTemp(@PathVariable Long id) {
+        log.info("임시저장 불러오기 id: {}", id);
+        return postTempService.loadPostTemp(id);
+    }
+
+//    임시저장 개별 삭제
+    @PostMapping("/post-temps/{id}/delete")
+    public void deletePostTemp(@PathVariable Long id) {
+        log.info("임시저장 개별 삭제 id: {}", id);
+        postTempService.deletePostTemp(id);
+    }
+
+//    임시저장 선택 삭제
+    @PostMapping("/post-temps/delete")
+    public void deletePostTemps(@RequestBody List<Long> ids) {
+        log.info("임시저장 선택 삭제 ids: {}", ids);
+        postTempService.deletePostTemps(ids);
+    }
+
+    // ── 댓글/대댓글 파일 URL 변환 (null 안전) ──
+    private void convertPostFilesUrl(PostDTO post) {
+        if (post.getPostFiles() != null) {
+            post.getPostFiles().forEach(pf -> {
+                try {
+                    pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
+                } catch (IOException e) {
+                    throw new RuntimeException("Presigned URL 생성 실패", e);
+                }
+            });
+        }
+        if (post.getSubReplies() != null) {
+            post.getSubReplies().forEach(sub -> convertPostFilesUrl(sub));
+        }
     }
 
     // ── S3 Presigned URL 변환 ──

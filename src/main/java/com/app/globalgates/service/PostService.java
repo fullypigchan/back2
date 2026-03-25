@@ -11,7 +11,6 @@ import com.app.globalgates.repository.FileDAO;
 import com.app.globalgates.repository.PostDAO;
 import com.app.globalgates.repository.PostFileDAO;
 import com.app.globalgates.repository.PostHashtagDAO;
-import com.app.globalgates.repository.ReplyProductRelDAO;
 import com.app.globalgates.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +32,6 @@ public class PostService {
     private final PostFileDAO postFileDAO;
     private final FileDAO fileDAO;
     private final PostHashtagDAO postHashtagDAO;
-    private final ReplyProductRelDAO replyProductRelDAO;
     private final S3Service s3Service;
 
 //    게시글 작성
@@ -47,10 +43,13 @@ public class PostService {
             Optional<PostHashtagDTO> foundHashtag = postHashtagDAO.findByTagName(hashtagDTO.getTagName());
 
             if (foundHashtag.isEmpty()) {
+                log.info("새로운태그인식함 {}", foundHashtag);
                 postHashtagDAO.save(hashtagDTO);
+                log.info("새로운태그들어감 {}", foundHashtag);
             } else {
                 hashtagDTO.setId(foundHashtag.get().getId());
-            }
+                log.info("기존태그에요 {}", foundHashtag);
+            };
 
             postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
         });
@@ -165,17 +164,26 @@ public class PostService {
         postDAO.delete(id);
     }
 
-//    댓글 작성 (판매품목 선택 시 관계 저장)
-    public void writeReply(PostDTO postDTO, Long productPostId) {
+//    댓글 작성
+    public void writeReply(PostDTO postDTO) {
         postDAO.save(postDTO);
-
-        if (productPostId != null) {
-            ReplyProductRelDTO relDTO = new ReplyProductRelDTO();
-            relDTO.setReplyPostId(postDTO.getId());
-            relDTO.setProductPostId(productPostId);
-            replyProductRelDAO.save(relDTO);
-        }
     }
+
+//    댓글 목록 조회 (대댓글 포함)
+    public List<PostDTO> getReplies(Long postId, Long memberId) {
+        List<PostDTO> comments = postDAO.findRepliesByPostId(postId, memberId);
+        if (comments.isEmpty()) return comments;
+
+        List<Long> commentIds = comments.stream().map(PostDTO::getId).collect(Collectors.toList());
+        List<PostDTO> subReplies = postDAO.findSubRepliesByParentIds(commentIds, memberId);
+
+        Map<Long, List<PostDTO>> subMap = subReplies.stream()
+                .collect(Collectors.groupingBy(PostDTO::getReplyPostId));
+
+        comments.forEach(c -> c.setSubReplies(subMap.getOrDefault(c.getId(), List.of())));
+        return comments;
+    }
+
     // 오늘자 경로 생성
     public String getTodayPath(){
         return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));

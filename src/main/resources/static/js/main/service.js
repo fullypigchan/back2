@@ -75,10 +75,8 @@ const service = (() => {
         });
     };
 
-    const writeReply = async (postId, memberId, postContent, productPostId) => {
-        let url = `/api/main/posts/${postId}/replies`;
-        if (productPostId) url += `?productPostId=${productPostId}`;
-        await fetch(url, {
+    const writeReply = async (postId, memberId, postContent) => {
+        await fetch(`/api/main/posts/${postId}/replies`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ memberId: memberId, postContent: postContent })
@@ -154,6 +152,38 @@ const service = (() => {
         await fetch(`/api/main/posts/delete/${postId}`, { method: 'POST' });
     };
 
+    const savePostTemp = async (memberId, postTempContent) => {
+        await fetch('/api/main/post-temps', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ memberId: memberId, postTempContent: postTempContent })
+        });
+    };
+
+    const getPostTemps = async (memberId, callback) => {
+        const response = await fetch(`/api/main/post-temps/${memberId}`);
+        const data = await response.json();
+        if (callback) return callback(data);
+        return data;
+    };
+
+    const loadPostTemp = async (id) => {
+        const response = await fetch(`/api/main/post-temps/${id}/load`, { method: 'POST' });
+        return await response.json();
+    };
+
+    const deletePostTemp = async (id) => {
+        await fetch(`/api/main/post-temps/${id}/delete`, { method: 'POST' });
+    };
+
+    const deletePostTemps = async (ids) => {
+        await fetch('/api/main/post-temps/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ids)
+        });
+    };
+
     return {
         getPostList, getExpertList, writePost, deletePost,
         addLike, deleteLike,
@@ -165,6 +195,7 @@ const service = (() => {
         searchMembers, getSearchHistories, saveSearchHistory, deleteSearchHistory, deleteAllSearchHistories,
         getMyProducts,
         getSuggestions,
-        getAds
+        getAds,
+        savePostTemp, getPostTemps, loadPostTemp, deletePostTemp, deletePostTemps
     };
 })();

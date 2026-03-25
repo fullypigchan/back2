@@ -20,14 +20,14 @@ const layout = (() => {
             const isVideo = (path) => /\.(mp4|mov|webm|avi)(\?|$)/i.test(path);
             const count = post.postFiles.length;
 
-            if (count === 1 && isVideo(post.postFiles[0])) {
-                mediaHtml = `<div class="postMedia"><video class="postMediaVideo" controls><source src="${post.postFiles[0]}"></video></div>`;
+            if (count === 1 && isVideo(post.postFiles[0].filePath)) {
+                mediaHtml = `<div class="postMedia"><video class="postMediaVideo" controls><source src="${post.postFiles[0].filePath}"></video></div>`;
             } else {
                 const gridClass = count >= 4 ? "postMediaGrid--4"
                     : count === 3 ? "postMediaGrid--3"
                     : count === 2 ? "postMediaGrid--2" : "";
-                const items = post.postFiles.map(filePath =>
-                    `<img class="postMediaImage" src="${filePath}">`
+                const items = post.postFiles.map(pf =>
+                    `<img class="postMediaImage" src="${pf.filePath}">`
                 ).join("");
                 mediaHtml = `<div class="postMedia"><div class="postMediaGrid ${gridClass}">${items}</div></div>`;
             }

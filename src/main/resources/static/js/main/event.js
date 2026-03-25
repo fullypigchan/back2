@@ -1,6 +1,9 @@
 window.onload = () => {
     let memberId = null;
 
+    // 장소 검색 객체 (검색 시 초기화)
+    var ps = null;
+
     // ── 1. 탭 전환 + 데이터 로드 + 무한스크롤 ──
     let activeTab = "feed";
     let postPage = 1;
@@ -949,9 +952,7 @@ window.onload = () => {
     replySubmit.addEventListener("click", async (e) => {
         if (replyEditor.textContent.length === 0) { return; }
         if (replyTargetPostId) {
-            const product = replyCtx.getSelectedProduct();
-            const productPostId = product ? product.id : null;
-            await service.writeReply(replyTargetPostId, memberId, replyEditor.textContent, productPostId);
+            await service.writeReply(replyTargetPostId, memberId, replyEditor.textContent);
         }
         closeReplyModal();
     });
@@ -963,10 +964,10 @@ window.onload = () => {
         const locationView = overlay.querySelector(".tweet-modal__location-view");
         const tagView = overlay.querySelector(".tweet-modal__tag-view");
         const mediaView = overlay.querySelector(".tweet-modal__media-view");
-        const draftView = overlay.querySelector(".tweet-modal__draft-view");
+        const postTempView = overlay.querySelector(".tweet-modal__draft-view");
         const productView = overlay.querySelector(".tweet-modal__product-view");
 
-        const allSubViews = [locationView, tagView, mediaView, draftView, productView];
+        const allSubViews = [locationView, tagView, mediaView, postTempView, productView];
 
         function showSubView(view) {
             composeView.classList.add("off");
@@ -1136,39 +1137,40 @@ window.onload = () => {
         checkCatScroll();
 
         // 임시저장
-        const draftBtn = overlay.querySelector(".tweet-modal__draft");
-        const draftList = draftView ? draftView.querySelector(".draft-panel__list") : null;
-        const draftEmpty = draftView ? draftView.querySelector(".draft-panel__empty") : null;
-        const draftFooter = draftView ? draftView.querySelector(".draft-panel__footer") : null;
-        const draftSelectAll = draftView ? draftView.querySelector(".draft-panel__select-all") : null;
-        const draftFooterDelete = draftView ? draftView.querySelector(".draft-panel__footer-delete") : null;
-        const draftConfirmOverlay = draftView ? draftView.querySelector(".draft-panel__confirm-overlay") : null;
-        const draftConfirmPrimary = draftConfirmOverlay ? draftConfirmOverlay.querySelector(".draft-panel__confirm-primary") : null;
-        const draftConfirmSecondary = draftConfirmOverlay ? draftConfirmOverlay.querySelector(".draft-panel__confirm-secondary") : null;
+        const postTempBtn = overlay.querySelector(".tweet-modal__draft");
+        const postTempList = postTempView ? postTempView.querySelector(".draft-panel__list") : null;
+        const postTempEmpty = postTempView ? postTempView.querySelector(".draft-panel__empty") : null;
+        const postTempFooter = postTempView ? postTempView.querySelector(".draft-panel__footer") : null;
+        const postTempSelectAll = postTempView ? postTempView.querySelector(".draft-panel__select-all") : null;
+        const postTempFooterDelete = postTempView ? postTempView.querySelector(".draft-panel__footer-delete") : null;
+        const postTempConfirmOverlay = postTempView ? postTempView.querySelector(".draft-panel__confirm-overlay") : null;
+        const postTempConfirmPrimary = postTempConfirmOverlay ? postTempConfirmOverlay.querySelector(".draft-panel__confirm-primary") : null;
+        const postTempConfirmSecondary = postTempConfirmOverlay ? postTempConfirmOverlay.querySelector(".draft-panel__confirm-secondary") : null;
         const modalEditor = overlay.querySelector(".tweet-modal__editor");
-        let drafts = [];
-        let selectedDraftIndexes = [];
+        let postTemps = [];
+        let selectedPostTempIndexes = [];
 
-        function loadDrafts() { /* 서버 연결 시 fetch로 교체 예정 */ }
-        function saveDrafts() { /* 서버 연결 시 fetch로 교체 예정 */ }
-
-        function updateDraftFooter() {
-            if (!draftFooter) { return; }
-            draftFooter.classList.toggle("off", drafts.length === 0);
-            if (draftFooterDelete) { draftFooterDelete.disabled = selectedDraftIndexes.length === 0; }
-            if (draftSelectAll) { draftSelectAll.textContent = (drafts.length > 0 && selectedDraftIndexes.length === drafts.length) ? "전체 해제" : "모두 선택"; }
+        async function loadPostTemps() {
+            postTemps = await service.getPostTemps(memberId);
         }
 
-        function isSelected(idx) { for (let i = 0; i < selectedDraftIndexes.length; i++) { if (selectedDraftIndexes[i] === idx) { return true; } } return false; }
-        function toggleDraftSelect(idx) {
-            if (isSelected(idx)) { let next = []; for (let i = 0; i < selectedDraftIndexes.length; i++) { if (selectedDraftIndexes[i] !== idx) { next.push(selectedDraftIndexes[i]); } } selectedDraftIndexes = next; }
-            else { selectedDraftIndexes.push(idx); }
-            syncDraftCheckboxes(); updateDraftFooter();
+        function updatePostTempFooter() {
+            if (!postTempFooter) { return; }
+            postTempFooter.classList.toggle("off", postTemps.length === 0);
+            if (postTempFooterDelete) { postTempFooterDelete.disabled = selectedPostTempIndexes.length === 0; }
+            if (postTempSelectAll) { postTempSelectAll.textContent = (postTemps.length > 0 && selectedPostTempIndexes.length === postTemps.length) ? "전체 해제" : "모두 선택"; }
         }
 
-        function syncDraftCheckboxes() {
-            if (!draftList) { return; }
-            const items = draftList.querySelectorAll(".draft-panel__item");
+        function isSelected(idx) { for (let i = 0; i < selectedPostTempIndexes.length; i++) { if (selectedPostTempIndexes[i] === idx) { return true; } } return false; }
+        function togglePostTempSelect(idx) {
+            if (isSelected(idx)) { let next = []; for (let i = 0; i < selectedPostTempIndexes.length; i++) { if (selectedPostTempIndexes[i] !== idx) { next.push(selectedPostTempIndexes[i]); } } selectedPostTempIndexes = next; }
+            else { selectedPostTempIndexes.push(idx); }
+            syncPostTempCheckboxes(); updatePostTempFooter();
+        }
+
+        function syncPostTempCheckboxes() {
+            if (!postTempList) { return; }
+            const items = postTempList.querySelectorAll(".draft-panel__item");
             for (let i = 0; i < items.length; i++) {
                 const idx = parseInt(items[i].getAttribute("data-draft-index"));
                 const cb = items[i].querySelector(".draft-panel__item-checkbox");
@@ -1177,91 +1179,94 @@ window.onload = () => {
             }
         }
 
-        function renderDraftList() {
-            selectedDraftIndexes = [];
-            if (!draftList) { return; }
-            if (drafts.length === 0) { draftList.innerHTML = ""; if (draftEmpty) { draftEmpty.classList.remove("off"); } updateDraftFooter(); return; }
-            if (draftEmpty) { draftEmpty.classList.add("off"); }
+        function renderPostTempList() {
+            selectedPostTempIndexes = [];
+            if (!postTempList) { return; }
+            if (postTemps.length === 0) { postTempList.innerHTML = ""; if (postTempEmpty) { postTempEmpty.classList.remove("off"); } updatePostTempFooter(); return; }
+            if (postTempEmpty) { postTempEmpty.classList.add("off"); }
             let html = "";
-            for (let i = 0; i < drafts.length; i++) {
-                const d = drafts[i];
-                html += '<div class="draft-panel__item" data-draft-index="' + i + '"><input type="checkbox" class="draft-panel__item-checkbox" data-draft-check="' + i + '" /><button type="button" class="draft-panel__item-load" data-draft-load="' + i + '"><span class="draft-panel__item-body"><span class="draft-panel__text">' + d.text + '</span><span class="draft-panel__date">' + d.date + '</span></span></button><span class="draft-panel__item-delete" data-draft-delete="' + i + '">✕</span></div>';
+            for (let i = 0; i < postTemps.length; i++) {
+                const d = postTemps[i];
+                html += '<div class="draft-panel__item" data-draft-index="' + i + '" data-draft-id="' + d.id + '"><input type="checkbox" class="draft-panel__item-checkbox" data-draft-check="' + i + '" /><button type="button" class="draft-panel__item-load" data-draft-load="' + i + '"><span class="draft-panel__item-body"><span class="draft-panel__text">' + d.postTempContent + '</span><span class="draft-panel__date">' + (d.createdDatetime || "") + '</span></span></button><span class="draft-panel__item-delete" data-draft-delete="' + i + '">✕</span></div>';
             }
-            draftList.innerHTML = html;
-            updateDraftFooter();
+            postTempList.innerHTML = html;
+            updatePostTempFooter();
         }
 
-        function saveDraft() {
+        async function savePostTempFromEditor() {
             if (!modalEditor) { return; }
             const text = modalEditor.textContent.trim();
             if (!text) { return; }
-            const now = new Date();
-            const dateStr = (now.getMonth() + 1) + "월 " + now.getDate() + "일 " + (now.getHours() < 12 ? "오전" : "오후") + " " + (now.getHours() % 12 || 12) + ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes();
-            drafts.push({ text: text, date: dateStr });
-            saveDrafts();
+            await service.savePostTemp(memberId, text);
+            await loadPostTemps();
         }
 
-        function loadDraftToEditor(index) {
-            if (!modalEditor || !drafts[index]) { return; }
-            modalEditor.textContent = drafts[index].text;
-            drafts.splice(index, 1);
-            saveDrafts();
+        async function loadPostTempToEditor(index) {
+            if (!modalEditor || !postTemps[index]) { return; }
+            const loaded = await service.loadPostTemp(postTemps[index].id);
+            modalEditor.textContent = loaded.postTempContent;
+            postTemps.splice(index, 1);
             modalEditor.dispatchEvent(new Event("input"));
             backToCompose();
         }
 
-        loadDrafts();
-
-        if (draftBtn && draftView) {
-            draftBtn.addEventListener("click", (e) => {
-                if (modalEditor && modalEditor.textContent.trim()) { saveDraft(); modalEditor.innerHTML = ""; modalEditor.dispatchEvent(new Event("input")); }
-                renderDraftList();
-                showSubView(draftView);
+        if (postTempBtn && postTempView) {
+            postTempBtn.addEventListener("click", async (e) => {
+                if (modalEditor && modalEditor.textContent.trim()) { await savePostTempFromEditor(); modalEditor.innerHTML = ""; modalEditor.dispatchEvent(new Event("input")); }
+                await loadPostTemps();
+                renderPostTempList();
+                showSubView(postTempView);
             });
         }
-        const draftBack = draftView ? draftView.querySelector(".draft-panel__back") : null;
-        if (draftBack) { draftBack.addEventListener("click", (e) => { backToCompose(); }); }
+        const postTempBack = postTempView ? postTempView.querySelector(".draft-panel__back") : null;
+        if (postTempBack) { postTempBack.addEventListener("click", (e) => { backToCompose(); }); }
         let pendingDeleteIndexes = [];
 
-        if (draftList) {
-            draftList.addEventListener("click", (e) => {
+        if (postTempList) {
+            postTempList.addEventListener("click", (e) => {
                 const checkbox = e.target.closest("[data-draft-check]");
-                if (checkbox) { toggleDraftSelect(parseInt(checkbox.getAttribute("data-draft-check"))); return; }
+                if (checkbox) { togglePostTempSelect(parseInt(checkbox.getAttribute("data-draft-check"))); return; }
                 const deleteBtn = e.target.closest("[data-draft-delete]");
-                if (deleteBtn) { pendingDeleteIndexes = [parseInt(deleteBtn.getAttribute("data-draft-delete"))]; if (draftConfirmOverlay) { draftConfirmOverlay.classList.remove("off"); } return; }
+                if (deleteBtn) { pendingDeleteIndexes = [parseInt(deleteBtn.getAttribute("data-draft-delete"))]; if (postTempConfirmOverlay) { postTempConfirmOverlay.classList.remove("off"); } return; }
                 const loadBtn = e.target.closest("[data-draft-load]");
-                if (loadBtn) { loadDraftToEditor(parseInt(loadBtn.getAttribute("data-draft-load"))); }
+                if (loadBtn) { loadPostTempToEditor(parseInt(loadBtn.getAttribute("data-draft-load"))); }
             });
         }
-        if (draftSelectAll) {
-            draftSelectAll.addEventListener("click", (e) => {
-                if (selectedDraftIndexes.length === drafts.length) { selectedDraftIndexes = []; }
-                else { selectedDraftIndexes = []; for (let i = 0; i < drafts.length; i++) { selectedDraftIndexes.push(i); } }
-                syncDraftCheckboxes(); updateDraftFooter();
+        if (postTempSelectAll) {
+            postTempSelectAll.addEventListener("click", (e) => {
+                if (selectedPostTempIndexes.length === postTemps.length) { selectedPostTempIndexes = []; }
+                else { selectedPostTempIndexes = []; for (let i = 0; i < postTemps.length; i++) { selectedPostTempIndexes.push(i); } }
+                syncPostTempCheckboxes(); updatePostTempFooter();
             });
         }
-        if (draftFooterDelete) {
-            draftFooterDelete.addEventListener("click", (e) => {
-                if (selectedDraftIndexes.length === 0) { return; }
-                pendingDeleteIndexes = []; for (let i = 0; i < selectedDraftIndexes.length; i++) { pendingDeleteIndexes.push(selectedDraftIndexes[i]); }
-                if (draftConfirmOverlay) { draftConfirmOverlay.classList.remove("off"); }
+        if (postTempFooterDelete) {
+            postTempFooterDelete.addEventListener("click", (e) => {
+                if (selectedPostTempIndexes.length === 0) { return; }
+                pendingDeleteIndexes = []; for (let i = 0; i < selectedPostTempIndexes.length; i++) { pendingDeleteIndexes.push(selectedPostTempIndexes[i]); }
+                if (postTempConfirmOverlay) { postTempConfirmOverlay.classList.remove("off"); }
             });
         }
-        if (draftConfirmPrimary) {
-            draftConfirmPrimary.addEventListener("click", (e) => {
-                pendingDeleteIndexes.sort((a, b) => { return b - a; });
-                for (let i = 0; i < pendingDeleteIndexes.length; i++) { drafts.splice(pendingDeleteIndexes[i], 1); }
-                pendingDeleteIndexes = []; saveDrafts();
-                if (draftConfirmOverlay) { draftConfirmOverlay.classList.add("off"); }
-                renderDraftList();
+        if (postTempConfirmPrimary) {
+            postTempConfirmPrimary.addEventListener("click", async (e) => {
+                const idsToDelete = pendingDeleteIndexes.map(idx => postTemps[idx].id);
+                await service.deletePostTemps(idsToDelete);
+                pendingDeleteIndexes = [];
+                await loadPostTemps();
+                if (postTempConfirmOverlay) { postTempConfirmOverlay.classList.add("off"); }
+                renderPostTempList();
             });
         }
-        if (draftConfirmSecondary) { draftConfirmSecondary.addEventListener("click", (e) => { if (draftConfirmOverlay) { draftConfirmOverlay.classList.add("off"); } }); }
+        if (postTempConfirmSecondary) { postTempConfirmSecondary.addEventListener("click", (e) => { if (postTempConfirmOverlay) { postTempConfirmOverlay.classList.add("off"); } }); }
 
         // 위치
+
         const geoBtn = overlay.querySelector(".tweet-modal__tool-btn--geo");
         const locationList = locationView ? locationView.querySelector("[data-location-list]") : null;
+        const locationSearchInput = locationView ? locationView.querySelector("[data-location-search]") : null;
+        const locationSearchBtn = locationView ? locationView.querySelector("[data-location-search-btn]") : null;
         const locationClose = locationView ? locationView.querySelector(".tweet-modal__location-close") : null;
+        const locationDeleteBtn = locationView ? locationView.querySelector("[data-location-delete]") : null;
+        const locationCompleteBtn = locationView ? locationView.querySelector("[data-location-complete]") : null;
         const locationDisplay = overlay.querySelector(".tweet-modal__location-display");
         const locationDisplayText = locationDisplay ? locationDisplay.querySelector(".tweet-modal__location-display-text-inner") : null;
         let selectedLocation = null;
@@ -1271,8 +1276,68 @@ window.onload = () => {
                 if (selectedLocation) { locationDisplayText.textContent = selectedLocation; locationDisplay.removeAttribute("hidden"); }
                 else { locationDisplayText.textContent = ""; locationDisplay.setAttribute("hidden", ""); }
             }
+            if (locationDeleteBtn) { locationDeleteBtn.hidden = !selectedLocation; }
+            if (locationCompleteBtn) { locationCompleteBtn.disabled = !selectedLocation; }
         }
-        if (geoBtn && locationView) { geoBtn.addEventListener("click", (e) => { showSubView(locationView); }); }
+
+        function searchPlaces() {
+            console.log("searchPlaces 호출됨");
+            var keyword = locationSearchInput.value;
+            console.log("keyword:", keyword);
+            if (!keyword.replace(/^\s+|\s+$/g, '')) {
+                alert('키워드를 입력해주세요!');
+                return false;
+            }
+            if (!ps) { ps = new kakao.maps.services.Places(); }
+            console.log("ps 생성 완료, keywordSearch 호출");
+            ps.keywordSearch(keyword, placesSearchCB);
+        }
+
+        function placesSearchCB(datas, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const addressNameSet = new Set();
+                datas.forEach((data) => {
+                    let addressName = data.address_name;
+                    const addressNames = addressName.split(" ");
+                    const lastPart = addressNames[addressNames.length - 1];
+                    const addressRegex = /^[0-9-]+$/;
+                    if (addressRegex.test(lastPart)) {
+                        addressName = addressNames.slice(0, -1).join(" ");
+                    }
+                    addressNameSet.add(addressName);
+                });
+                let html = '';
+                addressNameSet.forEach((addressName) => {
+                    html += '<button type="button" class="tweet-modal__location-item">' +
+                        '<span class="tweet-modal__location-item-label">' + addressName + '</span>' +
+                        '<span class="tweet-modal__location-item-check"></span>' +
+                        '</button>';
+                });
+                locationList.innerHTML = html;
+            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                alert('검색 결과가 존재하지 않습니다.');
+                return;
+            } else if (status === kakao.maps.services.Status.ERROR) {
+                alert('검색 결과 중 오류가 발생했습니다.');
+                return;
+            }
+        }
+
+        if (geoBtn && locationView) {
+            geoBtn.addEventListener("click", (e) => {
+                showSubView(locationView);
+                if (locationSearchInput) { locationSearchInput.value = ''; }
+                if (locationList) { locationList.innerHTML = ''; }
+                updateLocationUI();
+            });
+        }
+
+        if (locationSearchBtn) {
+            locationSearchBtn.addEventListener("click", (e) => {
+                searchPlaces();
+            });
+        }
+
         if (locationList) {
             locationList.addEventListener("click", (e) => {
                 const item = e.target.closest(".tweet-modal__location-item");
@@ -1285,6 +1350,20 @@ window.onload = () => {
                 backToCompose();
             });
         }
+
+        if (locationDeleteBtn) {
+            locationDeleteBtn.addEventListener("click", (e) => {
+                selectedLocation = null;
+                updateLocationUI();
+                if (locationList) { const allItems = locationList.querySelectorAll(".tweet-modal__location-item"); for (let i = 0; i < allItems.length; i++) { allItems[i].classList.remove("isSelected"); } }
+                backToCompose();
+            });
+        }
+
+        if (locationCompleteBtn) {
+            locationCompleteBtn.addEventListener("click", (e) => { backToCompose(); });
+        }
+
         if (locationClose) { locationClose.addEventListener("click", (e) => { backToCompose(); }); }
 
         // 태그 서브뷰
@@ -1314,7 +1393,7 @@ window.onload = () => {
             let html = "";
             for (let i = 0; i < products.length; i++) {
                 const p = products[i];
-                const img = (p.postFiles && p.postFiles.length > 0) ? p.postFiles[0] : "";
+                const img = (p.postFiles && p.postFiles.length > 0) ? p.postFiles[0].filePath : "";
                 const tags = (p.hashtags && p.hashtags.length > 0) ? p.hashtags.map(t => "#" + t.tagName).join(" ") : "";
                 html += '<button type="button" class="draft-panel__item draft-panel__item--selectable" data-product-id="' + p.id + '">' +
                     '<span class="draft-panel__checkbox"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9 20c-.264 0-.518-.104-.707-.293l-4.785-4.785 1.414-1.414L9 17.586 19.072 7.5l1.42 1.416L9.708 19.7c-.188.19-.442.3-.708.3z"></path></g></svg></span>' +
@@ -1494,9 +1573,9 @@ window.onload = () => {
             selectedLocation = null;
             if (locationDisplay && locationDisplayText) { locationDisplayText.textContent = ""; locationDisplay.setAttribute("hidden", ""); }
             if (locationList) { const allItems = locationList.querySelectorAll(".tweet-modal__location-item"); for (let i = 0; i < allItems.length; i++) { allItems[i].classList.remove("isSelected"); } }
-            selectedDraftIndexes = [];
-            if (draftConfirmOverlay) { draftConfirmOverlay.classList.add("off"); }
-            updateDraftFooter();
+            selectedPostTempIndexes = [];
+            if (postTempConfirmOverlay) { postTempConfirmOverlay.classList.add("off"); }
+            updatePostTempFooter();
             selectedProduct = null;
             const existingProduct = overlay.querySelector("[data-selected-product]");
             if (existingProduct) { existingProduct.remove(); }

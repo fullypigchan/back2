@@ -568,3 +568,13 @@ create table tbl_search_history (
     created_datetime timestamp    not null default now(),
     constraint fk_search_history_member foreign key(member_id) references tbl_member(id)
 );
+
+-- [67] tbl_post_temp
+create table tbl_post_temp (
+    id                bigint       generated always as identity primary key,
+    member_id         bigint       not null,
+    post_temp_content text         not null,
+    created_datetime  timestamp    not null default now(),
+    updated_datetime  timestamp    not null default now(),
+    constraint fk_post_temp_member foreign key(member_id) references tbl_member(id)
+);

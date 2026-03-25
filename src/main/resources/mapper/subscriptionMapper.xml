@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.globalgates.mapper.SubscriptionMapper">
+    <insert id="insert">
+        insert into tbl_subscription (member_id, tier, billing_cycle, status, expires_at)
+        values (#{memberId}, #{tier}::subscription_tier, #{billingCycle}, #{status}::subscription_status, #{expiresAt}::timestamp)
+    </insert>
+
+    <select id="selectByMemberId">
+        select id, member_id, tier, billing_cycle, status, started_at, expires_at, created_datetime, updated_datetime
+        from tbl_subscription
+        where member_id = #{memberId} and status = 'active'
+        order by id desc
+        limit 1
+    </select>
+
+    <update id="updateTier">
+        update tbl_subscription
+        set tier = #{tier}::subscription_tier,
+            billing_cycle = #{billingCycle},
+            expires_at = #{expiresAt}::timestamp,
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        update tbl_subscription
+        set status = #{status}::subscription_status,
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+</mapper>
