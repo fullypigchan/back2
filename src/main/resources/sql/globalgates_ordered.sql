@@ -158,15 +158,6 @@ create table tbl_post (
     constraint fk_post_reply_post foreign key(reply_post_id) references tbl_post(id)
 );
 
--- tbl_reply_product_rel
-create table tbl_reply_product_rel (
-    id              bigint generated always as identity primary key,
-    reply_post_id   bigint not null,
-    product_post_id bigint not null,
-    constraint fk_reply_product_reply foreign key(reply_post_id) references tbl_post(id),
-    constraint fk_reply_product_product foreign key(product_post_id) references tbl_post(id)
-);
-
 -- [13] tbl_post_product
 create table tbl_post_product (
     id                  bigint    primary key,

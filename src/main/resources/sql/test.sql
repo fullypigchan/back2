@@ -19,3 +19,4 @@ select * from tbl_follow;
 select * from tbl_post_file;
 
 select * from tbl_block;
+
