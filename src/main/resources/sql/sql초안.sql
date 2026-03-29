@@ -693,7 +693,6 @@ references tbl_advertisement(id)
 );
 
 -- [51] tbl_video_session  ─ 화상 채팅 세션 (video-chat 화면, Pro+ 구독 기능)
-
 create table tbl_video_session (
 id              bigint    generated always as identity primary key,  -- pk | 세션 고유 id (자동 증가)
 conversation_id bigint    not null,           -- fk → tbl_conversation.id | 연결된 대화방

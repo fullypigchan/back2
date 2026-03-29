@@ -18,18 +18,20 @@ body {
 }
 
 .video-page {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    padding: 28px 36px 24px 0;
+    padding: 14px 20px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .space-modal {
-    width: 600px;
-    height: calc(100vh - 52px);
-    min-height: 760px;
-    max-height: 980px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
     background: var(--panel);
     border: 1px solid #e4e8ec;
     border-radius: 20px;
@@ -112,16 +114,25 @@ body {
 
 .space-body {
     flex: 1;
-    padding: 8px 22px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 8px 22px;
     position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.space-body-header {
+    width: 100%;
+    height: 40px;
 }
 
 .space-title {
     margin: 0;
     font-size: 40px;
     font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.12;
+    line-height: 24px;
 }
 
 .edit-btn {
@@ -133,6 +144,17 @@ body {
 .edit-btn svg {
     width: 22px;
     height: 22px;
+}
+
+.video-chat-session {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1ft));
+    gap: 10px;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
 }
 
 .host-profile {
@@ -149,7 +171,6 @@ body {
     border-radius: 50%;
     border: 1px solid #dce3e8;
     background-color: #dce6ff;
-    background-image: url("/static/images/default-profile.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -168,8 +189,15 @@ body {
     line-height: 1.1;
 }
 
+.chat-left, .chat-right {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    border: 1px solid #0a84ff;
+}
+
 .space-footer {
-    height: 128px;
+    height: 88px;
     border-top: 1px solid var(--line);
     background: #fafafa;
     padding: 18px;

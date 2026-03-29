@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Video Modal</title>
     <link rel="stylesheet" href="/static/css/video/video.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.9/dist/livekit-client.umd.js"></script>
+    <script src="/static/js/video/event.js"></script>
+    <script src="/static/js/video/service.js"></script>
 </head>
 <body>
 <main class="video-page">
@@ -32,21 +35,28 @@
         </header>
 
         <section class="space-body">
-            <h1 class="space-title">박하민의 스페이스</h1>
-            <button class="icon-btn edit-btn" type="button" aria-label="수정">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5z"/>
-                    <path d="M13.5 7l3.5 3.5"/>
-                </svg>
-            </button>
-
-            <div class="host-profile">
-                <div class="host-avatar" aria-label="박하민 프로필"></div>
-                <div class="host-meta">
-                    <p class="host-name">박하민</p>
-
-                </div>
+            <!-- 채팅방 헤더 -->
+            <div class="space-body-header">
+                <h1 class="space-title">박하민의 스페이스</h1>
+                <button class="icon-btn edit-btn" type="button" aria-label="수정">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5z"/>
+                        <path d="M13.5 7l3.5 3.5"/>
+                    </svg>
+                </button>
             </div>
+
+            <!-- 채팅방 바디 (화상통화 출력되는 곳) -->
+            <div class="video-chat-session">
+
+            </div>
+<!--            <div class="host-profile">-->
+<!--                <div class="host-avatar" aria-label="박하민 프로필"></div>-->
+<!--                <div class="host-meta">-->
+<!--                    <p class="host-name">박하민</p>-->
+
+<!--                </div>-->
+<!--            </div>-->
         </section>
 
         <footer class="space-footer">
@@ -71,8 +81,6 @@
         </footer>
     </section>
 </main>
-<script src="/static/js/video/video.js"></script>
-`r`n
 </body>
 </html>
 

@@ -587,7 +587,7 @@ window.onload = () => {
         button.addEventListener("click", () => {
             const divName = button.classList[1];
             switch (divName) {
-                case "VideoCall": return;
+                case "VideoCall": startVideoCall(); break;
                 case "UserInfo": openModal(userInfoModal); break;
             }
         });
