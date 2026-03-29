@@ -17,4 +17,6 @@ public class PostTempVO extends Period {
     private Long id;
     private Long memberId;
     private String postTempContent;
+    private String postTempLocation;
+    private String postTempTags;
 }

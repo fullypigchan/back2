@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.globalgates.mapper.FriendsMapper">
+
+    <select id="selectAll">
+        select m.id,
+               m.member_nickname,
+               m.member_handle,
+               m.member_bio,
+               (select f.file_name from tbl_member_profile_file mpf
+                   join tbl_file f on mpf.id = f.id
+                where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
+                limit 1) as member_profile_file_name,
+               (select mm.member_nickname from tbl_follow fl2
+                   join tbl_member mm on fl2.follower_id = mm.id
+                where fl2.following_id = m.id and fl2.follower_id != #{memberId}
+                limit 1) as follower_intro
+        from tbl_member m
+        where m.member_status = 'active'
+          and m.id != #{memberId}
+          and m.id not in (select fl.following_id from tbl_follow fl where fl.follower_id = #{memberId})
+          and m.id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
+        order by m.created_datetime desc
+        limit #{criteria.count}
+        offset #{criteria.offset}
+    </select>
+
+    <select id="selectTotal" resultType="int">
+        select count(*)
+        from tbl_member m
+        where m.member_status = 'active'
+          and m.id != #{memberId}
+          and m.id not in (select fl.following_id from tbl_follow fl where fl.follower_id = #{memberId})
+          and m.id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
+    </select>
+
+</mapper>

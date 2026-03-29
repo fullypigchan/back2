@@ -1,10 +1,15 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>구독 변경 - Pro</title>
-    <link rel="stylesheet" href="/static/css/Subscribe/Subscribe.css"/>
+    <link rel="stylesheet" href="/css/Subscribe/Subscribe.css"/>
+    <script th:inline="javascript">
+        const memberId = [[${memberId}]];
+    </script>
+    <script src="https://js.bootpay.co.kr/bootpay-5.0.2.min.js"></script>
+    <script src="/js/Subscribe/event.js"></script>
 </head>
 <body>
 <main class="sub-page">
@@ -629,8 +634,5 @@
         <p class="sub-popup__desc"></p>
     </div>
 </div>
-
-<script src="/static/js/Subscribe/event.js"></script>
-<script src="https://js.bootpay.co.kr/bootpay-5.0.2.min.js"></script>
 </body>
 </html>

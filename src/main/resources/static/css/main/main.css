@@ -1141,9 +1141,9 @@ a.menu-item:visited {
 .tweet-modal__avatar-image,
 .tweet-modal__source-avatar-wrap,
 .tweet-modal__avatar-wrap {
-    width: 36px;
-    height: 36px;
-    border-radius: 9999px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
 }
@@ -1153,8 +1153,8 @@ a.menu-item:visited {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #1d9bf0;
-    color: #fff;
+    background: #cfe8fc;
+    color: #1d9bf0;
     font-weight: 700;
     font-size: 16px;
     overflow: hidden;
@@ -1164,8 +1164,8 @@ a.menu-item:visited {
 .tweet-modal__avatar-wrap img {
     width: 100%;
     height: 100%;
-    border-radius: 9999px;
     object-fit: cover;
+    display: block;
 }
 
 .tweet-modal__source-body,
@@ -1589,7 +1589,7 @@ a.menu-item:visited {
     min-width: 22px;
     padding: 0;
     border-radius: 9999px;
-    background: transparent;
+    background: rgba(29, 155, 240, 0.1);
     color: #1d9bf0;
     font-size: 13px;
     font-weight: 700;
@@ -1629,6 +1629,16 @@ a.menu-item:visited {
     color: inherit;
     font: inherit;
     line-height: inherit;
+}
+
+input.tweet-modal__location-display-text-inner {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0;
+    width: auto;
+    color: #1d9bf0;
+    cursor: pointer;
 }
 
 .tweet-modal__location-display.off {
@@ -2670,12 +2680,11 @@ a.menu-item:visited {
 [data-reply-modal] .tweet-modal__avatar-image,
 [data-reply-modal] .tweet-modal__source-avatar-wrap,
 [data-reply-modal] .tweet-modal__avatar-wrap {
-    width: 36px;
-    height: 36px;
-    border-radius: 9999px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    background: #eff3f4;
 }
 
 [data-reply-modal] .tweet-modal__source-body {
@@ -3894,6 +3903,13 @@ a.menu-item:visited {
 .postTime {
     color: #536471;
     font-size: 14px;
+}
+
+.postBadge {
+    width: 18px;
+    height: 18px;
+    vertical-align: -3px;
+    flex-shrink: 0;
 }
 
 .postText {

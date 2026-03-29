@@ -148,4 +148,11 @@
         </if>
         limit #{criteria.count} offset #{criteria.offset}
     </select>
+
+    <update id="updateMemberRole">
+        update tbl_member
+        set member_role = #{memberRole},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
 </mapper>

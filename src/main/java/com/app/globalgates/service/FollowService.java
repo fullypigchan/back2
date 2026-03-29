@@ -41,7 +41,7 @@ public class FollowService {
         return followDAO.findAllFollowings(followerId);
     }
 
-    //    미팔로우 회원 3명 (팔로우 추천)
+    //    팔로우하면 좋을 회원 3명 (팔로우 추천)
     public List<MemberDTO> getUnfollowedMembers(Long memberId) {
         return followDAO.findUnfollowedMembers(memberId);
     }

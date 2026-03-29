@@ -1,6 +1,7 @@
 package com.app.globalgates.repository;
 
 import com.app.globalgates.common.pagination.Criteria;
+import com.app.globalgates.common.enumeration.MemberRole;
 import com.app.globalgates.domain.MemberVO;
 import com.app.globalgates.dto.InquiryMemberDTO;
 import com.app.globalgates.dto.MemberDTO;
@@ -77,5 +78,9 @@ public class MemberDAO {
     // 전문가 페이지 - 거래처 등록 목록 조회
     public List<InquiryMemberDTO> findInquiryMembers(Criteria criteria, String categoryName, Long memberId) {
         return memberMapper.selectInquiryMembers(criteria, categoryName, memberId);
+    }
+//  회원 역할 변경
+    public void setMemberRole(Long id, MemberRole memberRole) {
+        memberMapper.updateMemberRole(id, memberRole);
     }
 }

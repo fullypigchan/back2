@@ -3,18 +3,18 @@
 <mapper namespace="com.app.globalgates.mapper.PostTempMapper">
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into tbl_post_temp (member_id, post_temp_content)
-        values (#{memberId}, #{postTempContent})
+        insert into tbl_post_temp (member_id, post_temp_content, post_temp_location, post_temp_tags)
+        values (#{memberId}, #{postTempContent}, #{postTempLocation}, #{postTempTags})
     </insert>
 
     <select id="selectById">
-        select id, member_id, post_temp_content, created_datetime, updated_datetime
+        select id, member_id, post_temp_content, post_temp_location, post_temp_tags, created_datetime, updated_datetime
         from tbl_post_temp
         where id = #{id}
     </select>
 
     <select id="selectAllByMemberId">
-        select id, member_id, post_temp_content, created_datetime, updated_datetime
+        select id, member_id, post_temp_content, post_temp_location, post_temp_tags, created_datetime, updated_datetime
         from tbl_post_temp
         where member_id = #{memberId}
         order by created_datetime desc

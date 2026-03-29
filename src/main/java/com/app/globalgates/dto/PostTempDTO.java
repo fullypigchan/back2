@@ -16,6 +16,8 @@ public class PostTempDTO {
     private Long id;
     private Long memberId;
     private String postTempContent;
+    private String postTempLocation;
+    private String postTempTags;
     private String createdDatetime;
     private String updatedDatetime;
 
@@ -24,6 +26,8 @@ public class PostTempDTO {
                 .id(id)
                 .memberId(memberId)
                 .postTempContent(postTempContent)
+                .postTempLocation(postTempLocation)
+                .postTempTags(postTempTags)
                 .build();
     }
 }

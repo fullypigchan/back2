@@ -58,6 +58,21 @@ public class MainAPIController {
         return result;
     }
 
+//    게시글 단건 조회 (수정용)
+    @GetMapping("/posts/{id}")
+    public PostDTO getPost(@PathVariable Long id, @RequestParam Long memberId) {
+        log.info("게시글 단건 조회 — postId: {}, memberId: {}", id, memberId);
+        PostDTO post = postService.getDetail(id, memberId);
+        post.getPostFiles().forEach(pf -> {
+            try {
+                pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                throw new RuntimeException("Presigned URL 생성 실패", e);
+            }
+        });
+        return post;
+    }
+
 //    게시글 작성
     @PostMapping("/posts/write")
     public void writePost(PostDTO postDTO,
@@ -119,10 +134,19 @@ public class MainAPIController {
 //    댓글 작성
     @PostMapping("/posts/{postId}/replies")
     public void writeReply(@PathVariable Long postId,
-                           @RequestBody PostDTO postDTO) {
+                           PostDTO postDTO,
+                           @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
         log.info("댓글 작성 — postId: {}, memberId: {}, content: {}", postId, postDTO.getMemberId(), postDTO.getPostContent());
         postDTO.setReplyPostId(postId);
         postService.writeReply(postDTO);
+
+        if (files != null && !files.isEmpty()) {
+            String todayPath = postService.getTodayPath();
+            for (MultipartFile file : files) {
+                String s3Key = s3Service.uploadFile(file, todayPath);
+                postService.saveFile(postDTO.getId(), file, s3Key);
+            }
+        }
     }
 
 //    댓글 목록
@@ -130,7 +154,10 @@ public class MainAPIController {
     public List<PostDTO> getReplies(@PathVariable Long postId, @RequestParam Long memberId) {
         log.info("댓글목록조회함 — postId: {}, memberId: {}", postId, memberId);
         List<PostDTO> replies = postService.getReplies(postId, memberId);
-        replies.forEach(reply -> convertPostFilesUrl(reply));
+        replies.forEach(reply -> {
+            convertPostFilesUrl(reply);
+            convertProfileUrl(reply);
+        });
         return replies;
     }
 
@@ -321,6 +348,20 @@ public class MainAPIController {
         }
         if (post.getSubReplies() != null) {
             post.getSubReplies().forEach(sub -> convertPostFilesUrl(sub));
+        }
+    }
+
+    // ── 프로필 이미지 URL 변환 (null 안전) ──
+    private void convertProfileUrl(PostDTO post) {
+        if (post.getMemberProfileFileName() != null) {
+            try {
+                post.setMemberProfileFileName(s3Service.getPresignedUrl(post.getMemberProfileFileName(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                throw new RuntimeException("Presigned URL 생성 실패", e);
+            }
+        }
+        if (post.getSubReplies() != null) {
+            post.getSubReplies().forEach(sub -> convertProfileUrl(sub));
         }
     }
 

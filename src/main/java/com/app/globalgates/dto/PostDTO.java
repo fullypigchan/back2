@@ -28,6 +28,7 @@ public class PostDTO {
     private String memberNickname;
     private String memberHandle;
     private String memberProfileFileName;
+    private String badgeType;
 
     // 좋아요,댓글,북마크 개수
     private int likeCount;

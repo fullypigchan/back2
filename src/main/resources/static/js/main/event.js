@@ -27,7 +27,7 @@ window.onload = () => {
         friendsSection.classList.remove("isActive");
     });
 
-    tabFriends.addEventListener("click", (e) => {
+    tabFriends.addEventListener("click", async (e) => {
         activeTab = "expert";
         tabFriends.classList.add("isActive");
         tabFeed.classList.remove("isActive");
@@ -35,7 +35,7 @@ window.onload = () => {
         feedSection.classList.remove("isActive");
 
         if (!expertLoaded) {
-            service.getExpertList(expertPage, memberId, (data) => {
+            await service.getExpertList(expertPage, memberId, (data) => {
                 layout.showExpertList(data.experts, expertPage);
                 expertHasMore = data.criteria.hasMore;
             });
@@ -51,14 +51,14 @@ window.onload = () => {
         });
     };
 
-    window.addEventListener("scroll", (e) => {
+    window.addEventListener("scroll", async (e) => {
         const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
         if (scrollTop + clientHeight < scrollHeight - 100) return;
 
         if (activeTab === "feed" && postCheckScroll && postHasMore) {
             postCheckScroll = false;
             postPage++;
-            service.getPostList(postPage, memberId, (data) => {
+            await service.getPostList(postPage, memberId, (data) => {
                 layout.showPostList(data.posts, postPage);
                 postHasMore = data.criteria.hasMore;
             });
@@ -68,7 +68,7 @@ window.onload = () => {
         if (activeTab === "expert" && expertCheckScroll && expertHasMore) {
             expertCheckScroll = false;
             expertPage++;
-            service.getExpertList(expertPage, memberId, (data) => {
+            await service.getExpertList(expertPage, memberId, (data) => {
                 layout.showExpertList(data.experts, expertPage);
                 expertHasMore = data.criteria.hasMore;
             });
@@ -293,7 +293,7 @@ window.onload = () => {
         if (actionClass === "menu-item--edit") {
             const postId = getPostIdFromButton(button);
             closePostMoreDropdown();
-            window.location.href = `/main/post/detail/${postId}?memberId=${memberId}`;
+            openEditModal(postId);
             return;
         }
         if (actionClass === "menu-item--delete") {
@@ -490,7 +490,7 @@ window.onload = () => {
                 const initial = (f.memberNickname || f.memberHandle || "?").charAt(0);
                 const avatarHtml = f.memberProfileFileName
                     ? `<span class="share-sheet__user-avatar"><img src="${f.memberProfileFileName}" alt="${f.memberNickname || ''}"/></span>`
-                    : `<span class="share-sheet__user-avatar">${initial}</span>`;
+                    : `<span class="share-sheet__user-avatar"><img src="${layout.buildAvatarDataUri(initial)}" alt="${f.memberNickname || ''}"/></span>`;
                 return `<button type="button" class="share-sheet__user" data-share-user-id="${f.followingId}">
                     ${avatarHtml}
                     <span class="share-sheet__user-body">
@@ -703,7 +703,7 @@ window.onload = () => {
                         const initial = (m.memberNickname || m.memberName || "?").charAt(0);
                         const avatarHtml = m.memberProfileFileName
                             ? `<img class="searchResultAvatar" src="${m.memberProfileFileName}" />`
-                            : `<div class="searchResultAvatar">${initial}</div>`;
+                            : `<img class="searchResultAvatar" src="${layout.buildAvatarDataUri(initial)}" />`;
                         return `<div class="searchResultItem" data-member-id="${m.id}">
                             ${avatarHtml}
                             <div class="searchResultProfile">
@@ -808,6 +808,7 @@ window.onload = () => {
     const composeGaugeText = composeOverlay.querySelector(".composerGaugeText");
     const composeSubmit = composeOverlay.querySelector(".tweet-modal__submit");
     const composeMaxLength = 500;
+    let editPostId = null;
 
     const createPostButton = document.getElementById("createPostButton");
     createPostButton.addEventListener("click", (e) => {
@@ -817,12 +818,41 @@ window.onload = () => {
         if (cs) { requestAnimationFrame(() => { cs.dispatchEvent(new Event("scroll")); }); }
     });
 
+    async function openEditModal(postId) {
+        const post = await service.getPost(postId, memberId);
+        editPostId = postId;
+
+        composeOverlay.classList.remove("off");
+        composeEditor.textContent = post.postContent || "";
+        composeEditor.dispatchEvent(new Event("input"));
+        composeSubmit.textContent = "수정";
+
+        // 태그 복원
+        if (post.hashtags && post.hashtags.length > 0) {
+            post.hashtags.forEach(h => composeCtx.addTag(h.tagName));
+        }
+
+        // 위치 복원
+        if (post.location) {
+            composeCtx.setLocation(post.location);
+        }
+
+        // 첨부파일 복원
+        if (post.postFiles && post.postFiles.length > 0) {
+            composeCtx.setExistingFiles(post.postFiles);
+        }
+
+        composeEditor.focus();
+    }
+
     function closeComposeModal() {
         composeOverlay.classList.add("off");
         composeEditor.innerHTML = "";
         composeGaugeText.textContent = composeMaxLength;
         composeGaugeText.style.color = "";
         composeSubmit.disabled = true;
+        editPostId = null;
+        composeSubmit.textContent = "게시";
         if (resetCompose) { resetCompose(); }
     }
 
@@ -870,11 +900,15 @@ window.onload = () => {
             formData.append("location", location);
         }
 
-        await service.writePost(formData);
+        if (editPostId) {
+            await service.updatePost(editPostId, formData);
+        } else {
+            await service.writePost(formData);
+        }
         closeComposeModal();
 
         postPage = 1;
-        service.getPostList(postPage, memberId, (data) => {
+        await service.getPostList(postPage, memberId, (data) => {
             layout.showPostList(data.posts, postPage);
             postHasMore = data.criteria.hasMore;
         });
@@ -904,7 +938,7 @@ window.onload = () => {
             const sourceAvatarImg = card.querySelector(".postAvatarImage");
             const sourceInitial = card.querySelector(".postAvatar")?.textContent?.trim() || "?";
 
-            document.getElementById("replyContextButton").textContent = sourceName + "의 " + sourceHandle + " 님에게 보내는 답글";
+            document.getElementById("replyContextButton").textContent = sourceName + " " + sourceHandle + " 님에게 보내는 답글";
             document.getElementById("replySourceName").textContent = sourceName;
             document.getElementById("replySourceHandle").textContent = sourceHandle;
             document.getElementById("replySourceTime").textContent = sourceTime;
@@ -914,7 +948,7 @@ window.onload = () => {
             if (sourceAvatarEl) {
                 sourceAvatarEl.innerHTML = sourceAvatarImg
                     ? `<img src="${sourceAvatarImg.src}" alt="" />`
-                    : sourceInitial;
+                    : `<img src="${layout.buildAvatarDataUri(sourceInitial)}" alt="" />`;
             }
         }
 
@@ -957,7 +991,10 @@ window.onload = () => {
     replySubmit.addEventListener("click", async (e) => {
         if (replyEditor.textContent.length === 0) { return; }
         if (replyTargetPostId) {
-            await service.writeReply(replyTargetPostId, memberId, replyEditor.textContent);
+            const replyFormData = new FormData();
+            replyFormData.append("memberId", memberId);
+            replyFormData.append("postContent", replyEditor.textContent);
+            await service.writeReply(replyTargetPostId, replyFormData);
         }
         closeReplyModal();
     });
@@ -1157,6 +1194,7 @@ window.onload = () => {
 
         async function loadPostTemps() {
             postTemps = await service.getPostTemps(memberId);
+            console.log("목록들어옴", postTemps.length, postTemps);
         }
 
         function updatePostTempFooter() {
@@ -1185,6 +1223,7 @@ window.onload = () => {
         }
 
         function renderPostTempList() {
+            console.log("목록그림 개수:", postTemps.length);
             selectedPostTempIndexes = [];
             if (!postTempList) { return; }
             if (postTemps.length === 0) { postTempList.innerHTML = ""; if (postTempEmpty) { postTempEmpty.classList.remove("off"); } updatePostTempFooter(); return; }
@@ -1202,14 +1241,33 @@ window.onload = () => {
             if (!modalEditor) { return; }
             const text = modalEditor.textContent.trim();
             if (!text) { return; }
-            await service.savePostTemp(memberId, text);
+            const tempLocation = selectedLocation || null;
+            const tagDivs = getTagDivs();
+            const tempTags = tagDivs.length > 0 ? JSON.stringify(tagDivs.map(t => t.textContent.replace("#", ""))) : null;
+            console.log("임시저장함 내용:", text, "위치:", tempLocation, "태그:", tempTags);
+            await service.savePostTemp(memberId, text, tempLocation, tempTags);
             await loadPostTemps();
         }
 
         async function loadPostTempToEditor(index) {
+            console.log("목록불러옴 index:", index, "id:", postTemps[index]?.id);
             if (!modalEditor || !postTemps[index]) { return; }
             const loaded = await service.loadPostTemp(postTemps[index].id);
+            console.log("목록가져옴 내용:", loaded.postTempContent, "위치:", loaded.postTempLocation, "태그:", loaded.postTempTags);
             modalEditor.textContent = loaded.postTempContent;
+
+            // 기존 태그 초기화 후 복원
+            const oldTags = getTagDivs();
+            for (let i = 0; i < oldTags.length; i++) { oldTags[i].remove(); }
+            if (loaded.postTempTags) {
+                JSON.parse(loaded.postTempTags).forEach(tag => addTag(tag));
+            }
+            syncTagUI();
+
+            // 위치 복원
+            selectedLocation = loaded.postTempLocation || null;
+            updateLocationUI();
+
             postTemps.splice(index, 1);
             modalEditor.dispatchEvent(new Event("input"));
             backToCompose();
@@ -1217,7 +1275,16 @@ window.onload = () => {
 
         if (postTempBtn && postTempView) {
             postTempBtn.addEventListener("click", async (e) => {
-                if (modalEditor && modalEditor.textContent.trim()) { await savePostTempFromEditor(); modalEditor.innerHTML = ""; modalEditor.dispatchEvent(new Event("input")); }
+                if (modalEditor && modalEditor.textContent.trim()) {
+                    await savePostTempFromEditor(); modalEditor.innerHTML = "";
+                    modalEditor.dispatchEvent(new Event("input"));
+                    // 태그/위치 초기화
+                    const oldTags = getTagDivs();
+                    for (let i = 0; i < oldTags.length; i++) { oldTags[i].remove(); }
+                    syncTagUI();
+                    selectedLocation = null;
+                    updateLocationUI();
+                }
                 await loadPostTemps();
                 renderPostTempList();
                 showSubView(postTempView);
@@ -1294,7 +1361,7 @@ window.onload = () => {
                 return false;
             }
             if (!ps) { ps = new kakao.maps.services.Places(); }
-            console.log("ps 생성 완료, keywordSearch 호출");
+            console.log("카카오받아옴");
             ps.keywordSearch(keyword, placesSearchCB);
         }
 
@@ -1616,7 +1683,29 @@ window.onload = () => {
             getAttachedFiles: () => attachedFiles,
             getTags: () => getTagDivs(),
             getSelectedProduct: () => selectedProduct,
-            getSelectedLocation: () => selectedLocation
+            getSelectedLocation: () => selectedLocation,
+            addTag: (tagName) => addTag(tagName),
+            setLocation: (loc) => { selectedLocation = loc; updateLocationUI(); },
+            setExistingFiles: (postFiles) => {
+                attachedFiles = [];
+                attachedUrls = postFiles.map(pf => pf.filePath);
+                if (attachedUrls.length > 0) {
+                    attachmentPreview.classList.remove("off");
+                    const isVideo = postFiles[0].contentType === "video";
+                    if (isVideo) {
+                        attachmentMedia.innerHTML = '' +
+                            '<div class="media-aspect-ratio media-aspect-ratio--single"></div>' +
+                            '<div class="media-absolute-layer">' +
+                                '<div class="media-cell media-cell--single">' +
+                                    '<div class="media-cell-inner">' +
+                                        '<div class="media-img-container">' +
+                                            '<video class="tweet-modal__attachment-video" controls><source src="' + attachedUrls[0] + '"></video>' +
+                                        '</div><button type="button" class="media-btn-delete" data-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>';
+                    } else {
+                        renderImageGrid();
+                    }
+                }
+            }
         };
     }
 
@@ -1706,6 +1795,19 @@ window.onload = () => {
 
         layout.setLoginMemberId(memberId);
 
+        // 프로필 이미지 없으면 SVG 아바타 동적 생성
+        const myInitial = (loginMember.memberNickname || loginMember.memberHandle || "?").charAt(0);
+        const avatarTargets = [
+            document.getElementById("accountAvatar"),
+            document.getElementById("composeAvatar"),
+            document.getElementById("replyAvatar")
+        ];
+        avatarTargets.forEach(el => {
+            if (!el) return;
+            if (el.querySelector("img")) return;
+            el.innerHTML = `<img src="${layout.buildAvatarDataUri(myInitial)}" alt="" />`;
+        });
+
         service.getAds((ads) => {
             layout.setAds(ads || []);
             loadFeed();
@@ -1730,7 +1832,7 @@ window.onload = () => {
                     const initial = (m.memberNickname || m.memberHandle || "?").charAt(0);
                     const avatarHtml = m.fileName
                         ? `<img class="suggestionAvatarImg" src="${m.fileName}" />`
-                        : initial;
+                        : `<img class="suggestionAvatarImg" src="${layout.buildAvatarDataUri(initial)}" />`;
                     const div = document.createElement("div");
                     div.className = "suggestionItem trend-item";
                     div.innerHTML =

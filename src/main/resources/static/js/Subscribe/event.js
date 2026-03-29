@@ -134,6 +134,9 @@ window.onload = () => {
         return "monthly";
     }
 
+    // 프론트 plan명 → DB tier 매핑
+    const tierMap = { pro: "pro", ultimate: "pro_plus", expert: "expert" };
+
     function getPaymentPlan() {
         const plan = priceData[currentPlan];
         if (!plan) return null;
@@ -147,15 +150,71 @@ window.onload = () => {
             amountValue: parsePrice(amountText),
             orderName: `${plan.displayName} ${isAnnual ? "연간" : "월간"} 구독`,
             orderId: `SUBSCRIBE_${currentPlan.toUpperCase()}_${currentPeriod.toUpperCase()}_${Date.now()}`,
+            tier: tierMap[currentPlan],
+            billingCycle: isAnnual ? "annual" : "monthly",
         };
     }
+
+    // 구독 등록 API (생성된 subscriptionId 반환)
+    const saveSubscription = async (plan) => {
+        const isAnnual = plan.billingCycle === "annual";
+        const now = new Date();
+        const expiresAt = new Date(now);
+        if (isAnnual) {
+            expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        } else {
+            expiresAt.setMonth(expiresAt.getMonth() + 1);
+        }
+
+        const response = await fetch("/api/subscriptions/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                memberId: memberId,
+                tier: plan.tier,
+                billingCycle: plan.billingCycle,
+                expiresAt: expiresAt.toISOString().slice(0, 19).replace("T", " "),
+            }),
+        });
+        return await response.json();
+    };
+
+    // 결제 정보 저장 API (subscriptionId 포함)
+    const savePayment = async (plan, bootpayResponse, subscriptionId) => {
+        await fetch("/api/subscriptions/payment/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                subscriptionId: subscriptionId,
+                memberId: memberId,
+                amount: plan.amountValue,
+                paymentMethod: bootpayResponse.method_origin || bootpayResponse.method || "",
+                receiptId: bootpayResponse.receipt_id || "",
+                paidAt: bootpayResponse.purchased_at || null,
+            }),
+        });
+    };
+
+    // 결제 성공 후 처리
+    const onPaymentSuccess = async (plan, bootpayResponse) => {
+        const subscriptionId = await saveSubscription(plan);
+        await savePayment(plan, bootpayResponse, subscriptionId);
+        alert("구독이 완료되었습니다!");
+        location.href = "/main/main";
+    };
 
     const pay = async () => {
         const plan = getPaymentPlan();
         if (!plan || plan.amountValue <= 0) return;
 
         if (typeof Bootpay === "undefined") {
-            console.log("Bootpay SDK is not loaded.");
+            const demoResult = {
+                price: plan.amountValue,
+                method: "데모",
+                receipt_id: `DEMO_${plan.orderId}`,
+                purchased_at: new Date().toISOString(),
+            };
+            await onPaymentSuccess(plan, demoResult);
             return;
         }
 
@@ -168,10 +227,10 @@ window.onload = () => {
                 pg: "라이트페이",
                 tax_free: 0,
                 user: {
-                    id: "회원아이디",
-                    username: "회원이름",
+                    id: String(memberId),
+                    username: "회원",
                     phone: "01000000000",
-                    email: "test@test.com",
+                    email: "user@globalgates.com",
                 },
                 items: [
                     {
@@ -189,25 +248,25 @@ window.onload = () => {
             });
 
             switch (response.event) {
-                case "issued":
+                case "issued": {
+                    const issuedSubId = await saveSubscription(plan);
+                    await savePayment(plan, response, issuedSubId);
+                    alert("가상계좌가 발급되었습니다. 입금 완료 시 구독이 활성화됩니다.");
                     break;
+                }
                 case "done":
-                    console.log(response);
+                    await onPaymentSuccess(plan, response);
                     break;
                 case "confirm": {
-                    console.log(response.receipt_id);
                     const confirmedData = await Bootpay.confirm();
-
                     if (confirmedData.event === "done") {
-                        // 결제 성공
+                        await onPaymentSuccess(plan, confirmedData);
                     }
-
                     break;
                 }
             }
         } catch (e) {
             console.log(e.message);
-
             switch (e.event) {
                 case "cancel":
                     console.log(e.message);

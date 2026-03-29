@@ -14,8 +14,17 @@ const service = (() => {
         return data;
     };
 
+    const getPost = async (postId, memberId) => {
+        const response = await fetch(`/api/main/posts/${postId}?memberId=${memberId}`);
+        return await response.json();
+    };
+
     const writePost = async (formData) => {
         await fetch('/api/main/posts/write', { method: 'POST', body: formData });
+    };
+
+    const updatePost = async (postId, formData) => {
+        await fetch(`/api/main/posts/update/${postId}`, { method: 'POST', body: formData });
     };
 
     const addLike = async (memberId, postId) => {
@@ -75,11 +84,10 @@ const service = (() => {
         });
     };
 
-    const writeReply = async (postId, memberId, postContent) => {
+    const writeReply = async (postId, formData) => {
         await fetch(`/api/main/posts/${postId}/replies`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ memberId: memberId, postContent: postContent })
+            body: formData
         });
     };
 
@@ -152,11 +160,11 @@ const service = (() => {
         await fetch(`/api/main/posts/delete/${postId}`, { method: 'POST' });
     };
 
-    const savePostTemp = async (memberId, postTempContent) => {
+    const savePostTemp = async (memberId, postTempContent, location, tags) => {
         await fetch('/api/main/post-temps', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ memberId: memberId, postTempContent: postTempContent })
+            body: JSON.stringify({ memberId: memberId, postTempContent: postTempContent, postTempLocation: location, postTempTags: tags })
         });
     };
 
@@ -185,7 +193,7 @@ const service = (() => {
     };
 
     return {
-        getPostList, getExpertList, writePost, deletePost,
+        getPostList, getExpertList, getPost, writePost, updatePost, deletePost,
         addLike, deleteLike,
         addBookmark, deleteBookmark,
         follow, unfollow, getFollowings,

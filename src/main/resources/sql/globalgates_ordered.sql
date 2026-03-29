@@ -565,6 +565,8 @@ create table tbl_post_temp (
     id                bigint       generated always as identity primary key,
     member_id         bigint       not null,
     post_temp_content text         not null,
+    post_temp_location text,
+    post_temp_tags text,
     created_datetime  timestamp    not null default now(),
     updated_datetime  timestamp    not null default now(),
     constraint fk_post_temp_member foreign key(member_id) references tbl_member(id)

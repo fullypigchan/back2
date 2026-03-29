@@ -33,25 +33,6 @@ public class MainController {
     private final BlockService blockService;
     private final ReportService reportService;
 
-//    메인 테스트 페이지
-    @GetMapping("/maintest")
-    public String goToMainTest(HttpServletRequest request, Model model) {
-        String token = jwtTokenProvider.parseTokenFromHeader(request);
-        String loginId = jwtTokenProvider.getUsername(token);
-        MemberDTO member = memberService.getMember(loginId);
-
-        if (member.getFileName() != null && !member.getFileName().isEmpty()) {
-            try {
-                member.setFileName(s3Service.getPresignedUrl(member.getFileName(), Duration.ofMinutes(10)));
-            } catch (IOException e) {
-                member.setFileName(null);
-            }
-        }
-
-        model.addAttribute("member", member);
-        return "main/maintest";
-    }
-
 //    메인 페이지
     @GetMapping("/main")
     public String goToMain(HttpServletRequest request, Model model) {

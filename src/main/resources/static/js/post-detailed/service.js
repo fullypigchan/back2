@@ -57,11 +57,10 @@ const service = (() => {
         });
     };
 
-    const writeReply = async (postId, memberId, postContent) => {
+    const writeReply = async (postId, formData) => {
         await fetch(`/api/main/posts/${postId}/replies`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ memberId: memberId, postContent: postContent })
+            body: formData
         });
     };
 

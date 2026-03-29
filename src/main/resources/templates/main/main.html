@@ -45,11 +45,7 @@
                             </span>
                     <span>알림</span>
                 </a>
-                <a class="nav-item">
-                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM6 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4zm13 4v3h2v-3h3V8h-3V5h-2v3h-3v2h3zM3.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C13.318 13.65 11.838 13 10 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C5.627 11.85 7.648 11 10 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H1.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46z"></path></g></svg>
-                    <span>팔로우하기</span>
-                </a>
-                <a class="nav-item">
+                <a class="nav-item" href="/friends">
                     <svg viewBox="0 0 24 24" class="nav-icon"><path d="M16.697 5.5c1.813 0 3.303 1.46 3.303 3.25 0 .967-.426 1.885-1.17 2.668L12 18.01l-6.83-6.592A3.74 3.74 0 014 8.75C4 6.96 5.49 5.5 7.303 5.5c.967 0 1.89.414 2.546 1.14L12 8.89l2.151-2.25A3.55 3.55 0 0116.697 5.5zm0-2C15.09 3.5 13.55 4.14 12 5.76 10.45 4.14 8.91 3.5 7.303 3.5 4.386 3.5 2 5.82 2 8.75c0 1.49.62 2.91 1.72 3.97l7.53 7.26a1 1 0 001.39 0l7.53-7.26A5.62 5.62 0 0022 8.75c0-2.93-2.386-5.25-5.303-5.25z"></path></svg>
                     <span>친구</span>
                 </a>
@@ -68,7 +64,7 @@
                     <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>
                     <span>북마크</span>
                 </a>
-                <a class="nav-item nav-item-premium">
+                <a class="nav-item" href="/subscribe">
                     <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path></g></svg>
                     <span>구독</span>
                 </a>
@@ -84,7 +80,7 @@
             <button class="post-btn" id="createPostButton">게시하기</button>
             <div class="accountMenuWrap" id="accountMenuWrap">
                 <div class="profile-card" id="accountCard">
-                    <div class="profile-avatar" id="accountAvatar" th:text="${member.memberNickname != null ? member.memberNickname.substring(0,1) : '?'}">K</div>
+                    <div class="profile-avatar" id="accountAvatar" th:text="${member.memberNickname != null ? member.memberNickname.substring(0,1) : (member.memberHandle != null ? member.memberHandle.substring(0,1) : '?')}">K</div>
                     <div class="profile-info">
                         <span class="profile-name" id="accountName" th:text="${member.memberNickname ?: member.memberName ?: ''}"></span>
                         <span class="profile-handle" id="accountHandle" th:text="${member.memberHandle ?: ''}"></span>
@@ -175,7 +171,7 @@
                 <div class="tweet-modal__composer">
                     <div class="tweet-modal__avatar-wrap" id="composeAvatar">
                         <img th:if="${member.fileName != null}" th:src="${member.fileName}" alt="" />
-                        <span th:if="${member.fileName == null}" th:text="${member.memberNickname != null ? member.memberNickname.substring(0,1) : '?'}"></span>
+                        <span th:if="${member.fileName == null}" th:text="${member.memberNickname != null ? member.memberNickname.substring(0,1) : (member.memberHandle != null ? member.memberHandle.substring(0,1) : '?')}"></span>
                     </div>
                     <div class="tweet-modal__input-wrap">
                         <!-- 게시판/커뮤니티 선택 영역 -->
@@ -419,7 +415,6 @@
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg>
                 </button>
                 <h2 id="reply-modal-title" class="tweet-modal__title">답글</h2>
-                <button type="button" class="tweet-modal__draft">임시저장</button>
             </div>
             <!-- 답글 작성 본문: 원본 게시물 + 에디터 + 첨부 미리보기 -->
             <div class="tweet-modal__body">
@@ -439,7 +434,7 @@
                 <div class="tweet-modal__composer">
                     <div class="tweet-modal__avatar-wrap" id="replyAvatar">
                         <img th:if="${member.fileName != null}" th:src="${member.fileName}" alt="" />
-                        <span th:if="${member.fileName == null}" th:text="${member.memberNickname != null ? member.memberNickname.substring(0,1) : '?'}"></span>
+                        <span th:if="${member.fileName == null}" th:text="${member.memberNickname != null ? member.memberNickname.substring(0,1) : (member.memberHandle != null ? member.memberHandle.substring(0,1) : '?')}"></span>
                     </div>
                     <div class="tweet-modal__input-wrap">
                         <div class="tweet-modal__editor" contenteditable="true" aria-multiline="true" data-placeholder="답글 등록하기" ></div>
@@ -613,17 +608,9 @@
                     <button type="button" class="draft-panel__item">
                         <img class="draft-panel__avatar" alt="" src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg" />
                         <span class="draft-panel__item-body">
-                                <span class="draft-panel__meta">@tmtsugar 님에게 보내는 답글</span>
-                                <span class="draft-panel__text">프로필 문구 수정 전 확인 부탁드립니다.</span>
-                                <span class="draft-panel__date">3월 10일 오전 11:20</span>
-                            </span>
-                    </button>
-                    <button type="button" class="draft-panel__item">
-                        <img class="draft-panel__avatar" alt="" src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png" />
-                        <span class="draft-panel__item-body">
-                                <span class="draft-panel__meta">@elonmusk 님에게 보내는 답글</span>
-                                <span class="draft-panel__text">회의 끝나고 초안 정리해서 다시 보낼게요.</span>
-                                <span class="draft-panel__date">3월 9일 오후 7:10</span>
+                                <span class="draft-panel__meta"></span>
+                                <span class="draft-panel__text"></span>
+                                <span class="draft-panel__date"></span>
                             </span>
                     </button>
                 </div>

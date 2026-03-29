@@ -78,7 +78,7 @@ public class PostService {
     }
 
     //    게시글 목록 조회
-    @Cacheable(value="post:list", key="'page:' + #page" + " + 'memberId:' + #memberId")
+//    @Cacheable(value="post:list", key="'page:' + #page" + " + 'memberId:' + #memberId")
     public PostWithPagingDTO getList(int page, Long memberId) {
         Criteria criteria = new Criteria(page, postDAO.findTotal());
         List<PostDTO> posts = postDAO.findAll(criteria, memberId);
@@ -102,7 +102,7 @@ public class PostService {
     }
 
     //    게시글 단건 조회
-    @Cacheable(value="post", key="'id:' + #id + ':memberId:' + #memberId")
+//    @Cacheable(value="post", key="'page:' + #page" + " + 'memberId:' + #memberId")
     public PostDTO getDetail(Long id, Long memberId) {
         PostDTO postDTO = postDAO.findById(id, memberId)
                 .orElseThrow(PostNotFoundException::new);
