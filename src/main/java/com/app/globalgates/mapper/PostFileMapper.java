@@ -4,6 +4,7 @@ package com.app.globalgates.mapper;
 import com.app.globalgates.domain.PostFileVO;
 import com.app.globalgates.dto.PostFileDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,4 +21,7 @@ public interface PostFileMapper {
 
     //    게시글 첨부파일 조회
     public List<PostFileDTO> selectAllByPostId(Long id);
+
+    //    여러 게시글의 첨부파일 일괄 조회 (N+1 방지)
+    public List<PostFileDTO> selectAllByPostIds(@Param("postIds") List<Long> postIds);
 }

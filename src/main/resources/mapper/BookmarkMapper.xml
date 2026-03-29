@@ -54,7 +54,7 @@
                p.title   as postTitle,
                p.content as postContent
         from tbl_bookmark b
-                 join tbl_post p on b.post_id = p.id
+                 left join tbl_post p on b.post_id = p.id
         where b.member_id = #{memberId}
         order by b.created_datetime desc
     </select>
@@ -68,7 +68,7 @@
                p.title   as postTitle,
                p.content as postContent
         from tbl_bookmark b
-                 join tbl_post p on b.post_id = p.id
+                 left join tbl_post p on b.post_id = p.id
         where b.folder_id = #{folderId}
         order by b.created_datetime desc
     </select>
@@ -82,7 +82,7 @@
                p.title   as postTitle,
                p.content as postContent
         from tbl_bookmark b
-                 join tbl_post p on b.post_id = p.id
+                 left join tbl_post p on b.post_id = p.id
         where b.member_id = #{memberId}
           and b.folder_id is null
         order by b.created_datetime desc

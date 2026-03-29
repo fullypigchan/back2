@@ -1,11 +1,16 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>북마크 / X</title>
-    <link rel="stylesheet" href="/static/css/bookmark/bookmark.css"/>
-    <script src="/static/js/bookmark/event.js"></script>
+    <link rel="stylesheet" href="/css/bookmark/bookmark.css"/>
+    <script th:inline="javascript">
+        const memberId = /*[[${memberId}]]*/ 0;
+    </script>
+    <script src="/js/bookmark/service.js"></script>
+    <script src="/js/bookmark/layout.js"></script>
+    <script src="/js/bookmark/event.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
@@ -85,30 +90,8 @@
                 </div>
             </section>
 
-            <section class="bookmark-list" aria-label="북마크 목록">
-                <button
-                        class="bookmark-item"
-                        id="bookmarkFolderButton"
-                        type="button"
-                        data-bookmark-folder="test"
-                        aria-label="test 북마크 열기"
-                >
-                            <span class="bookmark-item-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path
-                                            d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"
-                                    />
-                                </svg>
-                            </span>
-                    <span class="bookmark-item-label" id="bookmarkFolderLabel">test</span>
-                    <span class="bookmark-item-arrow" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path
-                                            d="M14.586 12L7.543 4.96l1.414-1.42L17.414 12l-8.457 8.46-1.414-1.42L14.586 12z"
-                                    />
-                                </svg>
-                            </span>
-                </button>
+            <section class="bookmark-list" id="bookmarkFolderList" aria-label="북마크 폴더 목록">
+                <!-- 폴더 목록은 JS에서 동적 생성 -->
             </section>
 
             <section class="empty-state" aria-live="polite">
@@ -141,7 +124,13 @@
                 </div>
             </section>
             <div class="bookmark-detail-feed" id="bookmarkPosts">
-                <article class="bookmark-post" data-post-id="101">
+                <!-- 게시물 카드는 JS에서 동적 생성 -->
+            </div>
+        </section>
+    </main>
+</div>
+<!-- 하드코딩된 게시물 카드 제거됨 — JS에서 동적 생성 -->
+<template id="__DUMMY_REMOVED__"><article class="bookmark-post" data-post-id="101">
                     <div class="bookmark-post-avatar">T</div>
                     <div class="bookmark-post-body">
                         <header class="bookmark-post-header">
@@ -341,6 +330,7 @@
         </section>
     </main>
 </div>
+</template>
 
 <div id="bookmarkLayers">
     <div class="bookmark-layers-dropdown" id="shareDropdown" hidden>

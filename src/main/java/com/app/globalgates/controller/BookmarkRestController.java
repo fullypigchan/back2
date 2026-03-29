@@ -4,6 +4,11 @@ import com.app.globalgates.dto.BookmarkDTO;
 import com.app.globalgates.dto.BookmarkFolderDTO;
 import com.app.globalgates.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/bookmarks")
@@ -74,5 +81,12 @@ public class BookmarkRestController {
     @GetMapping("/members/{memberId}/uncategorized")
     public List<BookmarkDTO> getUncategorizedBookmarks(@PathVariable Long memberId) {
         return bookmarkService.getUncategorizedBookmarks(memberId);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrity(DataIntegrityViolationException e) {
+        log.error("데이터 무결성 위반: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "이미 북마크된 게시물입니다."));
     }
 }

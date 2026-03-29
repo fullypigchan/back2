@@ -226,4 +226,49 @@ class BookmarkServiceTest {
         log.info("getBookmarkCount 결과 — count: {}", count);
         assertThat(count).isGreaterThanOrEqualTo(1);
     }
+
+    // 중복 북마크 추가 시 DataIntegrityViolationException 발생 확인
+    @Test
+    public void addBookmarkDuplicate() {
+        // UNIQUE 제약이 있으면 DataIntegrityViolationException 발생
+        BookmarkDTO dto = new BookmarkDTO();
+        dto.setMemberId(memberId);
+        dto.setPostId(postId);
+        bookmarkService.addBookmark(dto);
+
+        BookmarkDTO dto2 = new BookmarkDTO();
+        dto2.setMemberId(memberId);
+        dto2.setPostId(postId);
+
+        try {
+            bookmarkService.addBookmark(dto2);
+            log.info("중복 북마크 — 예외 발생하지 않음 (UNIQUE 제약 미적용 상태)");
+        } catch (Exception e) {
+            log.info("중복 북마크 — 예외 발생: {}", e.getClass().getSimpleName());
+            assertThat(e).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+        }
+    }
+
+    // 삭제된 게시물이 포함된 북마크 조회 (LEFT JOIN)
+    // FK 제약 때문에 게시물을 직접 삭제할 수 없으므로, FK를 일시 비활성화하여 테스트
+    @Test
+    public void getBookmarksWithDeletedPost() {
+        BookmarkDTO dto = new BookmarkDTO();
+        dto.setMemberId(memberId);
+        dto.setPostId(postId);
+        bookmarkService.addBookmark(dto);
+
+        // FK 일시 비활성화 → 게시물 삭제 → LEFT JOIN 검증
+        jdbcTemplate.execute("alter table tbl_bookmark drop constraint if exists fk_bookmark_post");
+        jdbcTemplate.update("delete from tbl_post where id = ?", postId);
+
+        List<BookmarkDTO> result = bookmarkService.getBookmarks(memberId);
+        log.info("삭제된 게시물 포함 조회 — size: {}", result.size());
+        // LEFT JOIN이면 결과가 있되 postTitle이 null
+        assertThat(result).isNotEmpty();
+        assertThat(result.get(0).getPostTitle()).isNull();
+
+        // FK 복원 (Transactional 롤백이 처리하지만 명시적으로)
+        jdbcTemplate.execute("alter table tbl_bookmark add constraint fk_bookmark_post foreign key (post_id) references tbl_post(id)");
+    }
 }

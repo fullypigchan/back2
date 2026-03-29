@@ -37,4 +37,24 @@
         order by pf.id
     </select>
 
+    <!-- 여러 게시글의 첨부파일 일괄 조회 (N+1 방지) -->
+    <select id="selectAllByPostIds" resultType="postFileDTO">
+        select pf.id,
+               pf.post_id,
+               pf.file_id,
+               f.original_name,
+               f.file_name,
+               f.file_path,
+               f.file_size,
+               f.content_type,
+               f.created_datetime
+        from tbl_post_file pf
+                 join tbl_file f on pf.file_id = f.id
+        where pf.post_id in
+        <foreach item="postId" collection="postIds" open="(" separator="," close=")">
+            #{postId}
+        </foreach>
+        order by pf.post_id, pf.id
+    </select>
+
 </mapper>

@@ -143,9 +143,45 @@
     let activeShareBookmarkPostId = "";
     let activeMorePostMeta = null;
     let toastTimer = null;
-    let currentFolderName = getTextContent(bookmarkFolderLabel) || "test";
+    let currentFolderId = null;
+    let currentFolderName = "모든 북마크";
     let currentFolderDeleted = false;
     const bookmarkFollowState = new Map();
+    const bookmarkFolderList = document.getElementById("bookmarkFolderList");
+
+    // ── API + 렌더링은 service.js, layout.js 모듈 사용 ──
+
+    function handleResult(result) {
+        if (!result.ok && result.message) showToast(result.message);
+        return result.ok ? result.data : null;
+    }
+
+    async function loadFolders() {
+        if (typeof memberId === "undefined" || !memberId) return;
+        const result = await BookmarkService.getFolders(memberId);
+        if (result.ok) BookmarkLayout.renderFolderList(bookmarkFolderList, result.data);
+        else if (result.message) showToast(result.message);
+    }
+
+    async function loadAllBookmarks() {
+        if (typeof memberId === "undefined" || !memberId) return;
+        const result = await BookmarkService.getAll(memberId);
+        if (result.ok) BookmarkLayout.renderPostList(bookmarkPosts, result.data, bookmarkPostsEmpty);
+        else if (result.message) showToast(result.message);
+    }
+
+    async function loadFolderBookmarks(folderId) {
+        const result = await BookmarkService.getByFolder(folderId);
+        if (result.ok) BookmarkLayout.renderPostList(bookmarkPosts, result.data, bookmarkPostsEmpty);
+        else if (result.message) showToast(result.message);
+    }
+
+    async function loadUncategorizedBookmarks() {
+        if (typeof memberId === "undefined" || !memberId) return;
+        const result = await BookmarkService.getUncategorized(memberId);
+        if (result.ok) BookmarkLayout.renderPostList(bookmarkPosts, result.data, bookmarkPostsEmpty);
+        else if (result.message) showToast(result.message);
+    }
 
     let activeReplyTrigger = null;
     let attachedReplyFiles = [];
@@ -231,20 +267,6 @@
     }
 
     function syncFolderNameUI() {
-        if (bookmarkFolderLabel) {
-            bookmarkFolderLabel.textContent = currentFolderName;
-        }
-        if (bookmarkFolderButton) {
-            bookmarkFolderButton.dataset.bookmarkFolder = currentFolderName;
-            bookmarkFolderButton.setAttribute(
-                "aria-label",
-                `${currentFolderName} 북마크 열기`,
-            );
-            bookmarkFolderButton.hidden = currentFolderDeleted;
-        }
-        if (bookmarkList) {
-            bookmarkList.hidden = currentFolderDeleted;
-        }
         if (isDetailViewOpen) {
             setHeaderTitle(currentFolderName);
         }
@@ -538,13 +560,15 @@
         window.setTimeout(() => deleteModalSubmitButton?.focus(), 0);
     }
 
-    function deleteCurrentFolder() {
+    async function deleteCurrentFolder() {
+        if (!currentFolderId) return;
+        await BookmarkService.deleteFolder(currentFolderId);
         currentFolderDeleted = true;
         closeDeleteModal();
         if (isDetailViewOpen) {
             closeBookmarkDetail();
         }
-        syncFolderNameUI();
+        await loadFolders();
         showToast("폴더를 삭제했습니다");
     }
 
@@ -625,12 +649,16 @@
         }
     }
 
-    function removeBookmarkedPost(postId) {
+    async function removeBookmarkedPost(postId) {
         const postCard = bookmarkPosts?.querySelector(
             `.bookmark-post[data-post-id="${postId}"]`,
         );
-        if (!postCard) {
-            return false;
+        if (!postCard) return false;
+        const bookmarkId = postCard.dataset.bookmarkId;
+        if (bookmarkId) {
+            await BookmarkService.remove(bookmarkId);
+        } else if (typeof memberId !== "undefined" && memberId) {
+            await BookmarkService.removeByPost(memberId, postId);
         }
         postCard.remove();
         syncBookmarkPostsEmpty();
@@ -705,7 +733,15 @@
     document.addEventListener("click", (event) => {
         const folderButton = event.target.closest("[data-bookmark-folder]");
         if (folderButton) {
-            openBookmarkDetail(folderButton.dataset.bookmarkFolder || "북마크");
+            const folderName = folderButton.dataset.bookmarkFolder || "북마크";
+            const folderId = folderButton.dataset.folderId || "";
+            currentFolderId = folderId || null;
+            openBookmarkDetail(folderName);
+            if (!folderId || folderId === "") {
+                loadUncategorizedBookmarks();
+            } else {
+                loadFolderBookmarks(folderId);
+            }
             return;
         }
     });
@@ -777,12 +813,17 @@
             }
         });
         folderNameInput.addEventListener("input", updateModalState);
-        modalSubmitButton.addEventListener("click", () => {
+        modalSubmitButton.addEventListener("click", async () => {
             const value = folderNameInput.value.trim();
-            if (!value) {
-                return;
+            if (!value) return;
+            modalSubmitButton.disabled = true;
+            const result = await BookmarkService.createFolder(memberId, value);
+            if (result.ok) {
+                showToast(`${value} 폴더를 만들었습니다`);
+                await loadFolders();
+            } else if (result.message) {
+                showToast(result.message);
             }
-            showToast(`${value} 폴더를 만들었습니다`);
             closeModal();
         });
     }
@@ -836,15 +877,17 @@
             }
         });
         editFolderNameInput.addEventListener("input", updateEditModalState);
-        editModalSubmitButton.addEventListener("click", () => {
+        editModalSubmitButton.addEventListener("click", async () => {
             const value = editFolderNameInput.value.trim();
-            if (!value || value === currentFolderName) {
-                return;
-            }
+            if (!value || value === currentFolderName) return;
+            if (!currentFolderId) return;
+            editModalSubmitButton.disabled = true;
+            await BookmarkService.updateFolder(currentFolderId, value);
             currentFolderName = value;
             syncFolderNameUI();
             setHeaderTitle(value);
             closeEditModal();
+            await loadFolders();
             showToast("폴더를 수정했습니다");
         });
     }
@@ -1942,5 +1985,8 @@
         closeBookmarkReplyModal();
         showToast("답글이 게시되었습니다");
     });
+
+    // ── 페이지 초기화: 폴더 목록 로드 ──
+    loadFolders();
 
 })();

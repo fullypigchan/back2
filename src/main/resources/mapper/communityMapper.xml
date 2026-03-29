@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.app.globalgates.mapper.CommunityMapper">
+
+    <!-- 커뮤니티 생성 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into tbl_community (creator_id, community_name, description, category_id)
+        values (#{creatorId}, #{communityName}, #{description}, #{categoryId})
+    </insert>
+
+    <!-- 커뮤니티 수정 -->
+    <update id="update">
+        update tbl_community
+        set community_name = #{communityName},
+            description = #{description},
+            category_id = #{categoryId},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <!-- 커뮤니티 상태 변경 -->
+    <update id="updateStatus">
+        update tbl_community
+        set community_status = #{status}::community_status,
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <!-- 커뮤니티 단건 조회 -->
+    <select id="selectById" resultType="communityDTO">
+        select v.*,
+               case when exists (
+                   select 1 from tbl_community_member cm2
+                   where cm2.community_id = v.id and cm2.member_id = #{memberId}
+               ) then true else false end as is_joined,
+               case when v.creator_id = #{memberId} then 'creator'
+                    else (select cm3.member_role::text from tbl_community_member cm3
+                          where cm3.community_id = v.id and cm3.member_id = #{memberId})
+               end as my_role
+        from view_community_feed v
+        where v.id = #{id}
+    </select>
+
+    <!-- 커뮤니티 전체 목록 (인기순) -->
+    <select id="selectAll" resultType="communityDTO">
+        select * from view_community_feed
+        order by member_count desc, created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 내가 가입한 커뮤니티 목록 -->
+    <select id="selectByMemberId" resultType="communityDTO">
+        select v.* from view_community_feed v
+        join tbl_community_member cm on cm.community_id = v.id
+        where cm.member_id = #{memberId}
+        order by cm.joined_at desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 카테고리별 커뮤니티 목록 -->
+    <select id="selectByCategory" resultType="communityDTO">
+        select * from view_community_feed
+        where category_id = #{categoryId}
+        order by member_count desc, created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 활성 커뮤니티 수 -->
+    <select id="selectCount" resultType="int">
+        select count(*) from tbl_community where community_status = 'active'
+    </select>
+
+    <!-- 내가 가입한 커뮤니티 수 -->
+    <select id="selectCountByMemberId" resultType="int">
+        select count(*) from tbl_community_member where member_id = #{memberId}
+    </select>
+
+    <select id="selectCountByCategory" resultType="int">
+        select count(*) from view_community_feed where category_id = #{categoryId}
+    </select>
+
+    <!-- 공통 게시글 컬럼 (서브쿼리 포함) -->
+    <sql id="postColumns">
+        p.id, p.member_id, p.title as post_title, p.content as post_content,
+        p.created_datetime, p.updated_datetime, p.community_id,
+        m.member_nickname, m.member_handle,
+        (select f.file_path from tbl_member_profile_file mpf
+            join tbl_file f on mpf.id = f.id
+         where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile'
+         limit 1) as member_profile_file_name,
+        coalesce(lc.cnt, 0) as like_count,
+        coalesce(rc.cnt, 0) as reply_count,
+        coalesce(bc.cnt, 0) as bookmark_count,
+        case when pl2.post_id is not null then true else false end as is_liked,
+        case when bk2.post_id is not null then true else false end as is_bookmarked
+    </sql>
+
+    <!-- 공통 카운트 조인 (서브쿼리 대신 left join으로 성능 개선) -->
+    <sql id="postCountJoins">
+        left join (select post_id, count(*) as cnt from tbl_post_like group by post_id) lc on lc.post_id = p.id
+        left join (select reply_post_id, count(*) as cnt from tbl_post where post_status = 'active' and reply_post_id is not null group by reply_post_id) rc on rc.reply_post_id = p.id
+        left join (select post_id, count(*) as cnt from tbl_bookmark group by post_id) bc on bc.post_id = p.id
+        left join tbl_post_like pl2 on pl2.post_id = p.id and pl2.member_id = #{memberId}
+        left join tbl_bookmark bk2 on bk2.post_id = p.id and bk2.member_id = #{memberId}
+    </sql>
+
+    <!-- 커뮤니티 검색 (이름/설명) -->
+    <select id="selectByKeyword" resultType="communityDTO">
+        select * from view_community_feed
+        where (community_name ilike concat('%', #{keyword}, '%')
+               or description ilike concat('%', #{keyword}, '%'))
+        order by member_count desc, created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <select id="selectCountByKeyword" resultType="int">
+        select count(*) from view_community_feed
+        where (community_name ilike concat('%', #{keyword}, '%')
+               or description ilike concat('%', #{keyword}, '%'))
+    </select>
+
+    <!-- 커뮤니티 게시글 목록 -->
+    <select id="selectPostsByCommunityId" resultType="postDTO">
+        select <include refid="postColumns"/>
+        from tbl_post p
+        join tbl_member m on p.member_id = m.id
+        <include refid="postCountJoins"/>
+        where p.community_id = #{communityId}
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+        order by p.created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 커뮤니티 게시글 수 -->
+    <select id="selectPostsCountByCommunityId" resultType="int">
+        select count(*) from tbl_post
+        where community_id = #{communityId} and post_status = 'active' and reply_post_id is null
+    </select>
+
+    <!-- 커뮤니티 게시글 검색 -->
+    <select id="selectPostsBySearch" resultType="postDTO">
+        select <include refid="postColumns"/>
+        from tbl_post p
+        join tbl_member m on p.member_id = m.id
+        <include refid="postCountJoins"/>
+        where p.community_id = #{communityId}
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+          <if test="keyword != null and keyword != ''">
+              and (p.title like concat('%', #{keyword}, '%')
+                   or m.member_handle like concat('%', #{keyword}, '%')
+                   or m.member_nickname like concat('%', #{keyword}, '%'))
+          </if>
+        <choose>
+            <when test="type == 'popular'">order by like_count desc</when>
+            <otherwise>order by p.created_datetime desc</otherwise>
+        </choose>
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 커뮤니티 게시글 검색 수 -->
+    <select id="selectPostsCountBySearch" resultType="int">
+        select count(*) from tbl_post p
+        join tbl_member m on p.member_id = m.id
+        where p.community_id = #{communityId}
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+          <if test="keyword != null and keyword != ''">
+              and (p.title like concat('%', #{keyword}, '%')
+                   or m.member_handle like concat('%', #{keyword}, '%')
+                   or m.member_nickname like concat('%', #{keyword}, '%'))
+          </if>
+    </select>
+
+    <!-- 커뮤니티 미디어 목록 -->
+    <select id="selectMediaByCommunityId" resultType="postFileDTO">
+        select pf.id, pf.post_id, pf.file_id,
+               f.original_name, f.file_name, f.file_path, f.file_size,
+               f.content_type, f.created_datetime
+        from tbl_post p
+        join tbl_post_file pf on pf.post_id = p.id
+        join tbl_file f on pf.file_id = f.id
+        where p.community_id = #{communityId}
+          and p.post_status = 'active'
+        order by f.created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 커뮤니티 미디어 수 -->
+    <select id="selectMediaCountByCommunityId" resultType="int">
+        select count(*) from tbl_post p
+        join tbl_post_file pf on pf.post_id = p.id
+        where p.community_id = #{communityId}
+          and p.post_status = 'active'
+    </select>
+
+    <!-- 홈 피드: 내가 가입한 커뮤니티의 모든 게시글 -->
+    <select id="selectMyCommunitiesPosts" resultType="postDTO">
+        select <include refid="postColumns"/>,
+               c.community_name,
+               (select cat.category_name from tbl_category cat where cat.id = c.category_id) as category_name
+        from tbl_post p
+        join tbl_member m on p.member_id = m.id
+        join tbl_community c on p.community_id = c.id
+        <include refid="postCountJoins"/>
+        where p.community_id in (select community_id from tbl_community_member where member_id = #{memberId})
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+          and c.community_status = 'active'
+        order by p.created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <select id="selectMyCommunitiesPostsCount" resultType="int">
+        select count(*) from tbl_post p
+        join tbl_community c on p.community_id = c.id
+        where p.community_id in (select community_id from tbl_community_member where member_id = #{memberId})
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+          and c.community_status = 'active'
+    </select>
+
+    <!-- 탐색 피드: 내가 가입하지 않은 커뮤니티의 생성자 게시글만 (카테고리 필터 지원) -->
+    <select id="selectExplorePosts" resultType="postDTO">
+        select <include refid="postColumns"/>,
+               c.community_name,
+               (select cat.category_name from tbl_category cat where cat.id = c.category_id) as category_name
+        from tbl_post p
+        join tbl_member m on p.member_id = m.id
+        join tbl_community c on p.community_id = c.id
+        <include refid="postCountJoins"/>
+        where p.community_id not in (select community_id from tbl_community_member where member_id = #{memberId})
+          and p.member_id = c.creator_id
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+          and c.community_status = 'active'
+          <if test="categoryId != null">
+              and (c.category_id = #{categoryId}
+                   or c.category_id in (select id from tbl_category where product_category_parent_id = #{categoryId}))
+          </if>
+        order by p.created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <select id="selectExplorePostsCount" resultType="int">
+        select count(*) from tbl_post p
+        join tbl_community c on p.community_id = c.id
+        where p.community_id not in (select community_id from tbl_community_member where member_id = #{memberId})
+          and p.member_id = c.creator_id
+          and p.post_status = 'active'
+          and p.reply_post_id is null
+          and c.community_status = 'active'
+          <if test="categoryId != null">
+              and (c.category_id = #{categoryId}
+                   or c.category_id in (select id from tbl_category where product_category_parent_id = #{categoryId}))
+          </if>
+    </select>
+
+</mapper>

@@ -73,7 +73,16 @@ public class MainController {
 
 //    게시글 상세 페이지
     @GetMapping("/post/detail/{id}")
-    public String goToPostDetail(@PathVariable Long id, @RequestParam Long memberId, HttpServletRequest request, Model model) {
+    public String goToPostDetail(@PathVariable Long id, @RequestParam(required = false) Long memberId, HttpServletRequest request, Model model) {
+        if (memberId == null) {
+            try {
+                String token = jwtTokenProvider.parseTokenFromHeader(request);
+                String username = jwtTokenProvider.getUsername(token);
+                memberId = memberService.getMember(username).getId();
+            } catch (Exception e) {
+                memberId = 0L;
+            }
+        }
         PostDTO postDTO = postService.getDetail(id, memberId);
         postDTO.getPostFiles().forEach(pf -> {
             try {

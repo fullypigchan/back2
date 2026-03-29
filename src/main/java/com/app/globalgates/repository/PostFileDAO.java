@@ -33,4 +33,12 @@ public class PostFileDAO {
     public List<PostFileDTO> findAllByPostId(Long id) {
         return postFileMapper.selectAllByPostId(id);
     }
+
+    //    여러 게시글의 첨부파일 일괄 조회 (N+1 방지)
+    public List<PostFileDTO> findAllByPostIds(List<Long> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return List.of();
+        }
+        return postFileMapper.selectAllByPostIds(postIds);
+    }
 }
