@@ -364,7 +364,6 @@ div.postHashtags {
 
 .post-detail-actions,
 .tweet-action-bar {
-    justify-content: space-between;
     gap: 8px;
     padding: 4px 0 4px;
 }

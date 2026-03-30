@@ -56,7 +56,12 @@
             member_region, member_status,
             member_role, push_enabled,
             member_language, birth_date, created_datetime,
-            updated_datetime, last_login_at, member_name
+            updated_datetime, last_login_at, member_name,
+            (select f.file_name from tbl_member_profile_file mpf
+                join tbl_file f on mpf.id = f.id
+             where mpf.member_id = tbl_member.id
+               and mpf.profile_image_type = 'profile'
+             limit 1) as file_name
         from tbl_member
         where (member_email = #{loginId} or member_phone = #{loginId})
           and member_status = 'active'
