@@ -22,13 +22,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/video-chat")
+@RequestMapping("/api/v1/video-chat/**")
 @Slf4j
 public class VideoChatTokenProxyController {
 
     private static final String LIVEKIT_SERVER_URL = "https://localhost:6080/token";
 
-    @PostMapping("/token")
+    @PostMapping("token")
     public ResponseEntity<Map<String, String>> proxyToken(
             @RequestBody Map<String, String> params,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

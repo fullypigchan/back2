@@ -78,6 +78,7 @@ public class VideoChatAPIController {
 
             // 녹음 파일 등록
             String url = s3Service.uploadFile(file, fileName);
+            videoChatService.saveRecodingFile(Long.parseLong(sessionId), file, url);
 
             return ResponseEntity.ok(Map.of("url", url));
         } catch (Exception e) {

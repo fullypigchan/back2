@@ -7,8 +7,17 @@ select
 from tbl_ad_file af
 join tbl_file f on af.id = f.id;
 
--- 게시물 관련된 모든 정보 조회하는 view (커뮤니티 정보 포함)
-create or replace view view_post_feed as
+-- 녹음 파일 조회하는 view
+create view vw_file_recoding as
+select
+    f.id, f.original_name, f.file_name, f.file_path, f.file_size,
+    f.content_type, f.created_datetime,
+    vr.video_session_id
+from tbl_video_recoding vr
+join tbl_file f on vr.id = f.id;
+
+-- 게시물 관련된 모든 정보 조회하는 view
+create view view_post_feed as
 select p.id,
        p.member_id,
        p.post_status,
