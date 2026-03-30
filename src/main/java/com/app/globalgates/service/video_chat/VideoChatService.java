@@ -1,15 +1,23 @@
 package com.app.globalgates.service.video_chat;
 
+import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.domain.video_chat.VideoChatVO;
+import com.app.globalgates.dto.FileDTO;
+import com.app.globalgates.dto.FileRecodingDTO;
 import com.app.globalgates.dto.chat.ChatRoomDTO;
 import com.app.globalgates.dto.video_chat.VideoChatDTO;
+import com.app.globalgates.repository.FileDAO;
+import com.app.globalgates.repository.FileRecodingDAO;
 import com.app.globalgates.repository.chat.ChatRoomDAO;
 import com.app.globalgates.repository.video_chat.VideoChatDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,6 +25,8 @@ import java.util.Optional;
 @Slf4j
 public class VideoChatService {
     private final VideoChatDAO videoChatDAO;
+    private final FileDAO fileDAO;
+    private final FileRecodingDAO fileRecodingDAO;
 
     @Transactional
     public VideoChatDTO getOrCreateSession(Long conversationId, Long callerId, Long receiverId) {
@@ -39,6 +49,30 @@ public class VideoChatService {
         }
 
         return toDTO(session);
+    }
+
+    // 녹음 파일 서버에 등록
+    @Transactional
+    @LogStatus
+    public void saveRecodingFile(Long sessionId, MultipartFile file, String s3Key) {
+        FileDTO fileDTO = new FileDTO();
+        fileDTO.setOriginalName(file.getOriginalFilename());
+        fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
+        fileDTO.setFilePath(s3Key);
+        fileDTO.setFileSize(file.getSize());
+        fileDTO.setContentType(file.getContentType().contains("audio")
+                ? FileContentType.AUDIO : FileContentType.ETC);
+        fileDAO.save(fileDTO);
+
+        FileRecodingDTO fileRecodingDTO = new FileRecodingDTO();
+        fileRecodingDTO.setId(fileDTO.getId());
+        fileRecodingDTO.setVideoSessionId(sessionId);
+        fileRecodingDAO.save(fileRecodingDTO.toFileRecodingVO());
+    }
+
+    // 대화방의 녹음파일을 모두 조회
+    public List<FileRecodingDTO> getRecodingList(Long sessionId) {
+        return fileRecodingDAO.findBySessionId(sessionId);
     }
 
     @Transactional

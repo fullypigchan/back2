@@ -24,6 +24,10 @@ select * from tbl_conversation;
 
 select * from tbl_video_session;
 
+select * from tbl_video_recoding;
+
+select * from tbl_file;
+
 select * from tbl_post_file;
 
 select * from tbl_block;

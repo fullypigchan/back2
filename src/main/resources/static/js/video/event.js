@@ -1,16 +1,46 @@
 ﻿window.onload = () => {
-    // LiveKit 설정
-    const APPLICATION_SERVER_URL = "https://localhost:6080/";
-    const LIVEKIT_URL = "wss://test-7paroumk.livekit.cloud";
+    // -------------------------------------------------------
+    // LiveKit 설정 - 환경에 따라 자동 설정
+    // -------------------------------------------------------
+    let APPLICATION_SERVER_URL = "https://localhost:6080/";
+    let LIVEKIT_URL = "wss://test-7paroumk.livekit.cloud";
     const LivekitClient = window.LivekitClient;
 
     let room = null;
     let sessionId = null;
     let mediaRecorder = null;
     let audioChunks = [];
-    let isRecording = false; // 녹화 상태 추적
+    let isRecording = false;
 
+    // -------------------------------------------------------
+    // URL 자동 설정
+    // -------------------------------------------------------
+    // function configureUrls() {
+    //     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    //         showToast("카메라 권한 요청을 지원하지 않거나 보안 연결(HTTPS)이 필요합니다.");
+    //         return;
+    //     }
+    //
+    //     if (!APPLICATION_SERVER_URL) {
+    //         if (window.location.hostname === "localhost") {
+    //             APPLICATION_SERVER_URL = "https://localhost:6080/";
+    //         } else {
+    //             APPLICATION_SERVER_URL = "https://" + window.location.hostname + ":6443/";
+    //         }
+    //     }
+    //
+    //     if (!LIVEKIT_URL) {
+    //         if (window.location.hostname === "localhost") {
+    //             LIVEKIT_URL = "wss://test-7paroumk.livekit.cloud"; // 로컬: LiveKit 클라우드
+    //         } else {
+    //             LIVEKIT_URL = "wss://" + window.location.hostname + ":7443/"; // 운영: 자체 서버
+    //         }
+    //     }
+    // }
+
+    // -------------------------------------------------------
     // Toast 알림
+    // -------------------------------------------------------
     function showToast(message) {
         const existing = document.querySelector(".video-toast");
         if (existing) existing.remove();
@@ -27,7 +57,9 @@
         }, 3000);
     }
 
+    // -------------------------------------------------------
     // 1. 페이지 진입 시 URL 파라미터로 자동 입장
+    // -------------------------------------------------------
     (async () => {
         const params = new URLSearchParams(window.location.search);
         const token    = params.get("token");
@@ -39,11 +71,16 @@
             return;
         }
 
+        // 나중에 주석 풀기
+        // URL 자동 설정
+        // configureUrls();
         console.log("화상통화 입장 - roomName:", roomName);
         await joinVideoRoom(token, roomName);
     })();
 
+    // -------------------------------------------------------
     // 2. LiveKit Room 연결
+    // -------------------------------------------------------
     async function joinVideoRoom(token, roomName) {
         room = new LivekitClient.Room();
 
@@ -65,7 +102,6 @@
         room.on(LivekitClient.RoomEvent.ParticipantConnected, (participant) => {
             console.log("참가자 입장:", participant.identity);
             showToast(`${participant.identity}님이 입장했습니다.`);
-            // 이미 녹화 중이 아니면 자동 시작
             if (!isRecording) {
                 startRecording();
             }
@@ -78,7 +114,7 @@
             removeVideoContainer(participant.identity);
         });
 
-        // 연결 상태 변화 감지 (네트워크 문제 등)
+        // 내 연결 상태 변화 감지
         room.on(LivekitClient.RoomEvent.ConnectionStateChanged, (state) => {
             console.log("연결 상태 변화:", state);
             if (state === LivekitClient.ConnectionState.Reconnecting) {
@@ -88,7 +124,7 @@
             }
         });
 
-        // 참가자 연결 품질 저하 감지
+        // 상대방 연결 품질 저하 감지
         room.on(LivekitClient.RoomEvent.ParticipantConnectionQualityChanged, (quality, participant) => {
             if (quality === LivekitClient.ConnectionQuality.Lost) {
                 showToast(`${participant.identity}님의 연결이 끊겼습니다. 재연결을 기다리는 중...`);
@@ -127,7 +163,9 @@
         }
     }
 
+    // -------------------------------------------------------
     // 3. 트랙 렌더링
+    // -------------------------------------------------------
     function addVideoTrack(track, participantIdentity, local = false) {
         if (document.getElementById(track.sid)) return;
 
@@ -143,7 +181,6 @@
         }
     }
 
-    // 화상통화 화면 생성
     function createVideoContainer(participantIdentity, local = false) {
         const existing = document.getElementById(`camera-${participantIdentity}`);
         if (existing) return existing;
@@ -172,7 +209,9 @@
         document.getElementById(`camera-${participantIdentity}`)?.remove();
     }
 
+    // -------------------------------------------------------
     // 4. 녹화
+    // -------------------------------------------------------
     function startRecording() {
         if (isRecording) return;
 
@@ -190,14 +229,32 @@
             if (event.data.size > 0) audioChunks.push(event.data);
         };
 
-        mediaRecorder.onstop = () => {
+        // S3 업로드 콜백은 start에서 등록 (stop이 호출되면 자동 실행)
+        mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const link = document.createElement("a");
-            link.href = audioUrl;
-            link.download = `recording_${new Date().getTime()}.webm`;
-            link.click();
-            showToast("녹화 파일이 저장되었습니다.");
+            showToast("녹화 파일을 업로드 중...");
+
+            try {
+                const formData = new FormData();
+                formData.append("file", audioBlob, `recording_${Date.now()}.webm`);
+                formData.append("sessionId", sessionId || "unknown");
+
+                const response = await fetch("/api/video-chat/recording", {
+                    method: "POST",
+                    body: formData,
+                    credentials: "include",
+                });
+
+                if (!response.ok) throw new Error("업로드 실패");
+
+                const data = await response.json();
+                console.log("녹화 파일 업로드 완료:", data.fileName);
+                showToast("녹화 파일이 저장되었습니다.");
+
+            } catch (error) {
+                console.error("녹화 파일 업로드 실패:", error.message);
+                showToast("녹화 파일 업로드에 실패했습니다.");
+            }
         };
 
         mediaRecorder.start();
@@ -210,7 +267,7 @@
     function stopRecording() {
         if (!isRecording) return;
         if (mediaRecorder && mediaRecorder.state !== "inactive") {
-            mediaRecorder.stop();
+            mediaRecorder.stop(); // ← stop() 호출 시 onstop 자동 실행 → S3 업로드
         }
         isRecording = false;
         console.log("녹화 중지");
@@ -237,7 +294,9 @@
         }
     });
 
+    // -------------------------------------------------------
     // 5. 통화 종료 (confirm 추가)
+    // -------------------------------------------------------
     document.querySelector(".end-btn")?.addEventListener("click", () => {
         const confirmed = window.confirm("통화를 종료하시겠습니까?");
         if (!confirmed) return;
@@ -261,7 +320,9 @@
         window.location.href = "/chat";
     }
 
+    // -------------------------------------------------------
     // 6. space-title 편집
+    // -------------------------------------------------------
     const title = document.querySelector(".space-title");
     const editButton = document.querySelector(".edit-btn");
 

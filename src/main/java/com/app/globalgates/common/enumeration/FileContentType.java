@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum FileContentType {
-    IMAGE("image"), VIDEO("video"), DOCUMENT("document"), ETC("etc");
+    IMAGE("image"), VIDEO("video"), DOCUMENT("document"), AUDIO("audio"), ETC("etc");
 
     private final String value;
 

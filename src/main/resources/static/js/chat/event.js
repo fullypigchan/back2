@@ -68,10 +68,24 @@ window.onload = () => {
     let isCurrentPartnerBlocked = false;
 
     // 1-8. 화상통화용 변수
-    const LIVEKIT_SERVER_URL = "https://localhost:6080";
+    // [임시 - 로컬 테스트용 프록시]
+    // 배포 시 아래 LIVEKIT_SERVER_URL을 실제 LiveKit 서버 URL로 변경
+    let LIVEKIT_SERVER_URL = "";
     let sessionId = null;
     let pendingVideoRoomName = null;
     let loginedMemberId = null;
+
+    // 1-9. LiveKit 서버 URL 자동 설정
+    function configureLiveKitUrl() {
+        if (!LIVEKIT_SERVER_URL) {
+            if (window.location.hostname === "localhost") {
+                LIVEKIT_SERVER_URL = "https://localhost:6080";
+            } else {
+                LIVEKIT_SERVER_URL = "https://" + window.location.hostname + ":6443";
+            }
+        }
+    }
+    configureLiveKitUrl();
 
     // 2.채팅방 목록 관련 함수
 
@@ -401,7 +415,6 @@ window.onload = () => {
         }
         markCurrentStageOneRoom(0);
         delete document.body.dataset.conversationId;
-        // URL에서 conversationId, partnerId 파라미터 제거
         const url = new URL(window.location.href);
         url.searchParams.delete("conversationId");
         url.searchParams.delete("partnerId");
@@ -889,14 +902,12 @@ window.onload = () => {
             }
         }
 
-        // 다른 항목 클릭 시 더보기 드롭다운 닫기
         const extendMenu = userInfoModal.querySelector(".Extend-Menu-Wrapper");
         if (extendMenu && !extendMenu.contains(e.target)) {
             extendMenu.classList.add("off");
         }
 
         if (setting) {
-            // 사용자 차단 해제 (이미 차단된 상태면 모달 없이 바로 해제)
             if (setting.classList.contains("BanUser") && setting.classList.contains("banned")) {
                 try {
                     await ChatService.unblockUser(currentMemberId, currentPartnerId, currentRoomId);
@@ -933,9 +944,9 @@ window.onload = () => {
                         isCurrentRoomMuted = result.muted;
                         button.innerHTML = `
                             ${isCurrentRoomMuted
-                                ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" data-icon="icon-notifications-off" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img" class="h-5 w-5"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.375 17C16.375 19.2091 14.5841 21 12.375 21C10.1659 21 8.375 19.2091 8.375 17"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.375 17H6.42522C5.21013 17 4.27578 15.9254 4.44462 14.7221L5.18254 9.46301C5.31208 8.25393 5.73464 7.14098 6.375 6.19173M9.375 3.65027C10.2917 3.23195 11.3086 3 12.375 3C16.0717 3 19.1736 5.78732 19.5675 9.46301L20.0536 14"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.375 3L21.375 21"></path></svg>`
-                                : `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" data-icon="icon-notifications-stroke" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img" class="h-5 w-5"><path d="M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958zM12 20c-1.306 0-2.417-.835-2.829-2h5.658c-.412 1.165-1.523 2-2.829 2zm-6.866-4l.847-6.698C6.364 6.272 8.941 4 11.996 4s5.627 2.268 6.013 5.295L18.864 16H5.134z"></path></svg>`
-                            }
+                            ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" data-icon="icon-notifications-off" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img" class="h-5 w-5"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.375 17C16.375 19.2091 14.5841 21 12.375 21C10.1659 21 8.375 19.2091 8.375 17"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.375 17H6.42522C5.21013 17 4.27578 15.9254 4.44462 14.7221L5.18254 9.46301C5.31208 8.25393 5.73464 7.14098 6.375 6.19173M9.375 3.65027C10.2917 3.23195 11.3086 3 12.375 3C16.0717 3 19.1736 5.78732 19.5675 9.46301L20.0536 14"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.375 3L21.375 21"></path></svg>`
+                            : `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" data-icon="icon-notifications-stroke" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img" class="h-5 w-5"><path d="M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958zM12 20c-1.306 0-2.417-.835-2.829-2h5.658c-.412 1.165-1.523 2-2.829 2zm-6.866-4l.847-6.698C6.364 6.272 8.941 4 11.996 4s5.627 2.268 6.013 5.295L18.864 16H5.134z"></path></svg>`
+                        }
                             <div class="Menu-Text">${isCurrentRoomMuted ? "언뮤트" : "뮤트"}</div>
                         `;
                     } catch (error) {
@@ -1162,7 +1173,6 @@ window.onload = () => {
 
         await refreshStageOnePartnerProfile(roomId);
 
-        // 차단 상태 확인 후 UI 동기화
         try {
             const blocked = await ChatService.isBlocked(currentMemberId, currentPartnerId);
             isCurrentPartnerBlocked = blocked;
@@ -1179,7 +1189,6 @@ window.onload = () => {
             console.error("차단 상태 확인 실패", err);
         }
 
-        // 메시지 렌더링 후 즉시 표시 (column-reverse로 스크롤 불필요)
         try {
             const messages = await ChatService.getMessages(currentRoomId, currentMemberId);
             if (!chatMessageList) return;
@@ -1188,7 +1197,6 @@ window.onload = () => {
             syncStageOneRoomPreview(messages);
             chatDiv.style.visibility = "";
 
-            // 반응과 이미지는 백그라운드로 로드
             loadStageOneReactions(messages);
             loadAllImagePreviews();
         } catch (error) {
@@ -1310,7 +1318,7 @@ window.onload = () => {
         });
     }
 
-    // 12-3-1.사용자별 방 복원 알림 구독 (삭제된 대화가 상대방 메시지로 복원될 때)
+    // 12-3-1.사용자별 방 복원 알림 구독
     function subscribeUserRestore() {
         if (!stompClient || !stompClient.connected) return;
         stompClient.subscribe(`/topic/user.${currentMemberId}.restore`, async (message) => {
@@ -1328,7 +1336,6 @@ window.onload = () => {
         if (!roomId) return;
         const isMine = Number(message?.senderId || 0) === currentMemberId;
 
-        // 차단된 상대방의 메시지는 렌더링하지 않고 읽음 처리도 하지 않음
         if (!isMine && Number(message?.senderId || 0) === currentPartnerId && isCurrentPartnerBlocked) {
             return;
         }
@@ -1346,7 +1353,6 @@ window.onload = () => {
         } else {
             const targetRoom = stageOneRooms.find((r) => r.conversationId === roomId);
             if (!targetRoom) {
-                // 방 목록에 없는 새 메시지 -> 방 목록 갱신
                 await loadStageOneRoomList();
                 return;
             }
@@ -1357,7 +1363,7 @@ window.onload = () => {
 
     // 13.메시지 렌더링 관련
 
-    // 13-0.첨부파일 HTML 생성 (이미지는 말풍선 밖에 독립 표시)
+    // 13-0.첨부파일 HTML 생성
     function getFileImageMarkup(message) {
         if (!message.fileId || message.fileContentType !== "image") return "";
         const fileName = escapeStageOneHtml(message.fileOriginalName || "파일");
@@ -1567,7 +1573,7 @@ window.onload = () => {
         lastRenderedDateKey = null;
     }
 
-    // 13-4.실시간 메시지 수신시 최하단 스크롤 (column-reverse에서 0이 최하단)
+    // 13-4.실시간 메시지 수신시 최하단 스크롤
     function scrollToBottom() {
         scrollContainer.scrollTop = 0;
     }
@@ -1623,7 +1629,7 @@ window.onload = () => {
         await Promise.all(Array.from(imgEls).map((imgEl) => ensureStageOneImagePreview(imgEl)));
     }
 
-    // 13-8.메시지별 반응 배지 서버 조회 후 렌더링 (병렬)
+    // 13-8.메시지별 반응 배지 서버 조회 후 렌더링
     async function loadStageOneReactions(messages) {
         await Promise.all(messages.map(async (message) => {
             const messageId = message.id;
@@ -1756,7 +1762,6 @@ window.onload = () => {
     }
 
     // 14.반응 추가 삭제
-
     async function addReaction(emoji, targetChat) {
         if (!targetChat) return;
 
@@ -1764,7 +1769,6 @@ window.onload = () => {
         if (!reactionsDiv) return;
         const messageId = targetChat.dataset.messageId;
 
-        // 14-1.같은 이모지를 다시 클릭한 경우 취소
         const myCurrentReaction = reactionsDiv.querySelector(".Reaction-Badge.my-reaction");
 
         if (myCurrentReaction && myCurrentReaction.dataset.emoji === emoji) {
@@ -1785,7 +1789,6 @@ window.onload = () => {
             return;
         }
 
-        // 14-2.기존에 다른 반응이 있으면 취소
         if (myCurrentReaction) {
             const oldEmoji = myCurrentReaction.dataset.emoji;
             try {
@@ -1803,7 +1806,6 @@ window.onload = () => {
             }
         }
 
-        // 14-3.서버에 새 반응 추가
         try {
             if (messageId) await ChatService.addReaction(messageId, currentMemberId, emoji, currentRoomId);
         } catch (error) {
@@ -1811,7 +1813,6 @@ window.onload = () => {
             return;
         }
 
-        // 14-4.DOM에 반응 배지 추가 또는 카운트 증가
         const existing = [...reactionsDiv.querySelectorAll(".Reaction-Badge")]
             .find((badge) => badge.dataset.emoji === emoji);
 
@@ -1836,7 +1837,6 @@ window.onload = () => {
     }
 
     // 15.초기화 실행
-
     applyStageOnePartnerProfile();
     connectStageOneSocket();
 
@@ -1860,6 +1860,10 @@ window.onload = () => {
         applyStageOnePartnerProfile();
     }
 
+    // -------------------------------------------------------
+    // 화상통화 관련
+    // -------------------------------------------------------
+
     // 화상통화 연결
     async function startVideoCall() {
         if (!currentMemberId || !currentPartnerId) {
@@ -1868,7 +1872,6 @@ window.onload = () => {
         }
 
         try {
-            // REST API 호출 → 서버에서 세션 생성 + 상대방에게 STOMP 알림 전송
             const response = await fetch("/api/video-chat/session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1880,9 +1883,10 @@ window.onload = () => {
             const sessionData = await response.json();
             const roomName = sessionData.roomName || "conversation-" + sessionData.conversationId;
             sessionId = sessionData.id;
+            console.log(sessionId);
 
-            // 발신자 본인도 토큰 발급 후 video 페이지로 이동
-            const token = await requestLiveKitToken(roomName, `member-${loginedMemberId}`);
+            // [임시 - 로컬 테스트용 프록시] 배포 시 아래 requestLiveKitToken 원본으로 교체
+            const token = await requestLiveKitToken(roomName);
             window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(roomName)}&sessionId=${sessionId}`;
 
         } catch (error) {
@@ -1890,8 +1894,8 @@ window.onload = () => {
         }
     }
 
-    // [임시 - 로컬 테스트용]
-    // 배포 시 아래 함수를 원래 버전으로 교체
+    // [임시 - 로컬 테스트용 프록시]
+    // 배포 시 아래 함수를 주석 해제된 원본으로 교체
     async function requestLiveKitToken(roomName) {
         const response = await fetch("/api/v1/video-chat/token", {
             method: "POST",
@@ -1903,19 +1907,19 @@ window.onload = () => {
         return data.token;
     }
 
-// [원본 - 배포 시 위 함수를 아래로 교체]
-// async function requestLiveKitToken(roomName, participantName) {
-//     const response = await fetch("https://localhost:6080/token", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ roomName, participantName })
-//     });
-//     if (!response.ok) throw new Error("토큰 발급 실패: " + response.status);
-//     const data = await response.json();
-//     return data.token;
-// }
+    // [원본 - 배포 시 위 함수를 아래로 교체 + VideoChatTokenProxyController.java 삭제]
+    // async function requestLiveKitToken(roomName, participantName) {
+    //     const response = await fetch(LIVEKIT_SERVER_URL + "/token", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify({ roomName, participantName })
+    //     });
+    //     if (!response.ok) throw new Error("토큰 발급 실패: " + response.status);
+    //     const data = await response.json();
+    //     return data.token;
+    // }
 
-    // 화상통화 STOMP 이벤트
+    // 화상통화 STOMP 이벤트 구독
     async function subscribeVideoCallEvents() {
         if (!stompClient || !stompClient.connected) {
             console.warn("STOMP 미연결 상태 - 화상통화 구독 실패");
@@ -1948,23 +1952,26 @@ window.onload = () => {
 
         message.textContent = `${payload.callerName}님이 화상통화를 요청했습니다.`;
         modal.classList.remove("off");
+        modal.classList.add("on");
         modalBackDrop.classList.remove("off");
 
         // 수락 버튼
         acceptBtn.onclick = async () => {
             modal.classList.add("off");
+            modal.classList.remove("on");
             modalBackDrop.classList.add("off");
             try {
-                const token = await requestLiveKitToken(payload.roomName, `member-${loginedMemberId}`);
+                const token = await requestLiveKitToken(payload.roomName);
                 window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(payload.roomName)}&sessionId=${payload.sessionId || ""}`;
             } catch (error) {
                 console.error("통화 수락 실패:", error.message);
             }
         };
 
-        // 거절 버튼 (REST API 방식으로 변경)
+        // 거절 버튼
         rejectBtn.onclick = async () => {
             modal.classList.add("off");
+            modal.classList.remove("on");
             modalBackDrop.classList.add("off");
             try {
                 await fetch("/api/video-chat/session/reject", {

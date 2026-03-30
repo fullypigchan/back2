@@ -21,10 +21,12 @@ references tbl_member(id)
 --                tbl_estimation_file, tbl_news_file, tbl_ad_file
 
 -- 파일 콘텐츠 유형
+alter type file_content_type add value 'audio';
 create type file_content_type as enum (
 'image',        -- 이미지 (jpg, png, webp 등)
 'video',        -- 동영상
 'document',     -- 문서 (pdf, docx 등)
+'audio',        -- 녹음파일
 'etc'           -- 기타
 );
 
@@ -708,6 +710,16 @@ constraint fk_video_session_caller foreign key(caller_id)
 references tbl_member(id),
 constraint fk_video_session_receiver foreign key(receiver_id)
 references tbl_member(id)
+);
+
+-- 화상채팅 녹음파일 정보
+create table tbl_video_recoding (
+id bigint not null primary key,
+video_session_id    bigint not null,                    -- tbl_video_session FK
+constraint fk_file_recoding foreign key (id)
+references tbl_file (id),
+constraint fk_recoding_session foreign key (video_session_id)
+references tbl_video_session (id)
 );
 
 
