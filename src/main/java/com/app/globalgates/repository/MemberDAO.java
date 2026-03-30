@@ -60,6 +60,10 @@ public class MemberDAO {
     public void softDelete(Long memberId){
         memberMapper.softDelete(memberId);
     }
+    //  프로필 수정
+    public void update(MemberDTO memberDTO){
+        memberMapper.update(memberDTO);
+    }
 //  Handle로 조회 (간소화 - 차단용)
     public Optional<MemberDTO> findByHandle(String memberHandle) {
         return memberMapper.selectMemberByHandle(memberHandle);

@@ -83,6 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
         },
     ];
 
+    const identityField = fields[1];
+
     const ensureErrorNode = (host) => {
         if (!host) return null;
         let node = host.querySelector(".field-error-message");
@@ -94,31 +96,49 @@ document.addEventListener("DOMContentLoaded", () => {
         return node;
     };
 
-    const setRed = (box) => {
-        if (!box) return;
-        box.style.borderColor = "rgb(244, 33, 46)";
-        box.style.borderWidth = "2px";
-        box.style.boxShadow = "0 0 0 2px rgba(244, 33, 46, 0.18)";
-    };
-
-    const clearError = (field) => {
+    const paintField = (field, state, message = "") => {
         const node = ensureErrorNode(field.host);
-        node?.classList.remove("show");
-    };
+        const errorColor = "rgb(217, 119, 6)";
+        const errorShadow = "0 0 0 2px rgba(217, 119, 6, 0.16)";
 
-    const showError = (field, message) => {
-        const node = ensureErrorNode(field.host);
+        if (state === "error") {
+            field.box.style.borderColor = errorColor;
+            field.box.style.borderWidth = "2px";
+            field.box.style.boxShadow = errorShadow;
+        } else if (state === "success") {
+            field.box.style.borderColor = "rgb(29, 155, 240)";
+            field.box.style.borderWidth = "2px";
+            field.box.style.boxShadow = "0 0 0 2px rgba(29, 155, 240, 0.18)";
+        } else {
+            field.box.style.borderColor = "rgb(207, 217, 222)";
+            field.box.style.borderWidth = "1px";
+            field.box.style.boxShadow = "none";
+        }
+
         if (!node) return;
         node.textContent = message;
-        node.classList.add("show");
+        node.style.color = state === "success" ? "rgb(29, 155, 240)" : errorColor;
+        node.classList.toggle("show", !!message);
     };
 
     const getError = (field) => field.validate(field.input.value);
+    const isCreateFormValid = () => fields.every((field) => !getError(field));
 
     const syncButton = () => {
-        const hasError = fields.some((field) => getError(field));
+        const hasError = !isCreateFormValid();
         nextButton.disabled = hasError;
         nextButton.style.opacity = hasError ? "0.5" : "1";
+    };
+
+    const renderFieldValidation = (field) => {
+        const message = getError(field);
+        if (message) {
+            paintField(field, "error", message);
+            return false;
+        }
+
+        paintField(field, field.input.value.trim() ? "success" : "neutral");
+        return true;
     };
 
     fields.forEach((field) => {
@@ -130,33 +150,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 field.input.value = normalized;
             }
 
-            const message = getError(field);
-            if (message && field.input.value.trim().length > 0) {
-                showError(field, message);
-            } else {
-                clearError(field);
-            }
-
             syncButton();
         });
 
         field.input.addEventListener("blur", () => {
-            const message = getError(field);
-            if (message) {
-                showError(field, message);
-                setRed(field.box);
-            } else {
-                clearError(field);
-            }
-
+            renderFieldValidation(field);
             syncButton();
         });
     });
 
     changeButton?.addEventListener("click", () => {
-        clearError(fields[1]);
+        paintField(identityField, "neutral");
         syncButton();
     });
+
+    window.joinCreateValidation = {
+        isCreateFormValid,
+        isIdentityFormatValid: () => !getError(identityField),
+        getIdentityFormatError: () => getError(identityField),
+        showIdentityFormatError: () => renderFieldValidation(identityField),
+        setIdentityDuplicateSuccess: (message) => paintField(identityField, "success", message),
+        setIdentityDuplicateError: (message) => paintField(identityField, "error", message),
+        clearIdentityDuplicateFeedback: () => paintField(identityField, "neutral"),
+        resetCreateFormState: () => {
+            fields.forEach((field) => paintField(field, "neutral"));
+            syncButton();
+        },
+        syncCreateButton: syncButton,
+    };
 
     nextButton.addEventListener(
         "click",
@@ -166,8 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             event.preventDefault();
             event.stopImmediatePropagation();
-            showError(invalidField, getError(invalidField));
-            setRed(invalidField.box);
+            renderFieldValidation(invalidField);
             invalidField.input.focus();
         },
         true

@@ -1,9 +1,12 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-    const wraps = document.querySelectorAll(".name-placeholder-wrap, .phone-number-placeholder");
-    const passwordInput = document.querySelector(".phone-input");
-    const passwordWrap = document.querySelector(".phone-number-placeholder");
-    const passwordBox = document.querySelector(".phone-placeholder");
-    const nextButton = document.querySelector(".next-button");
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modal-password");
+    if (!modal) return;
+
+    const wraps = modal.querySelectorAll(".name-placeholder-wrap, .phone-number-placeholder");
+    const passwordInput = modal.querySelector(".password-input");
+    const passwordWrap = modal.querySelector(".phone-number-placeholder");
+    const passwordBox = modal.querySelector(".phone-placeholder");
+    const nextButton = modal.querySelector(".next-button");
     const lengthErrorNode = ensureLengthErrorNode(passwordWrap);
 
     wraps.forEach((wrap) => {
@@ -72,8 +75,41 @@
         );
     }
 
-    bindPasswordToggle();
-    bindJoinModalClose();
+    bindPasswordToggle(modal);
+
+    window.joinPasswordModalReset = () => {
+        if (passwordInput) {
+            passwordInput.value = "";
+            passwordInput.type = "password";
+        }
+
+        if (lengthErrorNode) {
+            lengthErrorNode.textContent = "";
+            lengthErrorNode.classList.remove("show");
+        }
+
+        if (passwordBox) {
+            passwordBox.style.borderColor = "rgb(207, 217, 222)";
+            passwordBox.style.borderWidth = "1px";
+            passwordBox.style.boxShadow = "none";
+        }
+
+        const labelText = modal.querySelector(".phone-text");
+        if (labelText) {
+            expand(labelText);
+        }
+
+        const eyeOpen = modal.querySelector(".eye-open");
+        const eyeOff = modal.querySelector(".eye-off");
+        eyeOpen?.classList.remove("is-hidden");
+        eyeOff?.classList.add("is-hidden");
+
+        const toggleBtn = modal.querySelector(".eye-btn-wrap");
+        toggleBtn?.setAttribute("aria-label", "비밀번호 보기");
+
+        updateJoinButtonState(passwordInput, nextButton);
+    };
+
     updateJoinButtonState(passwordInput, nextButton);
 });
 
@@ -100,37 +136,28 @@ function ensureLengthErrorNode(host) {
 
 function setErrorBorder(box) {
     if (!box) return;
-    box.style.borderColor = "rgb(244, 33, 46)";
+    box.style.borderColor = "rgb(217, 119, 6)";
     box.style.borderWidth = "2px";
-    box.style.boxShadow = "0 0 0 2px rgba(244, 33, 46, 0.18)";
+    box.style.boxShadow = "0 0 0 2px rgba(217, 119, 6, 0.16)";
 }
 
-function bindPasswordToggle() {
-    const wrap = document.querySelector(".phone-number-placeholder");
-    const input = wrap?.querySelector(".phone-input");
-    const toggleBtn = wrap?.querySelector(".eye-btn-wrap");
-    const eyePath = wrap?.querySelector(".eye-btn-img path");
+function bindPasswordToggle(modal) {
+    const input = modal.querySelector(".password-input");
+    const toggleBtn = modal.querySelector(".eye-btn-wrap");
+    const eyeOpen = modal.querySelector(".eye-open");
+    const eyeOff = modal.querySelector(".eye-off");
 
-    if (!input || !toggleBtn || !eyePath) {
+    if (!input || !toggleBtn || !eyeOpen || !eyeOff) {
         return;
     }
 
-    const openEyePath =
-        "M12 21c-7.605 0-10.804-8.296-10.937-8.648L.932 12l.131-.352C1.196 11.295 4.394 3 12 3s10.804 8.296 10.937 8.648l.131.352-.131.352C22.804 12.705 19.606 21 12 21zm-8.915-9c.658 1.467 3.5 7 8.915 7s8.257-5.533 8.915-7c-.658-1.467-3.5-7-8.915-7s-8.257 5.533-8.915 7zM12 16c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4zm0-6c-1.103 0-2 .897-2 2s.897 2 2 2 2-.897 2-2-.897-2-2-2z";
-    const closedEyePath =
-        "M3.693 21.707l-1.414-1.414 2.429-2.429c-2.479-2.421-3.606-5.376-3.658-5.513l-.131-.352.131-.352c.133-.353 3.331-8.648 10.937-8.648 2.062 0 3.989.621 5.737 1.85l2.556-2.557 1.414 1.414L3.693 21.707zm-.622-9.706c.356.797 1.354 2.794 3.051 4.449l2.417-2.418c-.361-.609-.553-1.306-.553-2.032 0-2.206 1.794-4 4-4 .727 0 1.424.192 2.033.554l2.263-2.264C14.953 5.434 13.512 5 11.986 5c-5.416 0-8.258 5.535-8.915 7.001zM11.986 10c-1.103 0-2 .897-2 2 0 .178.023.352.067.519l2.451-2.451c-.167-.044-.341-.067-.519-.067zm10.951 1.647l.131.352-.131.352c-.133.353-3.331 8.648-10.937 8.648-.709 0-1.367-.092-2-.223v-2.047c.624.169 1.288.27 2 .27 5.415 0 8.257-5.533 8.915-7-.252-.562-.829-1.724-1.746-2.941l1.438-1.438c1.53 1.971 2.268 3.862 2.33 4.027z";
-
-    input.type = "password";
-    toggleBtn.setAttribute("aria-label", "비밀번호 표시");
-    toggleBtn.setAttribute("aria-pressed", "false");
-    eyePath.setAttribute("d", closedEyePath);
-
     toggleBtn.addEventListener("click", () => {
-        const isHidden = input.type === "password";
-        input.type = isHidden ? "text" : "password";
-        toggleBtn.setAttribute("aria-label", isHidden ? "비밀번호 숨기기" : "비밀번호 표시");
-        toggleBtn.setAttribute("aria-pressed", isHidden ? "true" : "false");
-        eyePath.setAttribute("d", isHidden ? openEyePath : closedEyePath);
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+
+        eyeOpen.classList.toggle("is-hidden", !showing);
+        eyeOff.classList.toggle("is-hidden", showing);
+        toggleBtn.setAttribute("aria-label", showing ? "비밀번호 보기" : "비밀번호 숨기기");
         input.focus();
     });
 }
@@ -145,21 +172,4 @@ function expand(labelText) {
     labelText.style.fontSize = "17px";
     labelText.style.paddingTop = "16px";
     labelText.style.color = "rgb(83, 100, 113)";
-}
-
-function bindJoinModalClose() {
-    const closeButtons = document.querySelectorAll(".join-modal-header-close-button, .join-modal-close");
-    if (!closeButtons.length) return;
-
-    closeButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            const modal = document.querySelector(".join-modal");
-            const root = modal?.closest(".join-modal-line1") || document.querySelector(".join-modal-line1");
-            const overlay = document.querySelector(".join-modal-overlay") || document.querySelector(".join-modal-all");
-
-            if (modal) modal.style.display = "none";
-            if (root) root.style.display = "none";
-            if (overlay) overlay.style.display = "none";
-        });
-    });
 }

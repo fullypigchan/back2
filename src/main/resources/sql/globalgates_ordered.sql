@@ -148,7 +148,7 @@ create table tbl_post (
     id               bigint      generated always as identity primary key,
     member_id        bigint      not null,
     post_status      post_status not null default 'active',
-    title            varchar(255) not null,
+    title            varchar(255),
     content          text        not null,
     location         varchar(255),
     reply_post_id    bigint,

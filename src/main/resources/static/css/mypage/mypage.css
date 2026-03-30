@@ -1603,6 +1603,9 @@ img.Post-Media-Image {
     width: 100%;
     height: 150px;
     background-color: rgb(207, 217, 222);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1637,13 +1640,18 @@ img.Post-Media-Image {
     left: 16px;
     width: 80px;
     height: 80px;
+    z-index: 1;
 }
 
 .Profile-Edit-Avatar-Image {
+    position: relative;
     width: 80px;
     height: 80px;
     border-radius: 50%;
     background-color: rgb(158, 27, 90);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     border: 3px solid #ffffff;
     overflow: hidden;
 }

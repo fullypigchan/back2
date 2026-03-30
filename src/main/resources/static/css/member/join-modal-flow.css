@@ -312,6 +312,15 @@
     transition: color 0.18s ease, font-size 0.18s ease;
 }
 
+.join-flow-modal #identity-input::placeholder {
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.join-flow-modal #identity-input.show-placeholder::placeholder {
+    opacity: 1;
+}
+
 .join-flow-modal .birth-date-input.birth-focus-placeholder::placeholder {
     color: #1d9bf0;
     font-size: 12px;
@@ -376,16 +385,16 @@
 }
 
 .join-flow-modal .field-error-message {
-    display: none;
+    display: none !important;
     margin-top: 6px;
-    color: #f4212e;
+    color: rgb(217, 119, 6);
     font-size: 13px;
     line-height: 16px;
     font-weight: 500;
 }
 
 .join-flow-modal .field-error-message.show {
-    display: block;
+    display: block !important;
 }
 
 .join-flow-modal .resend-message {
@@ -403,31 +412,30 @@
 }
 
 .join-flow-modal .eye-btn-wrap {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border: 0;
-    border-radius: 9999px;
+    border-radius: 999px;
     background: transparent;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
     cursor: pointer;
-}
-
-.join-flow-modal .eye-btn-wrap-in {
-    display: grid;
-    place-items: center;
-}
-
-.join-flow-modal .eye-btn-img {
-    width: 22px;
-    height: 22px;
-    fill: currentColor;
     color: #0f1419;
 }
 
-.join-flow-modal .eye-btn-junk,
-.join-flow-modal .eye-btn-junk-in {
+.join-flow-modal .eye-btn-wrap svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.join-flow-modal .eye-btn-wrap .is-hidden {
     display: none;
 }
 

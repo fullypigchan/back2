@@ -67,6 +67,12 @@ window.onload = () => {
     let isCurrentRoomMuted = false;
     let isCurrentPartnerBlocked = false;
 
+    // 1-8. 화상통화용 변수
+    const LIVEKIT_SERVER_URL = "https://localhost:6080";
+    let sessionId = null;
+    let pendingVideoRoomName = null;
+    let loginedMemberId = null;
+
     // 2.채팅방 목록 관련 함수
 
     // 2-1.채팅방 목록 DOM 배열 반환
@@ -1247,6 +1253,7 @@ window.onload = () => {
             syncStageOneRoomSubscriptions();
             if (pendingSubscriptionRoomId) subscribeStageOneRoom(pendingSubscriptionRoomId);
             subscribeUserRestore();
+            subscribeVideoCallEvents();
         }, (error) => {
             console.error("채팅 소켓 연결 실패", error);
             setTimeout(connectStageOneSocket, 3000);
@@ -1851,6 +1858,124 @@ window.onload = () => {
         pendingSubscriptionRoomId = null;
         closeChatRoom();
         applyStageOnePartnerProfile();
+    }
+
+    // 화상통화 연결
+    async function startVideoCall() {
+        if (!currentMemberId || !currentPartnerId) {
+            console.error("통화 상대방 정보가 없습니다.");
+            return;
+        }
+
+        try {
+            // REST API 호출 → 서버에서 세션 생성 + 상대방에게 STOMP 알림 전송
+            const response = await fetch("/api/video-chat/session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ receiverId: currentPartnerId })
+            });
+
+            if (!response.ok) throw new Error("세션 생성 실패: " + response.status);
+
+            const sessionData = await response.json();
+            const roomName = sessionData.roomName || "conversation-" + sessionData.conversationId;
+            sessionId = sessionData.id;
+
+            // 발신자 본인도 토큰 발급 후 video 페이지로 이동
+            const token = await requestLiveKitToken(roomName, `member-${loginedMemberId}`);
+            window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(roomName)}&sessionId=${sessionId}`;
+
+        } catch (error) {
+            console.error("화상통화 시작 실패:", error.message);
+        }
+    }
+
+    // [임시 - 로컬 테스트용]
+    // 배포 시 아래 함수를 원래 버전으로 교체
+    async function requestLiveKitToken(roomName) {
+        const response = await fetch("/api/v1/video-chat/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ roomName })
+        });
+        if (!response.ok) throw new Error("토큰 발급 실패: " + response.status);
+        const data = await response.json();
+        return data.token;
+    }
+
+// [원본 - 배포 시 위 함수를 아래로 교체]
+// async function requestLiveKitToken(roomName, participantName) {
+//     const response = await fetch("https://localhost:6080/token", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ roomName, participantName })
+//     });
+//     if (!response.ok) throw new Error("토큰 발급 실패: " + response.status);
+//     const data = await response.json();
+//     return data.token;
+// }
+
+    // 화상통화 STOMP 이벤트
+    async function subscribeVideoCallEvents() {
+        if (!stompClient || !stompClient.connected) {
+            console.warn("STOMP 미연결 상태 - 화상통화 구독 실패");
+            return;
+        }
+
+        // 서버에서 현재 로그인한 유저 id 조회
+        const response = await fetch("/api/video-chat/me");
+        const { memberId } = await response.json();
+        loginedMemberId = memberId;
+
+        console.log("화상통화 구독 시작 - memberId:", memberId);
+
+        stompClient.subscribe(`/topic/video-call.${memberId}`, (message) => {
+            const payload = JSON.parse(message.body);
+            if (payload.type === "REQUEST") {
+                showVideoCallModal(payload);
+            } else if (payload.type === "REJECTED") {
+                alert(`${payload.callerName}님이 통화를 거절했습니다.`);
+            }
+        });
+    }
+
+    // 수락/거절 모달 표시
+    function showVideoCallModal(payload) {
+        const modal = document.getElementById("videoCallModal");
+        const message = document.getElementById("videoCallMessage");
+        const acceptBtn = document.getElementById("videoCallAccept");
+        const rejectBtn = document.getElementById("videoCallReject");
+
+        message.textContent = `${payload.callerName}님이 화상통화를 요청했습니다.`;
+        modal.classList.remove("off");
+        modalBackDrop.classList.remove("off");
+
+        // 수락 버튼
+        acceptBtn.onclick = async () => {
+            modal.classList.add("off");
+            modalBackDrop.classList.add("off");
+            try {
+                const token = await requestLiveKitToken(payload.roomName, `member-${loginedMemberId}`);
+                window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(payload.roomName)}&sessionId=${payload.sessionId || ""}`;
+            } catch (error) {
+                console.error("통화 수락 실패:", error.message);
+            }
+        };
+
+        // 거절 버튼 (REST API 방식으로 변경)
+        rejectBtn.onclick = async () => {
+            modal.classList.add("off");
+            modalBackDrop.classList.add("off");
+            try {
+                await fetch("/api/video-chat/session/reject", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ callerId: payload.callerId })
+                });
+            } catch (error) {
+                console.error("통화 거절 실패:", error.message);
+            }
+        };
     }
 
     initializeStageOneChat();

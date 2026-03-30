@@ -15,11 +15,7 @@
 <body>
     <main class="join-page" role="main">
         <section class="join-hero" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="join-logo" aria-hidden="true">
-                <g>
-                    <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
-                </g>
-            </svg>
+            <img class="join-logo" src="/images/main/global-gates-logo.png" alt="">
         </section>
 
         <section class="join-panel" aria-label="회원가입 패널">
@@ -137,7 +133,7 @@
                                                                             </div>
                                                                             <div class="phone-placeholder-in3">
                                                                                 <div class="phone-placeholder-text">
-                                                                                    <input id="identity-input" maxlength="50" name="phone" type="text" class="phone-input" value="">
+                                                                                    <input id="identity-input" maxlength="50" name="phone" type="text" class="phone-input" value="" placeholder="01012345678">
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -409,17 +405,16 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="eye-btn">
-                                                                            <button type="button" class="eye-btn-wrap">
-                                                                                <div class="eye-btn-wrap-in">
-                                                                                    <svg viewBox="0 0 24 24" class="eye-btn-img">
-                                                                                        <g>
-                                                                                            <path d="M12 21c-7.605 0-10.804-8.296-10.937-8.648L.932 12l.131-.352C1.196 11.295 4.394 3 12 3s10.804 8.296 10.937 8.648l.131.352-.131.352C22.804 12.705 19.606 21 12 21zm-8.915-9c.658 1.467 3.5 7 8.915 7s8.257-5.533 8.915-7c-.658-1.467-3.5-7-8.915-7s-8.257 5.533-8.915 7zM12 16c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4zm0-6c-1.103 0-2 .897-2 2s.897 2 2 2 2-.897 2-2-.897-2-2-2z"></path>
-                                                                                        </g>
-                                                                                    </svg>
-                                                                                    <div class="eye-btn-junk">
-                                                                                        <span class="eye-btn-junk-in"></span>
-                                                                                    </div>
-                                                                                </div>
+                                                                            <button type="button" class="eye-btn-wrap" aria-label="비밀번호 보기">
+                                                                                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true">
+                                                                                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"></path>
+                                                                                    <circle cx="12" cy="12" r="3.2"></circle>
+                                                                                </svg>
+                                                                                <svg class="eye-off is-hidden" viewBox="0 0 24 24" aria-hidden="true">
+                                                                                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"></path>
+                                                                                    <circle cx="12" cy="12" r="3.2"></circle>
+                                                                                    <line x1="4" y1="20" x2="20" y2="4"></line>
+                                                                                </svg>
                                                                             </button>
                                                                         </div>
                                                                     </label>

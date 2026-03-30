@@ -101,6 +101,17 @@
         where id = #{id}
     </update>
 
+    <update id="update">
+        <!-- 프로필 수정 모달에서 실제로 바꾸는 텍스트 필드만 저장한다.
+             기존 회원가입/로그인 로직과 섞이지 않도록 member 본체 컬럼만 최소 범위로 갱신한다. -->
+        update tbl_member
+        set member_nickname = #{memberNickname},
+            member_bio = #{memberBio},
+            birth_date = #{birthDate},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
     <!-- 채팅 유저 검색 (차단 사용자 제외) -->
     <select id="searchByKeyword" resultType="com.app.globalgates.dto.MemberDTO">
         select

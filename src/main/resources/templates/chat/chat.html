@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="/css/chat/chat.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <script src="/js/chat/event.js"></script>
-    <script src="/js/video/event.js"></script>
+    <script src="/js/chat/service.js"></script>
+    <script src="/js/chat/layout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
 <main class="Chat-Main">
@@ -123,125 +126,6 @@
                                      style="height: 100vh; overflow: hidden auto; overflow-anchor: none; width: 100%;">
                                     <ul class="UserList-Container">
 
-                                        <!-- 유저 정보 하나 -->
-                                        <!-- 클릭 시, current 추가하고 해당 유저  -->
-                                        <!-------------------------------->
-                                        <li class="UserList-EachUser">
-                                            <div class="EachUser-Wrapper" style="opacity: 1;">
-                                                <div class="EachUser-UserInfo">
-                                                    <div class="UserInfo-Avatar">
-                                                        <a class="Avatar-Image">
-                                                            <!-- 유저 프로필 이미지 넣는 곳 -->
-                                                            <img alt="user-avatar" src="" loading="lazy"
-                                                                 draggable="false">
-                                                        </a>
-                                                    </div>
-                                                    <div class="UserInfo-Info">
-                                                        <div class="Info-Upper">
-                                                            <div class="Info-UserName">
-                                                                <!-- 유저 이름 + 구독 여부 뱃지 -->
-                                                                <a href="해당 유저 마이페이지 경로" style="text-decoration: none;">
-                                                                    <div class="UserName-Container">
-                                                                        <!-- 유저 이름 부분 -->
-                                                                        <div class="UserName-Text">유저 이름</div>
-                                                                        <!-- 유저 구독 여부 뱃지 부분 -->
-                                                                        <div class="UserName-Badge">
-                                                                            <div class="Badge-Wrapper">
-                                                                                <div class="Badge-Svg">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                         fill="currentColor"
-                                                                                         data-icon="icon-verified"
-                                                                                         viewBox="0 0 22 22" width="1em"
-                                                                                         height="1em" display="flex"
-                                                                                         role="img" class="fill-badge">
-                                                                                        <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <!-- 채팅이 올라온 최근 시간 부분 -->
-                                                            <div class="Lastest-ChatTime">
-                                                                <div class="Lastest-ChatTime-Text">2일 전</div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- 최근 올라온 채팅 내용 부분 -->
-                                                        <div class="Info-Bottom">
-                                                            <div class="Talk-Wrapper">
-                                                                <div class="Talk-Container">
-                                                                    <!-- 채팅 내용 span -->
-                                                                    <span class="Talk-Content">
-                                                                            채팅 내용 입력하는 곳
-                                                                        </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <!-------------------------------->
-
-                                        <!-------------------------------->
-                                        <li class="UserList-EachUser">
-                                            <div class="EachUser-Wrapper" style="opacity: 1;">
-                                                <div class="EachUser-UserInfo">
-                                                    <div class="UserInfo-Avatar">
-                                                        <a class="Avatar-Image">
-                                                            <!-- 유저 프로필 이미지 넣는 곳 -->
-                                                            <img alt="user-avatar" src="" loading="lazy"
-                                                                 draggable="false">
-                                                        </a>
-                                                    </div>
-                                                    <div class="UserInfo-Info">
-                                                        <div class="Info-Upper">
-                                                            <div class="Info-UserName">
-                                                                <!-- 유저 이름 + 구독 여부 뱃지 -->
-                                                                <a href="해당 유저 마이페이지 경로" style="text-decoration: none;">
-                                                                    <div class="UserName-Container">
-                                                                        <!-- 유저 이름 부분 -->
-                                                                        <div class="UserName-Text">유저 이름</div>
-                                                                        <!-- 유저 구독 여부 뱃지 부분 -->
-                                                                        <div class="UserName-Badge">
-                                                                            <div class="Badge-Wrapper">
-                                                                                <div class="Badge-Svg">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                         fill="currentColor"
-                                                                                         data-icon="icon-verified"
-                                                                                         viewBox="0 0 22 22" width="1em"
-                                                                                         height="1em" display="flex"
-                                                                                         role="img" class="fill-badge">
-                                                                                        <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <!-- 채팅이 올라온 최근 시간 부분 -->
-                                                            <div class="Lastest-ChatTime">
-                                                                <div class="Lastest-ChatTime-Text">2일 전</div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- 최근 올라온 채팅 내용 부분 -->
-                                                        <div class="Info-Bottom">
-                                                            <div class="Talk-Wrapper">
-                                                                <div class="Talk-Container">
-                                                                    <!-- 채팅 내용 span -->
-                                                                    <span class="Talk-Content">
-                                                                            채팅 내용 입력하는 곳
-                                                                        </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <!-------------------------------->
                                     </ul>
                                 </div>
                             </div>
@@ -1293,54 +1177,54 @@
                     <button type="button" class="Set-Remove-Time">
                         <div class="Area-Content-Text">5분</div>
                         <!-- 선택하면 나타나는 svg -->
-                        <svg class="off" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              data-icon="icon-checkmark" viewBox="0 0 24 24" width="24" height="24" display="flex"
-                             role="img" class="text-primary">
+                             role="img" class="text-primary off">
                             <path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path>
                         </svg>
                     </button>
                     <button type="button" class="Set-Remove-Time">
                         <div class="Area-Content-Text">1 시간</div>
                         <!-- 선택하면 나타나는 svg -->
-                        <svg class="off" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              data-icon="icon-checkmark" viewBox="0 0 24 24" width="24" height="24" display="flex"
-                             role="img" class="text-primary">
+                             role="img" class="text-primary off">
                             <path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path>
                         </svg>
                     </button>
                     <button type="button" class="Set-Remove-Time">
                         <div class="Area-Content-Text">8 시간</div>
                         <!-- 선택하면 나타나는 svg -->
-                        <svg class="off" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              data-icon="icon-checkmark" viewBox="0 0 24 24" width="24" height="24" display="flex"
-                             role="img" class="text-primary">
+                             role="img" class="text-primary off">
                             <path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path>
                         </svg>
                     </button>
                     <button type="button" class="Set-Remove-Time">
                         <div class="Area-Content-Text">1 일</div>
                         <!-- 선택하면 나타나는 svg -->
-                        <svg class="off" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              data-icon="icon-checkmark" viewBox="0 0 24 24" width="24" height="24" display="flex"
-                             role="img" class="text-primary">
+                             role="img" class="text-primary off">
                             <path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path>
                         </svg>
                     </button>
                     <button type="button" class="Set-Remove-Time">
                         <div class="Area-Content-Text">1 주</div>
                         <!-- 선택하면 나타나는 svg -->
-                        <svg class="off" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              data-icon="icon-checkmark" viewBox="0 0 24 24" width="24" height="24" display="flex"
-                             role="img" class="text-primary">
+                             role="img" class="text-primary off">
                             <path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path>
                         </svg>
                     </button>
                     <button type="button" class="Set-Remove-Time Bottom">
                         <div class="Area-Content-Text">4 주</div>
                         <!-- 선택하면 나타나는 svg -->
-                        <svg class="off" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              data-icon="icon-checkmark" viewBox="0 0 24 24" width="24" height="24" display="flex"
-                             role="img" class="text-primary">
+                             role="img" class="text-primary off">
                             <path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path>
                         </svg>
                     </button>
@@ -1614,6 +1498,18 @@
                 <path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
             </svg>
         </button>
+    </div>
+
+    <!-- 화상통화 수신 모달 -->
+    <div class="Small-Modal VideoCall-Request off" id="videoCallModal">
+        <div class="Small-Header">
+            <h2>화상통화 요청</h2>
+        </div>
+        <p class="Small-Message" id="videoCallMessage">상대방이 화상통화를 요청했습니다.</p>
+        <div class="Small-Buttons">
+            <button class="Small-Button Accept" id="videoCallAccept">수락</button>
+            <button class="Small-Button Cancel" id="videoCallReject">거절</button>
+        </div>
     </div>
 
     <!-- 이모지 div -->

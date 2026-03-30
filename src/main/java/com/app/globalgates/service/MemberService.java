@@ -121,6 +121,53 @@ public class MemberService {
         memberProfileFileDAO.save(memberProfileFileDTO);
     }
 
+    //  배너 이미지 저장
+    @Transactional
+    public void saveBannerFile(Long memberId, MultipartFile image, String s3Key) {
+        // 프로필 이미지 저장 로직과 같은 구조를 유지하되,
+        // 회원-파일 관계만 배너 전용 mapper를 타도록 분리한다.
+        FileDTO fileDTO = new FileDTO();
+        fileDTO.setOriginalName(image.getOriginalFilename());
+        fileDTO.setFileName(s3Key);
+        fileDTO.setFilePath(getTodayPath());
+        fileDTO.setFileSize(image.getSize());
+        fileDTO.setContentType(image.getContentType().contains("image") ? FileContentType.IMAGE : FileContentType.ETC);
+        fileDAO.save(fileDTO);
+
+        MemberProfileFileDTO memberProfileFileDTO = new MemberProfileFileDTO();
+        memberProfileFileDTO.setId(fileDTO.getId());
+        memberProfileFileDTO.setMemberId(memberId);
+        memberProfileFileDTO.setProfileImageType(ProfileImageType.BANNER);
+        memberProfileFileDAO.saveBanner(memberProfileFileDTO);
+    }
+
+    //  프로필 수정 텍스트 저장
+    @Transactional
+    public void update(MemberDTO memberDTO) {
+        // 이름(닉네임), 자기소개, 생년월일만 갱신한다.
+        // 이미지 교체 흐름은 컨트롤러에서 upload/save/delete 순서로 직접 조합한다.
+        memberDAO.update(memberDTO);
+    }
+
+    //  현재 프로필 이미지 조회
+    public MemberProfileFileDTO getProfileFile(Long memberId) {
+        return memberProfileFileDAO.findByMemberId(memberId);
+    }
+
+    //  현재 배너 이미지 조회
+    public MemberProfileFileDTO getBannerFile(Long memberId) {
+        return memberProfileFileDAO.findBannerByMemberId(memberId);
+    }
+
+    //  프로필/배너 이미지 관계 및 파일 메타 삭제
+    @Transactional
+    public void deleteProfileFile(Long fileId) {
+        // member_profile_file 관계와 tbl_file 메타는 항상 같이 지워야
+        // 다음 조회에서 이미 삭제된 파일 id가 남지 않는다.
+        memberProfileFileDAO.delete(fileId);
+        fileDAO.delete(fileId);
+    }
+
     //  이메일 검사(true : 사용가능)
     public boolean checkEmail(String memberEmail){
         return memberDAO.findMemberByMemberEmail(memberEmail).isEmpty();
@@ -129,6 +176,12 @@ public class MemberService {
     //  핸드폰 검사(true : 사용가능)
     public boolean checkPhone(String memberPhone){
         return memberDAO.findMemberByMemberPhone(memberPhone).isEmpty();
+    }
+
+    //  handle 검사(true : 사용가능)
+    public boolean checkHandle(String memberHandle){
+        // DB에는 @가 포함된 형태로 저장되므로 조회 시에도 동일한 형태로 맞춘다.
+        return memberDAO.findMemberByMemberHandle("@" + memberHandle).isEmpty();
     }
 
     //    로그인

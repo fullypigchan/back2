@@ -68,8 +68,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const closeAllModals = () => {
         restoreOauthButtons();
+        resetLoginState();
+        resetPasswordState();
         hideModal(loginModal);
         hideModal(passwordModal);
+    };
+
+    const resetLoginState = () => {
+        hadTypedIdentity = false;
+
+        if (loginInput) {
+            loginInput.value = "";
+        }
+
+        loginInputWrap?.classList.remove("is-focus");
+        clearLoginError();
+        syncLoginButton();
+    };
+
+    const resetPasswordState = () => {
+        if (passwordInput) {
+            passwordInput.value = "";
+            passwordInput.type = "password";
+        }
+
+        passwordWrap?.classList.remove("is-focus", "has-value");
+        eyeOpen?.classList.remove("is-hidden");
+        eyeOff?.classList.add("is-hidden");
+        passwordEyeButton?.setAttribute("aria-label", "비밀번호 보기");
+        syncPasswordButton();
     };
 
     const clearLoginError = () => {

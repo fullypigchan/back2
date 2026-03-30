@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.app.globalgates.mapper.PostProductMapper">
 
+    <!-- tbl_post 저장 후 같은 id로 상품 row를 만든다 -->
+    <insert id="insert">
+        insert into tbl_post_product (
+            id,
+            product_category_id,
+            product_price,
+            product_stock
+        )
+        values (
+            #{id},
+            #{productCategoryId},
+            #{productPrice},
+            #{productStock}
+        )
+    </insert>
+
     <!-- 특정 회원의 판매품목 목록 조회 -->
     <select id="selectAllByMemberId">
         select pp.id,
@@ -17,6 +33,24 @@
         where p.member_id = #{memberId}
           and p.post_status = 'active'
         order by pp.created_datetime desc
+    </select>
+
+    <!-- 특정 회원의 판매품목 목록 조회 (페이징) -->
+    <select id="selectAllByMemberIdWithPaging">
+        select pp.id,
+               pp.product_price,
+               pp.product_stock,
+               pp.product_category_id,
+               pp.created_datetime,
+               pp.updated_datetime,
+               p.title as post_title,
+               p.content as post_content
+        from tbl_post_product pp
+                 join tbl_post p on pp.id = p.id
+        where p.member_id = #{memberId}
+          and p.post_status = 'active'
+        order by pp.created_datetime desc
+        limit #{criteria.count} offset #{criteria.offset}
     </select>
 
     <!-- 추천 상품 전체 조회 -->
@@ -37,6 +71,33 @@
         where p.post_status = 'active'
         order by created_datetime desc
         limit #{criteria.count} offset #{criteria.offset}
+    </select>
+
+    <!-- 특정 회원의 상품 총 개수 -->
+    <select id="selectTotalByMemberId">
+        select count(*)
+        from tbl_post_product pp
+                 join tbl_post p on pp.id = p.id
+        where p.member_id = #{memberId}
+          and p.post_status = 'active'
+    </select>
+
+    <select id="selectMemberIdByProductId">
+        <!--
+            상품 삭제는 tbl_post_product 를 직접 물리 삭제하지 않고,
+            기존 게시글 삭제 흐름과 동일하게 tbl_post.post_status 를 inactive 로 바꾸는 방식으로 처리한다.
+
+            다만 그 전에 "이 상품이 누구 것인지" 먼저 확인해야 하므로,
+            product id(= post id) 기준으로 member_id만 조회하는 최소 쿼리를 둔다.
+
+            active 조건을 같이 두는 이유:
+            이미 삭제된 상품(inactive)은 다시 삭제 대상이 아니기 때문이다.
+        -->
+        select p.member_id
+        from tbl_post_product pp
+                 join tbl_post p on pp.id = p.id
+        where pp.id = #{productId}
+          and p.post_status = 'active'
     </select>
 
     <!-- 조회된 총 상품 수 -->

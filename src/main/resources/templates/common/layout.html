@@ -6,10 +6,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
-    <header th:replace="/common/header.html"></header>
+    <header th:replace="/common/header::header"></header>
 
     <th:block layout:fragment="content"></th:block>
 
-    <footer th:replace="/common/footer.html"></footer>
+    <footer th:replace="/common/footer::footer"></footer>
 </body>
 </html>
+ 1,

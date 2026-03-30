@@ -42,9 +42,19 @@ public class PostDAO {
         return postMapper.selectAll(criteria, memberId);
     }
 
+    //    게시글 목록 조회 (mypage의 memberId)
+    public List<PostDTO> findAllByMemberId(Criteria criteria, Long memberId) {
+        return postMapper.selectAllByMemberId(criteria, memberId);
+    }
+
     //    게시글 전체 개수
     public int findTotal() {
         return postMapper.selectTotal();
+    }
+
+    //    member가 가진 게시글 전체 개수
+    public int findTotalByMemberId(Long memberId) {
+        return postMapper.selectTotalByMemberId(memberId);
     }
 
     //    게시글 검색 조회

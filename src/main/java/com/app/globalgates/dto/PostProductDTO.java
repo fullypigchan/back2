@@ -17,9 +17,18 @@ import java.util.List;
 @NoArgsConstructor
 public class PostProductDTO {
     private Long id;
+
+    // tbl_post 저장 시 작성자 id로만 사용된다.
+    private Long memberId;
+
     private int productPrice;
     private int productStock;
     private Long productCategoryId;
+
+    // 상품 등록 폼에서 직접 받는 값이다.
+    private String categoryName;
+    private String postTag;
+
     private String createdDatetime;
     private String updatedDatetime;
 
@@ -46,5 +55,15 @@ public class PostProductDTO {
                 .createdDatetime(createdDatetime)
                 .updatedDatetime(updatedDatetime)
                 .build();
+    }
+
+    // 상품은 tbl_post를 먼저 저장한 뒤 같은 id로 tbl_post_product를 저장한다.
+    public PostDTO toPostDTO() {
+        PostDTO postDTO = new PostDTO();
+        postDTO.setId(id);
+        postDTO.setMemberId(memberId);
+        postDTO.setPostTitle(postTitle);
+        postDTO.setPostContent(postContent);
+        return postDTO;
     }
 }

@@ -84,4 +84,11 @@ public class PostMapperTests {
         List<PostDTO> foundPosts = postMapper.selectBySearch(criteria, search);
         log.info("조회한 게시물 : {}", foundPosts);
     }
+
+    @Test
+    public void testSelectALLByMemberId() {
+        Criteria criteria = new Criteria(1, postMapper.selectTotalByMemberId(46L));
+        List<PostDTO> foundPosts = postMapper.selectAllByMemberId(criteria,46L);
+        log.info("memberId로 조회한 게시물 : {}", foundPosts);
+    }
 }

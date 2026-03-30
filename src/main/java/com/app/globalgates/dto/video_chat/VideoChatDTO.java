@@ -22,6 +22,10 @@ public class VideoChatDTO {
     // 채팅방 이름
     private String title;
 
+    // 채팅방 응답용
+    private String roomName;
+    private String callerName;
+
     public VideoChatVO toVO() {
         return VideoChatVO.builder()
                 .id(id)

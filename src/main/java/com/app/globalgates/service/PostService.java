@@ -101,6 +101,45 @@ public class PostService {
         return postWithPagingDTO;
     }
 
+    // 마이페이지 "게시물" 탭은 메인 피드와 다르게
+    // 1. 작성자가 현재 로그인 사용자 본인이고
+    // 2. active 상태이며
+    // 3. 댓글이 아니고
+    // 4. 상품 게시글(tbl_post_product)은 아닌
+    // 일반 게시글만 조회해야 한다.
+    // 페이징 규칙은 기존 내 상품 목록과 동일하게 rowCount + 1개를 먼저 조회한 뒤
+    // 마지막 1개로 hasMore 여부만 판단한다.
+    public PostWithPagingDTO getMyPosts(int page, Long memberId) {
+        PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
+        Criteria criteria = new Criteria(page, postDAO.findTotalByMemberId(memberId));
+
+        List<PostDTO> posts = postDAO.findAllByMemberId(criteria, memberId).stream()
+                .map(postDTO -> {
+                    List<PostFileDTO> files = new ArrayList<>(postFileDAO.findAllByPostId(postDTO.getId()));
+                    if (!files.isEmpty()) {
+                        postDTO.setPostFiles(files);
+                        postDTO.setFileUrls(
+                                files.stream()
+                                        .map(PostFileDTO::getFilePath)
+                                        .collect(Collectors.toList())
+                        );
+                    }
+                    postDTO.setHashtags(postHashtagDAO.findAllByPostId(postDTO.getId()));
+                    return postDTO;
+                }).collect(Collectors.toList());
+
+        criteria.setHasMore(posts.size() > criteria.getRowCount());
+        postWithPagingDTO.setCriteria(criteria);
+
+        if (criteria.isHasMore()) {
+            posts.remove(posts.size() - 1);
+        }
+
+        posts.forEach(post -> post.setCreatedDatetime(DateUtils.toRelativeTime(post.getCreatedDatetime())));
+        postWithPagingDTO.setPosts(posts);
+        return postWithPagingDTO;
+    }
+
     //    게시글 단건 조회
     @Cacheable(value="post", key="'id:' + #id + ':memberId:' + #memberId")
     public PostDTO getDetail(Long id, Long memberId) {

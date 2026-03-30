@@ -3,6 +3,12 @@
 // - 소셜 기본 정보는 이 객체에 보관
 // - hidden input 중복 저장 안 함
 const params = new URLSearchParams(window.location.search);
+// 휴대폰 인증 흐름에서만 사용하는 임시 상태값
+let certCode = null;
+let phoneVerified = false;
+// 이메일 인증 흐름에서만 사용하는 임시 상태값
+let emailCertCode = null;
+let emailVerified = false;
 
 window.oauthJoinData = {
     enabled: params.get("oauth") === "1",
@@ -16,6 +22,7 @@ window.oauthJoinData = {
 
 const show = id => document.getElementById(id).style.display = 'flex';
 const hide = id => document.getElementById(id).style.display = 'none';
+const codeInput = document.querySelector('#modal-code input[name="code"]');
 const MODALS = [
     'modal-create', 'overlay-phone', 'overlay-email',
     'modal-code', 'modal-password', 'modal-oauth-birth', 'modal-business',
@@ -23,6 +30,24 @@ const MODALS = [
     'modal-language', 'modal-category', 'modal-submit'
 ];
 const hideAll = () => MODALS.forEach(hide);
+const resetSmsState = () => {
+    // 모달을 닫거나 처음부터 다시 시작할 때 인증 상태도 함께 비운다.
+    certCode = null;
+    phoneVerified = false;
+
+    if (codeInput) {
+        codeInput.value = "";
+    }
+};
+const resetEmailState = () => {
+    // 모달을 닫거나 처음부터 다시 시작할 때 이메일 인증 상태도 함께 비운다.
+    emailCertCode = null;
+    emailVerified = false;
+
+    if (codeInput) {
+        codeInput.value = "";
+    }
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     // 신규 SNS 회원이면 join 진입 직후 생년월일 모달부터 연다.
@@ -59,28 +84,93 @@ document.getElementById('btn-create').addEventListener('click', () => {
 
 // 닫기 버튼 (X) - 확인 후 닫기
 document.querySelectorAll('.join-modal-header-close-button, .icon-button--close').forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (confirm('정말 나가시겠습니까?')) hideAll();
+    btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!confirm('정말 나가시겠습니까?')) {
+            return;
+        }
+
+        window.joinCreateModalReset?.();
+        window.joinPasswordModalReset?.();
+        resetSmsState();
+        resetEmailState();
+        hideAll();
     });
 });
 
-// 계정 생성 → 인증 overlay
-document.querySelector('#modal-create .next-button').addEventListener('click', () => {
-    const label = document.querySelector('#modal-create .phone-text-in').textContent.trim();
-    hide('modal-create');
-    show(label === '이메일' ? 'overlay-email' : 'overlay-phone');
+// overlay-phone
+document.querySelector('#overlay-phone .btn-confirm').addEventListener('click', async () => {
+    try {
+        // 서버가 내려준 인증번호를 받아 두고, code 모달에서 사용자가 입력한 값과 비교한다.
+        certCode = await joinService.sendSms(identityInput.value.trim());
+        phoneVerified = false;
+        hide('overlay-phone');
+        show('modal-code');
+    } catch (error) {
+        alert(error.message || '인증번호 전송에 실패했습니다.');
+    }
+});
+document.querySelector('#overlay-phone .btn-edit').addEventListener('click', () => {
+    resetSmsState();
+    hide('overlay-phone');
+    show('modal-create');
 });
 
-// overlay-phone
-document.querySelector('#overlay-phone .btn-confirm').addEventListener('click', () => { hide('overlay-phone'); show('modal-code'); });
-document.querySelector('#overlay-phone .btn-edit').addEventListener('click', () => { hide('overlay-phone'); show('modal-create'); });
-
 // overlay-email
-document.querySelector('#overlay-email .btn-confirm').addEventListener('click', () => { hide('overlay-email'); show('modal-code'); });
-document.querySelector('#overlay-email .btn-edit').addEventListener('click', () => { hide('overlay-email'); show('modal-create'); });
+document.querySelector('#overlay-email .btn-confirm').addEventListener('click', async () => {
+    try {
+        // 서버가 내려준 인증번호를 받아 두고, code 모달에서 사용자가 입력한 값과 비교한다.
+        emailCertCode = await joinService.sendEmailCode(identityInput.value.trim());
+        emailVerified = false;
+        hide('overlay-email');
+        show('modal-code');
+    } catch (error) {
+        alert(error.message || '인증번호 전송에 실패했습니다.');
+    }
+});
+document.querySelector('#overlay-email .btn-edit').addEventListener('click', () => {
+    resetEmailState();
+    hide('overlay-email');
+    show('modal-create');
+});
 
 // 코드 → 비밀번호
-document.querySelector('#modal-code .next-button').addEventListener('click', () => { hide('modal-code'); show('modal-password'); });
+document.querySelector('#modal-code .next-button').addEventListener('click', () => {
+    const label = identityLabel?.textContent.trim();
+    const inputCode = codeInput?.value.trim() || "";
+
+    if (!inputCode) {
+        alert('인증번호를 입력하세요.');
+        return;
+    }
+
+    if (label === '휴대폰 번호') {
+        if (certCode !== inputCode) {
+            phoneVerified = false;
+            alert('잘못된 인증번호입니다.');
+            return;
+        }
+
+        // 일반 회원가입 최종 submit 전에 휴대폰 인증 완료 여부를 다시 확인한다.
+        phoneVerified = true;
+    }
+
+    if (label === '이메일') {
+        if (emailCertCode !== inputCode) {
+            emailVerified = false;
+            alert('잘못된 인증번호입니다.');
+            return;
+        }
+
+        // 일반 회원가입 최종 submit 전에 이메일 인증 완료 여부를 다시 확인한다.
+        emailVerified = true;
+    }
+
+    hide('modal-code');
+    show('modal-password');
+});
 
 // 비밀번호 → 사업자
 document.querySelector('#modal-password .next-button').addEventListener('click', () => { hide('modal-password'); show('modal-business'); });
@@ -114,7 +204,19 @@ document.querySelector('#modal-business .next-button').addEventListener('click',
 document.querySelector('#modal-profile .ghost-button').addEventListener('click', () => { hide('modal-profile'); show('modal-username'); });
 
 // 아이디 → 언어
-document.querySelector('#modal-username .next-button').addEventListener('click', () => { hide('modal-username'); show('modal-language'); });
+document.querySelector('#modal-username .next-button').addEventListener('click', async (event) => {
+    // handle 검증은 join-modal-user-name.js가 담당하고, 여기서는 통과 여부만 확인한다.
+    const isValid = await window.joinHandleValidation?.ensureValid?.();
+
+    if (!isValid || !window.joinHandleValidation?.canProceed?.()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+    }
+
+    hide('modal-username');
+    show('modal-language');
+});
 
 // 언어 → 카테고리
 document.querySelector('#modal-language .next-button').addEventListener('click', () => { hide('modal-language'); show('modal-category'); });
@@ -135,24 +237,120 @@ document.querySelectorAll('#modal-notification .notification-btn').forEach(btn =
     });
 });
 
+const createNextButton = document.querySelector('#modal-create .next-button');
+const identityInput = document.getElementById('identity-input');
+const identityLabel = document.querySelector('#modal-create .phone-text-in');
+const changeIdentityButton = document.querySelector('#modal-create .change');
 
+let identityDuplicateState = null; // null: 미검사, true: 사용가능, false: 중복
+let identityChecking = false;
+let identityRequestToken = 0;
 
-//     이메일, 휴대폰 번호 유효성 검사
-const identityInput = document.getElementById("identity-input")
-let check = false;
-let emailcheck = false;
-let phonecheck = false;
-const okMessage = "사용가능한 이메일입니다."
-const noMessage = "중복된 이메일입니다."
-identityInput.addEventListener("blur", (e) => {
-    if (identityInput.value === joinService.checkEmail()) {
-        emailcheck = true;
-        identityInput.style.borderColor = "green";
-        identityInput.nextElementSibling.textContent = okMessage;
+const isEmailMode = () => identityLabel?.textContent.trim() === '이메일';
+
+const resetIdentityDuplicateState = ({ clearVisual = false } = {}) => {
+    identityDuplicateState = null;
+    identityChecking = false;
+    identityRequestToken += 1;
+
+    if (clearVisual) {
+        window.joinCreateValidation?.clearIdentityDuplicateFeedback?.();
+    }
+};
+
+const runIdentityDuplicateCheck = async () => {
+    const value = identityInput?.value.trim() || '';
+    const formatError = window.joinCreateValidation?.getIdentityFormatError?.() || '';
+
+    if (formatError) {
+        return false;
     }
 
-})
+    const requestToken = ++identityRequestToken;
+    const emailMode = isEmailMode();
+    identityChecking = true;
 
+    try {
+        const isAvailable = emailMode
+            ? await joinService.checkEmail(value)
+            : await joinService.checkPhone(value);
+
+        if (requestToken !== identityRequestToken) {
+            return false;
+        }
+
+        if ((identityInput?.value.trim() || '') !== value || isEmailMode() !== emailMode) {
+            return false;
+        }
+
+        identityChecking = false;
+        identityDuplicateState = isAvailable;
+
+        if (!isAvailable) {
+            window.joinCreateValidation?.setIdentityDuplicateError?.(
+                emailMode ? '이미 사용 중인 이메일입니다.' : '이미 사용 중인 휴대폰 번호입니다.'
+            );
+            return false;
+        }
+
+        window.joinCreateValidation?.setIdentityDuplicateSuccess?.(
+            emailMode ? '사용 가능한 이메일입니다.' : '사용 가능한 휴대폰 번호입니다.'
+        );
+        return true;
+    } catch (error) {
+        if (requestToken !== identityRequestToken) {
+            return false;
+        }
+
+        identityChecking = false;
+        identityDuplicateState = null;
+        window.joinCreateValidation?.setIdentityDuplicateError?.('중복 확인 중 오류가 발생했습니다.');
+        return false;
+    }
+};
+
+identityInput?.addEventListener('input', () => {
+    resetIdentityDuplicateState({ clearVisual: true });
+});
+
+identityInput?.addEventListener('blur', async () => {
+    if (!identityInput.value.trim()) {
+        resetIdentityDuplicateState({ clearVisual: true });
+        return;
+    }
+
+    if (!window.joinCreateValidation?.isIdentityFormatValid?.()) {
+        return;
+    }
+
+    await runIdentityDuplicateCheck();
+});
+
+changeIdentityButton?.addEventListener('click', () => {
+    resetIdentityDuplicateState({ clearVisual: true });
+    resetSmsState();
+    resetEmailState();
+});
+
+createNextButton?.addEventListener('click', async (event) => {
+    if (!window.joinCreateValidation?.isCreateFormValid?.()) {
+        window.joinCreateValidation?.showIdentityFormatError?.();
+        return;
+    }
+
+    const isAvailable = await runIdentityDuplicateCheck();
+
+    if (!isAvailable || identityChecking || identityDuplicateState !== true) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        identityInput?.focus();
+        return;
+    }
+
+    const label = identityLabel.textContent.trim();
+    hide('modal-create');
+    show(label === '이메일' ? 'overlay-email' : 'overlay-phone');
+});
 
 
 //     회원 정보 입력 후 formData로 서버에 전송
@@ -217,6 +415,23 @@ joinBtn.addEventListener('click', async () => {
     const subMemberEmail = memberEmail?.value?.trim() ? memberEmail.value.trim() : null;
     const subMemberPhone = memberPhone?.value?.trim() ? memberPhone.value.trim() : null;
     const submemberHandle = "@" + memberHandle.value;
+
+    // 최종 제출 직전에도 한 번 더 검사해서 중간 단계 우회를 막는다.
+    const handleReady = await window.joinHandleValidation?.ensureValid?.();
+    if (!handleReady || !window.joinHandleValidation?.canProceed?.()) {
+        alert('아이디 형식을 확인하고 중복검사를 완료해주세요.');
+        return;
+    }
+
+    if (subMemberPhone !== null && !phoneVerified) {
+        alert('휴대폰 인증을 완료해주세요.');
+        return;
+    }
+
+    if (subMemberEmail !== null && !emailVerified) {
+        alert('이메일 인증을 완료해주세요.');
+        return;
+    }
 
     const formData = new FormData();
     // SNS 신규 가입 분기
