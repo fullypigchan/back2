@@ -2064,15 +2064,6 @@ window.onload = function () {
         }
     });
 
-    // [마이페이지 전용] 답글 버튼: .Post-Action-Btn.Reply 클릭 → openReplyModal
-    document.querySelectorAll(".Post-Action-Btn.Reply").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openReplyModal(button);
-        });
-    });
-
     // 답글 모달 이벤트
     replyCloseButton?.addEventListener("click", closeReplyModal);
     replyModalOverlay?.addEventListener("click", (e) => {
@@ -2611,72 +2602,122 @@ window.onload = function () {
         setTimeout(() => clipboardToast.classList.remove("show"), 2500);
     }
 
-    // Like/Bookmark SVG 초기화
-    const EMPTY_HEART = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true"><g><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>`;
-    const FULL_HEART = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true"><g><path d="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>`;
-    const EMPTY_BK = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>`;
-    const FULL_BK = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"></path></g></svg>`;
+    // Like / Bookmark는 정적 카드와 동적 카드가 섞여 있으므로 "최초 DOM에만 바인딩"하지 않는다.
+    // 대신 클릭 직전에 필요한 아이콘 구조를 보장하고, 상태 토글은 이벤트 위임 경로에서 처리한다.
+    const EMPTY_HEART = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" data-icon="like-empty" aria-hidden="true"><g><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>`;
+    const FULL_HEART = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" data-icon="like-full" aria-hidden="true"><g><path d="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>`;
+    const EMPTY_BK = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" data-icon="bookmark-empty" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>`;
+    const FULL_BK = `<svg viewBox="0 0 24 24" class="Post-Action-Icon" data-icon="bookmark-full" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"></path></g></svg>`;
 
-    document.querySelectorAll(".Post-Action-Btn.Like").forEach((btn) => {
+    function ensureLikeButtonIcons(btn) {
+        if (!btn || btn.dataset.likeIconsReady === "true") {
+            return;
+        }
+
         const inLikes = !!btn.closest(".Profile-Content.Likes");
-        const cnt = btn.querySelector(".Post-Action-Count");
-        btn.querySelectorAll("svg").forEach((s) => s.remove());
-        const e1 = document.createElement("span");
-        e1.innerHTML = EMPTY_HEART;
-        const es = e1.firstChild;
-        if (inLikes) es.classList.add("off");
-        const f1 = document.createElement("span");
-        f1.innerHTML = FULL_HEART;
-        const fs = f1.firstChild;
-        if (!inLikes) fs.classList.add("off");
-        if (cnt) {
-            btn.insertBefore(es, cnt);
-            btn.insertBefore(fs, cnt);
-        } else {
-            btn.appendChild(es);
-            btn.appendChild(fs);
+        const count = btn.querySelector(".Post-Action-Count");
+        const emptyWrapper = document.createElement("span");
+        const fullWrapper = document.createElement("span");
+        const isLiked = btn.dataset.liked === "true" || inLikes;
+
+        btn.querySelectorAll("svg").forEach((svg) => svg.remove());
+
+        emptyWrapper.innerHTML = EMPTY_HEART;
+        fullWrapper.innerHTML = FULL_HEART;
+
+        const emptyIcon = emptyWrapper.firstChild;
+        const fullIcon = fullWrapper.firstChild;
+
+        emptyIcon.classList.toggle("off", isLiked);
+        fullIcon.classList.toggle("off", !isLiked);
+        btn.classList.toggle("liked", isLiked);
+        btn.dataset.liked = String(isLiked);
+        btn.dataset.likeIconsReady = "true";
+
+        if (count) {
+            btn.insertBefore(emptyIcon, count);
+            btn.insertBefore(fullIcon, count);
+            return;
         }
-        if (inLikes) btn.classList.add("liked");
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const isLiked = btn.classList.contains("liked");
-            btn.classList.toggle("liked", !isLiked);
-            es.classList.toggle("off", !isLiked);
-            fs.classList.toggle("off", isLiked);
-            if (cnt) {
-                const n =
-                    parseInt(cnt.textContent.replace(/[^0-9]/g, ""), 10) || 0;
-                cnt.textContent = isLiked ? n - 1 : n + 1;
-            }
-        });
-    });
-    document.querySelectorAll(".Post-Action-Btn.Bookmark").forEach((btn) => {
-        const cnt = btn.querySelector(".Post-Action-Count");
-        btn.querySelectorAll("svg").forEach((s) => s.remove());
-        const e1 = document.createElement("span");
-        e1.innerHTML = EMPTY_BK;
-        const es = e1.firstChild;
-        const f1 = document.createElement("span");
-        f1.innerHTML = FULL_BK;
-        const fs = f1.firstChild;
-        fs.classList.add("off");
-        if (cnt) {
-            btn.insertBefore(es, cnt);
-            btn.insertBefore(fs, cnt);
-        } else {
-            btn.appendChild(es);
-            btn.appendChild(fs);
+
+        btn.appendChild(emptyIcon);
+        btn.appendChild(fullIcon);
+    }
+
+    function ensureBookmarkButtonIcons(btn) {
+        if (!btn || btn.dataset.bookmarkIconsReady === "true") {
+            return;
         }
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const isBk = btn.classList.contains("bookmarked");
-            btn.classList.toggle("bookmarked", !isBk);
-            es.classList.toggle("off", !isBk);
-            fs.classList.toggle("off", isBk);
-        });
-    });
+
+        const count = btn.querySelector(".Post-Action-Count");
+        const emptyWrapper = document.createElement("span");
+        const fullWrapper = document.createElement("span");
+        const isBookmarked = btn.dataset.bookmarked === "true";
+
+        btn.querySelectorAll("svg").forEach((svg) => svg.remove());
+
+        emptyWrapper.innerHTML = EMPTY_BK;
+        fullWrapper.innerHTML = FULL_BK;
+
+        const emptyIcon = emptyWrapper.firstChild;
+        const fullIcon = fullWrapper.firstChild;
+
+        emptyIcon.classList.toggle("off", isBookmarked);
+        fullIcon.classList.toggle("off", !isBookmarked);
+        btn.classList.toggle("bookmarked", isBookmarked);
+        btn.dataset.bookmarked = String(isBookmarked);
+        btn.dataset.bookmarkIconsReady = "true";
+
+        if (count) {
+            btn.insertBefore(emptyIcon, count);
+            btn.insertBefore(fullIcon, count);
+            return;
+        }
+
+        btn.appendChild(emptyIcon);
+        btn.appendChild(fullIcon);
+    }
+
+    function toggleLikeButton(btn) {
+        ensureLikeButtonIcons(btn);
+
+        const count = btn.querySelector(".Post-Action-Count");
+        const emptyIcon = btn.querySelector('[data-icon="like-empty"]');
+        const fullIcon = btn.querySelector('[data-icon="like-full"]');
+        const isLiked = btn.dataset.liked === "true";
+        const nextLiked = !isLiked;
+
+        btn.dataset.liked = String(nextLiked);
+        btn.classList.toggle("liked", nextLiked);
+        emptyIcon?.classList.toggle("off", nextLiked);
+        fullIcon?.classList.toggle("off", !nextLiked);
+
+        if (!count) {
+            return;
+        }
+
+        const current = parseInt(count.textContent.replace(/[^0-9]/g, ""), 10) || 0;
+        count.textContent = nextLiked ? current + 1 : Math.max(0, current - 1);
+    }
+
+    function toggleBookmarkButton(btn) {
+        ensureBookmarkButtonIcons(btn);
+
+        const emptyIcon = btn.querySelector('[data-icon="bookmark-empty"]');
+        const fullIcon = btn.querySelector('[data-icon="bookmark-full"]');
+        const isBookmarked = btn.dataset.bookmarked === "true";
+        const nextBookmarked = !isBookmarked;
+
+        btn.dataset.bookmarked = String(nextBookmarked);
+        btn.classList.toggle("bookmarked", nextBookmarked);
+        emptyIcon?.classList.toggle("off", nextBookmarked);
+        fullIcon?.classList.toggle("off", !nextBookmarked);
+    }
+
+    // 서버가 렌더한 정적 카드(답글/좋아요 탭 샘플)는 최초 진입 시 한 번만 아이콘 구조를 맞춘다.
+    // 조회 후 추가되는 DOM은 아래 이벤트 위임 경로에서 클릭 시점에 자동으로 보정된다.
+    document.querySelectorAll(".Post-Action-Btn.Like").forEach((btn) => ensureLikeButtonIcons(btn));
+    document.querySelectorAll(".Post-Action-Btn.Bookmark").forEach((btn) => ensureBookmarkButtonIcons(btn));
 
     let activeMoreMenu = null,
         activeMenuEl = null,
@@ -2926,12 +2967,39 @@ window.onload = function () {
             closeAllMoreMenus();
     });
 
-    // ── 공유 버튼 (Share) + 더보기 버튼 (More) 이벤트 위임 ──
+    // ── 카드 액션 버튼 이벤트 위임 ──
     document.body.addEventListener(
         "click",
         (e) => {
+            // 답글 버튼: 동적 카드도 동일한 경로로 모달을 열 수 있도록 이벤트를 위임한다.
+            const replyBtn = e.target.closest('.Post-Action-Btn.Reply, [data-action="reply"]');
+            if (replyBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                openReplyModal(replyBtn);
+                return;
+            }
+
+            // 좋아요 버튼: 현재 DOM 상태를 기준으로 아이콘 구조를 보장한 뒤 상태만 토글한다.
+            const likeBtn = e.target.closest('.Post-Action-Btn.Like, [data-action="like"]');
+            if (likeBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLikeButton(likeBtn);
+                return;
+            }
+
+            // 북마크도 동일한 방식으로 처리해, 렌더링 이후 별도 재바인딩 없이 동작하게 만든다.
+            const bookmarkBtn = e.target.closest('.Post-Action-Btn.Bookmark, [data-action="bookmark"]');
+            if (bookmarkBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleBookmarkButton(bookmarkBtn);
+                return;
+            }
+
             // 공유 버튼
-            const shareBtn = e.target.closest(".Post-Action-Btn.Share");
+            const shareBtn = e.target.closest('.Post-Action-Btn.Share, [data-action="share"]');
             if (shareBtn) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2939,7 +3007,7 @@ window.onload = function () {
                 return;
             }
             // 더보기 버튼
-            const moreBtn = e.target.closest(".Post-Card .Post-More-Button");
+            const moreBtn = e.target.closest('.Post-Card .Post-More-Button, .Post-Card [data-action="more"]');
             if (moreBtn) {
                 e.preventDefault();
                 e.stopPropagation();

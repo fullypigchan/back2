@@ -109,6 +109,7 @@ public class PostService {
     // 일반 게시글만 조회해야 한다.
     // 페이징 규칙은 기존 내 상품 목록과 동일하게 rowCount + 1개를 먼저 조회한 뒤
     // 마지막 1개로 hasMore 여부만 판단한다.
+    @Cacheable(value="post:list", key="'page:' + #page" + " + 'memberId:' + #memberId")
     public PostWithPagingDTO getMyPosts(int page, Long memberId) {
         PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
         Criteria criteria = new Criteria(page, postDAO.findTotalByMemberId(memberId));
