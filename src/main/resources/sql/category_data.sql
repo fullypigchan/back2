@@ -1,3 +1,4 @@
+
 insert into tbl_category (product_category_parent_id, category_name, created_datetime)
 values  (null, '수출', '2026-03-23 05:18:33.560922'),
         (null, '수입', '2026-03-23 05:18:33.560922'),

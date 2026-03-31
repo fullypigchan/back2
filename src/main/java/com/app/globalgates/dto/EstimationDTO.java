@@ -18,6 +18,7 @@ public class EstimationDTO {
     private Long productId;
     private String title;
     private String content;
+    private String location;
     private String deadLine;
     private String status;
     private String requesterEmail;

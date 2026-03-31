@@ -34,10 +34,28 @@ window.addEventListener("load", () => {
     const contentInput = document.querySelector('textarea[name="postContent"]');
     const tagInput = document.getElementById("devTags");
     const tagsHiddenInput = document.querySelector('input[name="tags"]');
+    const locationHiddenInput = document.querySelector('input[name="location"]');
+    const composeView = document.getElementById("composerComposeView");
+    const locationDisplayButton = document.getElementById("composerLocation");
+    const locationName = document.getElementById("composerLocationName");
+    const locationView = document.getElementById("composerLocationView");
+    const locationCloseButton = document.getElementById("composerLocationClose");
+    const locationDeleteButton = document.getElementById("composerLocationDelete");
+    const locationCompleteButton = document.getElementById("composerLocationComplete");
+    const locationSearchInput = document.getElementById("composerLocationSearch");
+    const locationSearchButton = document.getElementById("composerLocationSearchButton");
+    const locationGuide = document.getElementById("composerLocationGuide");
+    const locationMapElement = document.getElementById("composerLocationMap");
     const requiredFields = [titleInput, summaryInput, contentInput].filter(Boolean);
 
     let selectedProductId = "";
     let selectedReceiverEmail = "";
+    let selectedLocation = "";
+    let pendingLocation = "";
+    let mapInstance = null;
+    let mapMarker = null;
+    let geocoder = null;
+    let mapsLoaderPromise = null;
 
     const safeText = (value, fallback = "") => (value || fallback).trim();
 
@@ -61,6 +79,12 @@ window.addEventListener("load", () => {
         tagsHiddenInput.value = normalized;
     };
 
+    const syncLocationHiddenInput = () => {
+        if (locationHiddenInput) {
+            locationHiddenInput.value = selectedLocation;
+        }
+    };
+
     const syncSubmitState = () => {
         if (!submitButton) {
             return;
@@ -68,6 +92,32 @@ window.addEventListener("load", () => {
 
         const hasRequiredValues = requiredFields.every((field) => field.value.trim());
         submitButton.disabled = !hasRequiredValues || !selectedProductId;
+    };
+
+    const syncLocationUI = () => {
+        const hasLocation = Boolean(selectedLocation);
+
+        if (locationName) {
+            locationName.textContent = hasLocation ? selectedLocation : "위치 추가";
+        }
+
+        if (locationDisplayButton) {
+            locationDisplayButton.hidden = false;
+            locationDisplayButton.setAttribute(
+                "aria-label",
+                hasLocation ? `위치 ${selectedLocation}` : "위치 태그하기",
+            );
+        }
+
+        if (locationDeleteButton) {
+            locationDeleteButton.hidden = !hasLocation;
+        }
+
+        if (locationCompleteButton) {
+            locationCompleteButton.disabled = !pendingLocation;
+        }
+
+        syncLocationHiddenInput();
     };
 
     const renderSelectedProduct = () => {
@@ -164,15 +214,211 @@ window.addEventListener("load", () => {
     const openComposerModal = () => {
         const composerModalOverlay = document.getElementById("composerModalOverlay");
         const composerSection = document.getElementById("composerSection");
-        if (composerModalOverlay) composerModalOverlay.hidden = false;
-        if (composerSection) composerSection.hidden = false;
+        if (composerModalOverlay) {
+            composerModalOverlay.hidden = false;
+        }
+        if (composerSection) {
+            composerSection.hidden = false;
+        }
+        document.body.classList.add("modal-open");
     };
 
     const closeComposerModal = () => {
         const composerModalOverlay = document.getElementById("composerModalOverlay");
         const composerSection = document.getElementById("composerSection");
-        if (composerModalOverlay) composerModalOverlay.hidden = true;
-        if (composerSection) composerSection.hidden = true;
+        if (composerModalOverlay) {
+            composerModalOverlay.hidden = true;
+        }
+        if (composerSection) {
+            composerSection.hidden = true;
+        }
+        document.body.classList.remove("modal-open");
+    };
+
+    const loadGoogleMaps = () => {
+        if (window.google?.maps) {
+            return Promise.resolve(window.google.maps);
+        }
+
+        if (mapsLoaderPromise) {
+            return mapsLoaderPromise;
+        }
+
+        const apiKey = document.body.dataset.googleMapsApiKey?.trim();
+        if (!apiKey) {
+            return Promise.reject(new Error("Google Maps API key is missing."));
+        }
+
+        mapsLoaderPromise = new Promise((resolve, reject) => {
+            const callbackName = "__initEstimationLocationMap";
+            window[callbackName] = () => {
+                delete window[callbackName];
+                resolve(window.google.maps);
+            };
+
+            const script = document.createElement("script");
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&callback=${callbackName}`;
+            script.async = true;
+            script.defer = true;
+            script.onerror = () => {
+                delete window[callbackName];
+                reject(new Error("Failed to load Google Maps script."));
+            };
+            document.head.appendChild(script);
+        });
+
+        return mapsLoaderPromise;
+    };
+
+    const updatePendingLocation = (locationText) => {
+        pendingLocation = safeText(locationText);
+
+        if (locationGuide) {
+            locationGuide.textContent = pendingLocation
+                ? `선택된 위치: ${pendingLocation}`
+                : "지도를 클릭하거나 주소를 검색해서 위치를 선택하세요.";
+        }
+
+        if (locationCompleteButton) {
+            locationCompleteButton.disabled = !pendingLocation;
+        }
+    };
+
+    const ensureMap = async () => {
+        const maps = await loadGoogleMaps();
+
+        if (!locationMapElement) {
+            return;
+        }
+
+        if (!mapInstance) {
+            mapInstance = new maps.Map(locationMapElement, {
+                center: { lat: 37.5665, lng: 126.9780 },
+                zoom: 14,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+            });
+
+            geocoder = new maps.Geocoder();
+            mapMarker = new maps.Marker({ map: mapInstance });
+
+            mapInstance.addListener("click", (event) => {
+                const latLng = event.latLng;
+                if (!latLng) {
+                    return;
+                }
+
+                mapMarker.setPosition(latLng);
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === "OK" && results?.length) {
+                        updatePendingLocation(results[0].formatted_address);
+                        return;
+                    }
+
+                    updatePendingLocation(`${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`);
+                });
+            });
+        }
+
+        window.setTimeout(() => {
+            maps.event.trigger(mapInstance, "resize");
+            mapInstance.setCenter(mapMarker?.getPosition() || { lat: 37.5665, lng: 126.9780 });
+        }, 0);
+    };
+
+    const searchLocation = async () => {
+        const keyword = safeText(locationSearchInput?.value);
+        if (!keyword) {
+            updatePendingLocation("");
+            return;
+        }
+
+        await ensureMap();
+        if (!geocoder || !mapMarker || !mapInstance) {
+            return;
+        }
+
+        geocoder.geocode({ address: keyword }, (results, status) => {
+            if (status !== "OK" || !results?.length) {
+                updatePendingLocation("");
+                if (locationGuide) {
+                    locationGuide.textContent = "검색 결과를 찾지 못했습니다. 다른 주소로 시도해 주세요.";
+                }
+                return;
+            }
+
+            const result = results[0];
+            mapInstance.setCenter(result.geometry.location);
+            mapInstance.setZoom(15);
+            mapMarker.setPosition(result.geometry.location);
+            updatePendingLocation(result.formatted_address);
+        });
+    };
+
+    const openLocationPanel = async () => {
+        if (!composeView || !locationView) {
+            return;
+        }
+
+        pendingLocation = selectedLocation;
+        composeView.hidden = true;
+        locationView.hidden = false;
+        syncLocationUI();
+
+        try {
+            await ensureMap();
+        } catch (error) {
+            console.error(error);
+            alert("Google Maps 설정이 없어 위치 기능을 바로 열 수 없습니다.");
+            closeLocationPanel({ restoreFocus: false });
+        }
+    };
+
+    const closeLocationPanel = ({ restoreFocus = true } = {}) => {
+        if (!composeView || !locationView) {
+            return;
+        }
+
+        locationView.hidden = true;
+        composeView.hidden = false;
+        pendingLocation = selectedLocation;
+        if (locationSearchInput) {
+            locationSearchInput.value = "";
+        }
+        syncLocationUI();
+
+        if (restoreFocus) {
+            window.requestAnimationFrame(() => {
+                locationDisplayButton?.focus();
+            });
+        }
+    };
+
+    const applyLocation = () => {
+        selectedLocation = pendingLocation;
+        syncLocationUI();
+        closeLocationPanel();
+    };
+
+    const clearLocation = () => {
+        selectedLocation = "";
+        pendingLocation = "";
+        if (locationSearchInput) {
+            locationSearchInput.value = "";
+        }
+        if (locationGuide) {
+            locationGuide.textContent = "지도를 클릭하거나 주소를 검색해서 위치를 선택하세요.";
+        }
+        if (mapMarker) {
+            mapMarker.setMap(null);
+            mapMarker = new window.google.maps.Marker({ map: mapInstance });
+        }
+        if (mapInstance) {
+            mapInstance.setCenter({ lat: 37.5665, lng: 126.9780 });
+            mapInstance.setZoom(14);
+        }
+        syncLocationUI();
     };
 
     const buildPayload = () => {
@@ -187,6 +433,7 @@ window.addEventListener("load", () => {
             productId: selectedProductId ? Number(selectedProductId) : null,
             title: safeText(titleInput?.value),
             content: descriptionParts.join("\n"),
+            location: selectedLocation || null,
             deadLine: null,
             status: "requesting",
             receiverEmail: selectedReceiverEmail || null,
@@ -198,13 +445,21 @@ window.addEventListener("load", () => {
         composerForm?.reset();
         selectedProductId = "";
         selectedReceiverEmail = "";
-        tagsHiddenInput && (tagsHiddenInput.value = "");
+        selectedLocation = "";
+        pendingLocation = "";
+        if (tagsHiddenInput) {
+            tagsHiddenInput.value = "";
+        }
+        if (locationHiddenInput) {
+            locationHiddenInput.value = "";
+        }
         if (linkedProfile) {
             linkedProfile.hidden = true;
             linkedProfile.setAttribute("aria-hidden", "true");
         }
         renderSelectedProduct();
         syncProductSelection();
+        syncLocationUI();
         syncSubmitState();
     };
 
@@ -231,7 +486,7 @@ window.addEventListener("load", () => {
                 throw new Error(`견적 요청 저장 실패 (${response.status})`);
             }
 
-            alert("견적 요청이 저장되었습니다.");
+            alert("견적 요청이 등록되었습니다.");
             resetForm();
             window.location.href = "/estimation/list";
         } catch (error) {
@@ -254,6 +509,22 @@ window.addEventListener("load", () => {
         syncSubmitState();
     });
 
+    locationDisplayButton?.addEventListener("click", () => {
+        void openLocationPanel();
+    });
+    locationCloseButton?.addEventListener("click", () => closeLocationPanel());
+    locationDeleteButton?.addEventListener("click", clearLocation);
+    locationCompleteButton?.addEventListener("click", applyLocation);
+    locationSearchButton?.addEventListener("click", () => {
+        void searchLocation();
+    });
+    locationSearchInput?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            void searchLocation();
+        }
+    });
+
     productSelectButton?.addEventListener("click", openProductSelectModal);
     productSelectClose?.addEventListener("click", closeProductSelectModal);
     productSelectBackdrop?.addEventListener("click", closeProductSelectModal);
@@ -266,6 +537,7 @@ window.addEventListener("load", () => {
         renderSelectedProduct();
         syncProductSelection();
     });
+
     userLinkButton?.addEventListener("click", openShareChatSheet);
     shareChatCloseButtons.forEach((button) => {
         button.addEventListener("click", closeShareChatSheet);
@@ -276,6 +548,7 @@ window.addEventListener("load", () => {
             selectLinkedProfile(button);
         });
     });
+
     productSelectList?.addEventListener("click", (event) => {
         const item = event.target.closest("[data-product-id]");
         if (!(item instanceof HTMLElement)) {
@@ -300,6 +573,7 @@ window.addEventListener("load", () => {
     syncProductSelection();
     renderSelectedProduct();
     syncShareUsers();
+    syncLocationUI();
 
     window.setTimeout(openComposerModal, 0);
     window.setTimeout(() => {

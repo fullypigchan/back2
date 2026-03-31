@@ -9,6 +9,7 @@
             product_id,
             title,
             content,
+            location,
             deadline,
             status
         )
@@ -18,6 +19,7 @@
             #{productId},
             #{title},
             #{content},
+            #{location},
             #{deadLine},
             #{status}
         )
@@ -35,6 +37,7 @@
                e.product_id,
                e.title,
                e.content,
+               e.location,
                e.deadline as deadLine,
                e.status,
                requester.member_email as requesterEmail,
@@ -56,6 +59,7 @@
                e.product_id,
                e.title,
                e.content,
+               e.location,
                e.deadline as deadLine,
                e.status,
                requester.member_email as requesterEmail,
