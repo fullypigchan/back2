@@ -29,6 +29,10 @@ public class MemberDAO {
     public Optional<MemberDTO> findMemberByLoginId(String loginId){
         return memberMapper.selectMemberByLoginId(loginId);
     }
+    //  상태와 무관하게 이메일 혹은 핸드폰 조회
+    public Optional<MemberDTO> findMemberByLoginIdAnyStatus(String loginId){
+        return memberMapper.selectMemberByLoginIdAnyStatus(loginId);
+    }
     //  이메일 유효성 검사
     public Optional<MemberDTO> findMemberByMemberEmail(String memberEmail){
         return memberMapper.selectMemberByMemberEmail(memberEmail);
@@ -36,6 +40,10 @@ public class MemberDAO {
     //  핸드폰 유효성 검사
     public Optional<MemberDTO> findMemberByMemberPhone(String memberPhone){
         return memberMapper.selectMemberByMemberPhone(memberPhone);
+    }
+    //  비밀번호 유효성 검사
+    public Optional<MemberDTO> findMemberByMemberPassword(String loginId, String memberPassword){
+        return memberMapper.selectMemberByMemberPassword(loginId, memberPassword);
     }
     //  닉네임 또는 핸들로 회원 검색
     public List<MemberDTO> findMembersByKeyword(String keyword) {
@@ -61,9 +69,33 @@ public class MemberDAO {
     public void softDelete(Long memberId){
         memberMapper.softDelete(memberId);
     }
+    //  memberId로 re-activate
+    public void reactivate(Long memberId){
+        memberMapper.reactivate(memberId);
+    }
     //  프로필 수정
     public void update(MemberDTO memberDTO){
         memberMapper.update(memberDTO);
+    }
+    //  비밀번호 변경
+    public void updatePassword(Long memberId, String memberPassword) {
+        memberMapper.updatePassword(memberId, memberPassword);
+    }
+    //  handle 변경
+    public void updateHandle(Long memberId, String memberHandle) {
+        memberMapper.updateHandle(memberId, memberHandle);
+    }
+    //  휴대폰 번호 변경
+    public void updatePhone(Long memberId, String memberPhone) {
+        memberMapper.updatePhone(memberId, memberPhone);
+    }
+    //  이메일 변경
+    public void updateEmail(Long memberId, String memberEmail) {
+        memberMapper.updateEmail(memberId, memberEmail);
+    }
+    //  언어 변경
+    public void updateLanguage(Long memberId, String memberLanguage) {
+        memberMapper.updateLanguage(memberId, memberLanguage);
     }
 //  Handle로 조회 (간소화 - 차단용)
     public Optional<MemberDTO> findByHandle(String memberHandle) {

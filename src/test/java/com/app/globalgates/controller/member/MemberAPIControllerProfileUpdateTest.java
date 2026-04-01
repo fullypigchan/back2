@@ -50,7 +50,7 @@ class MemberAPIControllerProfileUpdateTest {
         MemberDTO loginMember = new MemberDTO();
         loginMember.setId(7L);
 
-        CustomUserDetails userDetails = new CustomUserDetails(loginMember);
+        CustomUserDetails userDetails = new CustomUserDetails(loginMember, "user@example.com");
 
         ResponseEntity<?> responseEntity = memberAPIController.updateProfile(requestMember, null, null, userDetails);
 

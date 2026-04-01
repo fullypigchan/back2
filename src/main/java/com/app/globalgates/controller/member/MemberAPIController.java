@@ -5,6 +5,7 @@ import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.auth.JwtTokenProvider;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.dto.MemberProfileFileDTO;
+import com.app.globalgates.dto.MemberSessionDTO;
 import com.app.globalgates.service.MemberService;
 import com.app.globalgates.service.S3Service;
 import java.io.IOException;
@@ -127,15 +128,69 @@ public class MemberAPIController {
             return ResponseEntity.ok(tokenMap);
         }catch (Exception e){
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인실패 : " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 실패"));
+        }
+    }
+
+    // 일반 로그인은 그대로 두고, 재활성화는 로그인 실패 후 별도 흐름으로만 진입시킨다.
+    // 여기서는 inactive 계정인지와 비밀번호 일치 여부만 확인해 확인 모달용 최소 정보만 내려준다.
+    @PostMapping("reactivation/prepare")
+    public ResponseEntity<?> prepareReactivation(@RequestBody MemberDTO memberDTO) {
+        try {
+            MemberDTO member = memberService.getInactiveMemberForReactivation(
+                    memberDTO.getLoginId(),
+                    memberDTO.getMemberPassword()
+            );
+
+            boolean useEmail = memberDTO.getLoginId() != null && memberDTO.getLoginId().contains("@");
+
+            return ResponseEntity.ok(Map.of(
+                    "useEmail", useEmail,
+                    "maskedTarget", memberService.getMaskedReactivationTarget(memberDTO.getLoginId(), member)
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // 인증코드 확인이 끝난 뒤 inactive 상태만 active로 복구하고,
+    // 기존 로그인과 같은 인증 매니저 흐름으로 access/refresh 토큰 발급까지 마무리한다.
+    @PostMapping("reactivation/complete")
+    public ResponseEntity<?> completeReactivation(@RequestBody MemberDTO memberDTO) {
+        try {
+            memberService.reactivateMember(
+                    memberDTO.getLoginId(),
+                    memberDTO.getMemberPassword()
+            );
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            memberDTO.getLoginId(),
+                            memberDTO.getMemberPassword()
+                    )
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String accessToken = jwtTokenProvider.createAccessToken(memberDTO.getLoginId());
+            jwtTokenProvider.createRefreshToken(memberDTO.getLoginId());
+
+            Cookie rememberLoginIdCookie = new Cookie("rememberLoginId", memberDTO.getLoginId());
+            rememberLoginIdCookie.setPath("/");
+            rememberLoginIdCookie.setMaxAge(60 * 60 * 24 * 30);
+            response.addCookie(rememberLoginIdCookie);
+
+            return ResponseEntity.ok(Map.of("accessToken", accessToken));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
     @GetMapping("info")
     public MemberDTO getUserInfo(HttpServletRequest request) {
         String token = jwtTokenProvider.parseTokenFromHeader(request);
-        String memberEmail = jwtTokenProvider.getUsername(token);
-        MemberDTO memberDTO = memberService.getMember(memberEmail);
+        String userName = jwtTokenProvider.getUsername(token);
+        MemberDTO memberDTO = memberService.getMember(userName);
 
         return memberDTO;
     }

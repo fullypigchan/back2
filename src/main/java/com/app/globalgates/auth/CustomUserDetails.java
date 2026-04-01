@@ -33,7 +33,7 @@ public class CustomUserDetails implements UserDetails {
     private String createdDatetime;
     private String updatedDatetime;
 
-    public CustomUserDetails(MemberDTO memberDTO) {
+    public CustomUserDetails(MemberDTO memberDTO, String loginId) {
         this.id = memberDTO.getId();
         this.memberEmail = memberDTO.getMemberEmail();
         this.memberName = memberDTO.getMemberName();
@@ -49,7 +49,7 @@ public class CustomUserDetails implements UserDetails {
         this.memberLanguage = memberDTO.getMemberLanguage();
         this.birthDate = memberDTO.getBirthDate();
         this.lastLoginAt = memberDTO.getLastLoginAt();
-        this.loginId = memberDTO.getLoginId();
+        this.loginId = loginId;
         this.createdDatetime = memberDTO.getCreatedDatetime();
         this.updatedDatetime = memberDTO.getUpdatedDatetime();
     }

@@ -46,7 +46,7 @@ public class JwtTokenProvider {
 
     //    액세스 토큰 생성
     public String createAccessToken(String username) {
-        final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 10;
+        final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 60;
         String accessToken = Jwts.builder()
                 .setSubject(username)
                 .claim("memberEmail", username)
@@ -64,7 +64,7 @@ public class JwtTokenProvider {
     }
 
     public String createAccessToken(String username, String provider) {
-        final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 10;
+        final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 60;
         String accessToken = Jwts.builder()
                 .setSubject(username)
                 .claim("memberEmail", username)

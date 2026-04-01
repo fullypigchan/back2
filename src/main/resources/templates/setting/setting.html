@@ -4,9 +4,14 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>설정 / G</title>
-    <link rel="stylesheet" href="/static/css/setting/setting.css"/>
+    <link rel="stylesheet" href="/css/setting/setting.css"/>
+    <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+    ({key: "AIzaSyBvskCpZg5-38p-M_xpfRiXYXYeqAF_ZD4", v: "weekly", internalUsageAttributionIds: "gmp_git_jsapisamples_v1_places-api" });</script>
+</head>
 </head>
 <body>
+<gmpx-api-loader key="AIzaSyBvskCpZg5-38p-M_xpfRiXYXYeqAF_ZD4" solution-channel="GMP_QB_addressselection_v4_cABC">
+</gmpx-api-loader>
 <main class="settings-page" role="main">
     <div class="settings-shell">
         <section
@@ -298,7 +303,7 @@
                             <a class="detail-form__link" href="#">비밀번호를 잊으셨나요?</a>
                             <div class="detail-form__footer">
                                 <button
-                                        type="submit"
+                                        type="button"
                                         class="detail-form__button"
                                         data-account-auth-submit
                                         disabled
@@ -320,7 +325,10 @@
                             <button type="button" class="account-info-item" data-account-info-id="username">
                                         <span class="account-info-item__content">
                                             <span class="account-info-item__label">사용자 아이디</span>
-                                            <span class="account-info-item__value">tmtsugar</span>
+                                            <span class="account-info-item__value" data-account-info-value="username"
+                                                  th:text="${member.memberHandle != null and !#strings.isEmpty(member.memberHandle) ? member.memberHandle : '사용자 아이디 정보 없음'}">
+                                                @samplehandle
+                                            </span>
                                         </span>
                                 <span class="account-info-item__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path
                                         d="M14.586 12L7.543 4.96l1.414-1.42L17.414 12l-8.457 8.46-1.414-1.42L14.586 12z"></path></g></svg></span>
@@ -328,7 +336,10 @@
                             <button type="button" class="account-info-item" data-account-info-id="phone">
                                         <span class="account-info-item__content">
                                             <span class="account-info-item__label">휴대폰</span>
-                                            <span class="account-info-item__value" data-account-info-value="phone">&nbsp;</span>
+                                            <span class="account-info-item__value" data-account-info-value="phone"
+                                                  th:text="${member.memberPhone != null and !#strings.isEmpty(member.memberPhone) ? member.memberPhone : '등록된 휴대폰 번호가 없습니다.'}">
+                                                010-0000-0000
+                                            </span>
                                         </span>
                                 <span class="account-info-item__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path
                                         d="M14.586 12L7.543 4.96l1.414-1.42L17.414 12l-8.457 8.46-1.414-1.42L14.586 12z"></path></g></svg></span>
@@ -336,7 +347,10 @@
                             <button type="button" class="account-info-item" data-account-info-id="email">
                                         <span class="account-info-item__content">
                                             <span class="account-info-item__label">이메일</span>
-                                            <span class="account-info-item__value">tjdgh1851@gmail.com</span>
+                                            <span class="account-info-item__value" data-account-info-value="email"
+                                                  th:text="${member.memberEmail != null and !#strings.isEmpty(member.memberEmail) ? member.memberEmail : '등록된 이메일이 없습니다.'}">
+                                                sample@email.com
+                                            </span>
                                         </span>
                                 <span class="account-info-item__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path
                                         d="M14.586 12L7.543 4.96l1.414-1.42L17.414 12l-8.457 8.46-1.414-1.42L14.586 12z"></path></g></svg></span>
@@ -344,14 +358,20 @@
                             <button type="button" class="account-info-item" data-account-info-id="createdAt">
                                         <span class="account-info-item__content">
                                             <span class="account-info-item__label">계정 생성</span>
-                                            <span class="account-info-item__value">2025. 2. 3. 오후 5:02:45</span>
-                                            <span class="account-info-item__description">211.234.227.8 (South Korea)</span>
+                                            <span class="account-info-item__value" data-account-info-value="createdAt"
+                                                  th:text="${member.createdDatetime != null and !#strings.isEmpty(member.createdDatetime) ? member.createdDatetime : '생성일 정보 없음'}">
+                                                2025. 2. 3. 오후 5:02:45
+                                            </span>
+                                            <span class="account-info-item__description">현재 로그인 계정 기준 정보</span>
                                         </span>
                             </button>
                             <button type="button" class="account-info-item" data-account-info-id="country">
                                         <span class="account-info-item__content">
                                             <span class="account-info-item__label">국가</span>
-                                            <span class="account-info-item__value" data-account-info-value="country">대한민국</span>
+                                            <span class="account-info-item__value" data-account-info-value="country"
+                                                  th:text="${member.memberRegion != null and !#strings.isEmpty(member.memberRegion) ? member.memberRegion : '설정되지 않음'}">
+                                                대한민국
+                                            </span>
                                         </span>
                                 <span class="account-info-item__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path
                                         d="M14.586 12L7.543 4.96l1.414-1.42L17.414 12l-8.457 8.46-1.414-1.42L14.586 12z"></path></g></svg></span>
@@ -359,7 +379,10 @@
                             <button type="button" class="account-info-item" data-account-info-id="language">
                                         <span class="account-info-item__content">
                                             <span class="account-info-item__label">언어</span>
-                                            <span class="account-info-item__value" data-language-current-value>한국어, 영어, 언어 관련 내용 없음</span>
+                                            <span class="account-info-item__value" data-language-current-value
+                                                  th:text="${member.memberLanguage != null and !#strings.isEmpty(member.memberLanguage) ? member.memberLanguage : '설정되지 않음'}">
+                                                한국어
+                                            </span>
                                         </span>
                                 <span class="account-info-item__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path
                                         d="M14.586 12L7.543 4.96l1.414-1.42L17.414 12l-8.457 8.46-1.414-1.42L14.586 12z"></path></g></svg></span>
@@ -493,7 +516,7 @@
 
                             <div class="password-editor__actions">
                                 <button
-                                        type="submit"
+                                        type="button"
                                         class="password-editor__save"
                                         data-password-editor-save
                                         disabled
@@ -575,7 +598,7 @@
                             <p class="deactivate-confirm-editor__summary">
                                 계정에 연결된 비밀번호를 입력하여 비활성화 요청을 완료하세요.
                             </p>
-                            <div class="deactivate-confirm-editor__field">
+                            <div class="deactivate-confirm-editor__field" data-deactivate-password-field>
                                 <label class="deactivate-confirm-editor__label"
                                        for="deactivateConfirmPassword">비밀번호</label>
                                 <input
@@ -583,11 +606,22 @@
                                         id="deactivateConfirmPassword"
                                         class="deactivate-confirm-editor__input"
                                         autocomplete="current-password"
+                                        data-deactivate-password-input
                                 />
                             </div>
+                            <p
+                                    class="deactivate-confirm-editor__message"
+                                    data-deactivate-password-message
+                                    hidden
+                            ></p>
                             <a href="#" class="deactivate-confirm-editor__forgot">비밀번호를 잊으셨나요?</a>
                             <div class="deactivate-confirm-editor__actions">
-                                <button type="button" class="deactivate-confirm-editor__button">
+                                <button
+                                        type="button"
+                                        class="deactivate-confirm-editor__button"
+                                        data-deactivate-submit
+                                        disabled
+                                >
                                     비활성화
                                 </button>
                             </div>
@@ -1393,251 +1427,60 @@
                     </section>
 
                     <section class="detail-route detail-route--country" data-detail-route-view="country-edit"
-                             data-route-title="국가 변경" hidden aria-hidden="true">
+                             data-route-title="주소 변경" hidden aria-hidden="true">
                         <section class="country-editor">
                             <div class="country-editor__section">
                                 <label class="country-editor__field">
-                                    <span class="country-editor__label">국가</span>
+                                    <span class="country-editor__label">주소</span>
                                     <select class="country-editor__select" aria-label="국가" data-country-select>
-                                        <option value="gh">가나</option>
-                                        <option value="ga">가봉</option>
-                                        <option value="gy">가이아나</option>
-                                        <option value="gm">감비아</option>
-                                        <option value="gg">건지</option>
-                                        <option value="gp">과들루프</option>
-                                        <option value="gt">과테말라</option>
-                                        <option value="gu">괌</option>
-                                        <option value="gd">그레나다</option>
-                                        <option value="gr">그리스</option>
-                                        <option value="gl">그린란드</option>
-                                        <option value="gn">기니</option>
-                                        <option value="gw">기니비사우</option>
-                                        <option value="na">나미비아</option>
-                                        <option value="nr">나우루</option>
-                                        <option value="ng">나이지리아</option>
-                                        <option value="za">남아프리카</option>
-                                        <option value="nl">네덜란드</option>
-                                        <option value="bq">네덜란드령 카리브</option>
-                                        <option value="np">네팔</option>
-                                        <option value="no">노르웨이</option>
-                                        <option value="nf">노퍽섬</option>
-                                        <option value="nz">뉴질랜드</option>
-                                        <option value="nc">뉴칼레도니아</option>
-                                        <option value="nu">니우에</option>
-                                        <option value="ne">니제르</option>
-                                        <option value="ni">니카라과</option>
-                                        <option value="tw">대만</option>
-                                        <option value="kr">대한민국</option>
-                                        <option value="dk">덴마크</option>
-                                        <option value="dm">도미니카</option>
-                                        <option value="do">도미니카 공화국</option>
-                                        <option value="de">독일</option>
-                                        <option value="tl">동티모르</option>
-                                        <option value="la">라오스</option>
-                                        <option value="lr">라이베리아</option>
-                                        <option value="lv">라트비아</option>
-                                        <option value="ru">러시아</option>
-                                        <option value="lb">레바논</option>
-                                        <option value="ls">레소토</option>
-                                        <option value="ro">루마니아</option>
-                                        <option value="lu">룩셈부르크</option>
-                                        <option value="rw">르완다</option>
-                                        <option value="ly">리비아</option>
-                                        <option value="re">리유니온</option>
-                                        <option value="lt">리투아니아</option>
-                                        <option value="li">리히텐슈타인</option>
-                                        <option value="mg">마다가스카르</option>
-                                        <option value="mq">마르티니크</option>
-                                        <option value="mh">마셜 제도</option>
-                                        <option value="yt">마요트</option>
-                                        <option value="mo">마카오(중국 특별행정구)</option>
-                                        <option value="mk">마케도니아</option>
-                                        <option value="mw">말라위</option>
-                                        <option value="my">말레이시아</option>
-                                        <option value="ml">말리</option>
-                                        <option value="im">맨 섬</option>
-                                        <option value="mx">멕시코</option>
-                                        <option value="mc">모나코</option>
-                                        <option value="ma">모로코</option>
-                                        <option value="mu">모리셔스</option>
-                                        <option value="mr">모리타니</option>
-                                        <option value="mz">모잠비크</option>
-                                        <option value="me">몬테네그로</option>
-                                        <option value="ms">몬트세라트</option>
-                                        <option value="md">몰도바</option>
-                                        <option value="mv">몰디브</option>
-                                        <option value="mt">몰타</option>
-                                        <option value="mn">몽골</option>
-                                        <option value="us">미국</option>
-                                        <option value="vi">미국령 버진아일랜드</option>
-                                        <option value="fm">미크로네시아</option>
-                                        <option value="vu">바누아투</option>
-                                        <option value="bh">바레인</option>
-                                        <option value="bb">바베이도스</option>
-                                        <option value="va">바티칸 시국</option>
-                                        <option value="bs">바하마</option>
-                                        <option value="bd">방글라데시</option>
-                                        <option value="bm">버뮤다</option>
-                                        <option value="bj">베냉</option>
-                                        <option value="ve">베네수엘라</option>
-                                        <option value="vn">베트남</option>
-                                        <option value="be">벨기에</option>
-                                        <option value="by">벨라루스</option>
-                                        <option value="bz">벨리즈</option>
-                                        <option value="ba">보스니아 헤르체고비나</option>
-                                        <option value="bw">보츠와나</option>
-                                        <option value="bo">볼리비아</option>
-                                        <option value="bi">부룬디</option>
-                                        <option value="bf">부르키나파소</option>
-                                        <option value="bv">부베섬</option>
-                                        <option value="bt">부탄</option>
-                                        <option value="mp">북마리아나제도</option>
-                                        <option value="bg">불가리아</option>
-                                        <option value="br">브라질</option>
-                                        <option value="bn">브루나이</option>
-                                        <option value="ws">사모아</option>
-                                        <option value="sa">사우디아라비아</option>
-                                        <option value="gs">사우스조지아 사우스샌드위치 제도</option>
-                                        <option value="sm">산마리노</option>
-                                        <option value="st">상투메 프린시페</option>
-                                        <option value="mf">생마르탱</option>
-                                        <option value="bl">생바르텔레미</option>
-                                        <option value="pm">생피에르 미클롱</option>
-                                        <option value="sn">세네갈</option>
-                                        <option value="rs">세르비아</option>
-                                        <option value="sc">세이셸</option>
-                                        <option value="lc">세인트루시아</option>
-                                        <option value="vc">세인트빈센트그레나딘</option>
-                                        <option value="kn">세인트키츠 네비스</option>
-                                        <option value="sh">세인트헬레나</option>
-                                        <option value="so">소말리아</option>
-                                        <option value="sb">솔로몬 제도</option>
-                                        <option value="sr">수리남</option>
-                                        <option value="lk">스리랑카</option>
-                                        <option value="sz">스와질란드</option>
-                                        <option value="se">스웨덴</option>
-                                        <option value="ch">스위스</option>
-                                        <option value="es">스페인</option>
-                                        <option value="sk">슬로바키아</option>
-                                        <option value="si">슬로베니아</option>
-                                        <option value="sl">시에라리온</option>
-                                        <option value="sx">신트마르턴</option>
-                                        <option value="sg">싱가포르</option>
-                                        <option value="ae">아랍에미리트</option>
-                                        <option value="aw">아루바</option>
-                                        <option value="am">아르메니아</option>
-                                        <option value="ar">아르헨티나</option>
-                                        <option value="as">아메리칸 사모아</option>
-                                        <option value="is">아이슬란드</option>
-                                        <option value="ht">아이티</option>
-                                        <option value="ie">아일랜드</option>
-                                        <option value="az">아제르바이잔</option>
-                                        <option value="af">아프가니스탄</option>
-                                        <option value="ad">안도라</option>
-                                        <option value="al">알바니아</option>
-                                        <option value="dz">알제리</option>
-                                        <option value="ao">앙골라</option>
-                                        <option value="ag">앤티가 바부다</option>
-                                        <option value="ai">앵귈라</option>
-                                        <option value="er">에리트리아</option>
-                                        <option value="ee">에스토니아</option>
-                                        <option value="ec">에콰도르</option>
-                                        <option value="et">에티오피아</option>
-                                        <option value="sv">엘살바도르</option>
-                                        <option value="gb">영국</option>
-                                        <option value="io">영국령 인도양 식민지</option>
-                                        <option value="ye">예멘</option>
-                                        <option value="om">오만</option>
-                                        <option value="au">오스트레일리아</option>
-                                        <option value="at">오스트리아</option>
-                                        <option value="hn">온두라스</option>
-                                        <option value="ax">올란드 제도</option>
-                                        <option value="wf">왈리스-푸투나 제도</option>
-                                        <option value="jo">요르단</option>
-                                        <option value="ug">우간다</option>
-                                        <option value="uy">우루과이</option>
-                                        <option value="uz">우즈베키스탄</option>
-                                        <option value="ua">우크라이나</option>
-                                        <option value="iq">이라크</option>
-                                        <option value="ir">이란</option>
-                                        <option value="il">이스라엘</option>
-                                        <option value="eg">이집트</option>
-                                        <option value="it">이탈리아</option>
-                                        <option value="in">인도</option>
-                                        <option value="id">인도네시아</option>
-                                        <option value="jp">일본</option>
-                                        <option value="jm">자메이카</option>
-                                        <option value="zm">잠비아</option>
-                                        <option value="je">저지</option>
-                                        <option value="gq">적도 기니</option>
-                                        <option value="ge">조지아</option>
-                                        <option value="cf">중앙 아프리카 공화국</option>
-                                        <option value="dj">지부티</option>
-                                        <option value="gi">지브롤터</option>
-                                        <option value="zw">짐바브웨</option>
-                                        <option value="td">차드</option>
-                                        <option value="cz">체코</option>
-                                        <option value="cl">칠레</option>
-                                        <option value="cm">카메룬</option>
-                                        <option value="cv">카보베르데</option>
-                                        <option value="kz">카자흐스탄</option>
-                                        <option value="qa">카타르</option>
-                                        <option value="kh">캄보디아</option>
-                                        <option value="ca">캐나다</option>
-                                        <option value="ke">케냐</option>
-                                        <option value="ky">케이맨 제도</option>
-                                        <option value="km">코모로</option>
-                                        <option value="xk">코소보</option>
-                                        <option value="cr">코스타리카</option>
-                                        <option value="cc">코코스 제도</option>
-                                        <option value="ci">코트디부아르</option>
-                                        <option value="co">콜롬비아</option>
-                                        <option value="cg">콩고-브라자빌</option>
-                                        <option value="cd">콩고-킨샤사</option>
-                                        <option value="cu">쿠바</option>
-                                        <option value="kw">쿠웨이트</option>
-                                        <option value="ck">쿡 제도</option>
-                                        <option value="cw">퀴라소</option>
-                                        <option value="hr">크로아티아</option>
-                                        <option value="cx">크리스마스섬</option>
-                                        <option value="kg">키르기스스탄</option>
-                                        <option value="ki">키리바시</option>
-                                        <option value="cy">키프로스</option>
-                                        <option value="tj">타지키스탄</option>
-                                        <option value="tz">탄자니아</option>
-                                        <option value="th">태국</option>
-                                        <option value="tc">터크스 케이커스 제도</option>
-                                        <option value="tr">터키</option>
-                                        <option value="tg">토고</option>
-                                        <option value="tk">토켈라우</option>
-                                        <option value="to">통가</option>
-                                        <option value="tm">투르크메니스탄</option>
-                                        <option value="tv">투발루</option>
-                                        <option value="tn">튀니지</option>
-                                        <option value="tt">트리니다드 토바고</option>
-                                        <option value="pa">파나마</option>
-                                        <option value="py">파라과이</option>
-                                        <option value="pk">파키스탄</option>
-                                        <option value="pg">파푸아뉴기니</option>
-                                        <option value="pw">팔라우</option>
-                                        <option value="ps">팔레스타인 지구</option>
-                                        <option value="fo">페로 제도</option>
-                                        <option value="pe">페루</option>
-                                        <option value="pt">포르투갈</option>
-                                        <option value="fk">포클랜드 제도</option>
-                                        <option value="pl">폴란드</option>
-                                        <option value="pr">푸에르토리코</option>
-                                        <option value="fr">프랑스</option>
-                                        <option value="tf">프랑스 남부 지방</option>
-                                        <option value="gf">프랑스령 기아나</option>
-                                        <option value="pf">프랑스령 폴리네시아</option>
-                                        <option value="fj">피지</option>
-                                        <option value="fi">핀란드</option>
-                                        <option value="ph">필리핀</option>
-                                        <option value="pn">핏케언 섬</option>
-                                        <option value="hu">헝가리</option>
-                                        <option value="hk">홍콩(중국 특별행정구)</option>
-                                    </select>
+                                        <!-- Note: The address components in this sample are based on North American address format.
+ You might need to adjust them for the locations relevant to your app. For more information, see
+ https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
+-->
+
+                                        <form id="address-form" action="" method="get" autocomplete="off">
+                                            <p class="title">Sample address form for North America</p>
+                                            <p class="note"><em>* = required field</em></p>
+                                            <label class="full-field">
+                                                <span class="form-label">Deliver to*</span>
+                                                <gmp-place-autocomplete
+                                                        included-primary-types="street_address"
+                                                        included-region-codes="US"></gmp-place-autocomplete>
+                                            </label>
+                                            <label class="full-field">
+                                                <span class="form-label">Street address*</span>
+                                                <input id="address1" name="address1" />
+                                            </label>
+                                            <label class="full-field">
+                <span class="form-label"
+                >Apartment, unit, suite, or floor #</span
+                >
+                                                <input id="address2" name="address2" />
+                                            </label>
+                                            <label class="full-field">
+                                                <span class="form-label">City*</span>
+                                                <input id="locality" name="locality" required />
+                                            </label>
+                                            <div class="address-row">
+                                                <label class="slim-field-left">
+                                                    <span class="form-label">State/Province*</span>
+                                                    <input id="state" name="state" required />
+                                                </label>
+                                                <label class="slim-field-right">
+                                                    <span class="form-label">Postal code*</span>
+                                                    <input id="postcode" name="postcode" required />
+                                                </label>
+                                            </div>
+                                            <label class="full-field">
+                                                <span class="form-label">Country/Region*</span>
+                                                <input id="country" name="country" required />
+                                            </label>
+                                            <button type="button" class="my-button">Save address</button>
+
+                                            <!-- Reset button provided for development testing convenience.
+                                  Not recommended for user-facing forms due to risk of mis-click when aiming for Submit button. -->
+                                            <input type="reset" value="Clear form" />
+                                        </form>
                                     <span class="country-editor__arrow" aria-hidden="true">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true"><g><path
                                                         d="M3.543 8.96l1.414-1.42L12 14.59l7.043-7.05 1.414 1.42L12 17.41 3.543 8.96z"></path></g></svg>
@@ -1902,23 +1745,18 @@
         <header class="modal-header modal-header--language-selection">
             <button
                     type="button"
-                    class="modal-close modal-close--back language-selection__back"
-                    id="languageSelectionBackButton"
-                    aria-label="뒤로가기"
-                    hidden
+                    class="modal-close"
+                    aria-label="닫기"
+                    data-modal-close
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <g>
                         <path
-                                d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"
+                                d="M16.24 7.76 12 12l4.24 4.24-1.41 1.41L10.59 13.41 6.35 17.65 4.94 16.24 9.17 12 4.94 7.76l1.41-1.41 4.24 4.24 4.24-4.24z"
                         ></path>
                     </g>
                 </svg>
             </button>
-            <div class="modal-spacer" aria-hidden="true"></div>
-            <div class="language-selection__brand" aria-hidden="true">
-                X
-            </div>
             <div class="modal-spacer" aria-hidden="true"></div>
         </header>
 
@@ -1937,43 +1775,82 @@
                     X 환경을 맞춤 설정하는 데 사용할 언어를 선택하세요.
                 </p>
 
-                <label
-                        class="language-selection__search"
-                        id="languageSelectionSearch"
-                >
-                            <span
-                                    class="language-selection__search-icon"
-                                    aria-hidden="true"
-                            >
-                                <svg viewBox="0 0 24 24">
-                                    <g>
-                                        <path
-                                                d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z"
-                                        ></path>
-                                    </g>
-                                </svg>
-                            </span>
-                    <input
-                            class="language-selection__search-input"
-                            id="languageSelectionSearchInput"
-                            type="text"
-                            placeholder="언어 검색하기"
-                            aria-label="언어 검색하기"
-                    />
-                </label>
-
                 <div
-                        class="language-selection__list"
+                        class="setting-language-selection__list"
                         id="languageSelectionList"
-                ></div>
-
-                <button
-                        type="button"
-                        class="language-selection__more"
-                        id="languageSelectionMoreButton"
+                        role="listbox"
+                        aria-label="언어 선택 목록"
+                        aria-multiselectable="false"
                 >
-                    더 보기
-                </button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="en" aria-selected="false"><span class="setting-language-selection__item-label">영어 - English</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ko" aria-selected="false"><span class="setting-language-selection__item-label">한국어</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="gu" aria-selected="false"><span class="setting-language-selection__item-label">구자라트어 - ગુજરાતી</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="el" aria-selected="false"><span class="setting-language-selection__item-label">그리스어 - Ελληνικά</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="nl" aria-selected="false"><span class="setting-language-selection__item-label">네덜란드어 - Nederlands</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ne" aria-selected="false"><span class="setting-language-selection__item-label">네팔어 - नेपाली</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="no" aria-selected="false"><span class="setting-language-selection__item-label">노르웨이어 - norsk</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="da" aria-selected="false"><span class="setting-language-selection__item-label">덴마크어 - dansk</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="de" aria-selected="false"><span class="setting-language-selection__item-label">독일어 - Deutsch</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="dv" aria-selected="false"><span class="setting-language-selection__item-label">디베히어 - Divehi</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="lo" aria-selected="false"><span class="setting-language-selection__item-label">라오어 - ລາວ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="lv" aria-selected="false"><span class="setting-language-selection__item-label">라트비아어 - latviešu</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ru" aria-selected="false"><span class="setting-language-selection__item-label">러시아어 - русский</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ro" aria-selected="false"><span class="setting-language-selection__item-label">루마니아어 - română</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="lt" aria-selected="false"><span class="setting-language-selection__item-label">리투아니아어 - lietuvių</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="mr" aria-selected="false"><span class="setting-language-selection__item-label">마라티어 - मराठी</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ml" aria-selected="false"><span class="setting-language-selection__item-label">말라얄람어 - മലയാളം</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ms" aria-selected="false"><span class="setting-language-selection__item-label">말레이어 - Melayu</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="eu" aria-selected="false"><span class="setting-language-selection__item-label">바스크어 - euskara</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="my" aria-selected="false"><span class="setting-language-selection__item-label">버마어 - မြန်မာ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="vi" aria-selected="false"><span class="setting-language-selection__item-label">베트남어 - Tiếng Việt</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="bn" aria-selected="false"><span class="setting-language-selection__item-label">벵골어 - বাংলা</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="bg" aria-selected="false"><span class="setting-language-selection__item-label">불가리아어 - български</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sr" aria-selected="false"><span class="setting-language-selection__item-label">세르비아어 - српски</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ckb" aria-selected="false"><span class="setting-language-selection__item-label">소라니 쿠르드어 - کوردیی ناوەندی</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="si" aria-selected="false"><span class="setting-language-selection__item-label">스리랑카어 - සිංහල</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sv" aria-selected="false"><span class="setting-language-selection__item-label">스웨덴어 - svenska</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="es" aria-selected="false"><span class="setting-language-selection__item-label">스페인어 - español</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sl" aria-selected="false"><span class="setting-language-selection__item-label">슬로베니아어 - slovenščina</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sd" aria-selected="false"><span class="setting-language-selection__item-label">신디어 - سنڌي</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ar" aria-selected="false"><span class="setting-language-selection__item-label">아랍어 - العربية</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="hy" aria-selected="false"><span class="setting-language-selection__item-label">아르메니아어 - հայերեն</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="is" aria-selected="false"><span class="setting-language-selection__item-label">아이슬란드어 - íslenska</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ht" aria-selected="false"><span class="setting-language-selection__item-label">아이티어 - Haitian Creole</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="am" aria-selected="false"><span class="setting-language-selection__item-label">암하라어 - አማርኛ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="et" aria-selected="false"><span class="setting-language-selection__item-label">에스토니아어 - eesti</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="eo" aria-selected="false"><span class="setting-language-selection__item-label">에스페란토어 - esperanto</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="or" aria-selected="false"><span class="setting-language-selection__item-label">오리야어 - ଓଡ଼ିଆ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ur" aria-selected="false"><span class="setting-language-selection__item-label">우르두어 - اردو</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="uk" aria-selected="false"><span class="setting-language-selection__item-label">우크라이나어 - українська</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="cy" aria-selected="false"><span class="setting-language-selection__item-label">웨일스어 - Cymraeg</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ug" aria-selected="false"><span class="setting-language-selection__item-label">위구르어 - ئۇيغۇرچە</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="it" aria-selected="false"><span class="setting-language-selection__item-label">이탈리아어 - italiano</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="id" aria-selected="false"><span class="setting-language-selection__item-label">인도네시아어 - Indonesia</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ja" aria-selected="false"><span class="setting-language-selection__item-label">일본어 - 日本語</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ka" aria-selected="false"><span class="setting-language-selection__item-label">조지아어 - ქართული</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="zh" aria-selected="false"><span class="setting-language-selection__item-label">중국어 - 中文</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="cs" aria-selected="false"><span class="setting-language-selection__item-label">체코어 - čeština</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ca" aria-selected="false"><span class="setting-language-selection__item-label">카탈로니아어 - català</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="kn" aria-selected="false"><span class="setting-language-selection__item-label">칸나다어 - ಕನ್ನಡ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="km" aria-selected="false"><span class="setting-language-selection__item-label">크메르어 - ខ្មែរ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="tl" aria-selected="false"><span class="setting-language-selection__item-label">타갈로그어 - Tagalog</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ta" aria-selected="false"><span class="setting-language-selection__item-label">타밀어 - தமிழ்</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="th" aria-selected="false"><span class="setting-language-selection__item-label">태국어 - ไทย</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="tr" aria-selected="false"><span class="setting-language-selection__item-label">터키어 - Türkçe</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="te" aria-selected="false"><span class="setting-language-selection__item-label">텔루구어 - తెలుగు</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="bo" aria-selected="false"><span class="setting-language-selection__item-label">티베트어 - བོད་སྐད་</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ps" aria-selected="false"><span class="setting-language-selection__item-label">파슈토어 - پښتو</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="pa" aria-selected="false"><span class="setting-language-selection__item-label">펀잡어 - ਪੰਜਾਬੀ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="fa" aria-selected="false"><span class="setting-language-selection__item-label">페르시아어 - فارسی</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="pt" aria-selected="false"><span class="setting-language-selection__item-label">포르투갈어 - português</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="pl" aria-selected="false"><span class="setting-language-selection__item-label">폴란드어 - polski</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="fr" aria-selected="false"><span class="setting-language-selection__item-label">프랑스어 - français</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="fi" aria-selected="false"><span class="setting-language-selection__item-label">핀란드어 - suomi</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="hu" aria-selected="false"><span class="setting-language-selection__item-label">헝가리어 - magyar</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="he" aria-selected="false"><span class="setting-language-selection__item-label">히브리어 - עברית</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="hi" aria-selected="false"><span class="setting-language-selection__item-label">힌디어 - हिन्दी</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="etc" aria-selected="false"><span class="setting-language-selection__item-label">기타</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                </div>
 
                 <div class="language-selection__footer">
                     <button
@@ -1981,14 +1858,7 @@
                             class="language-selection__primary"
                             id="languageSelectionNextButton"
                     >
-                        다음
-                    </button>
-                    <button
-                            type="button"
-                            class="language-selection__secondary"
-                            id="languageSelectionSkipButton"
-                    >
-                        건너뛰기
+                        저장
                     </button>
                 </div>
             </div>
@@ -2431,6 +2301,29 @@
     </section>
 </div>
 
-<script src="/static/js/setting/event.js"></script>
+<script th:inline="javascript">
+    /*
+     * setting 화면의 최초 회원 정보는 서버가 Thymeleaf로 주입하고,
+     * event.js는 이 전역 객체를 읽어 현재 상태 객체를 초기화한다.
+     * 이 패턴을 쓰면 템플릿은 "초기값 제공", JS는 "화면 전환과 상태 동기화"만 맡게 되어
+     * 현재 repo의 window.oauthJoinData 같은 객체 주입 방식과 결이 맞는다.
+     */
+    window.settingMember = {
+        id: [[${member.id}]],
+        memberName: [[${member.memberName}]],
+        memberEmail: [[${member.memberEmail}]],
+        memberPhone: [[${member.memberPhone}]],
+        memberLanguage: [[${member.memberLanguage}]],
+        memberHandle: [[${member.memberHandle}]],
+        memberRegion: [[${member.memberRegion}]],
+        createdDatetime: [[${member.createdDatetime}]]
+    };
+</script>
+<script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvskCpZg5-38p-M_xpfRiXYXYeqAF_ZD4&loading=async&libraries=places&callback=initMap">
+</script>
+<script src="/js/setting/google-map.js"></script>
+<script src="/js/setting/service.js"></script>
+<script src="/js/setting/event.js"></script>
 </body>
 </html>

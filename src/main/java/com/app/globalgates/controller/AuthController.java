@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -142,11 +143,17 @@ public class AuthController implements AuthControllerDocs {
     }
 
     //    로그아웃
+    //    setting의 계정 비활성화처럼 accessToken 상태가 이미 흔들린 직후에도 호출될 수 있으므로
+    //    토큰이 없으면 서버측 토큰 정리는 건너뛰고 쿠키 제거만 수행한다.
     @PostMapping("logout")
     public void logout(@CookieValue(value="accessToken", required = false) String token){
-        String username = jwtTokenProvider.getUsername(token);
-        jwtTokenProvider.deleteRefreshToken(username);
-        jwtTokenProvider.addToBlacklist(token);
+        String username = null;
+
+        if (token != null && !token.isBlank()) {
+            username = jwtTokenProvider.getUsername(token);
+            jwtTokenProvider.deleteRefreshToken(username);
+            jwtTokenProvider.addToBlacklist(token);
+        }
 
         Cookie deleteAccessCookie = new Cookie("accessToken", null);
         deleteAccessCookie.setPath("/");
@@ -160,8 +167,16 @@ public class AuthController implements AuthControllerDocs {
 
         response.addCookie(deleteRefreshCookie);
 
+        Cookie deleteRememberLoginIdCookie = new Cookie("rememberLoginId", null);
+        deleteRememberLoginIdCookie.setPath("/");
+        deleteRememberLoginIdCookie.setMaxAge(0);
+        response.addCookie(deleteRememberLoginIdCookie);
+
 //        회원 정보 삭제
-//        redisTemplate.delete("member::" + username);
+        //        accessToken에서 username을 복원한 경우에만 member 캐시를 함께 비운다.
+        if (username != null && !username.isBlank()) {
+            redisTemplate.delete("member::" + username);
+        }
 
 //        여러 개의 key 가져오기
 //        Set keys = redisTemplate.keys("posts::post_*");

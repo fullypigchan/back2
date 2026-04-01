@@ -1,4 +1,4 @@
-const service = (() => {
+const myPageService = (() => {
     const writeProduct = async (formData) => {
         const response = await fetch("/api/mypage/products", {
             method: "POST",

@@ -2030,8 +2030,8 @@ window.onload = function () {
                 // 이후에는 이미 그려진 목록을 유지하고,
                 // 추가 페이지는 아래 scroll 이벤트에서 이어 붙인다.
                 if (!myPostLoaded) {
-                    service.getMyPosts(myPostPage, (data) => {
-                        layout.showMyPostList(data, myPostPage);
+                    myPageService.getMyPosts(myPostPage, (data) => {
+                        mypageLayout.showMyPostList(data, myPostPage);
                         myPostHasMore = data.criteria.hasMore;
                     });
                     myPostLoaded = true;
@@ -2048,8 +2048,8 @@ window.onload = function () {
                 // 첫 진입 시에만 1페이지를 로드한다.
                 // 이후에는 스크롤로 다음 페이지를 이어서 불러온다.
                 if (!myProductLoaded) {
-                    service.getMyProducts(myProductPage, (data) => {
-                        layout.showMyProductList(data, myProductPage);
+                    myPageService.getMyProducts(myProductPage, (data) => {
+                        mypageLayout.showMyProductList(data, myProductPage);
                         myProductHasMore = data.criteria.hasMore;
                     });
                     myProductLoaded = true;
@@ -2063,8 +2063,8 @@ window.onload = function () {
                 // 이후에는 이미 렌더링된 목록을 유지하고,
                 // 추가 페이지는 아래 스크롤 이벤트에서 이어 붙인다.
                 if (!myLikedLoaded) {
-                    service.getMyLikedPosts(myLikedPage, (data) => {
-                        layout.showMyLikedPostList(data, myLikedPage);
+                    myPageService.getMyLikedPosts(myLikedPage, (data) => {
+                        mypageLayout.showMyLikedPostList(data, myLikedPage);
                         myLikedHasMore = data.criteria.hasMore;
                     });
                     myLikedLoaded = true;
@@ -2087,8 +2087,8 @@ window.onload = function () {
             myPostCheckScroll = false;
             myPostPage++;
 
-            service.getMyPosts(myPostPage, (data) => {
-                layout.showMyPostList(data, myPostPage);
+            myPageService.getMyPosts(myPostPage, (data) => {
+                mypageLayout.showMyPostList(data, myPostPage);
                 myPostHasMore = data.criteria.hasMore;
             });
 
@@ -2101,8 +2101,8 @@ window.onload = function () {
             myProductCheckScroll = false;
             myProductPage++;
 
-            service.getMyProducts(myProductPage, (data) => {
-                layout.showMyProductList(data, myProductPage);
+            myPageService.getMyProducts(myProductPage, (data) => {
+                mypageLayout.showMyProductList(data, myProductPage);
                 myProductHasMore = data.criteria.hasMore;
             });
 
@@ -2115,8 +2115,8 @@ window.onload = function () {
             myLikedCheckScroll = false;
             myLikedPage++;
 
-            service.getMyLikedPosts(myLikedPage, (data) => {
-                layout.showMyLikedPostList(data, myLikedPage);
+            myPageService.getMyLikedPosts(myLikedPage, (data) => {
+                mypageLayout.showMyLikedPostList(data, myLikedPage);
                 myLikedHasMore = data.criteria.hasMore;
             });
 
@@ -2638,7 +2638,7 @@ window.onload = function () {
             profileCheckSubmit = false;
             profileEditSaveButton.disabled = true;
 
-            const result = await service.updateProfile(formData);
+            const result = await myPageService.updateProfile(formData);
 
             alert(result.message || "프로필 수정 성공");
 
@@ -2972,7 +2972,7 @@ window.onload = function () {
             }
 
             try {
-                const result = await service.deleteProduct(selectedMyProductId);
+                const result = await myPageService.deleteProduct(selectedMyProductId);
 
                 closeSmallModal(".Small-Modal.Delete-Product");
 
@@ -2982,8 +2982,8 @@ window.onload = function () {
                 myProductPage = 1;
                 myProductHasMore = true;
 
-                service.getMyProducts(1, (data) => {
-                    layout.showMyProductList(data, 1);
+                myPageService.getMyProducts(1, (data) => {
+                    mypageLayout.showMyProductList(data, 1);
                     myProductHasMore = data.criteria.hasMore;
                 });
 
@@ -3494,7 +3494,7 @@ window.onload = function () {
             productSubmitting = true;
             productSubmitButton.disabled = true;
 
-            const result = await service.writeProduct(formData);
+            const result = await myPageService.writeProduct(formData);
 
             alert(result.message || "상품 등록 성공");
             resetProductForm();
@@ -3506,8 +3506,8 @@ window.onload = function () {
             myProductHasMore = true;
             myProductLoaded = true;
 
-            service.getMyProducts(myProductPage, (data) => {
-                layout.showMyProductList(data, myProductPage);
+            myPageService.getMyProducts(myProductPage, (data) => {
+                mypageLayout.showMyProductList(data, myProductPage);
                 myProductHasMore = data.criteria.hasMore;
             });
         } catch (error) {
@@ -3816,7 +3816,7 @@ window.onload = function () {
         try {
             // 서버 반영이 성공한 뒤에만 카드를 제거해야
             // 화면이 실제 팔로우 상태와 어긋나지 않는다.
-            await service.unfollow(followerId, followingId);
+            await myPageService.unfollow(followerId, followingId);
             card?.remove();
 
             // 요약 카드가 모두 비면 "더 보기" 링크도 의미가 없어지므로 같이 걷어낸다.
