@@ -32,7 +32,7 @@ class MypageAPIControllerTest {
         MemberDTO memberDTO = new MemberDTO();
         memberDTO.setId(7L);
 
-        CustomUserDetails userDetails = new CustomUserDetails(memberDTO);
+        CustomUserDetails userDetails = new CustomUserDetails(memberDTO, "user@example.com");
         PostProductWithPagingDTO pagingDTO = new PostProductWithPagingDTO();
 
         when(postProductService.getMyProducts(1, 7L)).thenReturn(pagingDTO);
@@ -48,7 +48,7 @@ class MypageAPIControllerTest {
         MemberDTO memberDTO = new MemberDTO();
         memberDTO.setId(7L);
 
-        CustomUserDetails userDetails = new CustomUserDetails(memberDTO);
+        CustomUserDetails userDetails = new CustomUserDetails(memberDTO, "user@example.com");
 
         ResponseEntity<?> responseEntity = mypageAPIController.deleteProduct(31L, userDetails);
 

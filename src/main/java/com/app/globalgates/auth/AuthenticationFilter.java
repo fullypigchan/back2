@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,15 +38,27 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                UsernamePasswordAuthenticationToken authentication =
-                        (UsernamePasswordAuthenticationToken) jwtTokenProvider.getAuthentication(accessToken);
+                try {
+                    UsernamePasswordAuthenticationToken authentication =
+                            (UsernamePasswordAuthenticationToken) jwtTokenProvider.getAuthentication(accessToken);
 
 //                요청 정보 저장
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                log.info("Authentication Success: {}", authentication);
-                log.info("Save in SecurityContext Success: {}", SecurityContextHolder.getContext().getAuthentication());
+                    log.info("Authentication Success: {}", authentication);
+                    log.info("Save in SecurityContext Success: {}", SecurityContextHolder.getContext().getAuthentication());
+                } catch (UsernameNotFoundException e) {
+                    // 계정 비활성화 직후 logout 요청은 accessToken이 남아 있어도
+                    // active 회원 조회에서는 사용자를 더 이상 찾지 못할 수 있다.
+                    // 이 경우 인증 객체 복원만 건너뛰고 logout 컨트롤러까지는 도달시켜
+                    // access/refresh 쿠키와 토큰 정리를 마무리하게 둔다.
+                    if ("/api/auth/logout".equals(request.getRequestURI())) {
+                        log.info("Skip authentication restore for logout: {}", e.getMessage());
+                    } else {
+                        throw e;
+                    }
+                }
 
             }else{
                 log.error("Token is not valid");

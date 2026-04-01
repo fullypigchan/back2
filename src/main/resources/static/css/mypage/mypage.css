@@ -1189,8 +1189,13 @@ body {
     color: #f91880;
 }
 
-.Post-Action-Btn.Like.active {
+.Post-Action-Btn.Like.liked {
     color: #f91880;
+}
+
+.Post-Action-Btn.Like.liked:hover {
+    color: #f91880;
+    background-color: rgba(249, 24, 128, 0.1);
 }
 
 /* 북마크 */
@@ -1199,8 +1204,13 @@ body {
     color: #1d9bf0;
 }
 
-.Post-Action-Btn.Bookmark.active {
+.Post-Action-Btn.Bookmark.bookmarked {
     color: #1d9bf0;
+}
+
+.Post-Action-Btn.Bookmark.bookmarked:hover {
+    color: #1d9bf0;
+    background-color: rgba(29, 155, 240, 0.1);
 }
 
 .Post-Action-Icon {

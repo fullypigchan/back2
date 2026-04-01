@@ -1,4 +1,4 @@
-const layout = (() => {
+const mypageLayout = (() => {
     const ICON_PATHS = {
         more: "M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z",
         reply: "M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z",
@@ -7,6 +7,18 @@ const layout = (() => {
         bookmark: "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z",
         share: "M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"
     };
+    const FILLED_ICON_PATHS = {
+        // 동적 카드도 첫 렌더부터 "현재 상태 그대로" 보여줘야 하므로,
+        // liked/bookmarked 상태에서는 event.js의 보정 전이라도 채워진 path를 바로 내려준다.
+        like: "M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z",
+        bookmark: "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
+    };
+
+    const createActionIcon = (path) => `
+        <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
+            <path d="${path}"></path>
+        </svg>
+    `;
 
     // 동적 카드도 정적 템플릿 카드와 같은 액션 규약을 쓰도록 data-action 속성을 함께 내려준다.
     // 이렇게 해두면 event.js는 카드가 "처음부터 있었는지" 또는 "조회 후 렌더링됐는지"를 구분하지 않고
@@ -187,12 +199,17 @@ const layout = (() => {
       `;
     };
 
-    const createMyPostCard = (post) => { // 게시글 1개를 더미 카드와 같은 Post-Card 마크업으로 바꾼다.
+    const createMyPostCard = (post, options = {}) => { // 게시글 1개를 더미 카드와 같은 Post-Card 마크업으로 바꾼다.
         const files = post.postFiles ?? []; // 첨부파일이 없을 때도 안전하게 처리하기 위해 기본값을 준다.
         const images = files.filter((file) => String(file.contentType).toUpperCase() === "IMAGE").slice(0, 4); // 이미지 파일만 최대 4장까지 뽑는다.
         const attachment = files.find((file) => String(file.contentType).toUpperCase() !== "IMAGE"); // 이미지가 없을 때 보여줄 일반 첨부파일 1개를 찾는다.
         const hashtags = (post.hashtags ?? []).map((tag) => `<span class="Category-Tag">#${tag.tagName}</span>`).join(""); // 해시태그를 더미 카드에 맞는 span 목록으로 만든다.
         const viewCount = 0; // 현재 DTO에 조회수 필드가 없어서 더미 구조만 유지하고 값은 0으로 둔다.
+        // 카드의 초기 아이콘 상태는 서버가 내려준 최종 상태를 그대로 따른다.
+        // Likes 탭만 예외적으로 "내가 좋아요한 글 목록"이라는 화면 의미가 더 강하므로,
+        // 옵션이 켜지면 DTO 값보다 우선해서 채워진 하트를 보여준다.
+        const isLiked = options.forceLiked || !!post.isLiked;
+        const isBookmarked = !!post.isBookmarked;
 
         let mediaHtml = ""; // 이미지나 첨부파일이 있을 때만 채울 영역이다.
         let dataType = "text"; // 기본 카드 타입은 텍스트 게시글이다.
@@ -241,11 +258,9 @@ const layout = (() => {
                               </svg>
                               <span class="Post-Action-Count">${post.replyCount ?? 0}</span>
                           </button>
-                          <button class="Post-Action-Btn Like" type="button" aria-label="좋아요 ${post.likeCount ?? 0}"
-                                  data-action="like" data-liked="false">
-                              <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
-                                  <path d="${ICON_PATHS.like}"/>
-                              </svg>
+                          <button class="Post-Action-Btn Like${isLiked ? " liked" : ""}" type="button" aria-label="좋아요 ${post.likeCount ?? 0}"
+                                  data-action="like" data-liked="${isLiked}">
+                              ${createActionIcon(isLiked ? FILLED_ICON_PATHS.like : ICON_PATHS.like)}
                               <span class="Post-Action-Count">${post.likeCount ?? 0}</span>
                           </button>
                           <button class="Post-Action-Btn" type="button" aria-label="조회수 ${viewCount}">
@@ -255,11 +270,9 @@ const layout = (() => {
                               <span class="Post-Action-Count">${viewCount}</span>
                           </button>
                           <div class="Post-Action-Right">
-                              <button class="Post-Action-Btn Bookmark" type="button" aria-label="북마크"
-                                      data-action="bookmark" data-bookmarked="false">
-                                  <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
-                                      <path d="${ICON_PATHS.bookmark}"/>
-                                  </svg>
+                              <button class="Post-Action-Btn Bookmark${isBookmarked ? " bookmarked" : ""}" type="button" aria-label="북마크"
+                                      data-action="bookmark" data-bookmarked="${isBookmarked}">
+                                  ${createActionIcon(isBookmarked ? FILLED_ICON_PATHS.bookmark : ICON_PATHS.bookmark)}
                               </button>
                               <button class="Post-Action-Btn Share" type="button" aria-label="공유" data-action="share">
                                   <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
@@ -304,7 +317,8 @@ const layout = (() => {
         if (!likeSection) return;
 
         const posts = postWithPagingDTO?.posts ?? [];
-        const html = posts.map(createMyPostCard).join("");
+        // Likes 탭은 목록 정의상 모두 "좋아요한 글"이므로 첫 렌더부터 하트를 채운 상태로 고정한다.
+        const html = posts.map((post) => createMyPostCard({ ...post, isLiked: true }, { forceLiked: true })).join("");
 
         if (posts.length === 0 && page === 1) {
             likeSection.innerHTML = `

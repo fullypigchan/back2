@@ -21,7 +21,9 @@
             push_enabled, member_language, birth_date, created_datetime, updated_datetime,
             last_login_at, member_name
         from tbl_member
-        where member_email = #{loginId} or member_phone = #{loginId} and member_password = #{memberPassword} and member_status = 'active'
+        where (member_email = #{loginId} or member_phone = #{loginId})
+          and member_password = #{memberPassword}
+          and member_status = 'active'
     </select>
 
     <select id="selectMemberByMemberPhone">
@@ -65,6 +67,20 @@
         from tbl_member
         where (member_email = #{loginId} or member_phone = #{loginId})
           and member_status = 'active'
+    </select>
+
+    <select id="selectMemberByLoginIdAnyStatus">
+        select
+            id, member_email, member_password,
+            member_nickname, member_handle,
+            member_phone, member_bio,
+            member_region, member_status,
+            member_role, push_enabled,
+            member_language, birth_date, created_datetime,
+            updated_datetime, last_login_at, member_name
+        from tbl_member
+        where member_email = #{loginId}
+           or member_phone = #{loginId}
     </select>
 
     <select id="selectMembersByKeyword">
@@ -112,6 +128,13 @@
         where member_handle = #{memberHandle} and member_status = 'active'
     </select>
 
+    <select id="selectMemberByMemberPassword">
+        select id, member_email, member_password, member_handle, member_phone,
+               member_region, member_status, member_role, created_datetime, updated_datetime,  member_name
+        from tbl_member
+        where (member_email = #{loginId} or member_phone = #{loginId}) and member_password = #{memberPassword} and member_status = 'active'
+    </select>
+
     <select id="selectById">
         select id, member_email, member_password, member_nickname
              ,member_handle, member_phone, member_bio, member_region
@@ -133,6 +156,13 @@
         where id = #{id}
     </update>
 
+    <update id="reactivate">
+        update tbl_member
+        set member_status = 'active',
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
     <update id="update">
         <!-- 프로필 수정 모달에서 실제로 바꾸는 텍스트 필드만 저장한다.
              기존 회원가입/로그인 로직과 섞이지 않도록 member 본체 컬럼만 최소 범위로 갱신한다. -->
@@ -140,6 +170,41 @@
         set member_nickname = #{memberNickname},
             member_bio = #{memberBio},
             birth_date = #{birthDate},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update tbl_member
+        set member_password = #{memberPassword},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateHandle">
+        update tbl_member
+        set member_handle = #{memberHandle},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updatePhone">
+        update tbl_member
+        set member_phone = #{memberPhone},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateEmail">
+        update tbl_member
+        set member_email = #{memberEmail},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateLanguage">
+        update tbl_member
+        set member_language = #{memberLanguage},
             updated_datetime = now()
         where id = #{id}
     </update>
