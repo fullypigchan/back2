@@ -237,6 +237,65 @@ const settingService = (() => {
         return result;
     };
 
+    // 푸시 알림 master on/off는 회원 본체의 push_enabled만 갱신한다.
+    const updateNotificationPushEnabled = async (pushEnabled) => {
+        const response = await fetch("/api/settings/notifications/push-enabled", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                pushEnabled: pushEnabled,
+            }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "푸시 알림 저장 실패");
+        }
+
+        return result;
+    };
+
+    // quality filter와 뮤트 조건은 같은 설정 묶음으로 저장한다.
+    const updateNotificationFilter = async (payload) => {
+        const response = await fetch("/api/settings/notifications/filter", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "알림 필터 저장 실패");
+        }
+
+        return result;
+    };
+
+    // 개별 푸시 종류 체크 상태는 master on/off와 분리해 별도 저장한다.
+    const updateNotificationPushPreference = async (payload) => {
+        const response = await fetch("/api/settings/notifications/push-preferences", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "푸시 알림 설정 저장 실패");
+        }
+
+        return result;
+    };
+
     return {
         checkPassword: checkPassword,
         updatePassword: updatePassword,
@@ -251,5 +310,8 @@ const settingService = (() => {
         updateEmail: updateEmail,
         updateLanguage: updateLanguage,
         deactivateAccount: deactivateAccount,
+        updateNotificationPushEnabled: updateNotificationPushEnabled,
+        updateNotificationFilter: updateNotificationFilter,
+        updateNotificationPushPreference: updateNotificationPushPreference,
     };
 })();

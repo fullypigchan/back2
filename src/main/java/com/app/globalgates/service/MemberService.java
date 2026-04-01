@@ -38,6 +38,7 @@ public class MemberService {
     private final CategoryMemberDAO categoryMemberDAO;
     private final CategoryDAO categoryDAO;
     private final OAuthDAO oAuthDAO;
+    private final NotificationPreferenceDAO notificationPreferenceDAO;
     private final PasswordEncoder passwordEncoder;
 
     //  일반 회원가입
@@ -314,6 +315,131 @@ public class MemberService {
         }
 
         memberDAO.updateLanguage(member.getId(), normalizedLanguage);
+    }
+
+    // 푸시 master on/off는 "전체 preset" 역할을 한다.
+    // 따라서 master를 켜면 상세 push도 전부 true, 끄면 상세 push도 전부 false로 함께 맞춘다.
+    // void 반환 메서드에서는 CachePut보다 CacheEvict가 안전하므로 다음 조회에서 최신 member를 다시 읽게 만든다.
+    @Transactional
+    @CacheEvict(value="member", key="#loginId")
+    public void updatePushEnabled(String loginId, boolean pushEnabled) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        memberDAO.updatePushEnabled(member.getId(), pushEnabled);
+
+        NotificationPreferenceDTO current = notificationPreferenceDAO.findByMemberId(member.getId())
+                .orElseGet(() -> createDefaultNotificationPreference(member));
+
+        current.setPushConnect(pushEnabled);
+        current.setPushExpert(pushEnabled);
+        current.setPushLikes(pushEnabled);
+        current.setPushPosts(pushEnabled);
+        current.setPushComments(pushEnabled);
+        current.setPushChatMessages(pushEnabled);
+        current.setPushQuotes(pushEnabled);
+        current.setPushSystem(pushEnabled);
+        current.setPushMentions(pushEnabled);
+
+        notificationPreferenceDAO.save(current);
+    }
+
+    public NotificationPreferenceDTO getNotificationPreference(String loginId) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        return notificationPreferenceDAO.findByMemberId(member.getId())
+                .orElseGet(() -> createDefaultNotificationPreference(member));
+    }
+
+    // 회원가입(join) 단계에서 이미 pushEnabled=true/false가 저장되므로,
+    // 상세 푸시 알림 기본값은 그 선택을 그대로 따라간다.
+    // 반면 quality filter와 muted 옵션은 "누구의 알림을 걸러낼지"에 대한 축이라 별도 기본값을 유지한다.
+    private NotificationPreferenceDTO createDefaultNotificationPreference(MemberDTO member) {
+        boolean pushEnabled = member.isPushEnabled();
+
+        NotificationPreferenceDTO dto = new NotificationPreferenceDTO();
+        dto.setMemberId(member.getId());
+
+        dto.setQualityFilterEnabled(true);
+
+        dto.setMutedNonFollowing(false);
+        dto.setMutedNotFollowingYou(false);
+        dto.setMutedNewAccount(false);
+        dto.setMutedDefaultProfile(false);
+        dto.setMutedUnverifiedEmail(false);
+        dto.setMutedUnverifiedPhone(false);
+
+        dto.setPushConnect(pushEnabled);
+        dto.setPushExpert(pushEnabled);
+        dto.setPushLikes(pushEnabled);
+        dto.setPushPosts(pushEnabled);
+        dto.setPushComments(pushEnabled);
+        dto.setPushChatMessages(pushEnabled);
+        dto.setPushQuotes(pushEnabled);
+        dto.setPushSystem(pushEnabled);
+        dto.setPushMentions(pushEnabled);
+
+        return dto;
+    }
+
+    @Transactional
+    public void updateNotificationFilter(String loginId, NotificationPreferenceDTO request) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        NotificationPreferenceDTO current = notificationPreferenceDAO.findByMemberId(member.getId())
+                .orElseGet(() -> createDefaultNotificationPreference(member));
+
+        // filter 저장은 quality/muted 관련 필드만 바꿔
+        // push 상세 체크 상태를 다른 화면 저장에서 덮어쓰지 않게 유지한다.
+        current.setQualityFilterEnabled(request.isQualityFilterEnabled());
+        current.setMutedNonFollowing(request.isMutedNonFollowing());
+        current.setMutedNotFollowingYou(request.isMutedNotFollowingYou());
+        current.setMutedNewAccount(request.isMutedNewAccount());
+        current.setMutedDefaultProfile(request.isMutedDefaultProfile());
+        current.setMutedUnverifiedEmail(request.isMutedUnverifiedEmail());
+        current.setMutedUnverifiedPhone(request.isMutedUnverifiedPhone());
+
+        notificationPreferenceDAO.save(current);
+    }
+
+    @Transactional
+    @CacheEvict(value="member", key="#loginId")
+    public void updateNotificationPushPreference(String loginId, NotificationPreferenceDTO request) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        NotificationPreferenceDTO current = notificationPreferenceDAO.findByMemberId(member.getId())
+                .orElseGet(() -> createDefaultNotificationPreference(member));
+
+        // push 상세 저장은 푸시 체크 관련 필드만 바꿔
+        // 필터/뮤트 조건이 섹션 간 저장 때문에 사라지지 않게 만든다.
+        current.setPushConnect(request.isPushConnect());
+        current.setPushExpert(request.isPushExpert());
+        current.setPushLikes(request.isPushLikes());
+        current.setPushPosts(request.isPushPosts());
+        current.setPushComments(request.isPushComments());
+        current.setPushChatMessages(request.isPushChatMessages());
+        current.setPushQuotes(request.isPushQuotes());
+        current.setPushSystem(request.isPushSystem());
+        current.setPushMentions(request.isPushMentions());
+
+        // 상세 push 저장은 개별 체크 상태를 그대로 반영하되,
+        // 최종적으로 하나도 선택되지 않으면 master push_enabled도 false로 맞춘다.
+        boolean hasEnabledPushAlert =
+                current.isPushConnect()
+                        || current.isPushExpert()
+                        || current.isPushLikes()
+                        || current.isPushPosts()
+                        || current.isPushComments()
+                        || current.isPushChatMessages()
+                        || current.isPushQuotes()
+                        || current.isPushSystem()
+                        || current.isPushMentions();
+
+        memberDAO.updatePushEnabled(member.getId(), hasEnabledPushAlert);
+        notificationPreferenceDAO.save(current);
     }
 
     // 계정 비활성화는 현재 로그인 사용자의 비밀번호를 다시 확인한 뒤 soft delete로 처리한다.

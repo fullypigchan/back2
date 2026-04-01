@@ -237,16 +237,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextPasswordInput = passwordEditRoute?.querySelector('[data-password-editor-input="nextPassword"]');
     const confirmPasswordInput = passwordEditRoute?.querySelector('[data-password-editor-input="confirmPassword"]');
     const passwordSaveButton = passwordEditRoute?.querySelector("[data-password-editor-save]");
-    // 알림 필터 상세 화면의 체크 상태. Spring이 boolean 값으로 내려주기 가장 쉬운 구조다.
+    /*
+     * 서버가 setting.html에서 주입한 현재 회원 정보와 알림 설정 초기값이다.
+     * 이 값들은 최초 렌더 기준의 신뢰 가능한 소스이며, 이후 화면 상태의 시작점으로만 사용한다.
+     */
+    const settingMember = window.settingMember || {};
+    const settingNotificationPreference = window.settingNotificationPreference || {};
+
+    // 알림 필터 상세 화면의 체크 상태.
+    // 서버가 내려준 값을 우선 사용하고, 아직 저장 이력이 없는 회원만 화면 기본값으로 떨어뜨린다.
     const notificationFilterState = {
-        isQualityFilterEnabled: true,
+        isQualityFilterEnabled:
+            settingNotificationPreference.qualityFilterEnabled ?? true,
         mutedNotificationOptions: {
-            nonFollowing: false,
-            notFollowingYou: false,
-            newAccount: false,
-            defaultProfile: false,
-            unverifiedEmail: false,
-            unverifiedPhone: false,
+            nonFollowing: Boolean(settingNotificationPreference.mutedNonFollowing),
+            notFollowingYou: Boolean(settingNotificationPreference.mutedNotFollowingYou),
+            newAccount: Boolean(settingNotificationPreference.mutedNewAccount),
+            defaultProfile: Boolean(settingNotificationPreference.mutedDefaultProfile),
+            unverifiedEmail: Boolean(settingNotificationPreference.mutedUnverifiedEmail),
+            unverifiedPhone: Boolean(settingNotificationPreference.mutedUnverifiedPhone),
         },
     };
     /*
@@ -260,17 +269,17 @@ document.addEventListener("DOMContentLoaded", () => {
      * pushAlerts의 key는 HTML의 data-notification-push-check 값과 반드시 같아야 한다.
      */
     const notificationPreferenceState = {
-        isPushEnabled: false,
+        isPushEnabled: Boolean(settingMember.pushEnabled),
         pushAlerts: {
-            connect: true,
-            expert: true,
-            likes: true,
-            posts: true,
-            comments: true,
-            chatMessages: true,
-            quotes: true,
-            system: true,
-            mentions: true,
+            connect: settingNotificationPreference.pushConnect ?? Boolean(settingMember.pushEnabled),
+            expert: settingNotificationPreference.pushExpert ?? Boolean(settingMember.pushEnabled),
+            likes: settingNotificationPreference.pushLikes ?? Boolean(settingMember.pushEnabled),
+            posts: settingNotificationPreference.pushPosts ?? Boolean(settingMember.pushEnabled),
+            comments: settingNotificationPreference.pushComments ?? Boolean(settingMember.pushEnabled),
+            chatMessages: settingNotificationPreference.pushChatMessages ?? Boolean(settingMember.pushEnabled),
+            quotes: settingNotificationPreference.pushQuotes ?? Boolean(settingMember.pushEnabled),
+            system: settingNotificationPreference.pushSystem ?? Boolean(settingMember.pushEnabled),
+            mentions: settingNotificationPreference.pushMentions ?? Boolean(settingMember.pushEnabled),
         },
     };
     // 내 게시물 관련 개인정보 설정 상태.
@@ -297,13 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
         notificationAudience: "non-following",
         duration: "until-unmuted",
     };
-    /*
-     * 서버가 setting.html에서 주입한 현재 회원 정보다.
-     * 이 값은 최초 렌더 기준의 신뢰 가능한 소스이며,
-     * 아래 currentAccountState는 이 객체를 바탕으로 프런트 화면 상태를 시작한다.
-     */
-    const settingMember = window.settingMember || {};
-
     // 현재 로그인 계정 요약 정보. 비활성화 화면/헤더 등 공통 영역에서 사용한다.
     const currentAccountState = {
         // 표시 이름/핸들은 서버가 심어준 값을 우선 사용하고,
@@ -318,6 +320,108 @@ document.addEventListener("DOMContentLoaded", () => {
         language: settingMember.memberLanguage || "설정되지 않음",
         createdAt: settingMember.createdDatetime || "생성일 정보 없음",
     };
+
+    function buildNotificationFilterPayload() {
+        return {
+            qualityFilterEnabled: notificationFilterState.isQualityFilterEnabled,
+            mutedNonFollowing: notificationFilterState.mutedNotificationOptions.nonFollowing,
+            mutedNotFollowingYou: notificationFilterState.mutedNotificationOptions.notFollowingYou,
+            mutedNewAccount: notificationFilterState.mutedNotificationOptions.newAccount,
+            mutedDefaultProfile: notificationFilterState.mutedNotificationOptions.defaultProfile,
+            mutedUnverifiedEmail: notificationFilterState.mutedNotificationOptions.unverifiedEmail,
+            mutedUnverifiedPhone: notificationFilterState.mutedNotificationOptions.unverifiedPhone,
+        };
+    }
+
+    function buildNotificationPushPreferencePayload() {
+        return {
+            pushConnect: notificationPreferenceState.pushAlerts.connect,
+            pushExpert: notificationPreferenceState.pushAlerts.expert,
+            pushLikes: notificationPreferenceState.pushAlerts.likes,
+            pushPosts: notificationPreferenceState.pushAlerts.posts,
+            pushComments: notificationPreferenceState.pushAlerts.comments,
+            pushChatMessages: notificationPreferenceState.pushAlerts.chatMessages,
+            pushQuotes: notificationPreferenceState.pushAlerts.quotes,
+            pushSystem: notificationPreferenceState.pushAlerts.system,
+            pushMentions: notificationPreferenceState.pushAlerts.mentions,
+        };
+    }
+
+    // master toggle은 전체 preset 역할을 한다.
+    // 사용자가 master를 켜면 상세 push는 전부 true,
+    // master를 끄면 상세 push는 전부 false로 맞춘다.
+    // 이후 세부 조정은 저장 버튼에서만 따로 저장한다.
+    function setAllPushAlerts(nextValue) {
+        Object.keys(notificationPreferenceState.pushAlerts).forEach((key) => {
+            notificationPreferenceState.pushAlerts[key] = nextValue;
+        });
+    }
+
+    // 상세 push 항목 중 하나라도 true가 있으면 true를 반환한다.
+    // 상세 저장 이후 master 스위치를 어떤 값으로 보일지 계산할 때 사용한다.
+    function hasEnabledPushAlert() {
+        return Object.values(notificationPreferenceState.pushAlerts).some(Boolean);
+    }
+
+    // 푸시 master toggle은 상단 스위치와 empty 상태의 "켜기" 버튼이 같은 저장 경로를 공유한다.
+    // 저장 실패 시 화면 상태를 이전 값으로 돌려 사용자가 실제 저장 결과를 오해하지 않게 만든다.
+    async function persistPushEnabled(nextValue) {
+        const previousValue = notificationPreferenceState.isPushEnabled;
+        const previousPushAlerts = { ...notificationPreferenceState.pushAlerts };
+
+        // master는 전체 preset이므로 스위치 값에 맞춰 상세 push 상태도 즉시 전부 맞춘다.
+        notificationPreferenceState.isPushEnabled = nextValue;
+        setAllPushAlerts(nextValue);
+        renderDetail();
+
+        try {
+            // server도 같은 정책을 따르도록 master API 한 번으로 member.push_enabled와
+            // notification_preference의 push 상세값을 함께 맞춘다.
+            await settingService.updateNotificationPushEnabled(nextValue);
+
+            window.settingMember.pushEnabled = nextValue;
+        } catch (error) {
+            notificationPreferenceState.isPushEnabled = previousValue;
+            notificationPreferenceState.pushAlerts = previousPushAlerts;
+            renderDetail();
+            alert(error.message || "푸시 알림 저장 실패");
+        }
+    }
+
+    async function saveNotificationFilter(showSuccessMessage = true) {
+        try {
+            await settingService.updateNotificationFilter(
+                buildNotificationFilterPayload(),
+            );
+            if (showSuccessMessage) {
+                alert("알림 필터가 저장되었습니다.");
+            }
+        } catch (error) {
+            alert(error.message || "알림 필터 저장 실패");
+        }
+    }
+
+    async function saveNotificationPushPreference() {
+        const previousValue = notificationPreferenceState.isPushEnabled;
+        const nextMasterValue = hasEnabledPushAlert();
+
+        // 세부 저장에서는 개별 체크 상태를 그대로 존중한다.
+        // 단, 최종적으로 모두 false면 master도 false, 하나라도 true면 master는 true로 맞춘다.
+        notificationPreferenceState.isPushEnabled = nextMasterValue;
+        renderDetail();
+
+        try {
+            await settingService.updateNotificationPushPreference(
+                buildNotificationPushPreferencePayload(),
+            );
+            window.settingMember.pushEnabled = nextMasterValue;
+            alert("푸시 알림 설정이 저장되었습니다.");
+        } catch (error) {
+            notificationPreferenceState.isPushEnabled = previousValue;
+            renderDetail();
+            alert(error.message || "푸시 알림 설정 저장 실패");
+        }
+    }
 
     function resetPhoneModal() {
         pendingPhoneNumber = "";
@@ -1977,8 +2081,19 @@ document.addEventListener("DOMContentLoaded", () => {
             "[data-notification-push-enable]",
         );
         if (notificationPushEnable instanceof HTMLButtonElement) {
-            notificationPreferenceState.isPushEnabled = true;
-            renderDetail();
+            void persistPushEnabled(true);
+            return;
+        }
+
+        const mutedSaveButton = target.closest("[data-notification-muted-save]");
+        if (mutedSaveButton instanceof HTMLButtonElement) {
+            void saveNotificationFilter();
+            return;
+        }
+
+        const pushSaveButton = target.closest("[data-notification-push-save]");
+        if (pushSaveButton instanceof HTMLButtonElement) {
+            void saveNotificationPushPreference();
             return;
         }
 
@@ -1990,6 +2105,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const infoButton = target.closest("[data-account-info-id]");
+        const phoneUpdateButton = target.closest("[data-phone-update]");
+
+        // 휴대폰 번호 업데이트는 상세 화면에서 새 폼을 다시 만들지 않고,
+        // 기존 phone-add 모달 플로우를 그대로 재사용해 중복 로직을 피한다.
+        if (phoneUpdateButton instanceof HTMLButtonElement) {
+            openModal("phone-add");
+            return;
+        }
+
         if (!(infoButton instanceof HTMLButtonElement)) {
             return;
         }
@@ -2032,6 +2156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (target.matches("[data-notification-filter-toggle]")) {
             notificationFilterState.isQualityFilterEnabled = target.checked;
+            void saveNotificationFilter(false);
             return;
         }
 
@@ -2051,8 +2176,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (target.matches("[data-notification-push-toggle]")) {
-            notificationPreferenceState.isPushEnabled = target.checked;
-            renderDetail();
+            void persistPushEnabled(target.checked);
             return;
         }
 
@@ -2064,6 +2188,19 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
                 notificationPreferenceState.pushAlerts[toggleKey] =
                     target.checked;
+
+                // 개별 상세 체크를 바꿀 때는 master의 의미도 함께 다시 계산한다.
+                // 단, 마지막 체크를 끄는 순간 상세 영역까지 바로 숨기면 저장 버튼을 누를 수 없으므로
+                // 여기서는 상단 toggle의 checked 상태만 즉시 따라가게 하고
+                // empty/content 전환은 저장 시점의 renderDetail에서 최종 반영한다.
+                notificationPreferenceState.isPushEnabled = hasEnabledPushAlert();
+
+                const currentRoute = target.closest('[data-detail-route-view="notification-push-edit"]');
+                const masterToggle = currentRoute?.querySelector("[data-notification-push-toggle]");
+
+                if (masterToggle instanceof HTMLInputElement) {
+                    masterToggle.checked = notificationPreferenceState.isPushEnabled;
+                }
             }
             return;
         }

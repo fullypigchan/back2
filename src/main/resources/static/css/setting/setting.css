@@ -3004,6 +3004,37 @@ a {
     text-decoration: underline;
 }
 
+.notification-muted-editor__actions,
+.notification-push-editor__actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 24px;
+}
+
+.notification-muted-editor__save,
+.notification-push-editor__save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--settings-accent);
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.notification-muted-editor__save:hover,
+.notification-push-editor__save:hover {
+    opacity: 0.88;
+}
+
 .notification-preferences-editor {
     min-height: calc(100vh - 49px);
 }
@@ -3697,6 +3728,11 @@ a {
 }
 
 .phone-editor__verified-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
     padding: 0;
     border: 0;
     background: transparent;
@@ -3704,6 +3740,16 @@ a {
     line-height: 20px;
     font-weight: 500;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.phone-editor__verified-action:hover {
+    background-color: var(--settings-accent-hover);
+}
+
+.phone-editor__verified-action:focus-visible {
+    outline: 2px solid var(--settings-accent);
+    outline-offset: 4px;
 }
 
 .phone-editor__verified-action--update {

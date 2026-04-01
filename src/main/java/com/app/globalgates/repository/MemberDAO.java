@@ -97,6 +97,10 @@ public class MemberDAO {
     public void updateLanguage(Long memberId, String memberLanguage) {
         memberMapper.updateLanguage(memberId, memberLanguage);
     }
+    //  푸시 알림 master on/off 변경
+    public void updatePushEnabled(Long memberId, boolean pushEnabled) {
+        memberMapper.updatePushEnabled(memberId, pushEnabled);
+    }
 //  Handle로 조회 (간소화 - 차단용)
     public Optional<MemberDTO> findByHandle(String memberHandle) {
         return memberMapper.selectMemberByHandle(memberHandle);

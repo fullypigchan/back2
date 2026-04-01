@@ -2,12 +2,14 @@ package com.app.globalgates.service;
 
 import com.app.globalgates.common.enumeration.Status;
 import com.app.globalgates.dto.MemberDTO;
+import com.app.globalgates.dto.NotificationPreferenceDTO;
 import com.app.globalgates.repository.BusinessMemberDAO;
 import com.app.globalgates.repository.CategoryDAO;
 import com.app.globalgates.repository.CategoryMemberDAO;
 import com.app.globalgates.repository.FileDAO;
 import com.app.globalgates.repository.MemberDAO;
 import com.app.globalgates.repository.MemberProfileFileDAO;
+import com.app.globalgates.repository.NotificationPreferenceDAO;
 import com.app.globalgates.repository.OAuthDAO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,9 @@ class MemberServicePasswordTest {
 
     @Mock
     private OAuthDAO oAuthDAO;
+
+    @Mock
+    private NotificationPreferenceDAO notificationPreferenceDAO;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -176,5 +181,194 @@ class MemberServicePasswordTest {
         memberService.reactivateMember("tester@example.com", "plain-password");
 
         verify(memberDAO).reactivate(7L);
+    }
+
+    @Test
+    void getNotificationPreference_returnsDefaultPushPreferencesFromJoinSelection() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setPushEnabled(false);
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(notificationPreferenceDAO.findByMemberId(7L)).thenReturn(Optional.empty());
+
+        NotificationPreferenceDTO result =
+                memberService.getNotificationPreference("tester@example.com");
+
+        assertTrue(result.isQualityFilterEnabled());
+        assertFalse(result.isMutedNonFollowing());
+        assertFalse(result.isPushConnect());
+        assertFalse(result.isPushMentions());
+    }
+
+    @Test
+    void updatePushEnabled_persistsBooleanForCurrentMember() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setPushEnabled(true);
+
+        NotificationPreferenceDTO savedPreference = new NotificationPreferenceDTO();
+        savedPreference.setId(9L);
+        savedPreference.setMemberId(7L);
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(notificationPreferenceDAO.findByMemberId(7L)).thenReturn(Optional.of(savedPreference));
+
+        memberService.updatePushEnabled("tester@example.com", true);
+
+        verify(memberDAO).updatePushEnabled(7L, true);
+        verify(notificationPreferenceDAO).save(savedPreference);
+        assertTrue(savedPreference.isPushConnect());
+        assertTrue(savedPreference.isPushMentions());
+    }
+
+    @Test
+    void updatePushEnabled_disablesAllDetailedPushPreferencesWhenMasterToggleIsTurnedOff() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setPushEnabled(true);
+
+        NotificationPreferenceDTO savedPreference = new NotificationPreferenceDTO();
+        savedPreference.setId(9L);
+        savedPreference.setMemberId(7L);
+        savedPreference.setPushConnect(true);
+        savedPreference.setPushExpert(true);
+        savedPreference.setPushLikes(true);
+        savedPreference.setPushPosts(true);
+        savedPreference.setPushComments(true);
+        savedPreference.setPushChatMessages(true);
+        savedPreference.setPushQuotes(true);
+        savedPreference.setPushSystem(true);
+        savedPreference.setPushMentions(true);
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(notificationPreferenceDAO.findByMemberId(7L)).thenReturn(Optional.of(savedPreference));
+
+        memberService.updatePushEnabled("tester@example.com", false);
+
+        verify(memberDAO).updatePushEnabled(7L, false);
+        verify(notificationPreferenceDAO).save(savedPreference);
+        assertFalse(savedPreference.isPushConnect());
+        assertFalse(savedPreference.isPushExpert());
+        assertFalse(savedPreference.isPushLikes());
+        assertFalse(savedPreference.isPushPosts());
+        assertFalse(savedPreference.isPushComments());
+        assertFalse(savedPreference.isPushChatMessages());
+        assertFalse(savedPreference.isPushQuotes());
+        assertFalse(savedPreference.isPushSystem());
+        assertFalse(savedPreference.isPushMentions());
+    }
+
+    @Test
+    void updateNotificationPushPreference_keepsMasterEnabledWhenAtLeastOneDetailedPushAlertIsEnabled() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setPushEnabled(true);
+
+        NotificationPreferenceDTO savedPreference = new NotificationPreferenceDTO();
+        savedPreference.setId(9L);
+        savedPreference.setMemberId(7L);
+
+        NotificationPreferenceDTO request = new NotificationPreferenceDTO();
+        request.setPushConnect(true);
+        request.setPushExpert(false);
+        request.setPushLikes(false);
+        request.setPushPosts(false);
+        request.setPushComments(false);
+        request.setPushChatMessages(false);
+        request.setPushQuotes(false);
+        request.setPushSystem(false);
+        request.setPushMentions(false);
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(notificationPreferenceDAO.findByMemberId(7L)).thenReturn(Optional.of(savedPreference));
+
+        memberService.updateNotificationPushPreference("tester@example.com", request);
+
+        verify(memberDAO).updatePushEnabled(7L, true);
+        verify(notificationPreferenceDAO).save(savedPreference);
+        assertTrue(savedPreference.isPushConnect());
+        assertFalse(savedPreference.isPushMentions());
+    }
+
+    @Test
+    void updateNotificationFilter_updatesOnlyFilterFields() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setPushEnabled(true);
+
+        NotificationPreferenceDTO savedPreference = new NotificationPreferenceDTO();
+        savedPreference.setId(9L);
+        savedPreference.setMemberId(7L);
+        savedPreference.setPushConnect(true);
+        savedPreference.setPushMentions(true);
+
+        NotificationPreferenceDTO request = new NotificationPreferenceDTO();
+        request.setQualityFilterEnabled(false);
+        request.setMutedNonFollowing(true);
+        request.setMutedNotFollowingYou(true);
+        request.setMutedNewAccount(true);
+        request.setMutedDefaultProfile(true);
+        request.setMutedUnverifiedEmail(true);
+        request.setMutedUnverifiedPhone(true);
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(notificationPreferenceDAO.findByMemberId(7L)).thenReturn(Optional.of(savedPreference));
+
+        memberService.updateNotificationFilter("tester@example.com", request);
+
+        verify(notificationPreferenceDAO).save(savedPreference);
+        assertFalse(savedPreference.isQualityFilterEnabled());
+        assertTrue(savedPreference.isMutedNonFollowing());
+        assertTrue(savedPreference.isMutedNotFollowingYou());
+        assertTrue(savedPreference.isMutedNewAccount());
+        assertTrue(savedPreference.isMutedDefaultProfile());
+        assertTrue(savedPreference.isMutedUnverifiedEmail());
+        assertTrue(savedPreference.isMutedUnverifiedPhone());
+        assertTrue(savedPreference.isPushConnect());
+        assertTrue(savedPreference.isPushMentions());
+    }
+
+    @Test
+    void updateNotificationPushPreference_updatesOnlyPushFields() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setPushEnabled(true);
+
+        NotificationPreferenceDTO savedPreference = new NotificationPreferenceDTO();
+        savedPreference.setId(9L);
+        savedPreference.setMemberId(7L);
+        savedPreference.setQualityFilterEnabled(true);
+        savedPreference.setMutedNonFollowing(true);
+
+        NotificationPreferenceDTO request = new NotificationPreferenceDTO();
+        request.setPushConnect(false);
+        request.setPushExpert(false);
+        request.setPushLikes(false);
+        request.setPushPosts(false);
+        request.setPushComments(false);
+        request.setPushChatMessages(false);
+        request.setPushQuotes(false);
+        request.setPushSystem(false);
+        request.setPushMentions(false);
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(notificationPreferenceDAO.findByMemberId(7L)).thenReturn(Optional.of(savedPreference));
+
+        memberService.updateNotificationPushPreference("tester@example.com", request);
+
+        verify(memberDAO).updatePushEnabled(7L, false);
+        verify(notificationPreferenceDAO).save(savedPreference);
+        assertTrue(savedPreference.isQualityFilterEnabled());
+        assertTrue(savedPreference.isMutedNonFollowing());
+        assertFalse(savedPreference.isPushConnect());
+        assertFalse(savedPreference.isPushExpert());
+        assertFalse(savedPreference.isPushLikes());
+        assertFalse(savedPreference.isPushPosts());
+        assertFalse(savedPreference.isPushComments());
+        assertFalse(savedPreference.isPushChatMessages());
+        assertFalse(savedPreference.isPushQuotes());
+        assertFalse(savedPreference.isPushSystem());
+        assertFalse(savedPreference.isPushMentions());
     }
 }

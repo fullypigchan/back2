@@ -746,6 +746,12 @@
                             <p class="notification-muted-editor__help">
                                 이 필터는 내가 팔로우하는 사람에게서 받는 알림에는 영향을 주지 않습니다.
                             </p>
+                            <div class="notification-muted-editor__actions">
+                                <button type="button" class="notification-muted-editor__save"
+                                        data-notification-muted-save>
+                                    저장
+                                </button>
+                            </div>
                         </section>
                     </section>
 
@@ -811,6 +817,12 @@
                             <p class="notification-muted-editor__help">
                                 이 필터는 내가 팔로우하는 사람에게서 받는 알림에는 영향을 주지 않습니다.
                             </p>
+                            <div class="notification-muted-editor__actions">
+                                <button type="button" class="notification-muted-editor__save"
+                                        data-notification-muted-save>
+                                    저장
+                                </button>
+                            </div>
                         </section>
                     </section>
 
@@ -964,6 +976,12 @@
                                             viewBox="0 0 24 24" aria-hidden="true"><g><path
                                             d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg></span></span></label>
                                 </section>
+                                <div class="notification-push-editor__actions">
+                                    <button type="button" class="notification-push-editor__save"
+                                            data-notification-push-save>
+                                        저장
+                                    </button>
+                                </div>
                             </div>
                         </section>
                     </section>
@@ -1400,12 +1418,9 @@
                             </div>
                             <div class="phone-editor__verified-actions">
                                 <button type="button"
-                                        class="phone-editor__verified-action phone-editor__verified-action--update">휴대폰
+                                        class="phone-editor__verified-action phone-editor__verified-action--update"
+                                        data-phone-update>휴대폰
                                     번호 업데이트
-                                </button>
-                                <button type="button"
-                                        class="phone-editor__verified-action phone-editor__verified-action--delete">휴대폰
-                                    번호 삭제
                                 </button>
                             </div>
                         </section>
@@ -2316,7 +2331,31 @@
         memberLanguage: [[${member.memberLanguage}]],
         memberHandle: [[${member.memberHandle}]],
         memberRegion: [[${member.memberRegion}]],
+        pushEnabled: [[${member.pushEnabled}]],
         createdDatetime: [[${member.createdDatetime}]]
+    };
+
+    /*
+     * 알림 상세 초기값도 같은 방식으로 서버가 직접 주입한다.
+     * event.js는 이 객체를 읽어 화면 상태만 구성하고, 저장은 별도 settings API로 보낸다.
+     */
+    window.settingNotificationPreference = {
+        qualityFilterEnabled: [[${notificationPreference.qualityFilterEnabled}]],
+        mutedNonFollowing: [[${notificationPreference.mutedNonFollowing}]],
+        mutedNotFollowingYou: [[${notificationPreference.mutedNotFollowingYou}]],
+        mutedNewAccount: [[${notificationPreference.mutedNewAccount}]],
+        mutedDefaultProfile: [[${notificationPreference.mutedDefaultProfile}]],
+        mutedUnverifiedEmail: [[${notificationPreference.mutedUnverifiedEmail}]],
+        mutedUnverifiedPhone: [[${notificationPreference.mutedUnverifiedPhone}]],
+        pushConnect: [[${notificationPreference.pushConnect}]],
+        pushExpert: [[${notificationPreference.pushExpert}]],
+        pushLikes: [[${notificationPreference.pushLikes}]],
+        pushPosts: [[${notificationPreference.pushPosts}]],
+        pushComments: [[${notificationPreference.pushComments}]],
+        pushChatMessages: [[${notificationPreference.pushChatMessages}]],
+        pushQuotes: [[${notificationPreference.pushQuotes}]],
+        pushSystem: [[${notificationPreference.pushSystem}]],
+        pushMentions: [[${notificationPreference.pushMentions}]]
     };
 </script>
 <script async

@@ -1,6 +1,7 @@
 package com.app.globalgates.controller.setting;
 
 import com.app.globalgates.auth.CustomUserDetails;
+import com.app.globalgates.dto.NotificationPreferenceDTO;
 import com.app.globalgates.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -133,6 +134,55 @@ public class SettingAPIController {
             );
 
             return ResponseEntity.ok(Map.of("message", "계정이 비활성화되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // 푸시 master on/off는 tbl_member.push_enabled 단일 컬럼만 바꾼다.
+    // 상세 푸시 체크 상태와 분리해 두면 화면 상단 스위치의 응답이 더 단순해진다.
+    @PostMapping("notifications/push-enabled")
+    public ResponseEntity<?> updatePushEnabled(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, Boolean> request
+    ) {
+        try {
+            memberService.updatePushEnabled(
+                    userDetails.getLoginId(),
+                    Boolean.TRUE.equals(request.get("pushEnabled"))
+            );
+
+            return ResponseEntity.ok(Map.of("message", "푸시 알림 설정이 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // quality filter와 muted 옵션은 같은 설정 덩어리로 저장한다.
+    // 같은 테이블을 쓰더라도 서비스는 이 필드들만 갱신해 push 상세값을 덮어쓰지 않는다.
+    @PostMapping("notifications/filter")
+    public ResponseEntity<?> updateNotificationFilter(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody NotificationPreferenceDTO request
+    ) {
+        try {
+            memberService.updateNotificationFilter(userDetails.getLoginId(), request);
+            return ResponseEntity.ok(Map.of("message", "알림 필터가 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // 개별 푸시 알림 체크 상태는 별도 API로 저장한다.
+    // master toggle과 저장 경로를 분리해도 실제 DB 행은 같은 회원 설정 한 건을 공유한다.
+    @PostMapping("notifications/push-preferences")
+    public ResponseEntity<?> updateNotificationPushPreference(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody NotificationPreferenceDTO request
+    ) {
+        try {
+            memberService.updateNotificationPushPreference(userDetails.getLoginId(), request);
+            return ResponseEntity.ok(Map.of("message", "푸시 알림 설정이 저장되었습니다."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
