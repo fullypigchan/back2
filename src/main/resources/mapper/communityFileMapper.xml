@@ -4,18 +4,17 @@
 
 <mapper namespace="com.app.globalgates.mapper.CommunityFileMapper">
 
-    <!-- 커버 이미지 등록 -->
+
     <insert id="insert">
         insert into tbl_community_file (id, community_id)
         values (#{id}, #{communityId})
     </insert>
 
-    <!-- 커버 이미지 삭제 -->
+
     <delete id="delete">
         delete from tbl_community_file where id = #{id}
     </delete>
 
-    <!-- 커뮤니티 커버 이미지 조회 -->
     <select id="selectByCommunityId" resultType="fileDTO">
         select f.id, f.original_name, f.file_name, f.file_path, f.file_size,
                f.content_type, f.created_datetime

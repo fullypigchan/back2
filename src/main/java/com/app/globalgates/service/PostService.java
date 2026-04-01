@@ -40,7 +40,7 @@ public class PostService {
     private final S3Service s3Service;
 
 //    게시글 작성
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void writePost(PostDTO postDTO, List<MultipartFile> files) {
         postDAO.save(postDTO);
 
@@ -206,7 +206,7 @@ public class PostService {
     }
 
     //    게시글 수정
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void update(PostDTO postDTO) {
         postDAO.setPost(postDTO.toPostVO());
 
@@ -273,13 +273,13 @@ public class PostService {
     }
 
     //    게시글 삭제 = 상태 inactive로.
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void delete(Long id) {
         postDAO.delete(id);
     }
 
 //    댓글 작성
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void writeReply(PostDTO postDTO) {
         postDAO.save(postDTO);
     }

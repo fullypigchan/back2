@@ -9,6 +9,8 @@ import com.app.globalgates.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +40,8 @@ public class CommunityService {
     // 커뮤니티 CRUD
     // ──────────────────────────────────────
 
+
+    @CacheEvict(value = "community:list", allEntries = true)
     public void createCommunity(CommunityDTO dto, MultipartFile coverImage) throws IOException {
         communityDAO.save(dto);
 
@@ -53,6 +57,10 @@ public class CommunityService {
         communityMemberDAO.save(creatorMember);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "community", allEntries = true),
+            @CacheEvict(value = "community:list", allEntries = true)
+    })
     public void updateCommunity(Long communityId, CommunityVO vo, MultipartFile coverImage, Long requesterId) throws IOException {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -76,6 +84,12 @@ public class CommunityService {
         }
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "community", allEntries = true),
+            @CacheEvict(value = "community:list", allEntries = true),
+            @CacheEvict(value = "community:member:list", allEntries = true),
+            @CacheEvict(value = "community:post:list", allEntries = true)
+    })
     public void deleteCommunity(Long communityId, Long requesterId) {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -87,6 +101,7 @@ public class CommunityService {
         communityDAO.softDelete(communityId);
     }
 
+    @Cacheable(value = "community", key = "'detail:' + #communityId + ':member:' + #memberId")
     public CommunityDTO getCommunityDetail(Long communityId, Long memberId) throws IOException {
         CommunityDTO result = communityDAO.findById(communityId, memberId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -98,6 +113,7 @@ public class CommunityService {
         return result;
     }
 
+    @Cacheable(value = "community:list", key = "'my:page:' + #page + ':member:' + #memberId")
     public CommunityWithPagingDTO getMyCommunities(int page, Long memberId) throws IOException {
         int total = communityDAO.getCountByMemberId(memberId);
         Criteria criteria = new Criteria(page, total);
@@ -114,6 +130,7 @@ public class CommunityService {
         return result;
     }
 
+    @Cacheable(value = "community:list", key = "'explore:page:' + #page")
     public CommunityWithPagingDTO getExploreCommunities(int page) throws IOException {
         int total = communityDAO.getCount();
         Criteria criteria = new Criteria(page, total);
@@ -130,6 +147,7 @@ public class CommunityService {
         return result;
     }
 
+    @Cacheable(value = "community:list", key = "'category:' + #categoryId + ':page:' + #page")
     public CommunityWithPagingDTO getCommunitiesByCategory(Long categoryId, int page) throws IOException {
         int total = communityDAO.getCountByCategory(categoryId);
         Criteria criteria = new Criteria(page, total);
@@ -150,6 +168,7 @@ public class CommunityService {
     // 커뮤니티 검색
     // ──────────────────────────────────────
 
+    @Cacheable(value = "community:list", key = "'search:' + #keyword + ':page:' + #page")
     public CommunityWithPagingDTO searchCommunities(String keyword, int page) throws IOException {
         int total = communityDAO.getCountByKeyword(keyword);
         Criteria criteria = new Criteria(page, total);
@@ -170,6 +189,11 @@ public class CommunityService {
     // 멤버십
     // ──────────────────────────────────────
 
+    @Caching(evict = {
+            @CacheEvict(value = "community", allEntries = true),
+            @CacheEvict(value = "community:member:list", allEntries = true),
+            @CacheEvict(value = "community:list", allEntries = true)
+    })
     public void joinCommunity(Long communityId, Long memberId) {
         communityMemberDAO.findByIds(communityId, memberId).ifPresent(m -> {
             throw new IllegalStateException("이미 가입한 커뮤니티입니다.");
@@ -182,6 +206,11 @@ public class CommunityService {
         communityMemberDAO.save(dto);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "community", allEntries = true),
+            @CacheEvict(value = "community:member:list", allEntries = true),
+            @CacheEvict(value = "community:list", allEntries = true)
+    })
     public void leaveCommunity(Long communityId, Long memberId) {
         communityMemberDAO.findByIds(communityId, memberId)
                 .orElseThrow(() -> new IllegalStateException("가입하지 않은 커뮤니티입니다."));
@@ -196,6 +225,7 @@ public class CommunityService {
         communityMemberDAO.delete(communityId, memberId);
     }
 
+    @Cacheable(value = "community:member:list", key = "'community:' + #communityId + ':page:' + #page")
     public CommunityMemberWithPagingDTO getCommunityMembers(Long communityId, int page) throws IOException {
         int total = communityMemberDAO.getCountByCommunityId(communityId);
         Criteria criteria = new Criteria(page, total);
@@ -220,6 +250,7 @@ public class CommunityService {
         return result;
     }
 
+    @CacheEvict(value = {"community", "community:member:list"}, allEntries = true)
     public void updateMemberRole(Long communityId, Long targetMemberId, String role, Long requesterId) {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -231,6 +262,7 @@ public class CommunityService {
         communityMemberDAO.updateRole(communityId, targetMemberId, role);
     }
 
+    @CacheEvict(value = {"community", "community:member:list"}, allEntries = true)
     public void kickMember(Long communityId, Long targetMemberId, Long requesterId) {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -250,7 +282,7 @@ public class CommunityService {
     // 커뮤니티 게시글
     // ──────────────────────────────────────
 
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void writeCommunityPost(PostDTO postDTO, List<MultipartFile> files, Long communityId) throws IOException {
         communityMemberDAO.findByIds(communityId, postDTO.getMemberId())
                 .orElseThrow(() -> new IllegalStateException("커뮤니티 멤버만 게시글을 작성할 수 있습니다."));
@@ -294,6 +326,7 @@ public class CommunityService {
     }
 
     // 홈 피드: 내 커뮤니티 게시글
+    @Cacheable(value = "community:post:list", key = "'myFeed:page:' + #page + ':member:' + #memberId")
     public PostWithPagingDTO getMyCommunitiesFeed(int page, Long memberId) {
         int total = communityDAO.getMyCommunitiesPostsCount(memberId);
         Criteria criteria = new Criteria(page, total);
@@ -311,6 +344,7 @@ public class CommunityService {
     }
 
     // 탐색 피드: 미가입 커뮤니티 생성자 게시글 (카테고리 필터 지원)
+    @Cacheable(value = "community:post:list", key = "'explore:page:' + #page + ':member:' + #memberId + ':cat:' + #categoryId")
     public PostWithPagingDTO getExploreFeed(int page, Long memberId, Long categoryId) {
         int total = communityDAO.getExplorePostsCount(memberId, categoryId);
         Criteria criteria = new Criteria(page, total);
@@ -327,6 +361,7 @@ public class CommunityService {
         return result;
     }
 
+    @Cacheable(value = "community:post:list", key = "'community:' + #communityId + ':page:' + #page + ':member:' + #memberId")
     public PostWithPagingDTO getCommunityPosts(Long communityId, int page, Long memberId) {
         int total = communityDAO.getPostsCountByCommunityId(communityId);
         Criteria criteria = new Criteria(page, total);
@@ -347,6 +382,7 @@ public class CommunityService {
     // 검색
     // ──────────────────────────────────────
 
+    @Cacheable(value = "community:post:list", key = "'search:' + #communityId + ':kw:' + #keyword + ':type:' + #type + ':page:' + #page + ':member:' + #memberId")
     public PostWithPagingDTO searchCommunityPosts(Long communityId, String keyword, String type, int page, Long memberId) {
         int total = communityDAO.getPostsCountBySearch(communityId, keyword);
         Criteria criteria = new Criteria(page, total);
@@ -367,6 +403,7 @@ public class CommunityService {
     // 미디어 탭
     // ──────────────────────────────────────
 
+    @Cacheable(value = "community:post:list", key = "'media:' + #communityId + ':page:' + #page")
     public CommunityMediaWithPagingDTO getCommunityMedia(Long communityId, int page) throws IOException {
         int total = communityDAO.getMediaCountByCommunityId(communityId);
         Criteria criteria = new Criteria(page, total);

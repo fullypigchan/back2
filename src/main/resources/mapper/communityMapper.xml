@@ -4,13 +4,11 @@
 
 <mapper namespace="com.app.globalgates.mapper.CommunityMapper">
 
-    <!-- 커뮤니티 생성 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into tbl_community (creator_id, community_name, description, category_id)
         values (#{creatorId}, #{communityName}, #{description}, #{categoryId})
     </insert>
 
-    <!-- 커뮤니티 수정 -->
     <update id="update">
         update tbl_community
         set community_name = #{communityName},
@@ -20,7 +18,6 @@
         where id = #{id}
     </update>
 
-    <!-- 커뮤니티 상태 변경 -->
     <update id="updateStatus">
         update tbl_community
         set community_status = #{status}::community_status,
@@ -28,7 +25,6 @@
         where id = #{id}
     </update>
 
-    <!-- 커뮤니티 단건 조회 -->
     <select id="selectById" resultType="communityDTO">
         select v.*,
                case when exists (
@@ -43,14 +39,12 @@
         where v.id = #{id}
     </select>
 
-    <!-- 커뮤니티 전체 목록 (인기순) -->
     <select id="selectAll" resultType="communityDTO">
         select * from view_community_feed
         order by member_count desc, created_datetime desc
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 내가 가입한 커뮤니티 목록 -->
     <select id="selectByMemberId" resultType="communityDTO">
         select v.* from view_community_feed v
         join tbl_community_member cm on cm.community_id = v.id
@@ -59,7 +53,6 @@
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 카테고리별 커뮤니티 목록 -->
     <select id="selectByCategory" resultType="communityDTO">
         select * from view_community_feed
         where category_id = #{categoryId}
@@ -67,12 +60,10 @@
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 활성 커뮤니티 수 -->
     <select id="selectCount" resultType="int">
         select count(*) from tbl_community where community_status = 'active'
     </select>
 
-    <!-- 내가 가입한 커뮤니티 수 -->
     <select id="selectCountByMemberId" resultType="int">
         select count(*) from tbl_community_member where member_id = #{memberId}
     </select>
@@ -81,7 +72,6 @@
         select count(*) from view_community_feed where category_id = #{categoryId}
     </select>
 
-    <!-- 공통 게시글 컬럼 (서브쿼리 포함) -->
     <sql id="postColumns">
         p.id, p.member_id, p.title as post_title, p.content as post_content,
         p.created_datetime, p.updated_datetime, p.community_id,
@@ -97,7 +87,6 @@
         case when bk2.post_id is not null then true else false end as is_bookmarked
     </sql>
 
-    <!-- 공통 카운트 조인 (서브쿼리 대신 left join으로 성능 개선) -->
     <sql id="postCountJoins">
         left join (select post_id, count(*) as cnt from tbl_post_like group by post_id) lc on lc.post_id = p.id
         left join (select reply_post_id, count(*) as cnt from tbl_post where post_status = 'active' and reply_post_id is not null group by reply_post_id) rc on rc.reply_post_id = p.id
@@ -106,7 +95,6 @@
         left join tbl_bookmark bk2 on bk2.post_id = p.id and bk2.member_id = #{memberId}
     </sql>
 
-    <!-- 커뮤니티 검색 (이름/설명) -->
     <select id="selectByKeyword" resultType="communityDTO">
         select * from view_community_feed
         where (community_name ilike concat('%', #{keyword}, '%')
@@ -121,7 +109,6 @@
                or description ilike concat('%', #{keyword}, '%'))
     </select>
 
-    <!-- 커뮤니티 게시글 목록 -->
     <select id="selectPostsByCommunityId" resultType="postDTO">
         select <include refid="postColumns"/>
         from tbl_post p
@@ -134,13 +121,11 @@
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 커뮤니티 게시글 수 -->
     <select id="selectPostsCountByCommunityId" resultType="int">
         select count(*) from tbl_post
         where community_id = #{communityId} and post_status = 'active' and reply_post_id is null
     </select>
 
-    <!-- 커뮤니티 게시글 검색 -->
     <select id="selectPostsBySearch" resultType="postDTO">
         select <include refid="postColumns"/>
         from tbl_post p
@@ -161,7 +146,6 @@
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 커뮤니티 게시글 검색 수 -->
     <select id="selectPostsCountBySearch" resultType="int">
         select count(*) from tbl_post p
         join tbl_member m on p.member_id = m.id
@@ -175,7 +159,6 @@
           </if>
     </select>
 
-    <!-- 커뮤니티 미디어 목록 -->
     <select id="selectMediaByCommunityId" resultType="postFileDTO">
         select pf.id, pf.post_id, pf.file_id,
                f.original_name, f.file_name, f.file_path, f.file_size,
@@ -189,7 +172,6 @@
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 커뮤니티 미디어 수 -->
     <select id="selectMediaCountByCommunityId" resultType="int">
         select count(*) from tbl_post p
         join tbl_post_file pf on pf.post_id = p.id
@@ -197,7 +179,6 @@
           and p.post_status = 'active'
     </select>
 
-    <!-- 홈 피드: 내가 가입한 커뮤니티의 모든 게시글 -->
     <select id="selectMyCommunitiesPosts" resultType="postDTO">
         select <include refid="postColumns"/>,
                c.community_name,
@@ -223,7 +204,6 @@
           and c.community_status = 'active'
     </select>
 
-    <!-- 탐색 피드: 내가 가입하지 않은 커뮤니티의 생성자 게시글만 (카테고리 필터 지원) -->
     <select id="selectExplorePosts" resultType="postDTO">
         select <include refid="postColumns"/>,
                c.community_name,

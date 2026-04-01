@@ -4,26 +4,22 @@
 
 <mapper namespace="com.app.globalgates.mapper.CommunityMemberMapper">
 
-    <!-- 멤버 가입 -->
     <insert id="insert">
         insert into tbl_community_member (community_id, member_id, member_role)
         values (#{communityId}, #{memberId}, #{memberRole}::community_member_role)
     </insert>
 
-    <!-- 멤버 탈퇴/추방 -->
     <delete id="delete">
         delete from tbl_community_member
         where community_id = #{communityId} and member_id = #{memberId}
     </delete>
 
-    <!-- 멤버 역할 변경 -->
     <update id="updateRole">
         update tbl_community_member
         set member_role = #{role}::community_member_role
         where community_id = #{communityId} and member_id = #{memberId}
     </update>
 
-    <!-- 특정 멤버 조회 -->
     <select id="selectByIds" resultType="communityMemberDTO">
         select cm.community_id, cm.member_id, cm.member_role, cm.joined_at,
                m.member_nickname, m.member_handle,
@@ -36,7 +32,6 @@
         where cm.community_id = #{communityId} and cm.member_id = #{memberId}
     </select>
 
-    <!-- 커뮤니티 멤버 목록 (역할 순 정렬) -->
     <select id="selectByCommunityId" resultType="communityMemberDTO">
         select cm.community_id, cm.member_id, cm.member_role, cm.joined_at,
                m.member_nickname, m.member_handle,
@@ -51,7 +46,6 @@
         limit #{criteria.count} offset #{criteria.offset}
     </select>
 
-    <!-- 커뮤니티 멤버 수 -->
     <select id="selectCountByCommunityId" resultType="int">
         select count(*) from tbl_community_member
         where community_id = #{communityId}

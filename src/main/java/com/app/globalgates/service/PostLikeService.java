@@ -18,13 +18,13 @@ public class PostLikeService {
     private final PostLikeDAO postLikeDAO;
 
 //    좋아요 추가
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void addLike(PostLikeDTO postLikeDTO) {
         postLikeDAO.save(postLikeDTO);
     }
 
 //    좋아요 삭제
-    @CacheEvict(value = {"post:list", "post", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void deleteLike(Long memberId, Long postId) {
         postLikeDAO.deleteByMemberIdAndPostId(memberId, postId);
     }
