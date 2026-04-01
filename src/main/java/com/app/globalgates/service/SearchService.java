@@ -1,6 +1,7 @@
 package com.app.globalgates.service;
 
 import com.app.globalgates.aop.annotation.LogStatusWithReturn;
+import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.dto.RankedSearchHistoryDTO;
 import com.app.globalgates.dto.SearchHistoryDTO;

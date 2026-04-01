@@ -689,9 +689,11 @@ window.onload = () => {
 
             if (btn.classList.contains("default")) {
                 try {
-                    await exploreService.checkFollow(memberId);
-                    setButtonToConnected(btn);
-                    showConnectToast("팔로우했습니다.");
+                    const result = await exploreService.checkFollow(memberId);
+                    if (result.includes("팔로우")) {
+                        setButtonToConnected(btn);
+                        showConnectToast("팔로우했습니다.");
+                    }
                 } catch (err) {
                     console.error("팔로우 실패:", err);
                 }
@@ -721,9 +723,13 @@ window.onload = () => {
                 if (pendingBtn) {
                     const memberId = pendingBtn.dataset.memberId;
                     try {
-                        if (memberId) await exploreService.checkFollow(memberId);
-                        resetButtonToDefault(pendingBtn);
-                        showConnectToast("언팔로우했습니다.");
+                        if (memberId) {
+                            const result = await exploreService.checkFollow(memberId);
+                            if (result.includes("언팔로우")) {
+                                resetButtonToDefault(pendingBtn);
+                                showConnectToast("언팔로우했습니다.");
+                            }
+                        }
                     } catch (err) {
                         console.error("언팔로우 실패:", err);
                     }

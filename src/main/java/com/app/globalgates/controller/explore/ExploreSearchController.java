@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -31,7 +28,7 @@ public class ExploreSearchController {
     private final S3Service s3service;
 
     // search 값의 type이 'popular'이면 인기순, 그 외는 최신순으로 조회
-    @GetMapping("search/{page}")
+    @PostMapping("search/{page}")
     public ResponseEntity<?> getSearchPosts(@PathVariable int page, PostSearch search,
                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
         search.setMemberId(userDetails.getId());
@@ -45,9 +42,10 @@ public class ExploreSearchController {
     }
 
     // 유저 검색
-    @GetMapping("search/member/{page}")
-    public ResponseEntity<?> getSearchMembers(@PathVariable int page, Long memberId, String keyword) {
-        MemberWithPagingDTO memberWithPagingDTO = memberService.getSearchMember(page, memberId, keyword);
+    @PostMapping("search/member/{page}")
+    public ResponseEntity<?> getSearchMembers(@PathVariable int page, String keyword,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MemberWithPagingDTO memberWithPagingDTO = memberService.getSearchMember(page, userDetails.getId(), keyword);
         return ResponseEntity.ok(memberWithPagingDTO);
     }
 

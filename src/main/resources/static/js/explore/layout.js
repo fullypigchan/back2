@@ -323,7 +323,7 @@ const exploreLayout = (() => {
 
             // 팔로우 여부
             const isFollowed = member.followed ?? false;
-            const btnClass   = isFollowed ? "connect-btn connected" : "connect-btn default";
+            const btnClass   = isFollowed ? "connected" : "default";
             const btnText    = isFollowed ? "Connected" : "Connect";
 
             const card = document.createElement("div");
@@ -341,7 +341,7 @@ const exploreLayout = (() => {
                 </div>
                 ${bio ? `<div class="user-bio">${bio}</div>` : ""}
             </div>
-        `;
+            `;
             friendsList.appendChild(card);
         });
     };

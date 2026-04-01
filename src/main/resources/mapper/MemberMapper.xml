@@ -67,6 +67,14 @@
           and member_status = 'active'
     </select>
 
+    <select id="selectTotalByKeyword">
+        select count(*)
+        from tbl_member
+        where member_status = 'active'
+          and (member_nickname like concat('%', #{keyword}, '%')
+            or member_handle like concat('%', #{keyword}, '%'))
+    </select>
+
     <select id="selectMembersByKeyword">
         select id, member_name, member_nickname, member_handle,
                member_bio, member_region, member_status, member_role,
@@ -94,7 +102,7 @@
                 select 1 from tbl_follow f
                 where f.follower_id = #{memberId}
                   and f.following_id = m.id
-            ) then true else false end as followed
+            ) then 1 else 0 end as followed
         from tbl_member m
         where m.member_status = 'active'
           and m.id != #{memberId}
@@ -103,6 +111,7 @@
                 or m.member_handle like concat('%', #{keyword}, '%')
             )
         order by m.member_nickname
+        limit #{criteria.count} offset #{criteria.offset}
     </select>
 
     <select id="selectMemberByMemberHandle">

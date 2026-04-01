@@ -94,6 +94,15 @@ public class MemberMapperTests {
     }
 
     @Test
+    public void testSelectMembersByKeywordWithFollow() {
+        String keyword = "아";
+        Long memberId = 40L;
+        Criteria criteria = new Criteria(1, memberMapper.selectTotalByKeyword(keyword));
+        List<MemberDTO> foundMembers = memberMapper.selectMembersByKeywordWithFollow(memberId ,keyword, criteria);
+        log.info("조회한 회원들: {}", foundMembers);
+    }
+
+    @Test
     public void testSelectInquiryMembers() {
         Long memberId = 9L;
         Criteria criteria = new Criteria(1, memberMapper.selectInquiryTotal("수출", memberId));

@@ -197,13 +197,13 @@ public class MemberService {
     }
 
     // 검색 값에 따른 회원들 조회
-    @Cacheable(value="member", key="'page:' + #page" + " + ':keyword:' + #keyword")
+    @Cacheable(value="member", key="'page:' + #page + ':keyword:' + #keyword + ':memberId:' + #memberId")
     @LogStatusWithReturn
     public MemberWithPagingDTO getSearchMember(int page, Long memberId, String keyword) {
         MemberWithPagingDTO memberWithPagingDTO = new MemberWithPagingDTO();
-        Criteria criteria = new Criteria(page, memberDAO.findMembersByKeywordWithFollow(memberId, keyword).size());
+        Criteria criteria = new Criteria(page, memberDAO.findTotalByKeyword(keyword));
 
-        List<MemberDTO> members = memberDAO.findMembersByKeywordWithFollow(memberId, keyword).stream()
+        List<MemberDTO> members = memberDAO.findMembersByKeywordWithFollow(memberId, keyword, criteria).stream()
                 .map(memberDTO -> {
                     MemberProfileFileDTO profile = memberProfileFileDAO.findByMemberId(memberDTO.getId());
                     if(profile != null) {

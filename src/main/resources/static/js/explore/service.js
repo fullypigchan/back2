@@ -41,12 +41,15 @@ const exploreService = (() => {
     }
 
     // 게시물 검색 조회 Search : memberId, keyword, type('popular', 'latest')
-    const searchPosts = async (page, {memberId, keyword, type}, callback) => {
+    const searchPosts = async (page, {keyword, type}, callback) => {
         const params = new URLSearchParams()
         if(keyword) params.append('keyword', keyword);
         if(type) params.append('type', type);
 
-        const response = await fetch(`/api/explore/search/${page}?${params.toString()}`);
+        const response = await fetch(`/api/explore/search/${page}?${params.toString()}`, {
+            method: "POST",
+            credentials: "include",
+        });
 
         if(!response.ok) {
             const errorText = await response.text();
@@ -61,7 +64,10 @@ const exploreService = (() => {
 
     // 검색 값에 따른 회원 조회
     const searchUsers = async (page, keyword, callback) => {
-        const response = await fetch(`/api/explore/search/member/${page}?keyword=${keyword}`);
+        const response = await fetch(`/api/explore/search/member/${page}?keyword=${keyword}`, {
+            method: "POST",
+            credentials: 'include',
+        });
 
         if(!response.ok) {
             const errorText = await response.text();
@@ -142,6 +148,8 @@ const exploreService = (() => {
             const errorText = await response.text();
             throw new Error(errorText || "Fetch error");
         }
+
+        return await response.text();
     }
 
     // 좋아요 체크
