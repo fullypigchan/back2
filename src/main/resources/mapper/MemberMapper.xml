@@ -138,6 +138,27 @@
         where id = #{id}
     </update>
 
+    <update id="updatePhone">
+        update tbl_member
+        set member_phone = #{memberPhone},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateEmail">
+        update tbl_member
+        set member_email = #{memberEmail},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateLanguage">
+        update tbl_member
+        set member_language = #{memberLanguage},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
     <!-- 채팅 유저 검색 (차단 사용자 제외) -->
     <select id="searchByKeyword" resultType="com.app.globalgates.dto.MemberDTO">
         select

@@ -106,4 +106,59 @@ class MemberServicePasswordTest {
 
         verify(memberDAO).updateHandle(7L, "@new_handle");
     }
+
+    @Test
+    void updatePhone_normalizesDigitsAndPersistsPhoneNumber() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setMemberPhone("01011112222");
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(memberDAO.findMemberByMemberPhone("01033334444")).thenReturn(Optional.empty());
+
+        memberService.updatePhone("tester@example.com", "010-3333-4444");
+
+        verify(memberDAO).updatePhone(7L, "01033334444");
+    }
+
+    @Test
+    void updateEmail_trimsAndLowercasesEmailBeforePersisting() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setMemberEmail("old@example.com");
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(memberDAO.findMemberByMemberEmail("new@example.com")).thenReturn(Optional.empty());
+
+        memberService.updateEmail("tester@example.com", "  New@Example.com ");
+
+        verify(memberDAO).updateEmail(7L, "new@example.com");
+    }
+
+    @Test
+    void updateLanguage_trimsLabelAndPersistsIt() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setMemberLanguage("한국어");
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+
+        memberService.updateLanguage("tester@example.com", "  영어 ");
+
+        verify(memberDAO).updateLanguage(7L, "영어");
+    }
+
+    @Test
+    void deactivateMember_softDeletesMemberWhenPasswordMatches() {
+        MemberDTO member = new MemberDTO();
+        member.setId(7L);
+        member.setMemberPassword("$2a$10$encodedPassword");
+
+        when(memberDAO.findMemberByLoginId("tester@example.com")).thenReturn(Optional.of(member));
+        when(passwordEncoder.matches("plain-password", "$2a$10$encodedPassword")).thenReturn(true);
+
+        memberService.deactivateMember("tester@example.com", "plain-password");
+
+        verify(memberDAO).softDelete(7L);
+    }
 }

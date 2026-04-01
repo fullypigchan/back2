@@ -66,4 +66,76 @@ public class SettingAPIController {
         }
     }
 
+    @PostMapping("phone")
+    public ResponseEntity<?> updatePhone(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            memberService.updatePhone(
+                    userDetails.getLoginId(),
+                    request.get("memberPhone")
+            );
+
+            return ResponseEntity.ok(Map.of("message", "휴대폰 번호가 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("email")
+    public ResponseEntity<?> updateEmail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            memberService.updateEmail(
+                    userDetails.getLoginId(),
+                    request.get("memberEmail")
+            );
+
+            return ResponseEntity.ok(Map.of("message", "이메일이 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // setting 화면의 언어 변경은 인증된 현재 사용자 기준으로만 처리한다.
+    // 프런트가 선택한 단일 라벨 문자열을 그대로 받아 member_language에 저장한다.
+    @PostMapping("language")
+    public ResponseEntity<?> updateLanguage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            memberService.updateLanguage(
+                    userDetails.getLoginId(),
+                    request.get("memberLanguage")
+            );
+
+            return ResponseEntity.ok(Map.of("message", "언어가 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // 계정 비활성화는 현재 로그인 사용자 기준으로만 처리한다.
+    // 비밀번호를 함께 받아 서버에서 최종 확인한 뒤 soft delete를 수행한다.
+    @PostMapping("deactivate")
+    public ResponseEntity<?> deactivate(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            memberService.deactivateMember(
+                    userDetails.getLoginId(),
+                    request.get("memberPassword")
+            );
+
+            return ResponseEntity.ok(Map.of("message", "계정이 비활성화되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
 }

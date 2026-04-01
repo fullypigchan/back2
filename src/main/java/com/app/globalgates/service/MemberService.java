@@ -10,6 +10,7 @@ import com.app.globalgates.dto.*;
 import com.app.globalgates.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -205,6 +206,7 @@ public class MemberService {
     }
 
     @Transactional
+    @CacheEvict(value="member", key="#loginId")
     public void updateHandle(String loginId, String memberHandle) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -232,6 +234,105 @@ public class MemberService {
         }
 
         memberDAO.updateHandle(member.getId(), savedHandle);
+    }
+
+    @Transactional
+    @CacheEvict(value="member", key="#loginId")
+    public void updatePhone(String loginId, String memberPhone) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        // 전화번호 입력은 화면에서 하이픈이 섞일 수 있으므로 저장 전에 숫자만 남겨 정규화한다.
+        String normalizedPhone = memberPhone == null ? "" : memberPhone.replaceAll("\\D", "");
+
+        if (normalizedPhone.isEmpty()) {
+            throw new IllegalArgumentException("휴대폰 번호를 입력하세요.");
+        }
+
+        if (!normalizedPhone.matches("^01[0-9]{8,9}$")) {
+            throw new IllegalArgumentException("올바른 휴대폰 번호 형식을 확인하세요.");
+        }
+
+        if (normalizedPhone.equals(member.getMemberPhone())) {
+            return;
+        }
+
+        if (memberDAO.findMemberByMemberPhone(normalizedPhone).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 휴대폰 번호입니다.");
+        }
+
+        memberDAO.updatePhone(member.getId(), normalizedPhone);
+    }
+
+    @Transactional
+    @CacheEvict(value="member", key="#loginId")
+    public void updateEmail(String loginId, String memberEmail) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        // 이메일 입력은 앞뒤 공백과 대소문자 차이로 같은 값이 중복 저장되지 않게 정규화한다.
+        String normalizedEmail = memberEmail == null ? "" : memberEmail.trim().toLowerCase();
+
+        if (normalizedEmail.isEmpty()) {
+            throw new IllegalArgumentException("이메일을 입력하세요.");
+        }
+
+        if (!normalizedEmail.matches("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$")) {
+            throw new IllegalArgumentException("올바른 이메일 형식을 확인하세요.");
+        }
+
+        if (normalizedEmail.equals(member.getMemberEmail())) {
+            return;
+        }
+
+        if (memberDAO.findMemberByMemberEmail(normalizedEmail).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        memberDAO.updateEmail(member.getId(), normalizedEmail);
+    }
+
+    // setting 언어 모달은 하드코딩된 선택지에서 단일 라벨 문자열만 넘어오는 구조다.
+    // getMember(loginId)는 캐시를 사용하므로 저장 후에는 현재 사용자의 member 캐시를 비워
+    // 다음 setting 진입이나 새로고침 시 최신 언어가 다시 내려오게 만든다.
+    @Transactional
+    @CacheEvict(value="member", key="#loginId")
+    public void updateLanguage(String loginId, String memberLanguage) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        String normalizedLanguage = memberLanguage == null ? "" : memberLanguage.trim();
+
+        if (normalizedLanguage.isEmpty()) {
+            throw new IllegalArgumentException("언어를 선택하세요.");
+        }
+
+        if (normalizedLanguage.equals(member.getMemberLanguage())) {
+            return;
+        }
+
+        memberDAO.updateLanguage(member.getId(), normalizedLanguage);
+    }
+
+    // 계정 비활성화는 현재 로그인 사용자의 비밀번호를 다시 확인한 뒤 soft delete로 처리한다.
+    // getMember/login 계열이 member 캐시를 사용할 수 있으므로 비활성화 후에는 캐시도 함께 비운다.
+    @Transactional
+    @CacheEvict(value="member", key="#loginId")
+    public void deactivateMember(String loginId, String memberPassword) {
+        MemberDTO member = memberDAO.findMemberByLoginId(loginId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        String normalizedPassword = memberPassword == null ? "" : memberPassword.trim();
+
+        if (normalizedPassword.isEmpty()) {
+            throw new IllegalArgumentException("비밀번호를 입력하세요.");
+        }
+
+        if (!passwordEncoder.matches(normalizedPassword, member.getMemberPassword())) {
+            throw new IllegalArgumentException("비밀번호를 다시 확인하세요.");
+        }
+
+        memberDAO.softDelete(member.getId());
     }
 
     //    로그인

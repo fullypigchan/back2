@@ -32,32 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const languageSelectionModal = document.getElementById(
         "languageSelectionModal",
     );
-    const languageSelectionModalTitle = document.getElementById(
-        "languageSelectionModalTitle",
-    );
-    const languageSelectionBackButton = document.getElementById(
-        "languageSelectionBackButton",
-    );
-    const languageSelectionSummary = document.getElementById(
-        "languageSelectionSummary",
-    );
-    const languageSelectionSearch = document.getElementById(
-        "languageSelectionSearch",
-    );
-    const languageSelectionSearchInput = document.getElementById(
-        "languageSelectionSearchInput",
-    );
     const languageSelectionList = document.getElementById(
         "languageSelectionList",
     );
-    const languageSelectionMoreButton = document.getElementById(
-        "languageSelectionMoreButton",
-    );
     const languageSelectionNextButton = document.getElementById(
         "languageSelectionNextButton",
-    );
-    const languageSelectionSkipButton = document.getElementById(
-        "languageSelectionSkipButton",
     );
     const phoneAddModal = document.getElementById("phoneAddModal");
     const phoneVerifyModal = document.getElementById("phoneVerifyModal");
@@ -70,9 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const phoneCodeStep = document.getElementById("phoneCodeStep");
     const phoneCodeNumber = document.getElementById("phoneCodeNumber");
     const phoneCodeInput = document.getElementById("phoneCodeInput");
-    const phoneCodeHelp = document.getElementById("phoneCodeHelp");
-    const phoneCodeHelpButton = document.getElementById("phoneCodeHelpButton");
-    const phoneCodeHelpMenu = document.getElementById("phoneCodeHelpMenu");
     const phoneCodeResendButton = document.getElementById(
         "phoneCodeResendButton",
     );
@@ -97,9 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailCodeStep = document.getElementById("emailCodeStep");
     const emailCodeAddress = document.getElementById("emailCodeAddress");
     const emailCodeInput = document.getElementById("emailCodeInput");
-    const emailCodeHelp = document.getElementById("emailCodeHelp");
-    const emailCodeHelpButton = document.getElementById("emailCodeHelpButton");
-    const emailCodeHelpMenu = document.getElementById("emailCodeHelpMenu");
     const emailCodeResendButton = document.getElementById(
         "emailCodeResendButton",
     );
@@ -137,15 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
         !appearanceModal ||
         !shortcutModal ||
         !languageSelectionModal ||
-        !languageSelectionModalTitle ||
-        !languageSelectionBackButton ||
-        !languageSelectionSummary ||
-        !languageSelectionSearch ||
-        !languageSelectionSearchInput ||
         !languageSelectionList ||
-        !languageSelectionMoreButton ||
         !languageSelectionNextButton ||
-        !languageSelectionSkipButton ||
         !phoneAddModal ||
         !phoneVerifyModal ||
         !phoneAddInput ||
@@ -155,9 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         !phoneCodeStep ||
         !phoneCodeNumber ||
         !phoneCodeInput ||
-        !phoneCodeHelp ||
-        !phoneCodeHelpButton ||
-        !phoneCodeHelpMenu ||
         !phoneCodeResendButton ||
         !phoneCodeActionButton ||
         !phoneVerifyNumber ||
@@ -172,9 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
         !emailCodeStep ||
         !emailCodeAddress ||
         !emailCodeInput ||
-        !emailCodeHelp ||
-        !emailCodeHelpButton ||
-        !emailCodeHelpMenu ||
         !emailCodeResendButton ||
         !emailCodeActionButton ||
         !emailVerifyAddress ||
@@ -233,59 +193,9 @@ document.addEventListener("DOMContentLoaded", () => {
         {id: "dim", label: "어두운", color: "#15202b"},
         {id: "lights-out", label: "완전 어두운", color: "#000000"},
     ];
-    const languageSelectionOptions = [
-        {id: "ko", label: "한국어 - 한국어"},
-        {id: "en", label: "영어 - English"},
-        {id: "en-gb", label: "영어(영국) - British English"},
-        {id: "ja", label: "일본어 - 日本語"},
-        {id: "es", label: "스페인어 - Español"},
-        {id: "fr", label: "프랑스어 - Français"},
-    ];
     const countryOptionMarkup = `
         <option value="gh">가나</option><option value="ga">가봉</option><option value="gy">가이아나</option><option value="gm">감비아</option><option value="gg">건지</option><option value="gp">과들루프</option><option value="gt">과테말라</option><option value="gu">괌</option><option value="gd">그레나다</option><option value="gr">그리스</option><option value="gl">그린란드</option><option value="gn">기니</option><option value="gw">기니비사우</option><option value="na">나미비아</option><option value="nr">나우루</option><option value="ng">나이지리아</option><option value="za">남아프리카</option><option value="nl">네덜란드</option><option value="bq">네덜란드령 카리브</option><option value="np">네팔</option><option value="no">노르웨이</option><option value="nf">노퍽섬</option><option value="nz">뉴질랜드</option><option value="nc">뉴칼레도니아</option><option value="nu">니우에</option><option value="ne">니제르</option><option value="ni">니카라과</option><option value="tw">대만</option><option value="kr">대한민국</option><option value="dk">덴마크</option><option value="dm">도미니카</option><option value="do">도미니카 공화국</option><option value="de">독일</option><option value="tl">동티모르</option><option value="la">라오스</option><option value="lr">라이베리아</option><option value="lv">라트비아</option><option value="ru">러시아</option><option value="lb">레바논</option><option value="ls">레소토</option><option value="ro">루마니아</option><option value="lu">룩셈부르크</option><option value="rw">르완다</option><option value="ly">리비아</option><option value="re">리유니온</option><option value="lt">리투아니아</option><option value="li">리히텐슈타인</option><option value="mg">마다가스카르</option><option value="mq">마르티니크</option><option value="mh">마셜 제도</option><option value="yt">마요트</option><option value="mo">마카오(중국 특별행정구)</option><option value="mk">마케도니아</option><option value="mw">말라위</option><option value="my">말레이시아</option><option value="ml">말리</option><option value="im">맨 섬</option><option value="mx">멕시코</option><option value="mc">모나코</option><option value="ma">모로코</option><option value="mu">모리셔스</option><option value="mr">모리타니</option><option value="mz">모잠비크</option><option value="me">몬테네그로</option><option value="ms">몬트세라트</option><option value="md">몰도바</option><option value="mv">몰디브</option><option value="mt">몰타</option><option value="mn">몽골</option><option value="us">미국</option><option value="vi">미국령 버진아일랜드</option><option value="fm">미크로네시아</option><option value="vu">바누아투</option><option value="bh">바레인</option><option value="bb">바베이도스</option><option value="va">바티칸 시국</option><option value="bs">바하마</option><option value="bd">방글라데시</option><option value="bm">버뮤다</option><option value="bj">베냉</option><option value="ve">베네수엘라</option><option value="vn">베트남</option><option value="be">벨기에</option><option value="by">벨라루스</option><option value="bz">벨리즈</option><option value="ba">보스니아 헤르체고비나</option><option value="bw">보츠와나</option><option value="bo">볼리비아</option><option value="bi">부룬디</option><option value="bf">부르키나파소</option><option value="bv">부베섬</option><option value="bt">부탄</option><option value="mp">북마리아나제도</option><option value="bg">불가리아</option><option value="br">브라질</option><option value="bn">브루나이</option><option value="ws">사모아</option><option value="sa">사우디아라비아</option><option value="gs">사우스조지아 사우스샌드위치 제도</option><option value="sm">산마리노</option><option value="st">상투메 프린시페</option><option value="mf">생마르탱</option><option value="bl">생바르텔레미</option><option value="pm">생피에르 미클롱</option><option value="sn">세네갈</option><option value="rs">세르비아</option><option value="sc">세이셸</option><option value="lc">세인트루시아</option><option value="vc">세인트빈센트그레나딘</option><option value="kn">세인트키츠 네비스</option><option value="sh">세인트헬레나</option><option value="so">소말리아</option><option value="sb">솔로몬 제도</option><option value="sr">수리남</option><option value="lk">스리랑카</option><option value="sz">스와질란드</option><option value="se">스웨덴</option><option value="ch">스위스</option><option value="es">스페인</option><option value="sk">슬로바키아</option><option value="si">슬로베니아</option><option value="sl">시에라리온</option><option value="sx">신트마르턴</option><option value="sg">싱가포르</option><option value="ae">아랍에미리트</option><option value="aw">아루바</option><option value="am">아르메니아</option><option value="ar">아르헨티나</option><option value="as">아메리칸 사모아</option><option value="is">아이슬란드</option><option value="ht">아이티</option><option value="ie">아일랜드</option><option value="az">아제르바이잔</option><option value="af">아프가니스탄</option><option value="ad">안도라</option><option value="al">알바니아</option><option value="dz">알제리</option><option value="ao">앙골라</option><option value="ag">앤티가 바부다</option><option value="ai">앵귈라</option><option value="er">에리트리아</option><option value="ee">에스토니아</option><option value="ec">에콰도르</option><option value="et">에티오피아</option><option value="sv">엘살바도르</option><option value="gb">영국</option><option value="io">영국령 인도양 식민지</option><option value="ye">예멘</option><option value="om">오만</option><option value="au">오스트레일리아</option><option value="at">오스트리아</option><option value="hn">온두라스</option><option value="ax">올란드 제도</option><option value="wf">왈리스-푸투나 제도</option><option value="jo">요르단</option><option value="ug">우간다</option><option value="uy">우루과이</option><option value="uz">우즈베키스탄</option><option value="ua">우크라이나</option><option value="iq">이라크</option><option value="ir">이란</option><option value="il">이스라엘</option><option value="eg">이집트</option><option value="it">이탈리아</option><option value="in">인도</option><option value="id">인도네시아</option><option value="jp">일본</option><option value="jm">자메이카</option><option value="zm">잠비아</option><option value="je">저지</option><option value="gq">적도 기니</option><option value="ge">조지아</option><option value="cf">중앙 아프리카 공화국</option><option value="dj">지부티</option><option value="gi">지브롤터</option><option value="zw">짐바브웨</option><option value="td">차드</option><option value="cz">체코</option><option value="cl">칠레</option><option value="cm">카메룬</option><option value="cv">카보베르데</option><option value="kz">카자흐스탄</option><option value="qa">카타르</option><option value="kh">캄보디아</option><option value="ca">캐나다</option><option value="ke">케냐</option><option value="ky">케이맨 제도</option><option value="km">코모로</option><option value="xk">코소보</option><option value="cr">코스타리카</option><option value="cc">코코스 제도</option><option value="ci">코트디부아르</option><option value="co">콜롬비아</option><option value="cg">콩고-브라자빌</option><option value="cd">콩고-킨샤사</option><option value="cu">쿠바</option><option value="kw">쿠웨이트</option><option value="ck">쿡 제도</option><option value="cw">퀴라소</option><option value="hr">크로아티아</option><option value="cx">크리스마스섬</option><option value="kg">키르기스스탄</option><option value="ki">키리바시</option><option value="cy">키프로스</option><option value="tj">타지키스탄</option><option value="tz">탄자니아</option><option value="th">태국</option><option value="tc">터크스 케이커스 제도</option><option value="tr">터키</option><option value="tg">토고</option><option value="tk">토켈라우</option><option value="to">통가</option><option value="tm">투르크메니스탄</option><option value="tv">투발루</option><option value="tn">튀니지</option><option value="tt">트리니다드 토바고</option><option value="pa">파나마</option><option value="py">파라과이</option><option value="pk">파키스탄</option><option value="pg">파푸아뉴기니</option><option value="pw">팔라우</option><option value="ps">팔레스타인 지구</option><option value="fo">페로 제도</option><option value="pe">페루</option><option value="pt">포르투갈</option><option value="fk">포클랜드 제도</option><option value="pl">폴란드</option><option value="pr">푸에르토리코</option><option value="fr">프랑스</option><option value="tf">프랑스 남부 지방</option><option value="gf">프랑스령 기아나</option><option value="pf">프랑스령 폴리네시아</option><option value="fj">피지</option><option value="fi">핀란드</option><option value="ph">필리핀</option><option value="pn">핏케언 섬</option><option value="hu">헝가리</option><option value="hk">홍콩(중국 특별행정구)</option>
     `;
-
-    /*
-     * Spring이 계정 기본 정보를 내려줄 1차 데이터 영역.
-     * 권장 방식:
-     * - 서버에서 ModelAttribute로 내려준 값을 data-* 또는 script JSON으로 주입
-     * - 이 배열은 그 값을 화면 공통 포맷으로 정리한 뒤 넣는 용도
-     * - id 값은 아래 syncAccountInfoListRoute / syncPhoneRoute / syncEmailRoute에서 키로 사용
-     */
-    const accountInfoItems = [
-        {
-            id: "username",
-            label: "사용자 아이디",
-            value: "tmtsugar",
-        },
-        {
-            id: "phone",
-            label: "휴대폰",
-            value: "",
-        },
-        {
-            id: "email",
-            label: "이메일",
-            value: "tjdgh1851@gmail.com",
-        },
-        {
-            id: "createdAt",
-            label: "계정 생성",
-            value: "2025. 2. 3. 오후 5:02:45",
-            description: "211.234.227.8 (South Korea)",
-            showArrow: false,
-        },
-        {
-            id: "country",
-            label: "국가",
-            value: "대한민국",
-        },
-        {
-            id: "language",
-            label: "언어",
-            value: "한국어, 영어, 언어 관련 내용 없음",
-        },
-    ];
 
     /*
      * 화면 전역 UI 상태.
@@ -408,27 +318,47 @@ document.addEventListener("DOMContentLoaded", () => {
         language: settingMember.memberLanguage || "설정되지 않음",
         createdAt: settingMember.createdDatetime || "생성일 정보 없음",
     };
-    // 휴대폰 추가/인증 모달 상태. 서버 인증 API 연결 시 request body와 거의 같은 형태로 쓰기 좋다.
-    const phoneModalState = {
-        phoneNumber: "",
-        code: "",
-        step: "add",
-        isHelpMenuOpen: false,
-    };
-    // 계정 이메일 변경 모달 상태. 알림 이메일과는 별개다.
-    const emailModalState = {
-        emailAddress: "",
-        code: "",
-        step: "add",
-        isHelpMenuOpen: false,
-    };
+
+    function resetPhoneModal() {
+        pendingPhoneNumber = "";
+        phoneCertCode = "";
+        phoneAddInput.value = "";
+        phoneCodeInput.value = "";
+        phoneAddStep.hidden = false;
+        phoneCodeStep.hidden = true;
+        phoneCodeActionButton.disabled = true;
+        phoneCodeActionButton.classList.remove("phone-modal__action--primary");
+        phoneCodeActionButton.classList.add("phone-modal__action--disabled");
+        phoneAddActionButton.textContent = "취소";
+        phoneAddActionButton.classList.remove("phone-modal__action--primary");
+    }
+
+    // 전화번호 추가는 입력값을 DOM에서 바로 읽고,
+    // 단계 사이에만 필요한 대상 번호와 인증코드만 임시로 보관한다.
+    let pendingPhoneNumber = "";
+    let phoneCertCode = "";
+    let pendingEmailAddress = "";
+    let emailCertCode = "";
+
+    function resetEmailModal() {
+        pendingEmailAddress = "";
+        emailCertCode = "";
+        emailAddInput.value = "";
+        emailCodeInput.value = "";
+        emailAddStep.hidden = false;
+        emailCodeStep.hidden = true;
+        emailCodeActionButton.disabled = true;
+        emailCodeActionButton.classList.remove("phone-modal__action--primary");
+        emailCodeActionButton.classList.remove("email-modal__action--primary");
+        emailCodeActionButton.classList.add("phone-modal__action--disabled");
+        emailCodeActionButton.classList.add("email-modal__action--disabled");
+        emailAddActionButton.textContent = "취소";
+        emailAddActionButton.classList.remove("phone-modal__action--primary");
+        emailAddActionButton.classList.remove("email-modal__action--primary");
+    }
     // 언어 선택 모달 상태. 서버 저장 전 선택값을 임시로 들고 있는다.
     const languageSelectionState = {
-        step: "choices",
-        query: "",
-        showAll: false,
-        selectedIds: new Set(["ko", "en"]),
-        appLanguageId: "ko",
+        selectedLanguageId: "ko",
     };
 
     function buildIcon(path, extraClass = "") {
@@ -474,132 +404,82 @@ document.addEventListener("DOMContentLoaded", () => {
         return suffixes.map((suffix) => `${base}${suffix}`.slice(0, 15));
     }
 
-    function renderLanguageSelectionModal() {
-        const isAppStep = languageSelectionState.step === "app";
-        const normalizedQuery = languageSelectionState.query
-            .trim()
-            .toLowerCase();
-        const filteredOptions = languageSelectionOptions.filter((option) =>
-            option.label.toLowerCase().includes(normalizedQuery),
-        );
-        const selectedOptions = languageSelectionOptions.filter((option) =>
-            languageSelectionState.selectedIds.has(option.id),
-        );
-        const visibleOptions = isAppStep
-            ? selectedOptions
-            : !normalizedQuery && !languageSelectionState.showAll
-                ? filteredOptions.slice(0, 3)
-                : filteredOptions;
-
-        languageSelectionBackButton.hidden = !isAppStep;
-        languageSelectionModalTitle.textContent = isAppStep
-            ? "앱 언어 선택"
-            : "언어 선택";
-        languageSelectionSummary.textContent = isAppStep
-            ? "앱의 기본 언어가 이 언어로 설정됩니다. Twitter에서 추천하는 내가 좋아할 만한 콘텐츠는 내가 선택한 다른 언어로도 표시됩니다."
-            : "X 환경을 맞춤 설정하는 데 사용할 언어를 선택하세요.";
-        languageSelectionSearch.hidden = isAppStep;
-        languageSelectionMoreButton.hidden =
-            isAppStep ||
-            Boolean(normalizedQuery) ||
-            filteredOptions.length <= 3 ||
-            languageSelectionState.showAll;
-        languageSelectionSkipButton.hidden = isAppStep;
-        languageSelectionNextButton.textContent = "다음";
-        languageSelectionSearchInput.value = languageSelectionState.query;
-        languageSelectionList.innerHTML = visibleOptions.length
-            ? visibleOptions
-                .map((option) => {
-                    const isChecked = isAppStep
-                        ? languageSelectionState.appLanguageId === option.id
-                        : languageSelectionState.selectedIds.has(option.id);
-                    const boxClass = isAppStep
-                        ? "language-selection__item-box language-selection__item-box--radio"
-                        : "language-selection__item-box";
-                    const itemClass = isAppStep
-                        ? "language-selection__item language-selection__item--app"
-                        : "language-selection__item";
-                    const inputType = isAppStep ? "radio" : "checkbox";
-                    const inputName = isAppStep
-                        ? 'name="appLanguageOption"'
-                        : "";
-
-                    return `
-                            <label class="${itemClass}">
-                                <span class="language-selection__item-label">
-                                    ${option.label}
-                                </span>
-                                <span class="language-selection__item-control">
-                                    <input
-                                        type="${inputType}"
-                                        class="language-selection__item-checkbox"
-                                        data-language-option-id="${option.id}"
-                                        ${inputName}
-                                        ${isChecked ? "checked" : ""}
-                                    />
-                                    <span class="${boxClass}" aria-hidden="true">
-                                        ${buildIcon(
-                        "M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z",
-                    )}
-                                    </span>
-                                </span>
-                            </label>
-                        `;
-                })
-                .join("")
-            : '<p class="language-selection__empty">검색 결과가 없습니다.</p>';
-
-        languageSelectionSearchInput.disabled = isAppStep;
-        const footerClassName = isAppStep
-            ? "language-selection__footer language-selection__footer--compact"
-            : "language-selection__footer";
-        languageSelectionNextButton.parentElement.className = footerClassName;
-        languageSelectionNextButton.textContent = "다음";
-    }
-
-    function getLanguagePreferenceLabel() {
-        const labels = languageSelectionOptions
-            .filter((option) =>
-                languageSelectionState.selectedIds.has(option.id),
-            )
-            .map((option) => option.label.split(" - ")[0]);
-
-        if (!labels.length) {
-            return "언어를 선택하세요";
-        }
-
-        if (
-            labels.length === 2 &&
-            labels[0] === "한국어" &&
-            labels[1] === "영어"
-        ) {
-            return "한국어 및 영어";
-        }
-
-        return labels.join(", ");
-    }
-
-    function getAppLanguageLabel() {
-        const selectedOption = languageSelectionOptions.find(
-            (option) => option.id === languageSelectionState.appLanguageId,
+    function getCurrentLanguageSelectionId() {
+        const currentLanguage = (currentAccountState.language || "").trim();
+        const languageItems = languageSelectionList.querySelectorAll(
+            "[data-setting-language-id]",
         );
 
-        return selectedOption?.label.split(" - ")[0] || "한국어";
+        for (const item of languageItems) {
+            if (!(item instanceof HTMLButtonElement)) {
+                continue;
+            }
+
+            const itemId = item.dataset.settingLanguageId || "";
+            const itemLabel =
+                item.querySelector(".setting-language-selection__item-label")
+                    ?.textContent?.trim() || "";
+            const shortLabel = itemLabel.split(" - ")[0].trim();
+
+            if (
+                currentLanguage === itemId ||
+                currentLanguage === itemLabel ||
+                currentLanguage === shortLabel
+            ) {
+                return itemId;
+            }
+        }
+
+        return "ko";
     }
 
-    function getCombinedLanguageLabel() {
-        const preferenceLabel = getLanguagePreferenceLabel();
-        const appLanguageLabel = getAppLanguageLabel();
+    function getSelectedLanguageLabel() {
+        const languageItems = languageSelectionList.querySelectorAll(
+            "[data-setting-language-id]",
+        );
 
-        if (preferenceLabel === "언어를 선택하세요") {
-            return appLanguageLabel;
+        for (const item of languageItems) {
+            if (!(item instanceof HTMLButtonElement)) {
+                continue;
+            }
+
+            if (
+                item.dataset.settingLanguageId !==
+                languageSelectionState.selectedLanguageId
+            ) {
+                continue;
+            }
+
+            const itemLabel =
+                item.querySelector(".setting-language-selection__item-label")
+                    ?.textContent?.trim() || "";
+
+            return itemLabel.split(" - ")[0].trim() || itemLabel;
         }
 
-        if (preferenceLabel.includes(appLanguageLabel)) {
-            return preferenceLabel;
-        }
+        return "설정되지 않음";
+    }
 
-        return `${appLanguageLabel}, ${preferenceLabel}`;
+    function syncLanguageSelectionItems() {
+        const languageItems = languageSelectionList.querySelectorAll(
+            "[data-setting-language-id]",
+        );
+
+        for (const item of languageItems) {
+            if (!(item instanceof HTMLButtonElement)) {
+                continue;
+            }
+
+            const isSelected =
+                item.dataset.settingLanguageId ===
+                languageSelectionState.selectedLanguageId;
+
+            item.setAttribute("aria-selected", String(isSelected));
+            item.classList.toggle(
+                "setting-language-selection__item--selected",
+                isSelected,
+            );
+        }
     }
 
     function resetDetailHeaderAction() {
@@ -1041,6 +921,85 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function syncDeactivateConfirmRoute(routeRoot) {
+        const passwordField = routeRoot.querySelector("[data-deactivate-password-field]");
+        const passwordInput = routeRoot.querySelector("[data-deactivate-password-input]");
+        const passwordMessage = routeRoot.querySelector("[data-deactivate-password-message]");
+        const submitButton = routeRoot.querySelector("[data-deactivate-submit]");
+
+        if (passwordField instanceof HTMLElement) {
+            passwordField.classList.remove("deactivate-confirm-editor__field--active");
+        }
+        if (passwordInput instanceof HTMLInputElement) {
+            passwordInput.value = "";
+        }
+        if (passwordMessage instanceof HTMLElement) {
+            passwordMessage.hidden = true;
+            passwordMessage.textContent = "";
+        }
+        if (submitButton instanceof HTMLButtonElement) {
+            submitButton.disabled = true;
+        }
+    }
+
+    function bindDeactivateConfirmRoute(routeRoot) {
+        const passwordField = routeRoot.querySelector("[data-deactivate-password-field]");
+        const passwordInput = routeRoot.querySelector("[data-deactivate-password-input]");
+        const passwordMessage = routeRoot.querySelector("[data-deactivate-password-message]");
+        const submitButton = routeRoot.querySelector("[data-deactivate-submit]");
+
+        if (
+            !(passwordField instanceof HTMLElement) ||
+            !(passwordInput instanceof HTMLInputElement) ||
+            !(passwordMessage instanceof HTMLElement) ||
+            !(submitButton instanceof HTMLButtonElement)
+        ) {
+            return;
+        }
+
+        passwordInput.addEventListener("focus", () => {
+            passwordField.classList.add("deactivate-confirm-editor__field--active");
+        });
+
+        passwordInput.addEventListener("blur", () => {
+            passwordField.classList.toggle(
+                "deactivate-confirm-editor__field--active",
+                passwordInput.value.trim().length > 0,
+            );
+        });
+
+        passwordInput.addEventListener("input", () => {
+            const hasPassword = passwordInput.value.trim().length > 0;
+
+            passwordMessage.hidden = true;
+            passwordMessage.textContent = "";
+            submitButton.disabled = !hasPassword;
+            passwordField.classList.toggle(
+                "deactivate-confirm-editor__field--active",
+                hasPassword || document.activeElement === passwordInput,
+            );
+        });
+
+        submitButton.addEventListener("click", async () => {
+            const password = passwordInput.value.trim();
+
+            if (!password) {
+                return;
+            }
+
+            try {
+                await settingService.deactivateAccount(password);
+                await settingService.logout();
+                window.location.href = "/";
+            } catch (error) {
+                passwordMessage.hidden = false;
+                passwordMessage.textContent =
+                    error.message || "계정 비활성화 중 오류가 발생했습니다.";
+                passwordInput.focus();
+            }
+        });
+    }
+
     /*
      * routeRoot 하나에 서버/프론트 상태를 다시 주입하는 계열 함수들.
      * Spring으로 바꿀 때는 각 함수가 "DTO -> DOM 반영" 책임만 갖도록 유지하면 된다.
@@ -1221,12 +1180,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /*
-     * accountInfoItems/currentAccountState를 상세 화면별 DOM에 주입한다.
+     * 현재 회원 상태(currentAccountState)를 상세 화면별 DOM에 주입한다.
      * 서버에서 값이 바뀌면 이 sync 함수만 다시 호출해도 화면이 맞춰지게 설계되어 있다.
      */
     function syncPhoneRoute(routeRoot) {
-        const phoneItem = accountInfoItems.find((item) => item.id === "phone");
-        const phoneValue = phoneItem?.value || "";
+        const phoneValue = currentAccountState.phone || "";
         const phoneValueNode = routeRoot.querySelector("[data-phone-current-value]");
         const verifiedScreen = routeRoot.querySelector("[data-phone-verified-screen]");
         const addButton = routeRoot.querySelector(".phone-editor__action");
@@ -1244,18 +1202,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function syncEmailRoute(routeRoot) {
-        const emailItem = accountInfoItems.find((item) => item.id === "email");
-        const emailValue = emailItem?.value || "tjdgh1851@gmail.com";
-        const emailValueNode = routeRoot.querySelector("[data-email-current-value]");
-        if (emailValueNode instanceof HTMLElement) {
-            emailValueNode.textContent = emailValue;
-        }
-    }
-
     function syncCountryRoute(routeRoot) {
-        const countryItem = accountInfoItems.find((item) => item.id === "country");
-        const currentCountry = countryItem?.value || "대한민국";
+        const currentCountry = currentAccountState.country || "설정되지 않음";
         const countrySelect = routeRoot.querySelector("[data-country-select]");
 
         if (!(countrySelect instanceof HTMLSelectElement)) {
@@ -1271,7 +1219,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function bindCountryRoute(routeRoot) {
-        const countryItem = accountInfoItems.find((item) => item.id === "country");
         const countrySelect = routeRoot.querySelector("[data-country-select]");
         if (!(countrySelect instanceof HTMLSelectElement)) {
             return;
@@ -1279,19 +1226,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         countrySelect.addEventListener("change", () => {
             const selectedCountry =
-                countrySelect.selectedOptions[0]?.textContent?.trim() || "대한민국";
+                countrySelect.selectedOptions[0]?.textContent?.trim() || "설정되지 않음";
 
-            if (countryItem) {
-                countryItem.value = selectedCountry;
-            }
+            currentAccountState.country = selectedCountry;
         });
-    }
-
-    function syncLanguageRoute(routeRoot) {
-        const languageValue = routeRoot.querySelector("[data-language-current-value]");
-        if (languageValue instanceof HTMLElement) {
-            languageValue.textContent = getCombinedLanguageLabel();
-        }
     }
 
     function syncAccountInfoListRoute(routeRoot) {
@@ -1351,6 +1289,11 @@ document.addEventListener("DOMContentLoaded", () => {
             syncDeactivateRoute(routeRoot);
             return;
         }
+        if (activeDetailRoute === "deactivate-confirm") {
+            bindRouteOnce(routeRoot, "boundDeactivateConfirm", bindDeactivateConfirmRoute);
+            syncDeactivateConfirmRoute(routeRoot);
+            return;
+        }
         if (activeDetailRoute === "notification-filter-edit") {
             syncNotificationFilterRoute(routeRoot);
             return;
@@ -1397,7 +1340,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         if (activeDetailRoute === "email-edit") {
-            syncEmailRoute(routeRoot);
+            const emailValueNode = routeRoot.querySelector("[data-email-current-value]");
+            if (emailValueNode instanceof HTMLElement) {
+                emailValueNode.textContent =
+                    currentAccountState.email || "등록된 이메일이 없습니다.";
+            }
             return;
         }
         if (activeDetailRoute === "country-edit") {
@@ -1406,7 +1353,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         if (activeDetailRoute === "language-edit") {
-            syncLanguageRoute(routeRoot);
+            const languageValue = routeRoot.querySelector("[data-language-current-value]");
+            if (languageValue instanceof HTMLElement) {
+                languageValue.textContent = currentAccountState.language || "설정되지 않음";
+            }
             return;
         }
     }
@@ -1498,16 +1448,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.dataset.surface = appearanceState.surface;
         appearanceFontRange.value = appearanceState.fontScale;
         renderAppearanceOptions();
-    }
-
-    function applyPhoneAddActionState() {
-        const hasPhoneNumber = phoneModalState.phoneNumber.trim().length > 0;
-
-        phoneAddActionButton.textContent = hasPhoneNumber ? "다음" : "취소";
-        phoneAddActionButton.classList.toggle(
-            "phone-modal__action--primary",
-            hasPhoneNumber,
-        );
     }
 
     if (accountInfoAuthInput instanceof HTMLInputElement) {
@@ -1640,80 +1580,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderPhoneAddStep() {
-        const isCodeStep = phoneModalState.step === "code";
-        const isHelpMenuVisible = isCodeStep && phoneModalState.isHelpMenuOpen;
-
-        phoneAddStep.hidden = isCodeStep;
-        phoneCodeStep.hidden = !isCodeStep;
-        phoneCodeNumber.textContent =
-            phoneModalState.phoneNumber || "01099139076";
-        phoneCodeInput.value = phoneModalState.code;
-        phoneCodeHelpMenu.hidden = !isHelpMenuVisible;
-        phoneCodeHelpButton.setAttribute(
-            "aria-expanded",
-            String(isHelpMenuVisible),
-        );
-        phoneCodeActionButton.disabled =
-            phoneModalState.code.trim().length === 0;
-        phoneCodeActionButton.classList.toggle(
-            "phone-modal__action--primary",
-            phoneModalState.code.trim().length > 0,
-        );
-        phoneCodeActionButton.classList.toggle(
-            "phone-modal__action--disabled",
-            phoneModalState.code.trim().length === 0,
-        );
-    }
-
-    function applyEmailAddActionState() {
-        const hasEmailAddress = emailModalState.emailAddress.trim().length > 0;
-
-        emailAddActionButton.textContent = hasEmailAddress ? "다음" : "취소";
-        emailAddActionButton.classList.toggle(
-            "phone-modal__action--primary",
-            hasEmailAddress,
-        );
-        emailAddActionButton.classList.toggle(
-            "email-modal__action--primary",
-            hasEmailAddress,
-        );
-    }
-
-    function renderEmailAddStep() {
-        const isCodeStep = emailModalState.step === "code";
-        const isHelpMenuVisible = isCodeStep && emailModalState.isHelpMenuOpen;
-
-        emailAddStep.hidden = isCodeStep;
-        emailCodeStep.hidden = !isCodeStep;
-        emailCodeAddress.textContent =
-            emailModalState.emailAddress || "tjdgh1851@gmail.com";
-        emailCodeInput.value = emailModalState.code;
-        emailCodeHelpMenu.hidden = !isHelpMenuVisible;
-        emailCodeHelpButton.setAttribute(
-            "aria-expanded",
-            String(isHelpMenuVisible),
-        );
-        emailCodeActionButton.disabled =
-            emailModalState.code.trim().length === 0;
-        emailCodeActionButton.classList.toggle(
-            "phone-modal__action--primary",
-            emailModalState.code.trim().length > 0,
-        );
-        emailCodeActionButton.classList.toggle(
-            "email-modal__action--primary",
-            emailModalState.code.trim().length > 0,
-        );
-        emailCodeActionButton.classList.toggle(
-            "phone-modal__action--disabled",
-            emailModalState.code.trim().length === 0,
-        );
-        emailCodeActionButton.classList.toggle(
-            "email-modal__action--disabled",
-            emailModalState.code.trim().length === 0,
-        );
-    }
-
     /*
      * 공통 모달 열기.
      * Spring API 연동 후에도 모달 open/close 자체는 프론트에서 유지하고,
@@ -1736,25 +1602,24 @@ document.addEventListener("DOMContentLoaded", () => {
             const closeButton = shortcutModal.querySelector(".modal-close");
             closeButton?.focus();
         } else if (modalType === "language-select") {
-            languageSelectionState.step = "choices";
-            languageSelectionState.query = "";
-            languageSelectionState.showAll = false;
-            languageSelectionSearchInput.value = "";
-            renderLanguageSelectionModal();
-            languageSelectionSearchInput.focus();
+            languageSelectionState.selectedLanguageId =
+                getCurrentLanguageSelectionId();
+            syncLanguageSelectionItems();
+
+            const selectedLanguageItem = languageSelectionList.querySelector(
+                `[data-setting-language-id="${languageSelectionState.selectedLanguageId}"]`,
+            );
+
+            if (selectedLanguageItem instanceof HTMLButtonElement) {
+                selectedLanguageItem.focus();
+            } else {
+                languageSelectionNextButton.focus();
+            }
         } else if (modalType === "phone-add") {
-            phoneModalState.step = "add";
-            phoneModalState.isHelpMenuOpen = false;
-            phoneAddInput.value = phoneModalState.phoneNumber;
-            applyPhoneAddActionState();
-            renderPhoneAddStep();
+            resetPhoneModal();
             phoneAddInput.focus();
         } else if (modalType === "email-add") {
-            emailModalState.step = "add";
-            emailModalState.isHelpMenuOpen = false;
-            emailAddInput.value = emailModalState.emailAddress;
-            applyEmailAddActionState();
-            renderEmailAddStep();
+            resetEmailModal();
             emailAddInput.focus();
         }
     }
@@ -1770,8 +1635,8 @@ document.addEventListener("DOMContentLoaded", () => {
         phoneVerifyModal.hidden = true;
         emailAddModal.hidden = true;
         emailVerifyModal.hidden = true;
-        phoneModalState.isHelpMenuOpen = false;
-        emailModalState.isHelpMenuOpen = false;
+        resetPhoneModal();
+        resetEmailModal();
     }
 
     function selectSection(sectionId) {
@@ -2328,134 +2193,186 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     phoneAddCloseButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-
-        if (phoneModalState.step === "code") {
-            phoneModalState.step = "add";
-            phoneModalState.isHelpMenuOpen = false;
-            renderPhoneAddStep();
-            phoneAddInput.focus();
-            return;
-        }
-
+        event.preventDefault();
         closeModal();
     });
 
     phoneAddInput.addEventListener("input", () => {
         phoneAddInput.value = phoneAddInput.value.replace(/[^0-9]/g, "");
-        phoneModalState.phoneNumber = phoneAddInput.value;
-        applyPhoneAddActionState();
+
+        const hasPhoneNumber = phoneAddInput.value.trim().length > 0;
+        phoneAddActionButton.textContent = hasPhoneNumber ? "다음" : "취소";
+        phoneAddActionButton.classList.toggle(
+            "phone-modal__action--primary",
+            hasPhoneNumber,
+        );
     });
 
     phoneCodeInput.addEventListener("input", () => {
-        phoneModalState.code = phoneCodeInput.value;
-        renderPhoneAddStep();
+        phoneCodeInput.value = phoneCodeInput.value.replace(/[^0-9]/g, "");
+
+        const hasCode = phoneCodeInput.value.trim().length > 0;
+        phoneCodeActionButton.disabled = !hasCode;
+        phoneCodeActionButton.classList.toggle(
+            "phone-modal__action--primary",
+            hasCode,
+        );
+        phoneCodeActionButton.classList.toggle(
+            "phone-modal__action--disabled",
+            !hasCode,
+        );
     });
 
-    phoneCodeHelpButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        phoneModalState.isHelpMenuOpen = !phoneModalState.isHelpMenuOpen;
-        renderPhoneAddStep();
-    });
-
-    phoneAddActionButton.addEventListener("click", () => {
+    phoneAddActionButton.addEventListener("click", async () => {
         const phoneNumber = phoneAddInput.value.trim();
-        phoneModalState.phoneNumber = phoneNumber;
 
         if (!phoneNumber) {
-            closeModal();
             return;
         }
 
-        phoneVerifyNumber.textContent = phoneNumber;
-        phoneVerifyModal.hidden = false;
-        activeModal = "phone-verify";
-        phoneVerifyConfirmButton.focus();
+        try {
+            const isAvailable = await settingService.checkPhone(phoneNumber);
+
+            if (!isAvailable) {
+                alert("이미 사용 중인 휴대폰 번호입니다.");
+                phoneAddInput.focus();
+                return;
+            }
+
+            pendingPhoneNumber = phoneNumber;
+            phoneVerifyNumber.textContent = phoneNumber;
+            phoneVerifyModal.hidden = false;
+            phoneVerifyConfirmButton.focus();
+        } catch (error) {
+            alert(error.message || "휴대폰 번호 확인 중 오류가 발생했습니다.");
+        }
     });
 
     phoneVerifyEditButton.addEventListener("click", () => {
         phoneVerifyModal.hidden = true;
-        activeModal = "phone-add";
         phoneAddInput.focus();
     });
 
-    phoneVerifyConfirmButton.addEventListener("click", () => {
-        phoneVerifyModal.hidden = true;
-        activeModal = "phone-add";
-        phoneModalState.step = "code";
-        phoneModalState.code = "";
-        phoneModalState.isHelpMenuOpen = false;
-        renderPhoneAddStep();
-        phoneCodeInput.focus();
-    });
+    phoneVerifyConfirmButton.addEventListener("click", async () => {
+        try {
+            phoneCertCode = await settingService.sendSms(pendingPhoneNumber);
 
-    phoneCodeActionButton.addEventListener("click", () => {
-        const phoneItem = accountInfoItems.find((item) => item.id === "phone");
-        if (phoneItem) {
-            phoneItem.value = phoneModalState.phoneNumber;
+            phoneVerifyModal.hidden = true;
+            phoneAddStep.hidden = true;
+            phoneCodeStep.hidden = false;
+            phoneCodeInput.value = "";
+            phoneCodeActionButton.disabled = true;
+            phoneCodeActionButton.classList.remove("phone-modal__action--primary");
+            phoneCodeActionButton.classList.add("phone-modal__action--disabled");
+            phoneCodeNumber.textContent = pendingPhoneNumber;
+            phoneCodeInput.focus();
+        } catch (error) {
+            alert(error.message || "인증번호 전송에 실패했습니다.");
         }
-        const phoneValueNode = document.querySelector("[data-account-info-value='phone']");
-        if (phoneValueNode instanceof HTMLElement) {
-            phoneValueNode.textContent = phoneModalState.phoneNumber || "\u00a0";
-        }
-        phoneModalState.step = "add";
-        phoneModalState.code = "";
-        closeModal();
-        renderDetail();
     });
 
-    phoneCodeResendButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        phoneModalState.isHelpMenuOpen = false;
-        renderPhoneAddStep();
-        phoneCodeInput.focus();
-    });
+    phoneCodeActionButton.addEventListener("click", async () => {
+        const code = phoneCodeInput.value.trim();
 
-    emailAddCloseButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-
-        if (emailModalState.step === "code") {
-            emailModalState.step = "add";
-            emailModalState.isHelpMenuOpen = false;
-            renderEmailAddStep();
-            emailAddInput.focus();
+        if (!code) {
             return;
         }
 
+        if (code !== phoneCertCode) {
+            alert("잘못된 인증번호입니다.");
+            phoneCodeInput.focus();
+            return;
+        }
+
+        try {
+            await settingService.updatePhone(pendingPhoneNumber);
+
+            currentAccountState.phone = pendingPhoneNumber;
+            window.settingMember.memberPhone = pendingPhoneNumber;
+
+            closeModal();
+            renderDetail();
+        } catch (error) {
+            alert(error.message || "휴대폰 번호 저장 중 오류가 발생했습니다.");
+        }
+    });
+
+    phoneCodeResendButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        try {
+            phoneCertCode = await settingService.sendSms(pendingPhoneNumber);
+            phoneCodeInput.focus();
+        } catch (error) {
+            alert(error.message || "인증번호 재전송에 실패했습니다.");
+        }
+    });
+
+    emailAddCloseButton.addEventListener("click", (event) => {
+        event.preventDefault();
         closeModal();
     });
 
     emailAddInput.addEventListener("input", () => {
-        emailModalState.emailAddress = emailAddInput.value;
-        applyEmailAddActionState();
+        emailAddInput.value = emailAddInput.value.trimStart();
+
+        const hasEmailAddress = emailAddInput.value.trim().length > 0;
+        emailAddActionButton.textContent = hasEmailAddress ? "다음" : "취소";
+        emailAddActionButton.classList.toggle(
+            "phone-modal__action--primary",
+            hasEmailAddress,
+        );
+        emailAddActionButton.classList.toggle(
+            "email-modal__action--primary",
+            hasEmailAddress,
+        );
     });
 
     emailCodeInput.addEventListener("input", () => {
-        emailModalState.code = emailCodeInput.value;
-        renderEmailAddStep();
+        const hasCode = emailCodeInput.value.trim().length > 0;
+        emailCodeActionButton.disabled = !hasCode;
+        emailCodeActionButton.classList.toggle(
+            "phone-modal__action--primary",
+            hasCode,
+        );
+        emailCodeActionButton.classList.toggle(
+            "email-modal__action--primary",
+            hasCode,
+        );
+        emailCodeActionButton.classList.toggle(
+            "phone-modal__action--disabled",
+            !hasCode,
+        );
+        emailCodeActionButton.classList.toggle(
+            "email-modal__action--disabled",
+            !hasCode,
+        );
     });
 
-    emailCodeHelpButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        emailModalState.isHelpMenuOpen = !emailModalState.isHelpMenuOpen;
-        renderEmailAddStep();
-    });
-
-    emailAddActionButton.addEventListener("click", () => {
+    emailAddActionButton.addEventListener("click", async () => {
         const emailAddress = emailAddInput.value.trim();
-        emailModalState.emailAddress = emailAddress;
 
         if (!emailAddress) {
-            closeModal();
             return;
         }
 
-        emailVerifyAddress.textContent = emailAddress;
-        emailVerifyModal.hidden = false;
-        activeModal = "email-verify";
-        emailVerifyConfirmButton.focus();
+        try {
+            const isAvailable = await settingService.checkEmail(emailAddress);
+
+            if (!isAvailable) {
+                alert("이미 사용 중인 이메일입니다.");
+                emailAddInput.focus();
+                return;
+            }
+
+            pendingEmailAddress = emailAddress;
+            emailVerifyAddress.textContent = emailAddress;
+            emailVerifyModal.hidden = false;
+            activeModal = "email-verify";
+            emailVerifyConfirmButton.focus();
+        } catch (error) {
+            alert(error.message || "이메일 확인 중 오류가 발생했습니다.");
+        }
     });
 
     emailVerifyEditButton.addEventListener("click", () => {
@@ -2464,114 +2381,110 @@ document.addEventListener("DOMContentLoaded", () => {
         emailAddInput.focus();
     });
 
-    emailVerifyConfirmButton.addEventListener("click", () => {
-        emailVerifyModal.hidden = true;
-        activeModal = "email-add";
-        emailModalState.step = "code";
-        emailModalState.code = "";
-        emailModalState.isHelpMenuOpen = false;
-        renderEmailAddStep();
-        emailCodeInput.focus();
+    emailVerifyConfirmButton.addEventListener("click", async () => {
+        try {
+            emailCertCode = await settingService.sendEmailCode(pendingEmailAddress);
+
+            emailVerifyModal.hidden = true;
+            activeModal = "email-add";
+            emailAddStep.hidden = true;
+            emailCodeStep.hidden = false;
+            emailCodeAddress.textContent = pendingEmailAddress;
+            emailCodeInput.value = "";
+            emailCodeActionButton.disabled = true;
+            emailCodeActionButton.classList.remove("phone-modal__action--primary");
+            emailCodeActionButton.classList.remove("email-modal__action--primary");
+            emailCodeActionButton.classList.add("phone-modal__action--disabled");
+            emailCodeActionButton.classList.add("email-modal__action--disabled");
+            emailCodeInput.focus();
+        } catch (error) {
+            alert(error.message || "인증번호 전송에 실패했습니다.");
+        }
     });
 
-    emailCodeResendButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        emailModalState.isHelpMenuOpen = false;
-        renderEmailAddStep();
-        emailCodeInput.focus();
+    emailCodeResendButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        try {
+            emailCertCode = await settingService.sendEmailCode(pendingEmailAddress);
+            emailCodeInput.focus();
+        } catch (error) {
+            alert(error.message || "인증번호 재전송에 실패했습니다.");
+        }
     });
 
-    languageSelectionSearchInput.addEventListener("input", () => {
-        languageSelectionState.query = languageSelectionSearchInput.value;
-        renderLanguageSelectionModal();
-    });
+    emailCodeActionButton.addEventListener("click", async () => {
+        const code = emailCodeInput.value.trim();
 
-    languageSelectionList.addEventListener("change", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLInputElement)) {
+        if (!code) {
             return;
         }
 
-        const optionId = target.dataset.languageOptionId;
-        if (!optionId) {
+        if (code !== emailCertCode) {
+            alert("잘못된 인증번호입니다.");
+            emailCodeInput.focus();
             return;
         }
 
-        if (languageSelectionState.step === "app") {
-            languageSelectionState.appLanguageId = optionId;
-            renderLanguageSelectionModal();
-            return;
-        }
+        try {
+            await settingService.updateEmail(pendingEmailAddress);
 
-        if (target.checked) {
-            languageSelectionState.selectedIds.add(optionId);
-        } else {
-            languageSelectionState.selectedIds.delete(optionId);
-        }
-    });
+            currentAccountState.email = pendingEmailAddress;
+            window.settingMember.memberEmail = pendingEmailAddress;
 
-    languageSelectionMoreButton.addEventListener("click", () => {
-        languageSelectionState.showAll = true;
-        renderLanguageSelectionModal();
-    });
-
-    languageSelectionNextButton.addEventListener("click", () => {
-        if (languageSelectionState.step === "choices") {
-            const selectedOptions = languageSelectionOptions.filter((option) =>
-                languageSelectionState.selectedIds.has(option.id),
-            );
-            languageSelectionState.appLanguageId =
-                selectedOptions[0]?.id || "ko";
-            languageSelectionState.step = "app";
-            renderLanguageSelectionModal();
-            languageSelectionBackButton.focus();
-            return;
-        }
-
-        const languageItem = accountInfoItems.find(
-            (item) => item.id === "language",
-        );
-        if (languageItem) {
-            languageItem.value = getCombinedLanguageLabel();
-        }
-
-        closeModal();
-
-        if (activeDetailRoute === "language-edit") {
+            closeModal();
             renderDetail();
+        } catch (error) {
+            alert(error.message || "이메일 저장 중 오류가 발생했습니다.");
         }
     });
 
-    languageSelectionSkipButton.addEventListener("click", () => {
-        closeModal();
+    languageSelectionList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const languageItem = target.closest("[data-setting-language-id]");
+        if (!(languageItem instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        languageSelectionState.selectedLanguageId =
+            languageItem.dataset.settingLanguageId || "ko";
+        syncLanguageSelectionItems();
     });
 
-    languageSelectionBackButton.addEventListener("click", () => {
-        languageSelectionState.step = "choices";
-        renderLanguageSelectionModal();
-        languageSelectionSearchInput.focus();
+    // 언어 모달은 단일 선택 후 바로 저장하는 구조로 단순화했다.
+    // 저장 성공 시에는 현재 setting 상태와 서버에서 주입한 초기값만 함께 갱신한다.
+    languageSelectionNextButton.addEventListener("click", async () => {
+        const selectedLanguageLabel = getSelectedLanguageLabel();
+
+        if (!selectedLanguageLabel || selectedLanguageLabel === "설정되지 않음") {
+            alert("언어를 선택하세요.");
+            return;
+        }
+
+        try {
+            await settingService.updateLanguage(selectedLanguageLabel);
+
+            currentAccountState.language = selectedLanguageLabel;
+            window.settingMember.memberLanguage = selectedLanguageLabel;
+
+            closeModal();
+
+            if (activeDetailRoute === "language-edit") {
+                renderDetail();
+            }
+        } catch (error) {
+            alert(error.message || "언어 저장 중 오류가 발생했습니다.");
+        }
     });
 
     modalLayer.addEventListener("click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) {
             return;
-        }
-
-        if (
-            phoneModalState.isHelpMenuOpen &&
-            !target.closest("#phoneCodeHelp")
-        ) {
-            phoneModalState.isHelpMenuOpen = false;
-            renderPhoneAddStep();
-        }
-
-        if (
-            emailModalState.isHelpMenuOpen &&
-            !target.closest("#emailCodeHelp")
-        ) {
-            emailModalState.isHelpMenuOpen = false;
-            renderEmailAddStep();
         }
 
         if (target.hasAttribute("data-modal-close")) {
@@ -2621,17 +2534,6 @@ document.addEventListener("DOMContentLoaded", () => {
             closeModal();
         }
     });
-
-    const passwordInputValue = document.querySelector(".detail-form__input").value;
-    const submitBtn = document.querySelector(".detail-form__button");
-    let identityDuplicateState = null; // null: 미검사, true: 사용가능, false: 중복
-    let identityChecking = false;
-
-
-    submitBtn.addEventListener("click", (e) => {
-
-    })
-
 
     applyAppearanceState();
     renderNavigation();

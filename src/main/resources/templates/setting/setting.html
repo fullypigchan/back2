@@ -593,7 +593,7 @@
                             <p class="deactivate-confirm-editor__summary">
                                 계정에 연결된 비밀번호를 입력하여 비활성화 요청을 완료하세요.
                             </p>
-                            <div class="deactivate-confirm-editor__field">
+                            <div class="deactivate-confirm-editor__field" data-deactivate-password-field>
                                 <label class="deactivate-confirm-editor__label"
                                        for="deactivateConfirmPassword">비밀번호</label>
                                 <input
@@ -601,11 +601,22 @@
                                         id="deactivateConfirmPassword"
                                         class="deactivate-confirm-editor__input"
                                         autocomplete="current-password"
+                                        data-deactivate-password-input
                                 />
                             </div>
+                            <p
+                                    class="deactivate-confirm-editor__message"
+                                    data-deactivate-password-message
+                                    hidden
+                            ></p>
                             <a href="#" class="deactivate-confirm-editor__forgot">비밀번호를 잊으셨나요?</a>
                             <div class="deactivate-confirm-editor__actions">
-                                <button type="button" class="deactivate-confirm-editor__button">
+                                <button
+                                        type="button"
+                                        class="deactivate-confirm-editor__button"
+                                        data-deactivate-submit
+                                        disabled
+                                >
                                     비활성화
                                 </button>
                             </div>
@@ -1411,11 +1422,11 @@
                     </section>
 
                     <section class="detail-route detail-route--country" data-detail-route-view="country-edit"
-                             data-route-title="국가 변경" hidden aria-hidden="true">
+                             data-route-title="주소 변경" hidden aria-hidden="true">
                         <section class="country-editor">
                             <div class="country-editor__section">
                                 <label class="country-editor__field">
-                                    <span class="country-editor__label">국가</span>
+                                    <span class="country-editor__label">주소</span>
                                     <select class="country-editor__select" aria-label="국가" data-country-select>
                                         <option value="gh">가나</option>
                                         <option value="ga">가봉</option>
@@ -1920,23 +1931,18 @@
         <header class="modal-header modal-header--language-selection">
             <button
                     type="button"
-                    class="modal-close modal-close--back language-selection__back"
-                    id="languageSelectionBackButton"
-                    aria-label="뒤로가기"
-                    hidden
+                    class="modal-close"
+                    aria-label="닫기"
+                    data-modal-close
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <g>
                         <path
-                                d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"
+                                d="M16.24 7.76 12 12l4.24 4.24-1.41 1.41L10.59 13.41 6.35 17.65 4.94 16.24 9.17 12 4.94 7.76l1.41-1.41 4.24 4.24 4.24-4.24z"
                         ></path>
                     </g>
                 </svg>
             </button>
-            <div class="modal-spacer" aria-hidden="true"></div>
-            <div class="language-selection__brand" aria-hidden="true">
-                X
-            </div>
             <div class="modal-spacer" aria-hidden="true"></div>
         </header>
 
@@ -1955,43 +1961,82 @@
                     X 환경을 맞춤 설정하는 데 사용할 언어를 선택하세요.
                 </p>
 
-                <label
-                        class="language-selection__search"
-                        id="languageSelectionSearch"
-                >
-                            <span
-                                    class="language-selection__search-icon"
-                                    aria-hidden="true"
-                            >
-                                <svg viewBox="0 0 24 24">
-                                    <g>
-                                        <path
-                                                d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z"
-                                        ></path>
-                                    </g>
-                                </svg>
-                            </span>
-                    <input
-                            class="language-selection__search-input"
-                            id="languageSelectionSearchInput"
-                            type="text"
-                            placeholder="언어 검색하기"
-                            aria-label="언어 검색하기"
-                    />
-                </label>
-
                 <div
-                        class="language-selection__list"
+                        class="setting-language-selection__list"
                         id="languageSelectionList"
-                ></div>
-
-                <button
-                        type="button"
-                        class="language-selection__more"
-                        id="languageSelectionMoreButton"
+                        role="listbox"
+                        aria-label="언어 선택 목록"
+                        aria-multiselectable="false"
                 >
-                    더 보기
-                </button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="en" aria-selected="false"><span class="setting-language-selection__item-label">영어 - English</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ko" aria-selected="false"><span class="setting-language-selection__item-label">한국어</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="gu" aria-selected="false"><span class="setting-language-selection__item-label">구자라트어 - ગુજરાતી</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="el" aria-selected="false"><span class="setting-language-selection__item-label">그리스어 - Ελληνικά</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="nl" aria-selected="false"><span class="setting-language-selection__item-label">네덜란드어 - Nederlands</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ne" aria-selected="false"><span class="setting-language-selection__item-label">네팔어 - नेपाली</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="no" aria-selected="false"><span class="setting-language-selection__item-label">노르웨이어 - norsk</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="da" aria-selected="false"><span class="setting-language-selection__item-label">덴마크어 - dansk</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="de" aria-selected="false"><span class="setting-language-selection__item-label">독일어 - Deutsch</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="dv" aria-selected="false"><span class="setting-language-selection__item-label">디베히어 - Divehi</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="lo" aria-selected="false"><span class="setting-language-selection__item-label">라오어 - ລາວ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="lv" aria-selected="false"><span class="setting-language-selection__item-label">라트비아어 - latviešu</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ru" aria-selected="false"><span class="setting-language-selection__item-label">러시아어 - русский</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ro" aria-selected="false"><span class="setting-language-selection__item-label">루마니아어 - română</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="lt" aria-selected="false"><span class="setting-language-selection__item-label">리투아니아어 - lietuvių</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="mr" aria-selected="false"><span class="setting-language-selection__item-label">마라티어 - मराठी</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ml" aria-selected="false"><span class="setting-language-selection__item-label">말라얄람어 - മലയാളം</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ms" aria-selected="false"><span class="setting-language-selection__item-label">말레이어 - Melayu</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="eu" aria-selected="false"><span class="setting-language-selection__item-label">바스크어 - euskara</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="my" aria-selected="false"><span class="setting-language-selection__item-label">버마어 - မြန်မာ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="vi" aria-selected="false"><span class="setting-language-selection__item-label">베트남어 - Tiếng Việt</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="bn" aria-selected="false"><span class="setting-language-selection__item-label">벵골어 - বাংলা</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="bg" aria-selected="false"><span class="setting-language-selection__item-label">불가리아어 - български</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sr" aria-selected="false"><span class="setting-language-selection__item-label">세르비아어 - српски</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ckb" aria-selected="false"><span class="setting-language-selection__item-label">소라니 쿠르드어 - کوردیی ناوەندی</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="si" aria-selected="false"><span class="setting-language-selection__item-label">스리랑카어 - සිංහල</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sv" aria-selected="false"><span class="setting-language-selection__item-label">스웨덴어 - svenska</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="es" aria-selected="false"><span class="setting-language-selection__item-label">스페인어 - español</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sl" aria-selected="false"><span class="setting-language-selection__item-label">슬로베니아어 - slovenščina</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="sd" aria-selected="false"><span class="setting-language-selection__item-label">신디어 - سنڌي</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ar" aria-selected="false"><span class="setting-language-selection__item-label">아랍어 - العربية</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="hy" aria-selected="false"><span class="setting-language-selection__item-label">아르메니아어 - հայերեն</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="is" aria-selected="false"><span class="setting-language-selection__item-label">아이슬란드어 - íslenska</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ht" aria-selected="false"><span class="setting-language-selection__item-label">아이티어 - Haitian Creole</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="am" aria-selected="false"><span class="setting-language-selection__item-label">암하라어 - አማርኛ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="et" aria-selected="false"><span class="setting-language-selection__item-label">에스토니아어 - eesti</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="eo" aria-selected="false"><span class="setting-language-selection__item-label">에스페란토어 - esperanto</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="or" aria-selected="false"><span class="setting-language-selection__item-label">오리야어 - ଓଡ଼ିଆ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ur" aria-selected="false"><span class="setting-language-selection__item-label">우르두어 - اردو</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="uk" aria-selected="false"><span class="setting-language-selection__item-label">우크라이나어 - українська</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="cy" aria-selected="false"><span class="setting-language-selection__item-label">웨일스어 - Cymraeg</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ug" aria-selected="false"><span class="setting-language-selection__item-label">위구르어 - ئۇيغۇرچە</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="it" aria-selected="false"><span class="setting-language-selection__item-label">이탈리아어 - italiano</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="id" aria-selected="false"><span class="setting-language-selection__item-label">인도네시아어 - Indonesia</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ja" aria-selected="false"><span class="setting-language-selection__item-label">일본어 - 日本語</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ka" aria-selected="false"><span class="setting-language-selection__item-label">조지아어 - ქართული</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="zh" aria-selected="false"><span class="setting-language-selection__item-label">중국어 - 中文</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="cs" aria-selected="false"><span class="setting-language-selection__item-label">체코어 - čeština</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ca" aria-selected="false"><span class="setting-language-selection__item-label">카탈로니아어 - català</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="kn" aria-selected="false"><span class="setting-language-selection__item-label">칸나다어 - ಕನ್ನಡ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="km" aria-selected="false"><span class="setting-language-selection__item-label">크메르어 - ខ្មែរ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="tl" aria-selected="false"><span class="setting-language-selection__item-label">타갈로그어 - Tagalog</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ta" aria-selected="false"><span class="setting-language-selection__item-label">타밀어 - தமிழ்</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="th" aria-selected="false"><span class="setting-language-selection__item-label">태국어 - ไทย</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="tr" aria-selected="false"><span class="setting-language-selection__item-label">터키어 - Türkçe</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="te" aria-selected="false"><span class="setting-language-selection__item-label">텔루구어 - తెలుగు</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="bo" aria-selected="false"><span class="setting-language-selection__item-label">티베트어 - བོད་སྐད་</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="ps" aria-selected="false"><span class="setting-language-selection__item-label">파슈토어 - پښتو</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="pa" aria-selected="false"><span class="setting-language-selection__item-label">펀잡어 - ਪੰਜਾਬੀ</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="fa" aria-selected="false"><span class="setting-language-selection__item-label">페르시아어 - فارسی</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="pt" aria-selected="false"><span class="setting-language-selection__item-label">포르투갈어 - português</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="pl" aria-selected="false"><span class="setting-language-selection__item-label">폴란드어 - polski</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="fr" aria-selected="false"><span class="setting-language-selection__item-label">프랑스어 - français</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="fi" aria-selected="false"><span class="setting-language-selection__item-label">핀란드어 - suomi</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="hu" aria-selected="false"><span class="setting-language-selection__item-label">헝가리어 - magyar</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="he" aria-selected="false"><span class="setting-language-selection__item-label">히브리어 - עברית</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="hi" aria-selected="false"><span class="setting-language-selection__item-label">힌디어 - हिन्दी</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                    <button type="button" class="setting-language-selection__item" data-setting-language-id="etc" aria-selected="false"><span class="setting-language-selection__item-label">기타</span><span class="setting-language-selection__item-check" aria-hidden="true"></span></button>
+                </div>
 
                 <div class="language-selection__footer">
                     <button
@@ -1999,14 +2044,7 @@
                             class="language-selection__primary"
                             id="languageSelectionNextButton"
                     >
-                        다음
-                    </button>
-                    <button
-                            type="button"
-                            class="language-selection__secondary"
-                            id="languageSelectionSkipButton"
-                    >
-                        건너뛰기
+                        저장
                     </button>
                 </div>
             </div>

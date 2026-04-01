@@ -77,6 +77,18 @@ public class MemberDAO {
     public void updateHandle(Long memberId, String memberHandle) {
         memberMapper.updateHandle(memberId, memberHandle);
     }
+    //  휴대폰 번호 변경
+    public void updatePhone(Long memberId, String memberPhone) {
+        memberMapper.updatePhone(memberId, memberPhone);
+    }
+    //  이메일 변경
+    public void updateEmail(Long memberId, String memberEmail) {
+        memberMapper.updateEmail(memberId, memberEmail);
+    }
+    //  언어 변경
+    public void updateLanguage(Long memberId, String memberLanguage) {
+        memberMapper.updateLanguage(memberId, memberLanguage);
+    }
 //  Handle로 조회 (간소화 - 차단용)
     public Optional<MemberDTO> findByHandle(String memberHandle) {
         return memberMapper.selectMemberByHandle(memberHandle);

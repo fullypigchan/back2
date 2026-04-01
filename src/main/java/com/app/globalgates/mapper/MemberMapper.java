@@ -43,6 +43,12 @@ public interface MemberMapper {
     public void updatePassword(@Param("id") Long id, @Param("memberPassword") String memberPassword);
     //  handle 변경
     public void updateHandle(@Param("id") Long id, @Param("memberHandle") String memberHandle);
+    //  휴대폰 번호 변경
+    public void updatePhone(@Param("id") Long id, @Param("memberPhone") String memberPhone);
+    //  이메일 변경
+    public void updateEmail(@Param("id") Long id, @Param("memberEmail") String memberEmail);
+    //  언어 변경
+    public void updateLanguage(@Param("id") Long id, @Param("memberLanguage") String memberLanguage);
     //  Handle로 조회 (간소화)
     public Optional<MemberDTO> selectMemberByHandle(String memberHandle);
     //  채팅 유저 검색 (차단 사용자 제외)
