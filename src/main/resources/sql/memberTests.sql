@@ -53,7 +53,7 @@ select * from tbl_member_category_rel;
 
 drop view  vw_category_member;
 
-drop table tbl_oauth
+drop table tbl_oauth;
 drop type oauth_provider;
 
 select * from tbl_post;

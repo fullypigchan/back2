@@ -24,3 +24,4 @@ create table tbl_notification_preference (
                                              constraint fk_notification_preference_member
                                                  foreign key(member_id) references tbl_member(id)
 );
+select * from tbl_notification_preference;
