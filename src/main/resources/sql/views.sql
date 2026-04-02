@@ -11,8 +11,7 @@ join tbl_file f on af.id = f.id;
 create view vw_file_recoding as
 select
     f.id, f.original_name, f.file_name, f.file_path, f.file_size,
-    f.content_type, f.created_datetime,
-    vr.video_session_id
+    f.content_type, f.created_datetime
 from tbl_video_recoding vr
 join tbl_file f on vr.id = f.id;
 

@@ -2,17 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.app.globalgates.mapper.FileRecodingMapper">
     <insert id="insert">
-        insert into tbl_video_recoding (id, video_session_id)
-        values (#{id}, #{videoSessionId})
+        insert into tbl_video_recoding (id, meeting_id, recoding_time)
+        values (#{id}, #{meetingId}, #{recodingTime})
     </insert>
 
-    <select id="selectBySessionId">
+    <select id="selectByMeetingId">
         select
             id, original_name, file_name, file_path,
             file_size, content_type, created_datetime,
-            video_session_id
+            meeting_id, recoding_time
         from vw_file_recoding
-        where video_session_id = #{sessionId}
+        where meeting_id = #{meetingId}
     </select>
 
 </mapper>

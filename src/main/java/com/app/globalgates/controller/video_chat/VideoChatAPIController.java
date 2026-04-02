@@ -2,8 +2,10 @@ package com.app.globalgates.controller.video_chat;
 
 import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.domain.video_chat.VideoChatVO;
+import com.app.globalgates.dto.MeetingDTO;
 import com.app.globalgates.dto.chat.ChatRoomDTO;
 import com.app.globalgates.dto.video_chat.VideoChatDTO;
+import com.app.globalgates.service.MeetingService;
 import com.app.globalgates.service.S3Service;
 import com.app.globalgates.service.chat.ChatRoomService;
 import com.app.globalgates.service.video_chat.VideoChatService;
@@ -24,6 +26,7 @@ import java.util.Map;
 public class VideoChatAPIController {
     private final ChatRoomService chatRoomService;
     private final VideoChatService videoChatService;
+    private final MeetingService meetingService;
     private final SimpMessagingTemplate messagingTemplate;
     private final S3Service s3Service;
 
@@ -68,18 +71,23 @@ public class VideoChatAPIController {
         return ResponseEntity.ok(session);
     }
 
-    // 녹화된 파일 s3 서버에 저장
+    // 녹화가 종료되면 회의 정보와 녹음 파일을 같이 등록
     @PostMapping("recording")
     public ResponseEntity<?> uploadRecording(@RequestParam("file") MultipartFile file,
-                                             @RequestParam("sessionId") String sessionId,
+                                             @ModelAttribute MeetingDTO meetingDTO,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
+            // 회의 정보 등록
+            meetingDTO.setRequesterId(userDetails.getId());
+            meetingService.save(meetingDTO);
+
+            // 녹음 파일 경로 생성
             String fileName = "recording/" + userDetails.getId() + "/"
-                    + sessionId + "_" + System.currentTimeMillis() + ".webm";
+                    + meetingDTO.getId() + "_" + System.currentTimeMillis() + ".webm";
 
             // 녹음 파일 등록
             String url = s3Service.uploadFile(file, fileName);
-            videoChatService.saveRecodingFile(Long.parseLong(sessionId), file, url);
+            videoChatService.saveRecodingFile(meetingDTO, file, url);
 
             return ResponseEntity.ok(Map.of("url", url));
         } catch (Exception e) {
@@ -99,6 +107,7 @@ public class VideoChatAPIController {
         ));
     }
 
+    // 화상통화 거절 요청
     @PostMapping("/session/reject")
     public ResponseEntity<?> rejectVideoCall(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -121,6 +130,7 @@ public class VideoChatAPIController {
         return ResponseEntity.ok().build();
     }
 
+    // 화상통화 종료
     @PostMapping("session/end")
     public ResponseEntity<Void> endSession(@RequestParam Long conversationId) {
         videoChatService.endSession(conversationId);

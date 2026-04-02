@@ -1,6 +1,6 @@
 ﻿window.onload = () => {
     // -------------------------------------------------------
-    // LiveKit 설정 - 환경에 따라 자동 설정
+    // LiveKit 설정
     // -------------------------------------------------------
     let APPLICATION_SERVER_URL = "https://localhost:6080/";
     let LIVEKIT_URL = "wss://test-7paroumk.livekit.cloud";
@@ -8,35 +8,11 @@
 
     let room = null;
     let sessionId = null;
+    let partnerId = null;
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
-
-    // -------------------------------------------------------
-    // URL 자동 설정
-    // -------------------------------------------------------
-    // function configureUrls() {
-    //     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    //         showToast("카메라 권한 요청을 지원하지 않거나 보안 연결(HTTPS)이 필요합니다.");
-    //         return;
-    //     }
-    //
-    //     if (!APPLICATION_SERVER_URL) {
-    //         if (window.location.hostname === "localhost") {
-    //             APPLICATION_SERVER_URL = "https://localhost:6080/";
-    //         } else {
-    //             APPLICATION_SERVER_URL = "https://" + window.location.hostname + ":6443/";
-    //         }
-    //     }
-    //
-    //     if (!LIVEKIT_URL) {
-    //         if (window.location.hostname === "localhost") {
-    //             LIVEKIT_URL = "wss://test-7paroumk.livekit.cloud"; // 로컬: LiveKit 클라우드
-    //         } else {
-    //             LIVEKIT_URL = "wss://" + window.location.hostname + ":7443/"; // 운영: 자체 서버
-    //         }
-    //     }
-    // }
+    let recordingStartTime = null;
 
     // -------------------------------------------------------
     // Toast 알림
@@ -62,10 +38,11 @@
     // -------------------------------------------------------
     (async () => {
         const params = new URLSearchParams(window.location.search);
-        const token    = params.get("token");
-        const roomName = params.get("roomName");
-        sessionId       = params.get("sessionId");
-        const userName   = params.get("userName") || "나";
+        const token       = params.get("token");
+        const roomName    = params.get("roomName");
+        sessionId         = params.get("sessionId");
+        partnerId         = params.get("partnerId");   // 상대방 id 추가
+        const userName    = params.get("userName") || "나";
         const partnerName = params.get("partnerName") || "상대방";
 
         if (!token || !roomName) {
@@ -73,10 +50,7 @@
             return;
         }
 
-        // 나중에 주석 풀기
-        // URL 자동 설정
-        // configureUrls();
-        console.log("화상통화 입장 - roomName:", roomName);
+        console.log("화상통화 입장 - roomName:", roomName, "partnerId:", partnerId);
         await joinVideoRoom(token, roomName, userName, partnerName);
     })();
 
@@ -105,17 +79,23 @@
             console.log("참가자 입장:", partnerName);
             showToast(`${partnerName}님이 입장했습니다.`);
             updateParticipantList(userName, partnerName);
-            if (!isRecording) {
+
+            const totalParticipants = room.remoteParticipants.size + 1;
+            if (totalParticipants >= 2 && !isRecording) {
                 startRecording();
             }
         });
 
-        // 상대방 퇴장 - 화면만 제거 (내 화면 유지)
+        // 상대방 퇴장 - 녹화 종료
         room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
             console.log("참가자 퇴장:", partnerName);
             showToast(`${partnerName}님이 퇴장했습니다.`);
             updateParticipantList(userName, null);
             removeVideoContainer(partnerName);
+
+            if (isRecording) {
+                stopRecording();
+            }
         });
 
         // 내 연결 상태 변화 감지
@@ -140,7 +120,12 @@
             console.log("LiveKit 연결 성공 - 내 identity:", room.localParticipant.identity);
             console.log("현재 원격 참가자:", [...room.remoteParticipants.values()].map(p => p.identity));
 
-            // 카메라/마이크 활성화 실패 시 입장 불가
+            // 이미 상대방이 있으면 바로 녹화 시작
+            if (room.remoteParticipants.size >= 1 && !isRecording) {
+                startRecording();
+            }
+
+            // 카메라/마이크 활성화
             try {
                 await room.localParticipant.enableCameraAndMicrophone();
                 console.log("카메라/마이크 활성화 성공");
@@ -161,7 +146,6 @@
                 addVideoTrack(localVideoPublication.track, userName, true);
             }
 
-            // 이미 방에 있는 원격 참가자 확인 → 수락한 쪽에서 발신자가 이미 있을 때
             const alreadyInRoom = room.remoteParticipants.size > 0;
             updateParticipantList(userName, alreadyInRoom ? partnerName : null);
 
@@ -237,15 +221,17 @@
             if (event.data.size > 0) audioChunks.push(event.data);
         };
 
-        // S3 업로드 콜백은 start에서 등록 (stop이 호출되면 자동 실행)
         mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+
             showToast("녹화 파일을 업로드 중...");
 
             try {
                 const formData = new FormData();
                 formData.append("file", audioBlob, `recording_${Date.now()}.webm`);
-                formData.append("sessionId", sessionId || "unknown");
+                formData.append("acceptorId", partnerId || "");
+                formData.append("meetingDurationTime", duration);
 
                 const response = await fetch("/api/video-chat/recording", {
                     method: "POST",
@@ -256,7 +242,7 @@
                 if (!response.ok) throw new Error("업로드 실패");
 
                 const data = await response.json();
-                console.log("녹화 파일 업로드 완료:", data.fileName);
+                console.log("녹화 파일 업로드 완료 - meetingId:", data.meetingId);
                 showToast("녹화 파일이 저장되었습니다.");
 
             } catch (error) {
@@ -267,6 +253,7 @@
 
         mediaRecorder.start();
         isRecording = true;
+        recordingStartTime = Date.now();
         console.log("녹화 시작");
         showToast("🔴 녹화가 시작되었습니다.");
         updateRecordingUI(true);
@@ -275,7 +262,7 @@
     function stopRecording() {
         if (!isRecording) return;
         if (mediaRecorder && mediaRecorder.state !== "inactive") {
-            mediaRecorder.stop(); // ← stop() 호출 시 onstop 자동 실행 → S3 업로드
+            mediaRecorder.stop();
         }
         isRecording = false;
         console.log("녹화 중지");
@@ -303,7 +290,7 @@
     });
 
     // -------------------------------------------------------
-    // 5. 통화 종료 (confirm 추가)
+    // 5. 통화 종료
     // -------------------------------------------------------
     document.querySelector(".end-btn")?.addEventListener("click", () => {
         const confirmed = window.confirm("통화를 종료하시겠습니까?");
@@ -332,14 +319,15 @@
     // 6. 브라우저 종료 시 자동 퇴장
     // -------------------------------------------------------
     window.addEventListener("beforeunload", () => {
+        if (isRecording) {
+            stopRecording();
+        }
         room?.disconnect();
     });
-
 
     // -------------------------------------------------------
     // 7. 참여자 상태 표시
     // -------------------------------------------------------
-    // 참여자 목록 갱신
     function updateParticipantList(userName, partnerName) {
         const list = document.getElementById("participantList");
         if (!list) return;

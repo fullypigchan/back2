@@ -1890,7 +1890,7 @@ window.onload = () => {
 
             // [임시 - 로컬 테스트용 프록시] 배포 시 아래 requestLiveKitToken 원본으로 교체
             const token = await requestLiveKitToken(roomName);
-            window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(roomName)}&sessionId=${sessionId}&userName=${encodeURIComponent(currentMemberName)}&partnerName=${encodeURIComponent(currentPartnerName)}`;
+            window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(roomName)}&sessionId=${sessionId}&userName=${encodeURIComponent(currentMemberName)}&partnerName=${encodeURIComponent(currentPartnerName)}&partnerId=${currentPartnerId}`;
 
         } catch (error) {
             console.error("화상통화 시작 실패:", error.message);
@@ -1967,7 +1967,7 @@ window.onload = () => {
             modalBackDrop.classList.add("off");
             try {
                 const token = await requestLiveKitToken(payload.roomName);
-                window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(payload.roomName)}&sessionId=${payload.sessionId || ""}&userName=${encodeURIComponent(currentMemberName)}&partnerName=${encodeURIComponent(payload.callerName)}`;
+                window.location.href = `/video-chat/join?token=${encodeURIComponent(token)}&roomName=${encodeURIComponent(payload.roomName)}&sessionId=${payload.sessionId || ""}&userName=${encodeURIComponent(currentMemberName)}&partnerName=${encodeURIComponent(payload.callerName)}&partnerId=${payload.callerId}`;
             } catch (error) {
                 console.error("통화 수락 실패:", error.message);
             }
