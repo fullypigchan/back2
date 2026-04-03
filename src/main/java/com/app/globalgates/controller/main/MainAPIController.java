@@ -78,10 +78,10 @@ public class MainAPIController {
     @PostMapping("/posts/write")
     public void writePost(PostDTO postDTO,
                           @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
-        log.info("게시글 작성됐나요? 작성자(내아디)(memberId)는: {}, 내용은(content): {}", postDTO.getMemberId(), postDTO.getPostContent());
+        log.info("게시글 작성됐나요?");
         postService.writePost(postDTO, files);
-        log.info("ㅇㅇ됨");
-
+        log.info("ㅇㅇ됨. 작성자(내아디)(memberId)는: {}, 내용은(content): {}", postDTO.getMemberId(), postDTO.getPostContent());
+        log.info("첨부파일은 있나요?");
         if (files != null && !files.isEmpty()) {
             log.info("파일인식함");
             String todayPath = postService.getTodayPath();

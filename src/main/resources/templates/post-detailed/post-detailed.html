@@ -9,6 +9,8 @@
         const memberId = [[${memberId}]];
         const postId = [[${post.id}]];
         const postMemberId = [[${post.memberId}]];
+        const postMemberHandle = [[${post.memberHandle}]];
+        const postIsFollowed = [[${post.followed}]];
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=5edccf3b451ef7d32d5c833781ba22dc&libraries=services"></script>
@@ -89,6 +91,8 @@
                 </div>
 
                 <div class="post-detail-meta">
+                    <span>조회수</span>
+                    <span th:text="${post.postReadCount}"></span>
                     <span th:text="${post.createdDatetime}"></span>
                 </div>
 

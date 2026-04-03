@@ -83,12 +83,12 @@ const service = (() => {
     };
 
     return {
-        addLike, deleteLike,
-        addBookmark, deleteBookmark,
-        follow, unfollow,
-        block, report,
-        writeReply, getReplies,
-        deletePost,
-        getFollowings
+        addLike: addLike, deleteLike: deleteLike,
+        addBookmark: addBookmark, deleteBookmark: deleteBookmark,
+        follow: follow, unfollow: unfollow,
+        block: block, report: report,
+        writeReply: writeReply, getReplies: getReplies,
+        deletePost: deletePost,
+        getFollowings: getFollowings
     };
 })();

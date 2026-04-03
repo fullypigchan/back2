@@ -4,6 +4,7 @@ import com.app.globalgates.dto.BlockDTO;
 import com.app.globalgates.repository.BlockDAO;
 import com.app.globalgates.repository.chat.ChatRoomDAO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ public class BlockService {
     private final ChatRoomDAO chatRoomDAO;
 
     //    차단 추가
+    @CacheEvict(value = {"post:list", "page:search"}, allEntries = true)
     public void block(BlockDTO blockDTO) {
         blockDAO.save(blockDTO);
     }

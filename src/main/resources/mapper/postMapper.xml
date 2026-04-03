@@ -22,6 +22,11 @@
         where id = #{id}
     </update>
 
+    <update id="updateReadCount">
+        update tbl_post set post_read_count = post_read_count + 1
+        where id = #{id}
+    </update>
+
     <!-- 게시글 단건 조회 (댓글 포함) -->
     <select id="selectById">
         select p.id,
@@ -41,7 +46,7 @@
                 limit 1) as member_profile_file_name,
                (select count(*) from tbl_post_like pl where pl.post_id = p.id) as like_count,
                (select count(*) from tbl_post rp where rp.reply_post_id = p.id and rp.post_status = 'active') as reply_count,
-               (select count(*) from tbl_bookmark b where b.post_id = p.id) as bookmark_count,
+               p.post_read_count,
                bg.badge_type,
                p.community_id,
                c.community_name,
@@ -52,7 +57,11 @@
                case when exists (
                    select 1 from tbl_bookmark b
                    where b.post_id = p.id and b.member_id = #{memberId}
-               ) then true else false end as is_bookmarked
+               ) then true else false end as is_bookmarked,
+               case when exists (
+                   select 1 from tbl_follow f
+                   where f.follower_id = #{memberId} and f.following_id = p.member_id
+               ) then true else false end as is_followed
         from tbl_post p
                  join tbl_member m on p.member_id = m.id
                  left join tbl_badge bg on bg.member_id = p.member_id
@@ -71,7 +80,11 @@
                case when exists (
                    select 1 from tbl_bookmark b
                    where b.post_id = v.id and b.member_id = #{memberId}
-               ) then true else false end as is_bookmarked
+               ) then true else false end as is_bookmarked,
+               case when exists (
+                   select 1 from tbl_follow f
+                   where f.follower_id = #{memberId} and f.following_id = v.member_id
+               ) then true else false end as is_followed
         from view_post_feed v
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
           and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
@@ -91,7 +104,11 @@
         case when exists (
         select 1 from tbl_bookmark b
         where b.post_id = v.id and b.member_id = #{postSearch.memberId}
-        ) then true else false end as is_bookmarked
+        ) then true else false end as is_bookmarked,
+        case when exists (
+        select 1 from tbl_follow f
+        where f.follower_id = #{postSearch.memberId} and f.following_id = v.member_id
+        ) then true else false end as is_followed
         from view_post_feed v
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{postSearch.memberId})
         and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{postSearch.memberId} and r.target_type = 'member')

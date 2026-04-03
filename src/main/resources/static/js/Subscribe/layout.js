@@ -126,5 +126,5 @@ const subscribeLayout = (() => {
         return Number(String(value).replace(/[^\d]/g, "")) || 0;
     }
 
-    return { priceData, learnMoreData, tierMap, planMap, tierRank, parsePrice };
+    return { priceData: priceData, learnMoreData: learnMoreData, tierMap: tierMap, planMap: planMap, tierRank: tierRank, parsePrice: parsePrice };
 })();

@@ -13,6 +13,7 @@ public class ExpertDTO {
     private String memberHandle;
     private String memberBio;
     private String memberProfileFileName;
+    private String badgeType;
 
     // 누구누구님이 팔로우중 입니다 같은거
     private String followerIntro;

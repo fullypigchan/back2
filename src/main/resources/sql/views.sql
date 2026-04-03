@@ -36,7 +36,7 @@ select p.id,
        (select count(*) from tbl_post_like pl
                         where pl.post_id = p.id) as like_count,
        (select count(*) from tbl_post rp where rp.reply_post_id = p.id and rp.post_status = 'active') as reply_count,
-       (select count(*) from tbl_bookmark b where b.post_id = p.id) as bookmark_count,
+       p.post_read_count,
        bg.badge_type,
        p.community_id,
        c.community_name
@@ -134,3 +134,31 @@ select
 from tbl_member m
 left join tbl_member_profile_file mpf on mpf.member_id = m.id
 left join tbl_file tf on tf.id = mpf.id;
+
+-- 커뮤니티 목록용 (멤버수, 게시글수, 커버이미지 포함)
+create or replace view view_community_feed as
+select c.id,
+       c.community_name,
+       c.description,
+       c.creator_id,
+       c.community_status,
+       c.category_id,
+       cat.category_name,
+       c.created_datetime,
+       c.updated_datetime,
+       (select count(*)
+        from tbl_community_member cm
+        where cm.community_id = c.id) as member_count,
+       (select count(*)
+        from tbl_post p
+        where p.community_id = c.id
+          and p.post_status = 'active'
+          and p.reply_post_id is null) as post_count,
+       (select f.file_path
+        from tbl_community_file cf
+                 join tbl_file f on cf.id = f.id
+        where cf.community_id = c.id
+        limit 1) as cover_file_path
+from tbl_community c
+         left join tbl_category cat on c.category_id = cat.id
+where c.community_status = 'active';

@@ -4,7 +4,6 @@ import com.app.globalgates.dto.FollowDTO;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.repository.FollowDAO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +17,16 @@ public class FollowService {
     private final FollowDAO followDAO;
 
     //    팔로우 추가
-    @CacheEvict(value="member", allEntries=true)
+    @CacheEvict(value = {"member", "post", "post:list"}, allEntries = true)
     public void follow(FollowDTO followDTO) {
+        if (followDAO.findByFollowerIdAndFollowingId(followDTO.getFollowerId(), followDTO.getFollowingId()).isPresent()) {
+            return;
+        }
         followDAO.save(followDTO);
     }
 
     //    팔로우 해제
-    @CacheEvict(value="member", allEntries=true)
+    @CacheEvict(value = {"member", "post", "post:list"}, allEntries = true)
     public void unfollow(Long followerId, Long followingId) {
         followDAO.delete(followerId, followingId);
     }
