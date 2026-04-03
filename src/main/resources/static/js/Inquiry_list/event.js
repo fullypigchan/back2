@@ -135,7 +135,7 @@ window.onload = function () {
 
                 let html =
                     '<button class="cat-back-btn" title="이전 카테고리" type="button"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(270 12 12)"/></svg></button>';
-                html += `<button class="cat-chip parent-highlight">${category}</button>`;
+                html += `<button class="cat-chip parent-highlight active" data-cat="${category}">${category}</button>`;
                 subs.forEach((sub) => {
                     html += `<button class="cat-chip" data-cat="${sub}" data-is-sub="true">${sub}</button>`;
                 });
@@ -143,6 +143,13 @@ window.onload = function () {
                 scrollEl.innerHTML = html;
                 scrollEl.scrollLeft = 0;
                 setTimeout(checkScroll, 50);
+
+                if (currentCategory !== category) {
+                    currentCategory = category;
+                    scrollState = { page: 1, isLoading: false, hasMore: true };
+                    document.getElementById("friendsList").innerHTML = "";
+                    loadInquiryMembers(true);
+                }
                 return;
             }
 
@@ -188,7 +195,8 @@ window.onload = function () {
                         if (result.includes("언팔로우")) {
                             pendingBtn.classList.remove("disconnect");
                             pendingBtn.classList.add("default");
-                            pendingBtn.textContent = "approve";
+                            pendingBtn.textContent = "Approve";
+                            showToast("Disapproved. 거래처가 거절되었습니다.", "toast--disapprove");
                         }
                     }
                 } catch (err) {
@@ -222,7 +230,8 @@ window.onload = function () {
                 await inquiryListService.checkFollow(memberId);
                 button.classList.remove("default");
                 button.classList.add("disconnect");
-                button.textContent = "disapproved";
+                button.textContent = "Disapproved";
+                showToast("Approved. 거래처가 승인되었습니다.", "toast--approve");
             } catch (err) {
                 console.error("팔로우 요청 실패:", err);
             }
@@ -250,6 +259,18 @@ window.onload = function () {
             setActiveInquiryTab(tab.dataset.inquiryTab);
         });
     });
+
+    // 토스트 출력
+    function showToast(message, extraClass) {
+        const existing = document.querySelector(".toast");
+        if (existing) existing.remove();
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        if (extraClass) toast.classList.add(extraClass);
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
 
     window.addEventListener(
         "scroll",

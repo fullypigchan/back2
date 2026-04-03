@@ -2,9 +2,11 @@ package com.app.globalgates.service.video_chat;
 
 import com.app.globalgates.aop.annotation.LogStatus;
 import com.app.globalgates.common.enumeration.FileContentType;
+import com.app.globalgates.domain.FileRecodingVO;
 import com.app.globalgates.domain.video_chat.VideoChatVO;
 import com.app.globalgates.dto.FileDTO;
 import com.app.globalgates.dto.FileRecodingDTO;
+import com.app.globalgates.dto.MeetingDTO;
 import com.app.globalgates.dto.chat.ChatRoomDTO;
 import com.app.globalgates.dto.video_chat.VideoChatDTO;
 import com.app.globalgates.repository.FileDAO;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +57,7 @@ public class VideoChatService {
     // 녹음 파일 서버에 등록
     @Transactional
     @LogStatus
-    public void saveRecodingFile(Long sessionId, MultipartFile file, String s3Key) {
+    public void saveRecodingFile(MeetingDTO meetingDTO, MultipartFile file, String s3Key) {
         FileDTO fileDTO = new FileDTO();
         fileDTO.setOriginalName(file.getOriginalFilename());
         fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
@@ -66,13 +69,14 @@ public class VideoChatService {
 
         FileRecodingDTO fileRecodingDTO = new FileRecodingDTO();
         fileRecodingDTO.setId(fileDTO.getId());
-        fileRecodingDTO.setVideoSessionId(sessionId);
+        fileRecodingDTO.setMeetingId(meetingDTO.getId());
+        fileRecodingDTO.setRecodingTime(meetingDTO.getMeetingDurationTime());
         fileRecodingDAO.save(fileRecodingDTO.toFileRecodingVO());
     }
 
-    // 대화방의 녹음파일을 모두 조회
-    public List<FileRecodingDTO> getRecodingList(Long sessionId) {
-        return fileRecodingDAO.findBySessionId(sessionId);
+    // 회의 id로 해당 회의의 녹음 파일 조회
+    public FileRecodingDTO getRecodingFile(Long meetingId) {
+        return fileRecodingDAO.findByMeetingId(meetingId);
     }
 
     @Transactional
@@ -93,5 +97,4 @@ public class VideoChatService {
                 .createdDatetime(videoChatVO.getCreatedDatetime())
                 .build();
     }
-
 }

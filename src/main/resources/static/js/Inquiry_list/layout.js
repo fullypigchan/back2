@@ -43,7 +43,7 @@ const inquiryListLayout = (() => {
             // ── 팔로우 여부에 따른 버튼 상태 ─────────────────
             const isFollowed   = member.followed ?? false;
             const btnClass     = isFollowed ? "connect-btn disconnect" : "connect-btn default";
-            const btnText      = isFollowed ? "disapproved" : "approve";
+            const btnText      = isFollowed ? "Disapproved" : "Approve";
 
             const card = document.createElement("div");
             card.className = "user-card";

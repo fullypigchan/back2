@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,8 +19,8 @@ public class FileRecodingDAO {
         fileRecodingMapper.insert(fileRecodingVO);
     };
 
-    // 대화방 id로 녹음파일 조회
-    public List<FileRecodingDTO> findBySessionId(Long sessionId) {
-        return fileRecodingMapper.selectBySessionId(sessionId);
+    // 회의 id로 녹음파일 조회
+    public FileRecodingDTO findByMeetingId(Long meetingId) {
+        return fileRecodingMapper.selectByMeetingId(meetingId);
     }
 }

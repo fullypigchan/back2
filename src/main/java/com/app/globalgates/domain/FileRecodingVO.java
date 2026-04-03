@@ -9,5 +9,6 @@ import lombok.*;
 @Builder
 public class FileRecodingVO {
     private Long id;
-    private Long videoSessionId;
+    private Long meetingId;
+    private int recodingTime;
 }

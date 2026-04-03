@@ -18,7 +18,8 @@ public class FileRecodingDTO {
     private FileContentType contentType;
     private String createdDatetime;
 
-    private Long videoSessionId;
+    private Long meetingId;
+    private int recodingTime;
 
     public FileVO toFileVO() {
         return FileVO.builder()
@@ -35,7 +36,8 @@ public class FileRecodingDTO {
     public FileRecodingVO toFileRecodingVO() {
         return FileRecodingVO.builder()
                 .id(id)
-                .videoSessionId(videoSessionId)
+                .meetingId(meetingId)
+                .recodingTime(recodingTime)
                 .build();
     }
 }
