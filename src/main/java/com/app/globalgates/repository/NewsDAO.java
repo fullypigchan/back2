@@ -27,4 +27,5 @@ public class NewsDAO {
     public List<NewsDTO> findLatestInMain() {
         return newsMapper.selectLatestInMain();
     }
+
 }

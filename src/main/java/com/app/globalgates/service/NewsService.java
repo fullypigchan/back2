@@ -33,4 +33,5 @@ public class NewsService {
     public List<NewsDTO> getLatestNewsInMain() {
         return newsDAO.findLatestInMain();
     }
+
 }

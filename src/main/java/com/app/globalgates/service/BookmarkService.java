@@ -7,7 +7,6 @@ import com.app.globalgates.repository.BookmarkFolderDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,16 +25,13 @@ public class BookmarkService {
     }
 
     //    폴더 수정
+    @CacheEvict(value = "bookmark:folder:list", allEntries = true)
     public void updateFolder(BookmarkFolderDTO bookmarkFolderDTO) {
         bookmarkFolderDAO.update(bookmarkFolderDTO);
     }
 
     //    폴더 삭제
-    @Caching(evict = {
-            @CacheEvict(value = "bookmark:folder", key = "#id"),
-            @CacheEvict(value = "bookmark:folder:list", allEntries = true),
-            @CacheEvict(value = "bookmark:list", allEntries = true)
-    })
+    @CacheEvict(value = {"bookmark:folder:list", "bookmark:list"}, allEntries = true)
     public void deleteFolder(Long id) {
         bookmarkDAO.clearFolderId(id);
         bookmarkFolderDAO.delete(id);
@@ -53,28 +49,25 @@ public class BookmarkService {
     }
 
     //    북마크 추가
-    @CacheEvict(value = {"bookmark", "bookmark:list", "community:post:list", "post:list", "post"}, allEntries = true)
+    @CacheEvict(value = "bookmark:list", allEntries = true)
     public void addBookmark(BookmarkDTO bookmarkDTO) {
         bookmarkDAO.save(bookmarkDTO);
     }
 
     //    북마크 삭제
-    @Caching(evict = {
-            @CacheEvict(value = "bookmark", allEntries = true),
-            @CacheEvict(value = "bookmark:list", allEntries = true)
-    })
+    @CacheEvict(value = "bookmark:list", allEntries = true)
     public void deleteBookmark(Long id) {
         bookmarkDAO.delete(id);
     }
 
     //    회원/게시글 기준 북마크 삭제
-    @CacheEvict(value = {"bookmark", "bookmark:list", "community:post:list", "post:list", "post"}, allEntries = true)
+    @CacheEvict(value = "bookmark:list", allEntries = true)
     public void deleteBookmark(Long memberId, Long postId) {
         bookmarkDAO.deleteByMemberIdAndPostId(memberId, postId);
     }
 
     //    북마크 폴더 이동
-    @CacheEvict(value = {"bookmark", "bookmark:list"}, allEntries = true)
+    @CacheEvict(value = "bookmark:list", allEntries = true)
     public void updateFolderId(BookmarkDTO bookmarkDTO) {
         bookmarkDAO.updateFolderId(bookmarkDTO);
     }

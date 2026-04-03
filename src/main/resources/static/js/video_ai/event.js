@@ -1,8 +1,8 @@
-(function () {
+window.onload = () => {
     'use strict';
 
-    // ===== Sample Data =====
-    var meetings = [
+    // 1. 샘플 회의 데이터
+    const meetings = [
         {
             id: 'rec-001',
             title: '프로젝트 킥오프 회의',
@@ -32,42 +32,42 @@
         }
     ];
 
-    // ===== State =====
-    var currentMeeting = null;
-    var expandedMeetingId = null;
+    // 2. 상태 관리 변수
+    let currentMeeting = null;
+    let expandedMeetingId = null;
 
-    // ===== DOM =====
-    var fab = document.getElementById('vaiFab');
-    var dropdown = document.getElementById('vaiDropdown');
-    var meetingToggle = document.getElementById('vaiMeetingToggle');
-    var meetingChevron = document.getElementById('vaiMeetingChevron');
-    var meetingList = document.getElementById('vaiMeetingList');
+    // 3. DOM 요소 참조
+    const fab = document.getElementById('vaiFab');
+    const dropdown = document.getElementById('vaiDropdown');
+    const meetingToggle = document.getElementById('vaiMeetingToggle');
+    const meetingChevron = document.getElementById('vaiMeetingChevron');
+    const meetingList = document.getElementById('vaiMeetingList');
 
-    var audioPanel = document.getElementById('vaiAudioPanel');
-    var audioPlayer = document.getElementById('vaiAudioPlayer');
-    var audioTitle = document.getElementById('vaiAudioTitle');
-    var audioBack = document.getElementById('vaiAudioBack');
-    var audioClose = document.getElementById('vaiAudioClose');
+    const audioPanel = document.getElementById('vaiAudioPanel');
+    const audioPlayer = document.getElementById('vaiAudioPlayer');
+    const audioTitle = document.getElementById('vaiAudioTitle');
+    const audioBack = document.getElementById('vaiAudioBack');
+    const audioClose = document.getElementById('vaiAudioClose');
 
-    var summaryPanel = document.getElementById('vaiSummaryPanel');
-    var summaryTitle = document.getElementById('vaiSummaryTitle');
-    var summaryText = document.getElementById('vaiSummaryText');
-    var summaryBack = document.getElementById('vaiSummaryBack');
-    var summaryClose = document.getElementById('vaiSummaryClose');
+    const summaryPanel = document.getElementById('vaiSummaryPanel');
+    const summaryTitle = document.getElementById('vaiSummaryTitle');
+    const summaryText = document.getElementById('vaiSummaryText');
+    const summaryBack = document.getElementById('vaiSummaryBack');
+    const summaryClose = document.getElementById('vaiSummaryClose');
 
-    var chatPanel = document.getElementById('vaiChatPanel');
-    var chatTitle = document.getElementById('vaiChatTitle');
-    var chatMessages = document.getElementById('vaiChatMessages');
-    var chatTextarea = document.querySelector('.vai-chat-textarea');
-    var chatSendBtn = document.getElementById('vaiChatSend');
-    var chatBack = document.getElementById('vaiChatBack');
-    var chatClose = document.getElementById('vaiChatClose');
+    const chatPanel = document.getElementById('vaiChatPanel');
+    const chatTitle = document.getElementById('vaiChatTitle');
+    const chatMessages = document.getElementById('vaiChatMessages');
+    const chatTextarea = document.querySelector('.vai-chat-textarea');
+    const chatSendBtn = document.getElementById('vaiChatSend');
+    const chatBack = document.getElementById('vaiChatBack');
+    const chatClose = document.getElementById('vaiChatClose');
 
-    // ===== Render Meeting List =====
+    // 4. 회의 목록 렌더링
     function renderMeetings() {
-        var html = '';
-        for (var i = 0; i < meetings.length; i++) {
-            var m = meetings[i];
+        let html = '';
+        for (let i = 0; i < meetings.length; i++) {
+            const m = meetings[i];
             html +=
                 '<div class="vai-meeting-item" data-id="' + m.id + '">' +
                 '  <div class="vai-meeting-row">' +
@@ -111,35 +111,33 @@
         bindMeetingEvents();
     }
 
-    // ===== Find meeting data by id =====
+    // 5. ID로 회의 데이터 검색
     function findMeeting(id) {
-        for (var i = 0; i < meetings.length; i++) {
+        for (let i = 0; i < meetings.length; i++) {
             if (meetings[i].id === id) return meetings[i];
         }
         return null;
     }
 
-    // ===== Bind meeting click events =====
+    // 6. 회의 항목 클릭 이벤트 바인딩
     function bindMeetingEvents() {
-        var rows = meetingList.querySelectorAll('.vai-meeting-row');
+        // 6-1. 회의 행 클릭시 서브액션 토글
+        const rows = meetingList.querySelectorAll('.vai-meeting-row');
         rows.forEach(function (row) {
             row.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var item = row.closest('.vai-meeting-item');
-                var id = item.getAttribute('data-id');
-                var subActions = item.querySelector('.vai-sub-actions');
-                var chevron = item.querySelector('.vai-meeting-chevron');
+                const item = row.closest('.vai-meeting-item');
+                const id = item.getAttribute('data-id');
+                const subActions = item.querySelector('.vai-sub-actions');
+                const chevron = item.querySelector('.vai-meeting-chevron');
 
                 if (expandedMeetingId === id) {
-                    // 닫기
                     subActions.classList.remove('open');
                     chevron.classList.remove('expanded');
                     expandedMeetingId = null;
                     currentMeeting = null;
                 } else {
-                    // 이전 열린 것 즉시 닫기 (애니메이션 없이)
                     collapseAllSubActions(true);
-                    // 열기
                     subActions.classList.add('open');
                     chevron.classList.add('expanded');
                     expandedMeetingId = id;
@@ -148,11 +146,12 @@
             });
         });
 
-        var subActions = meetingList.querySelectorAll('.vai-sub-action');
+        // 6-2. 서브액션 버튼 클릭시 패널 열기
+        const subActions = meetingList.querySelectorAll('.vai-sub-action');
         subActions.forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var action = btn.getAttribute('data-action');
+                const action = btn.getAttribute('data-action');
                 if (!currentMeeting) return;
 
                 if (action === 'audio') {
@@ -166,14 +165,15 @@
         });
     }
 
+    // 7. 모든 서브액션 접기
     function collapseAllSubActions(instant) {
-        var allSubs = meetingList.querySelectorAll('.vai-sub-actions');
-        var allChevrons = meetingList.querySelectorAll('.vai-meeting-chevron');
+        const allSubs = meetingList.querySelectorAll('.vai-sub-actions');
+        const allChevrons = meetingList.querySelectorAll('.vai-meeting-chevron');
         allSubs.forEach(function (s) {
             if (instant) s.classList.add('no-transition');
             s.classList.remove('open');
             if (instant) {
-                s.offsetHeight; // force reflow
+                s.offsetHeight;
                 s.classList.remove('no-transition');
             }
         });
@@ -181,7 +181,7 @@
         expandedMeetingId = null;
     }
 
-    // ===== Close helpers =====
+    // 8. 모든 패널 닫기
     function closeAllPanels() {
         audioPanel.classList.remove('open');
         summaryPanel.classList.remove('open');
@@ -189,6 +189,7 @@
         audioPlayer.pause();
     }
 
+    // 9. 드롭다운 포함 전체 닫기
     function closeEverything() {
         dropdown.classList.remove('open');
         meetingList.classList.remove('open');
@@ -197,12 +198,13 @@
         closeAllPanels();
     }
 
+    // 10. 패널에서 드롭다운으로 복귀
     function backToDropdown() {
         closeAllPanels();
         dropdown.classList.add('open');
     }
 
-    // ===== FAB -> Dropdown =====
+    // 11. FAB 버튼 클릭시 드롭다운 토글
     fab.addEventListener('click', function (e) {
         e.stopPropagation();
         if (dropdown.classList.contains('open')) {
@@ -213,10 +215,10 @@
         }
     });
 
-    // ===== Meeting Toggle (아코디언) =====
+    // 12. 회의 목록 아코디언 토글
     meetingToggle.addEventListener('click', function (e) {
         e.stopPropagation();
-        var isOpen = meetingList.classList.contains('open');
+        const isOpen = meetingList.classList.contains('open');
         if (isOpen) {
             meetingList.classList.remove('open');
             meetingChevron.classList.remove('expanded');
@@ -227,7 +229,7 @@
         }
     });
 
-    // ===== Open panels =====
+    // 13. 오디오 패널 열기
     function openAudio() {
         audioTitle.textContent = currentMeeting.title + ' - 오디오';
         if (currentMeeting.audioUrl) {
@@ -240,6 +242,7 @@
         audioPanel.classList.add('open');
     }
 
+    // 14. 요약본 패널 열기
     function openSummary() {
         summaryTitle.textContent = currentMeeting.summaryTitle;
         summaryText.textContent = currentMeeting.summaryText;
@@ -248,6 +251,7 @@
         summaryPanel.classList.add('open');
     }
 
+    // 15. AI 채팅 패널 열기
     function openChat() {
         chatTitle.textContent = currentMeeting.title + ' - AI 질문';
         resetChat();
@@ -257,28 +261,30 @@
         setTimeout(function () { chatTextarea.focus(); }, 100);
     }
 
-    // ===== Back / Close buttons =====
+    // 16. 각 패널 뒤로가기 버튼
     audioBack.addEventListener('click', function (e) { e.stopPropagation(); backToDropdown(); });
-    audioClose.addEventListener('click', function (e) { e.stopPropagation(); closeEverything(); });
     summaryBack.addEventListener('click', function (e) { e.stopPropagation(); backToDropdown(); });
-    summaryClose.addEventListener('click', function (e) { e.stopPropagation(); closeEverything(); });
     chatBack.addEventListener('click', function (e) { e.stopPropagation(); backToDropdown(); });
+
+    // 17. 각 패널 닫기 버튼
+    audioClose.addEventListener('click', function (e) { e.stopPropagation(); closeEverything(); });
+    summaryClose.addEventListener('click', function (e) { e.stopPropagation(); closeEverything(); });
     chatClose.addEventListener('click', function (e) { e.stopPropagation(); closeEverything(); });
 
-    // ===== Outside click =====
+    // 18. 외부 클릭시 전체 닫기
     document.addEventListener('click', function (e) {
-        var container = document.getElementById('vaiContainer');
+        const container = document.getElementById('vaiContainer');
         if (!container.contains(e.target)) {
             closeEverything();
         }
     });
 
-    // ===== ESC =====
+    // 19. ESC 키 입력시 전체 닫기
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeEverything();
     });
 
-    // ===== Chat =====
+    // 20. 채팅 초기화
     function resetChat() {
         chatMessages.innerHTML =
             '<div class="vai-chat-empty">' +
@@ -289,19 +295,21 @@
             '</div>';
     }
 
+    // 21. 채팅 메시지 추가
     function addMessage(text, type) {
-        var empty = chatMessages.querySelector('.vai-chat-empty');
+        const empty = chatMessages.querySelector('.vai-chat-empty');
         if (empty) empty.remove();
 
-        var div = document.createElement('div');
+        const div = document.createElement('div');
         div.className = 'vai-msg ' + (type === 'user' ? 'vai-msg-user' : 'vai-msg-ai');
         div.textContent = text;
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    // 22. 채팅 메시지 전송
     function sendMessage() {
-        var text = chatTextarea.value.trim();
+        const text = chatTextarea.value.trim();
         if (!text) return;
         addMessage(text, 'user');
         chatTextarea.value = '';
@@ -311,16 +319,21 @@
         }, 800);
     }
 
+    // 23. 채팅 전송 버튼 클릭
     chatSendBtn.addEventListener('click', function (e) { e.stopPropagation(); sendMessage(); });
+
+    // 24. 채팅 입력창 엔터키 전송
     chatTextarea.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
+
+    // 25. 채팅 입력창 높이 자동 조절
     chatTextarea.addEventListener('input', function () {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
 
-    // ===== Init =====
+    // 26. 초기 렌더링 실행
     renderMeetings();
 
-})();
+};

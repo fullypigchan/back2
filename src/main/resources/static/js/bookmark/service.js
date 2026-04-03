@@ -42,6 +42,7 @@ const BookmarkService = (function () {
 
         // 북마크
         getAll: (memberId) => request(`${BASE}/members/${memberId}`),
+        getByMemberAndPost: (memberId, postId) => request(`${BASE}/members/${memberId}/posts/${postId}`),
         getByFolder: (folderId) => request(`${BASE}/folders/${folderId}/items`),
         getUncategorized: (memberId) => request(`${BASE}/members/${memberId}/uncategorized`),
         add: (memberId, postId, folderId) => {

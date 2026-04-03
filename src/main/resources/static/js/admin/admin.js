@@ -766,6 +766,28 @@
         let result = confirm("뉴스를 등록하시겠습니까?");
         if (!result) return;
 
+        // ═══ [n8n 연동용] 실제 DB 등록 fetch ═══
+        // 백엔드 NewsAPIController POST /api/news 엔드포인트 활성화 후 주석 해제
+        // const category = document.querySelector("#newsCategory").value;
+        // const sourceUrl = document.querySelector("#newsSource").value.trim();
+        //
+        // fetch("/api/news", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //         newsTitle: title,
+        //         newsContent: content,
+        //         newsSourceUrl: sourceUrl,
+        //         newsCategory: category,
+        //         newsType: "general"   // 속보일 경우 "emergency"
+        //     })
+        // }).then(res => {
+        //     if (!res.ok) throw new Error("등록 실패");
+        //     alert("뉴스가 등록되었습니다.");
+        // }).catch(err => {
+        //     alert("뉴스 등록에 실패했습니다: " + err.message);
+        // });
+
         alert("뉴스가 등록되었습니다.");
 
         document.querySelector("#newsUrl").value = "";

@@ -83,6 +83,13 @@ public class BookmarkRestController {
         return bookmarkService.getUncategorizedBookmarks(memberId);
     }
 
+    @GetMapping("/members/{memberId}/posts/{postId}")
+    public ResponseEntity<BookmarkDTO> getBookmarkByMemberAndPost(@PathVariable Long memberId, @PathVariable Long postId) {
+        return bookmarkService.getBookmark(memberId, postId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrity(DataIntegrityViolationException e) {
         log.error("데이터 무결성 위반: {}", e.getMessage());

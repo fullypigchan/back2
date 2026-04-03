@@ -968,6 +968,17 @@ input {
     fill: currentColor;
 }
 
+.bookmark-share-sheet-folder-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.bookmark-share-sheet-folder-count {
+    color: #536471;
+    font-size: 13px;
+    margin-left: auto;
+}
+
 .bookmark-share-sheet-empty {
     padding: 24px 16px;
     color: #536471;

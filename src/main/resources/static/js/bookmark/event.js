@@ -28,11 +28,8 @@
     const shareBookmarkCreateFolder = document.getElementById(
         "shareBookmarkCreateFolder",
     );
-    const shareBookmarkFolderButton = document.getElementById(
-        "shareBookmarkFolderButton",
-    );
-    const shareBookmarkFolderCheck = document.getElementById(
-        "shareBookmarkFolderCheck",
+    const shareBookmarkFolderList = document.getElementById(
+        "shareBookmarkFolderList",
     );
 
     const bookmarkModal = document.getElementById("bookmarkModal");
@@ -145,8 +142,8 @@
     let toastTimer = null;
     let currentFolderId = null;
     let currentFolderName = "모든 북마크";
-    let currentFolderDeleted = false;
     const bookmarkFollowState = new Map();
+    let pendingShareBookmarkReopen = false;
     const bookmarkFolderList = document.getElementById("bookmarkFolderList");
 
     // ── API + 렌더링은 service.js, layout.js 모듈 사용 ──
@@ -453,22 +450,38 @@
         updateBodyScrollLock();
     }
 
+    async function loadShareBookmarkFolders() {
+        if (typeof memberId === "undefined" || !memberId || !shareBookmarkFolderList) return;
+        const result = await BookmarkService.getFolders(memberId);
+        if (!result.ok) return;
+        const folders = result.data || [];
+        let html = `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="">
+            <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.998 8.5c0-1.38 1.119-2.5 2.5-2.5h9c1.381 0 2.5 1.12 2.5 2.5v14.12l-7-3.5-7 3.5V8.5zM18.5 2H8.998v2H18.5c.275 0 .5.224.5.5V15l2 1.4V4.5c0-1.38-1.119-2.5-2.5-2.5z"/></svg></span>
+            <span class="bookmark-share-sheet-folder-name">미분류</span>
+        </button>`;
+        folders.forEach((f) => {
+            html += `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="${f.id}">
+                <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.998 8.5c0-1.38 1.119-2.5 2.5-2.5h9c1.381 0 2.5 1.12 2.5 2.5v14.12l-7-3.5-7 3.5V8.5zM18.5 2H8.998v2H18.5c.275 0 .5.224.5.5V15l2 1.4V4.5c0-1.38-1.119-2.5-2.5-2.5z"/></svg></span>
+                <span class="bookmark-share-sheet-folder-name">${escapeHtml(f.folderName)}</span>
+                <span class="bookmark-share-sheet-folder-count">${f.bookmarkCount || 0}</span>
+            </button>`;
+        });
+        shareBookmarkFolderList.innerHTML = html;
+    }
+
     function openShareBookmarkModal(button) {
         const {bookmarkButton, postId} = getSharePostMeta(button);
         closeShareDropdown();
         closeShareModal();
         activeShareBookmarkButton = bookmarkButton;
         activeShareBookmarkPostId = postId;
-        shareBookmarkFolderCheck?.classList.toggle(
-            "bookmark-share-sheet-folder-check--active",
-            bookmarkButton?.classList.contains("active") ?? false,
-        );
         if (!shareBookmarkModal) {
             return;
         }
         toggleHiddenLayer(shareBookmarkModal, true);
         activeShareModal = shareBookmarkModal;
         updateBodyScrollLock();
+        loadShareBookmarkFolders();
     }
 
     function positionDropdownLayer(layer, anchorRect) {
@@ -563,11 +576,12 @@
     async function deleteCurrentFolder() {
         if (!currentFolderId) return;
         await BookmarkService.deleteFolder(currentFolderId);
-        currentFolderDeleted = true;
         closeDeleteModal();
         if (isDetailViewOpen) {
             closeBookmarkDetail();
         }
+        currentFolderId = null;
+        currentFolderName = "모든 북마크";
         await loadFolders();
         showToast("폴더를 삭제했습니다");
     }
@@ -689,7 +703,7 @@
     }
 
     function openBookmarkDetail(folderName) {
-        if (!listView || !detailView || isDetailViewOpen || currentFolderDeleted) {
+        if (!listView || !detailView || isDetailViewOpen) {
             return;
         }
         currentFolderName = folderName || currentFolderName;
@@ -765,9 +779,20 @@
                 searchInput.value.trim().length > 0,
             );
         };
+        const filterFolders = () => {
+            const query = searchInput.value.trim().toLowerCase();
+            const folderButtons = bookmarkFolderList?.querySelectorAll(".bookmark-item") ?? [];
+            folderButtons.forEach((btn) => {
+                const label = btn.querySelector(".bookmark-item-label")?.textContent?.toLowerCase() || "";
+                btn.style.display = !query || label.includes(query) ? "" : "none";
+            });
+        };
         searchInput.addEventListener("focus", syncSearchState);
         searchInput.addEventListener("blur", syncSearchState);
-        searchInput.addEventListener("input", syncSearchState);
+        searchInput.addEventListener("input", () => {
+            syncSearchState();
+            filterFolders();
+        });
         syncSearchState();
     }
 
@@ -794,6 +819,7 @@
             toggleClassModal(bookmarkModal, false);
             if (reset) {
                 resetModalForm();
+                pendingShareBookmarkReopen = false;
             }
             updateBodyScrollLock();
         }
@@ -825,6 +851,13 @@
                 showToast(result.message);
             }
             closeModal();
+            if (pendingShareBookmarkReopen && activeShareBookmarkPostId) {
+                pendingShareBookmarkReopen = false;
+                toggleHiddenLayer(shareBookmarkModal, true);
+                activeShareModal = shareBookmarkModal;
+                updateBodyScrollLock();
+                await loadShareBookmarkFolders();
+            }
         });
     }
 
@@ -947,15 +980,32 @@
     });
 
     shareBookmarkCreateFolder?.addEventListener("click", () => {
+        pendingShareBookmarkReopen = true;
         closeShareModal();
         modalOpenButton?.click();
     });
 
-    shareBookmarkFolderButton?.addEventListener("click", () => {
+    shareBookmarkModal?.addEventListener("click", async (event) => {
+        const folderBtn = event.target.closest("[data-share-folder-id]");
+        if (!folderBtn) return;
+        const folderId = folderBtn.dataset.shareFolderId || null;
+        const postId = activeShareBookmarkPostId;
+        if (!postId || typeof memberId === "undefined" || !memberId) return;
+
+        const existing = await BookmarkService.getByMemberAndPost(memberId, postId);
+
+        if (existing.ok && existing.data) {
+            await BookmarkService.moveFolder(existing.data.id, folderId);
+        } else {
+            await BookmarkService.add(memberId, postId, folderId);
+        }
+
         if (activeShareBookmarkButton) {
             setBookmarkButtonState(activeShareBookmarkButton, true);
         }
         closeShareModal();
+        const folderName = folderBtn.querySelector(".bookmark-share-sheet-folder-name")?.textContent || "폴더";
+        showToast(`${folderName}에 추가했습니다`);
     });
 
     shareDropdown?.addEventListener("click", (event) => {
