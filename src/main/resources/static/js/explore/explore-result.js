@@ -7,6 +7,24 @@ window.onload = () => {
     const latestSection = document.getElementById("latestSection");
     const membersSection = document.getElementById("membersSection");
 
+    async function getLoginMemberInfo() {
+        try {
+            const response = await fetch("/api/member/info", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            if (!response.ok) throw new Error("유저 정보 조회 실패");
+            let member = await response.json();
+            return member.id;
+
+        } catch (err) {
+            console.error("getLoginMemberInfo 실패:", err);
+            return null;
+        }
+    }
+
     if (tabPopular && tabLatest && tabMembers && popularSection && latestSection && membersSection) {
         function showPopularTab() {
             tabPopular.classList.add("isActive");
@@ -607,6 +625,23 @@ window.onload = () => {
             if (e.key === "Escape") {
                 closePostMoreDropdown();
                 closePostMoreModal();
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            // 버튼/액션 영역 클릭이면 무시
+            if (e.target.closest(
+                ".tweet-action-bar, .postMoreButton, [data-testid='reply'], " +
+                ".tweet-action-btn--like, .tweet-action-btn--bookmark, " +
+                ".tweet-action-btn--share, .postAvatar"
+            )) return;
+
+            const card = e.target.closest(".postCard");
+            if (!card) return;
+
+            const postId = card.dataset.postId;
+            if (postId) {
+                window.location.href = `/main/post/detail/${postId}`;
             }
         });
     })();
@@ -2940,15 +2975,16 @@ window.onload = () => {
             });
         });
     });
-    document.querySelectorAll("[data-testid='reply']").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            closeShareDropdown();
-            closeNotificationDropdown();
-            openReplyModal(button);
-        });
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-testid='reply']");
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        closeShareDropdown();
+        closeNotificationDropdown();
+        openReplyModal(btn);
     });
+
     replyCloseButton?.addEventListener("click", closeReplyModal);
     replyModalOverlay?.addEventListener("click", (e) => {
         if (e.target === replyModalOverlay) closeReplyModal();
@@ -3181,8 +3217,23 @@ window.onload = () => {
         renderTagResults([]);
         replyTagSearchInput?.focus();
     });
-    replySubmitButton?.addEventListener("click", (e) => {
+    replySubmitButton?.addEventListener("click", async () => {
         if (!activeReplyTrigger || replySubmitButton.disabled) return;
+        const postId = activeReplyTrigger.closest(".postCard")?.dataset.postId;
+        const memberId = await getLoginMemberInfo();
+        if (postId && replyEditor) {
+            try {
+                const formData = new FormData();
+                formData.append("memberId", memberId);
+                formData.append("postContent", replyEditor.textContent);
+                if (attachedReplyFiles.length > 0) {
+                    attachedReplyFiles.forEach(f => formData.append("files", f));
+                }
+                await service.writeReply(postId, formData);
+            } catch (err) {
+                console.error("답글 저장 실패:", err);
+            }
+        }
         updateReplyCount(activeReplyTrigger);
         closeReplyModal({skipConfirm: true});
     });

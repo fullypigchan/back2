@@ -1,4 +1,4 @@
-window.onload = function () {
+function initReplyModule(memberId) {
     // ===== 1. DOM =====
     // 탭 네비게이션 링크 목록
     const tabLinks = document.querySelectorAll(".tab-link");
@@ -1782,6 +1782,13 @@ window.onload = function () {
         syncReplySubmitState();
         syncReplyFormatButtons();
         window.requestAnimationFrame(() => {
+            const myAvatarEl = q(".tweet-modal__avatar-image");
+            if (myAvatarEl && typeof loginMember !== "undefined") {
+                const myInitial = (loginMember.memberNickname || loginMember.memberHandle || "?").charAt(0);
+                myAvatarEl.src = loginMember.memberProfileFileName
+                    || (typeof layout !== "undefined" ? layout.buildAvatarDataUri(myInitial) : "");
+                myAvatarEl.alt = loginMember.memberNickname || "";
+            }
             replyEditor.focus();
         });
     }
@@ -2973,12 +2980,25 @@ window.onload = function () {
     });
 
     // 답글 제출 버튼 클릭 시 답글 수를 증가시키고 모달을 닫는다
-    replySubmitButton?.addEventListener("click", () => {
+    replySubmitButton?.addEventListener("click", async () => {
         if (!activeReplyTrigger || replySubmitButton.disabled) return;
+        const postId = activeReplyTrigger.closest(".postCard")?.dataset.postId;
+        if (postId && replyEditor) {
+            try {
+                const formData = new FormData();
+                formData.append("memberId", memberId);
+                formData.append("postContent", replyEditor.textContent);
+                if (attachedReplyFiles.length > 0) {
+                    attachedReplyFiles.forEach(f => formData.append("files", f));
+                }
+                await service.writeReply(postId, formData);
+            } catch (err) {
+                console.error("답글 저장 실패:", err);
+            }
+        }
         updateReplyCount(activeReplyTrigger);
         closeReplyModal({skipConfirm: true});
     });
-
     // 문서 클릭 시 열린 피커/드롭다운을 외부 클릭으로 닫는다
     document.addEventListener("click", (e) => {
         if (
@@ -3115,11 +3135,17 @@ window.onload = function () {
     });
 
     // 판매글 선택 서브뷰 열기 (compose view를 숨기고 product view를 표시)
-    function openProductSelectPanel() {
+    async function openProductSelectPanel() {
         if (!replyProductView) return;
-        renderProductList();
         if (composeView) composeView.hidden = true;
         replyProductView.hidden = false;
+        try {
+            const products = await service.getMyProducts(memberId);
+            renderProductList(products);
+        } catch (err) {
+            console.error("상품 목록 로드 실패:", err);
+            renderProductList([]);
+        }
     }
 
     // 판매글 선택 서브뷰 닫기 (product view를 숨기고 compose view를 복원)
@@ -3130,57 +3156,31 @@ window.onload = function () {
     }
 
     // 내 상품 목록 렌더링 (임시저장 수정 모드와 동일한 draft-panel 스타일)
-    function renderProductList() {
+    function renderProductList(products) {
         if (!productSelectList) return;
-        // TODO: REST API - GET /api/products/my 로 실제 데이터 가져오기
-        // 현재는 하드코딩된 샘플 데이터 사용
-        const sampleProducts = [
-            {
-                id: "1",
-                name: "상품 이름 1",
-                price: "₩50,000",
-                stock: "100개",
-                image: "../../static/images/main/global-gates-logo.png",
-                tags: ["#부품", "#전자"]
-            },
-            {
-                id: "2",
-                name: "상품 이름 2",
-                price: "₩30,000",
-                stock: "50개",
-                image: "../../static/images/main/global-gates-logo.png",
-                tags: ["#부품", "#기계"]
-            },
-            {
-                id: "3",
-                name: "상품 이름 3",
-                price: "₩80,000",
-                stock: "200개",
-                image: "../../static/images/main/global-gates-logo.png",
-                tags: ["#부품", "#소재"]
-            },
-        ];
-
-        if (sampleProducts.length === 0) {
+        if (!products || products.length === 0) {
             productSelectList.innerHTML = "";
             if (productSelectEmpty) productSelectEmpty.hidden = false;
             return;
         }
         if (productSelectEmpty) productSelectEmpty.hidden = true;
-
-        productSelectList.innerHTML = sampleProducts.map((p) => `
+        productSelectList.innerHTML = products.map((p) => {
+            const img = (p.postFiles && p.postFiles.length > 0) ? p.postFiles[0].filePath : "../../static/images/main/global-gates-logo.png";
+            const tags = (p.hashtags && p.hashtags.length > 0) ? p.hashtags.map(t => "#" + t.tagName).join(" ") : "";
+            return `
             <button type="button" class="draft-panel__item draft-panel__item--selectable" data-product-id="${p.id}" aria-pressed="false">
                 <span class="draft-panel__checkbox">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9 20c-.264 0-.518-.104-.707-.293l-4.785-4.785 1.414-1.414L9 17.586 19.072 7.5l1.42 1.416L9.708 19.7c-.188.19-.442.3-.708.3z"></path></g></svg>
                 </span>
-                <img class="draft-panel__avatar" alt="" src="${p.image}">
+                <img class="draft-panel__avatar" alt="" src="${img}">
                 <span class="draft-panel__item-body">
-                    <span class="draft-panel__text">${p.name}</span>
-                    <span class="draft-panel__meta">${p.tags.join(" ")}</span>
-                    <span class="draft-panel__date">${p.price} · ${p.stock}</span>
+                    <span class="draft-panel__text">${p.postTitle || ""}</span>
+                    <span class="draft-panel__meta">${tags}</span>
+                    <span class="draft-panel__date">₩${(p.productPrice || 0).toLocaleString()} · ${p.productStock || 0}개</span>
                 </span>
             </button>
-        `).join("");
+        `;
+        }).join("");
     }
 
     // 상품 클릭 시 선택 토글 (단일 선택) — 한 번만 등록
@@ -3247,7 +3247,6 @@ window.onload = function () {
         selection.removeAllRanges();
         selection.addRange(range);
     }
-
 };
 
 

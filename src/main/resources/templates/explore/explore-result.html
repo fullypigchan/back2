@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/common/layout}">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,10 +9,13 @@
     <link rel="stylesheet" href="/css/explore/explore-result.css"/>
     <script src="/js/explore/explore-result.js"></script>
     <script src="/js/explore/service.js"></script>
+    <script src="/js/main/service.js"></script>
     <script src="/js/explore/layout.js"></script>
+    <script src="/js/explore/reply.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
+<th:block layout:fragment="content">
 <div class="pageLayout" id="mainPage">
     <!-- 좌측 글로벌 내비게이션: 홈에서 가장 자주 쓰는 이동 링크와 빠른 작성 진입점, 계정 메뉴가 모여 있다. -->
 
@@ -117,6 +121,7 @@
         </div>
     </div>
 </div>
+
 <!-- 답글 모달 전체 레이어: event.js의 openReplyModal()/closeReplyModal()이 이 블록을 열고 닫는다 -->
 <div class="tweet-modal-overlay" data-reply-modal hidden>
     <div class="tweet-modal" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
@@ -663,6 +668,7 @@
         </div>
     </div><!-- /.tweet-modal -->
 </div><!-- /.tweet-modal-overlay -->
+</th:block>
 </body>
 </html>
 
