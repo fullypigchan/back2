@@ -97,15 +97,19 @@ public class MemberDAO {
     public void updateLanguage(Long memberId, String memberLanguage) {
         memberMapper.updateLanguage(memberId, memberLanguage);
     }
+    //  국가 변경
+    public void updateCountry(Long memberId, String memberCountry) {
+        memberMapper.updateCountry(memberId, memberCountry);
+    }
     //  푸시 알림 master on/off 변경
     public void updatePushEnabled(Long memberId, boolean pushEnabled) {
         memberMapper.updatePushEnabled(memberId, pushEnabled);
     }
-//  Handle로 조회 (간소화 - 차단용)
+    //  Handle로 조회 (간소화 - 차단용)
     public Optional<MemberDTO> findByHandle(String memberHandle) {
         return memberMapper.selectMemberByHandle(memberHandle);
     }
-//  채팅 유저 검색 (차단 사용자 제외)
+    //  채팅 유저 검색 (차단 사용자 제외)
     public List<MemberDTO> searchByKeyword(String keyword, Long memberId){
         return memberMapper.searchByKeyword(keyword, memberId);
     }
@@ -119,7 +123,7 @@ public class MemberDAO {
     public List<InquiryMemberDTO> findInquiryMembers(Criteria criteria, String categoryName, Long memberId) {
         return memberMapper.selectInquiryMembers(criteria, categoryName, memberId);
     }
-//  회원 역할 변경
+    //  회원 역할 변경
     public void setMemberRole(Long id, MemberRole memberRole) {
         memberMapper.updateMemberRole(id, memberRole);
     }

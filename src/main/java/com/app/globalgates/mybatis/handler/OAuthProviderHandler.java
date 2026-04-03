@@ -27,7 +27,10 @@ public class OAuthProviderHandler implements TypeHandler<OAuthProvider> {
 
     @Override
     public OAuthProvider getResult(ResultSet rs, String columnName) throws SQLException {
-        return switch (rs.getString(columnName)) {
+        String value = rs.getString(columnName);
+        if(value == null) return null;
+
+        return switch (value.toLowerCase()) {
             case "kakao" -> OAuthProvider.KAKAO;
             case "naver" -> OAuthProvider.NAVER;
             case "google" -> OAuthProvider.GOOGLE;

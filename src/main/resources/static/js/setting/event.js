@@ -244,20 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const settingMember = window.settingMember || {};
     const settingNotificationPreference = window.settingNotificationPreference || {};
 
-    // 알림 필터 상세 화면의 체크 상태.
-    // 서버가 내려준 값을 우선 사용하고, 아직 저장 이력이 없는 회원만 화면 기본값으로 떨어뜨린다.
-    const notificationFilterState = {
-        isQualityFilterEnabled:
-            settingNotificationPreference.qualityFilterEnabled ?? true,
-        mutedNotificationOptions: {
-            nonFollowing: Boolean(settingNotificationPreference.mutedNonFollowing),
-            notFollowingYou: Boolean(settingNotificationPreference.mutedNotFollowingYou),
-            newAccount: Boolean(settingNotificationPreference.mutedNewAccount),
-            defaultProfile: Boolean(settingNotificationPreference.mutedDefaultProfile),
-            unverifiedEmail: Boolean(settingNotificationPreference.mutedUnverifiedEmail),
-            unverifiedPhone: Boolean(settingNotificationPreference.mutedUnverifiedPhone),
-        },
-    };
     /*
      * 푸시 알림 환경설정 상태.
      * Spring 연동 시 예시:
@@ -316,22 +302,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "https://pbs.twimg.com/profile_images/1886326200253202432/j2j1wUY3_x96.jpg",
         phone: settingMember.memberPhone || "",
         email: settingMember.memberEmail || "",
-        country: settingMember.memberRegion || "설정되지 않음",
+        country: settingMember.memberCountry || "설정되지 않음",
         language: settingMember.memberLanguage || "설정되지 않음",
         createdAt: settingMember.createdDatetime || "생성일 정보 없음",
+        memberProvider: settingMember.memberProvider
     };
-
-    function buildNotificationFilterPayload() {
-        return {
-            qualityFilterEnabled: notificationFilterState.isQualityFilterEnabled,
-            mutedNonFollowing: notificationFilterState.mutedNotificationOptions.nonFollowing,
-            mutedNotFollowingYou: notificationFilterState.mutedNotificationOptions.notFollowingYou,
-            mutedNewAccount: notificationFilterState.mutedNotificationOptions.newAccount,
-            mutedDefaultProfile: notificationFilterState.mutedNotificationOptions.defaultProfile,
-            mutedUnverifiedEmail: notificationFilterState.mutedNotificationOptions.unverifiedEmail,
-            mutedUnverifiedPhone: notificationFilterState.mutedNotificationOptions.unverifiedPhone,
-        };
-    }
 
     function buildNotificationPushPreferencePayload() {
         return {
@@ -385,19 +360,6 @@ document.addEventListener("DOMContentLoaded", () => {
             notificationPreferenceState.pushAlerts = previousPushAlerts;
             renderDetail();
             alert(error.message || "푸시 알림 저장 실패");
-        }
-    }
-
-    async function saveNotificationFilter(showSuccessMessage = true) {
-        try {
-            await settingService.updateNotificationFilter(
-                buildNotificationFilterPayload(),
-            );
-            if (showSuccessMessage) {
-                alert("알림 필터가 저장되었습니다.");
-            }
-        } catch (error) {
-            alert(error.message || "알림 필터 저장 실패");
         }
     }
 
@@ -1108,26 +1070,6 @@ document.addEventListener("DOMContentLoaded", () => {
      * routeRoot 하나에 서버/프론트 상태를 다시 주입하는 계열 함수들.
      * Spring으로 바꿀 때는 각 함수가 "DTO -> DOM 반영" 책임만 갖도록 유지하면 된다.
      */
-    function syncNotificationFilterRoute(routeRoot) {
-        const toggle = routeRoot.querySelector("[data-notification-filter-toggle]");
-        if (toggle instanceof HTMLInputElement) {
-            toggle.checked = notificationFilterState.isQualityFilterEnabled;
-        }
-    }
-
-    function syncNotificationMutedRoute(routeRoot) {
-        routeRoot.querySelectorAll("[data-notification-muted-toggle]").forEach((input) => {
-            if (!(input instanceof HTMLInputElement)) {
-                return;
-            }
-
-            const optionKey = input.dataset.notificationMutedToggle;
-            input.checked = optionKey
-                ? Boolean(notificationFilterState.mutedNotificationOptions[optionKey])
-                : false;
-        });
-    }
-
     /*
      * 푸시 알림 상세 화면 동기화.
      * - 상단 master on/off
@@ -1324,15 +1266,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bindCountryRoute(routeRoot) {
         const countrySelect = routeRoot.querySelector("[data-country-select]");
+        const saveButton = routeRoot.querySelector("[data-country-save]");
+
         if (!(countrySelect instanceof HTMLSelectElement)) {
             return;
         }
 
-        countrySelect.addEventListener("change", () => {
-            const selectedCountry =
+        if (!(saveButton instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        // 국가 화면은 언어 모달과 달리 별도 상세 route다.
+        // 그래서 선택 즉시 전역 상태를 바꾸지 않고, 저장 버튼에서만 서버/화면 상태를 함께 확정한다.
+        saveButton.addEventListener("click", async () => {
+            const nextCountry =
                 countrySelect.selectedOptions[0]?.textContent?.trim() || "설정되지 않음";
 
-            currentAccountState.country = selectedCountry;
+            if (!nextCountry || nextCountry === "설정되지 않음") {
+                alert("국가를 선택하세요.");
+                return;
+            }
+
+            // 이미 저장된 값과 같으면 서버를 다시 호출하지 않는다.
+            if (nextCountry === (currentAccountState.country || "설정되지 않음")) {
+                return;
+            }
+
+            saveButton.disabled = true;
+
+            try {
+                await settingService.updateCountry(nextCountry);
+
+                currentAccountState.country = nextCountry;
+                window.settingMember.memberCountry = nextCountry;
+                renderDetail();
+                alert("국가가 저장되었습니다.");
+            } catch (error) {
+                // 저장 실패 시에는 마지막 저장 성공값을 기준으로 select를 원복해
+                // 사용자가 저장된 값과 화면 값을 혼동하지 않게 한다.
+                syncCountryRoute(routeRoot);
+                alert(error.message || "국가 저장 중 오류가 발생했습니다.");
+            } finally {
+                saveButton.disabled = false;
+            }
         });
     }
 
@@ -1398,15 +1374,10 @@ document.addEventListener("DOMContentLoaded", () => {
             syncDeactivateConfirmRoute(routeRoot);
             return;
         }
-        if (activeDetailRoute === "notification-filter-edit") {
-            syncNotificationFilterRoute(routeRoot);
-            return;
-        }
-        if (activeDetailRoute === "notification-muted-edit" || activeDetailRoute === "privacy-muted-notifications-edit") {
-            syncNotificationMutedRoute(routeRoot);
-            return;
-        }
-        if (activeDetailRoute === "notification-push-edit") {
+        if (
+            activeDetailRoute === "notification-push-edit" ||
+            (!activeDetailRoute && activeSectionId === "notifications")
+        ) {
             syncNotificationPushRoute(routeRoot);
             return;
         }
@@ -1507,12 +1478,18 @@ document.addEventListener("DOMContentLoaded", () => {
         hideDetailRouteViews();
         detailBackButton.hidden = !activeDetailRoute;
 
-        const routeName = activeDetailRoute || activeSectionId;
+        const routeName =
+            !activeDetailRoute && activeSectionId === "notifications"
+                ? "notification-push-edit"
+                : (activeDetailRoute || activeSectionId);
         const routeRoot = showDetailRouteView(routeName);
 
         if (routeRoot instanceof HTMLElement) {
             detailTitle.textContent = routeRoot.dataset.routeTitle || "";
-            if (activeDetailRoute) {
+            if (
+                activeDetailRoute ||
+                (!activeDetailRoute && activeSectionId === "notifications")
+            ) {
                 syncDetailRoute(routeRoot);
             }
             if (window.matchMedia("(max-width: 400px)").matches && !activeDetailRoute) {
@@ -1826,21 +1803,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
             activeSectionId === "notifications" &&
-            entryLink.getAttribute("href") === "/settings/notifications/filters"
+            (
+                entryLink.getAttribute("href") === "/settings/notifications/filters" ||
+                entryLink.getAttribute("href") ===
+                "/settings/notifications/preferences"
+            )
         ) {
             event.preventDefault();
-            activeDetailRoute = "notification-filter-edit";
-            renderDetail();
-            return;
-        }
-
-        if (
-            activeSectionId === "notifications" &&
-            entryLink.getAttribute("href") ===
-            "/settings/notifications/preferences"
-        ) {
-            event.preventDefault();
-            activeDetailRoute = "notification-preferences-edit";
+            activeDetailRoute = "notification-push-edit";
             renderDetail();
             return;
         }
@@ -1999,43 +1969,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const notificationFilterToggle = target.closest(
-            "[data-notification-filter-toggle]",
-        );
-        if (notificationFilterToggle instanceof HTMLInputElement) {
-            notificationFilterState.isQualityFilterEnabled =
-                notificationFilterToggle.checked;
-            return;
-        }
-
-        const notificationFilterRoute = target.closest(
-            "[data-notification-filter-route]",
-        );
-        if (notificationFilterRoute instanceof HTMLButtonElement) {
-            if (
-                notificationFilterRoute.dataset.notificationFilterRoute ===
-                "muted"
-            ) {
-                activeDetailRoute = "notification-muted-edit";
-                renderDetail();
-            }
-            return;
-        }
-
-        const notificationPreferencesRoute = target.closest(
-            "[data-notification-preferences-route]",
-        );
-        if (notificationPreferencesRoute instanceof HTMLButtonElement) {
-            if (
-                notificationPreferencesRoute.dataset
-                    .notificationPreferencesRoute === "push"
-            ) {
-                activeDetailRoute = "notification-push-edit";
-                renderDetail();
-            }
-            return;
-        }
-
         const privacyPostsRoute = target.closest("[data-privacy-posts-route]");
         if (privacyPostsRoute instanceof HTMLButtonElement) {
             if (privacyPostsRoute.dataset.privacyPostsRoute === "location") {
@@ -2067,12 +2000,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
                 activeDetailRoute = "privacy-muted-words-edit";
                 renderDetail();
-            } else if (
-                privacyMuteBlockItem.dataset.privacyMuteBlockItem ===
-                "muted-notifications"
-            ) {
-                activeDetailRoute = "privacy-muted-notifications-edit";
-                renderDetail();
             }
             return;
         }
@@ -2082,12 +2009,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         if (notificationPushEnable instanceof HTMLButtonElement) {
             void persistPushEnabled(true);
-            return;
-        }
-
-        const mutedSaveButton = target.closest("[data-notification-muted-save]");
-        if (mutedSaveButton instanceof HTMLButtonElement) {
-            void saveNotificationFilter();
             return;
         }
 
@@ -2151,27 +2072,6 @@ document.addEventListener("DOMContentLoaded", () => {
     detailContent.addEventListener("change", (event) => {
         const target = event.target;
         if (!(target instanceof HTMLInputElement)) {
-            return;
-        }
-
-        if (target.matches("[data-notification-filter-toggle]")) {
-            notificationFilterState.isQualityFilterEnabled = target.checked;
-            void saveNotificationFilter(false);
-            return;
-        }
-
-        if (target.matches("[data-notification-muted-toggle]")) {
-            const optionKey = target.dataset.notificationMutedToggle;
-            if (
-                optionKey &&
-                Object.hasOwn(
-                    notificationFilterState.mutedNotificationOptions,
-                    optionKey,
-                )
-            ) {
-                notificationFilterState.mutedNotificationOptions[optionKey] =
-                    target.checked;
-            }
             return;
         }
 
@@ -2297,8 +2197,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (
             activeDetailRoute === "password-edit" ||
             activeDetailRoute === "deactivate-edit" ||
-            activeDetailRoute === "notification-filter-edit" ||
-            activeDetailRoute === "notification-preferences-edit" ||
             activeDetailRoute === "privacy-mute-block-edit" ||
             activeDetailRoute === "privacy-posts-edit" ||
             activeDetailRoute === "privacy-chat-edit" ||
@@ -2311,16 +2209,12 @@ document.addEventListener("DOMContentLoaded", () => {
             activeDetailRoute = "privacy-mute-block-edit";
         } else if (activeDetailRoute === "privacy-muted-words-edit") {
             activeDetailRoute = "privacy-mute-block-edit";
-        } else if (activeDetailRoute === "privacy-muted-notifications-edit") {
-            activeDetailRoute = "privacy-mute-block-edit";
         } else if (activeDetailRoute === "privacy-muted-words-add-edit") {
             activeDetailRoute = "privacy-muted-words-edit";
         } else if (activeDetailRoute === "privacy-posts-location-edit") {
             activeDetailRoute = "privacy-posts-edit";
-        } else if (activeDetailRoute === "notification-muted-edit") {
-            activeDetailRoute = "notification-filter-edit";
         } else if (activeDetailRoute === "notification-push-edit") {
-            activeDetailRoute = "notification-preferences-edit";
+            activeDetailRoute = "";
         } else if (activeDetailRoute === "account-info-list") {
             activeDetailRoute = "account-info-auth";
         } else {

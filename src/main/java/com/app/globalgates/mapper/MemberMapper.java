@@ -53,6 +53,8 @@ public interface MemberMapper {
     public void updateEmail(@Param("id") Long id, @Param("memberEmail") String memberEmail);
     //  언어 변경
     public void updateLanguage(@Param("id") Long id, @Param("memberLanguage") String memberLanguage);
+    //  국가 변경
+    public void updateCountry(@Param("id") Long id, @Param("memberCountry") String memberCountry);
     //  푸시 알림 master on/off 변경
     public void updatePushEnabled(@Param("id") Long id, @Param("pushEnabled") boolean pushEnabled);
     //  Handle로 조회 (간소화)

@@ -258,25 +258,6 @@ const settingService = (() => {
         return result;
     };
 
-    // quality filter와 뮤트 조건은 같은 설정 묶음으로 저장한다.
-    const updateNotificationFilter = async (payload) => {
-        const response = await fetch("/api/settings/notifications/filter", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.message || "알림 필터 저장 실패");
-        }
-
-        return result;
-    };
-
     // 개별 푸시 종류 체크 상태는 master on/off와 분리해 별도 저장한다.
     const updateNotificationPushPreference = async (payload) => {
         const response = await fetch("/api/settings/notifications/push-preferences", {
@@ -291,6 +272,27 @@ const settingService = (() => {
 
         if (!response.ok) {
             throw new Error(result.message || "푸시 알림 설정 저장 실패");
+        }
+
+        return result;
+    };
+
+    // 국가는 설정 화면의 단일 선택값만 저장하면 되므로 라벨 문자열 하나만 전달한다.
+    const updateCountry = async (memberCountry) => {
+        const response = await fetch("/api/settings/country", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                memberCountry: memberCountry,
+            }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "국가 저장 실패");
         }
 
         return result;
@@ -311,7 +313,7 @@ const settingService = (() => {
         updateLanguage: updateLanguage,
         deactivateAccount: deactivateAccount,
         updateNotificationPushEnabled: updateNotificationPushEnabled,
-        updateNotificationFilter: updateNotificationFilter,
         updateNotificationPushPreference: updateNotificationPushPreference,
+        updateCountry: updateCountry,
     };
 })();

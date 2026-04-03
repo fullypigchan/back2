@@ -13,15 +13,6 @@ public class NotificationPreferenceDTO {
     private Long id;
     private Long memberId;
 
-    private boolean qualityFilterEnabled;
-
-    private boolean mutedNonFollowing;
-    private boolean mutedNotFollowingYou;
-    private boolean mutedNewAccount;
-    private boolean mutedDefaultProfile;
-    private boolean mutedUnverifiedEmail;
-    private boolean mutedUnverifiedPhone;
-
     private boolean pushConnect;
     private boolean pushExpert;
     private boolean pushLikes;

@@ -37,6 +37,7 @@ public class MemberDTO implements Serializable {
     private MemberRole memberRole;
     private boolean pushEnabled;
     private String memberLanguage;
+    private String memberCountry;
     private String birthDate;
     private String lastLoginAt;
     private String loginId;
@@ -80,6 +81,7 @@ public class MemberDTO implements Serializable {
                 .memberRole(memberRole)
                 .pushEnabled(pushEnabled)
                 .memberLanguage(memberLanguage)
+                .memberCountry(memberCountry)
                 .birthDate(birthDate)
                 .lastLoginAt(lastLoginAt)
                 .build();

@@ -158,20 +158,6 @@ public class SettingAPIController {
         }
     }
 
-    // quality filter와 muted 옵션은 같은 설정 덩어리로 저장한다.
-    // 같은 테이블을 쓰더라도 서비스는 이 필드들만 갱신해 push 상세값을 덮어쓰지 않는다.
-    @PostMapping("notifications/filter")
-    public ResponseEntity<?> updateNotificationFilter(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody NotificationPreferenceDTO request
-    ) {
-        try {
-            memberService.updateNotificationFilter(userDetails.getLoginId(), request);
-            return ResponseEntity.ok(Map.of("message", "알림 필터가 저장되었습니다."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
-    }
 
     // 개별 푸시 알림 체크 상태는 별도 API로 저장한다.
     // master toggle과 저장 경로를 분리해도 실제 DB 행은 같은 회원 설정 한 건을 공유한다.
@@ -183,6 +169,25 @@ public class SettingAPIController {
         try {
             memberService.updateNotificationPushPreference(userDetails.getLoginId(), request);
             return ResponseEntity.ok(Map.of("message", "푸시 알림 설정이 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // setting 화면의 국가 변경도 인증된 현재 사용자 기준으로만 처리한다.
+    // 프런트는 선택된 국가 라벨 문자열 하나만 보내고, 서버는 현재 로그인 사용자 행만 갱신한다.
+    @PostMapping("country")
+    public ResponseEntity<?> updateCountry(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            memberService.updateCountry(
+                    userDetails.getLoginId(),
+                    request.get("memberCountry")
+            );
+
+            return ResponseEntity.ok(Map.of("message", "국가가 저장되었습니다."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

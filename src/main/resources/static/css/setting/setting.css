@@ -507,6 +507,77 @@ a {
     flex-direction: column;
 }
 
+.account-connect-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--settings-border);
+    background: transparent;
+}
+
+.account-connect-card__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.account-connect-card__logo {
+    display: block;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.account-connect-card__meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.account-connect-card__name {
+    color: var(--settings-text-primary);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+}
+
+.account-connect-card__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    color: #5cb67a;
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 500;
+}
+
+.account-connect-card__status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid currentColor;
+    border-radius: 9999px;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.account-connect-card__email {
+    color: var(--settings-text-primary);
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 400;
+    text-align: right;
+    word-break: break-all;
+}
+
 .account-info-item {
     display: flex;
     align-items: flex-start;
@@ -567,6 +638,19 @@ a {
     width: 20px;
     height: 20px;
     fill: currentColor;
+}
+
+@media (max-width: 720px) {
+    .account-connect-card {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        padding: 8px 20px;
+    }
+
+    .account-connect-card__email {
+        text-align: left;
+    }
 }
 
 .modal-layer {
@@ -3007,8 +3091,9 @@ a {
 .notification-muted-editor__actions,
 .notification-push-editor__actions {
     display: flex;
-    justify-content: center;
+    justify-content: right;
     padding-top: 24px;
+    margin-right: 15px;
 }
 
 .notification-muted-editor__save,
@@ -3896,6 +3981,35 @@ a {
 
 .country-editor__help-link:hover {
     text-decoration: underline;
+}
+
+.country-editor__actions{
+    display: flex;
+    justify-content: right;
+    padding-top: 24px;
+    margin-right: 15px;
+}
+
+.country-editor__button{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--settings-accent);
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.country-editor__button:hover{
+    opacity: 0.88;
 }
 
 .language-editor {

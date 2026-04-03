@@ -27,6 +27,7 @@ public class MemberVO extends Period {
     private MemberRole memberRole;
     private boolean pushEnabled;
     private String memberLanguage;
+    private String memberCountry;
     private String birthDate;
     private String lastLoginAt;
 }

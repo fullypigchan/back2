@@ -32,6 +32,7 @@ public class SettingController {
         // 템플릿과 프런트는 이 model 객체들을 기준으로 최초 상태를 만든다.
         // 서버는 "초기값의 출처"를, 프런트는 "화면 전환과 상호작용"을 맡도록 책임을 분리한다.
         model.addAttribute("member", member);
+        log.info("member: {}", model.asMap());
         model.addAttribute("notificationPreference", notificationPreference);
         return "setting/setting";
     }

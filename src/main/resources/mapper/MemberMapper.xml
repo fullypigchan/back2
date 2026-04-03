@@ -16,11 +16,11 @@
 
     <select id="selectMemberForLogin">
         select
-            id, member_email, member_password, member_nickname, member_handle,
-            member_phone, member_bio, member_region, member_status, member_role,
-            push_enabled, member_language, birth_date, created_datetime, updated_datetime,
-            last_login_at, member_name
-        from tbl_member
+            m.id, m.member_email, m.member_password, m.member_nickname, m.member_handle,
+            m.member_phone, m.member_bio, m.member_region, m.member_country, m.member_status, m.member_role,
+            m.push_enabled, m.member_language, m.birth_date, m.created_datetime, m.updated_datetime,
+            m.last_login_at, m.member_name, o.provider, o.provider_id, o.profile_url
+        from tbl_member m left join tbl_oauth o on m.id = o.member_id
         where (member_email = #{loginId} or member_phone = #{loginId})
           and member_password = #{memberPassword}
           and member_status = 'active'
@@ -29,7 +29,7 @@
     <select id="selectMemberByMemberPhone">
         select id, member_email, member_password,
                member_nickname, member_handle, member_phone,
-               member_bio, member_region, member_status,
+               member_bio, member_region, member_country, member_status,
                member_role, push_enabled,
                member_language, birth_date, created_datetime,
                updated_datetime, last_login_at, member_name
@@ -42,7 +42,7 @@
             id, member_email, member_password,
             member_nickname, member_handle,
             member_phone, member_bio,
-            member_region, member_status,
+            member_region, member_country, member_status,
             member_role, push_enabled,
             member_language, birth_date, created_datetime,
             updated_datetime, last_login_at, member_name
@@ -52,19 +52,20 @@
 
     <select id="selectMemberByLoginId">
         select
-            id, member_email, member_password,
-            member_nickname, member_handle,
-            member_phone, member_bio,
-            member_region, member_status,
-            member_role, push_enabled,
-            member_language, birth_date, created_datetime,
-            updated_datetime, last_login_at, member_name,
+            m.id, m.member_email, m.member_password,
+            m.member_nickname, m.member_handle,
+            m.member_phone, m.member_bio,
+            m.member_region, m.member_country, m.member_status,
+            m.member_role, m.push_enabled,
+            m.member_language, m.birth_date, m.created_datetime,
+            m.updated_datetime, m.last_login_at, m.member_name,
+            o.provider,o.profile_url,o.provider_id,
             (select f.file_name from tbl_member_profile_file mpf
                 join tbl_file f on mpf.id = f.id
-             where mpf.member_id = tbl_member.id
+             where mpf.member_id = m.id
                and mpf.profile_image_type = 'profile'
              limit 1) as file_name
-        from tbl_member
+        from tbl_member m left join tbl_oauth o on m.id = o.member_id
         where (member_email = #{loginId} or member_phone = #{loginId})
           and member_status = 'active'
     </select>
@@ -133,6 +134,7 @@
     <select id="selectById">
         select id, member_email, member_password, member_nickname
              ,member_handle, member_phone, member_bio, member_region
+             ,member_country
              ,member_status, member_role, push_enabled
              ,member_language, birth_date, created_datetime
              ,updated_datetime, last_login_at, member_name
@@ -200,6 +202,13 @@
     <update id="updateLanguage">
         update tbl_member
         set member_language = #{memberLanguage},
+            updated_datetime = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateCountry">
+        update tbl_member
+        set member_country = #{memberCountry},
             updated_datetime = now()
         where id = #{id}
     </update>
