@@ -12,11 +12,13 @@
                    join tbl_file f on mpf.id = f.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,
+               bg.badge_type,
                (select mm.member_nickname from tbl_follow fl2
                    join tbl_member mm on fl2.follower_id = mm.id
                 where fl2.following_id = m.id and fl2.follower_id != #{memberId}
                 limit 1) as follower_intro
         from tbl_member m
+                 left join tbl_badge bg on bg.member_id = m.id
         where m.member_role = 'expert'
           and m.member_status = 'active'
           and m.id != #{memberId}

@@ -44,9 +44,19 @@ window.onload = () => {
     });
 
     // 광고 데이터 준비 후 게시글 렌더링 (게시글 3개마다 광고 1개 삽입)
+    const initFollowState = (posts) => {
+        posts.forEach((post) => {
+            const handle = post.memberHandle ? post.memberHandle : "";
+            if (post.followed) {
+                followState[handle] = true;
+            }
+        });
+    };
+
     const loadFeed = () => {
         service.getPostList(postPage, memberId, (data) => {
-            layout.showPostList(data.posts, postPage);
+            const posts = layout.showPostList(data.posts, postPage);
+            initFollowState(posts);
             postHasMore = data.criteria.hasMore;
         });
     };
@@ -59,7 +69,8 @@ window.onload = () => {
             postCheckScroll = false;
             postPage++;
             await service.getPostList(postPage, memberId, (data) => {
-                layout.showPostList(data.posts, postPage);
+                const posts = layout.showPostList(data.posts, postPage);
+                initFollowState(posts);
                 postHasMore = data.criteria.hasMore;
             });
             setTimeout(() => { postCheckScroll = true; }, 1000);
@@ -909,7 +920,8 @@ window.onload = () => {
 
         postPage = 1;
         await service.getPostList(postPage, memberId, (data) => {
-            layout.showPostList(data.posts, postPage);
+            const posts = layout.showPostList(data.posts, postPage);
+            initFollowState(posts);
             postHasMore = data.criteria.hasMore;
         });
     });

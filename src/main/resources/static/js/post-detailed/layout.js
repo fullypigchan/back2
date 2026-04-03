@@ -77,5 +77,5 @@ const layout = (() => {
         </a>`;
     };
 
-    return { SVG, esc, buildAvatarDataUri, buildReplyCard };
+    return { SVG: SVG, esc: esc, buildAvatarDataUri: buildAvatarDataUri, buildReplyCard: buildReplyCard };
 })();

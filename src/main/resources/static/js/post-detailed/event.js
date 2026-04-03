@@ -383,6 +383,9 @@ window.onload = () => {
     let activeMoreBtn = null;
     let activeMoreMeta = null;
     const followState = {};
+    if (postIsFollowed && postMemberHandle) {
+        followState[postMemberHandle] = true;
+    }
 
     function closeMoreDrop() {
         if (moreDropdown) moreDropdown.hidden = true;

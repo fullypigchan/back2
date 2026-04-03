@@ -193,17 +193,17 @@ const service = (() => {
     };
 
     return {
-        getPostList, getExpertList, getPost, writePost, updatePost, deletePost,
-        addLike, deleteLike,
-        addBookmark, deleteBookmark,
-        follow, unfollow, getFollowings,
-        block, report,
-        writeReply,
-        getLatestNews,
-        searchMembers, getSearchHistories, saveSearchHistory, deleteSearchHistory, deleteAllSearchHistories,
-        getMyProducts,
-        getSuggestions,
-        getAds,
-        savePostTemp, getPostTemps, loadPostTemp, deletePostTemp, deletePostTemps
+        getPostList: getPostList, getExpertList: getExpertList, getPost: getPost, writePost: writePost, updatePost: updatePost, deletePost: deletePost,
+        addLike: addLike, deleteLike: deleteLike,
+        addBookmark: addBookmark, deleteBookmark: deleteBookmark,
+        follow: follow, unfollow: unfollow, getFollowings: getFollowings,
+        block: block, report: report,
+        writeReply: writeReply,
+        getLatestNews: getLatestNews,
+        searchMembers: searchMembers, getSearchHistories: getSearchHistories, saveSearchHistory: saveSearchHistory, deleteSearchHistory: deleteSearchHistory, deleteAllSearchHistories: deleteAllSearchHistories,
+        getMyProducts: getMyProducts,
+        getSuggestions: getSuggestions,
+        getAds: getAds,
+        savePostTemp: savePostTemp, getPostTemps: getPostTemps, loadPostTemp: loadPostTemp, deletePostTemp: deletePostTemp, deletePostTemps: deletePostTemps
     };
 })();

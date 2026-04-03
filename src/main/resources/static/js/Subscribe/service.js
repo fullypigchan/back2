@@ -51,5 +51,5 @@ const subscribeService = (() => {
         });
     };
 
-    return { subscribe, savePayment, getMy, changePlan, cancel };
+    return { subscribe: subscribe, savePayment: savePayment, getMy: getMy, changePlan: changePlan, cancel: cancel };
 })();

@@ -32,6 +32,11 @@ public class PostDAO {
         postMapper.delete(id);
     }
 
+    //    조회수 증가
+    public void updateReadCount(Long id) {
+        postMapper.updateReadCount(id);
+    }
+
     //    게시글 단건 조회
     public Optional<PostDTO> findById(Long id, Long memberId) {
         return postMapper.selectById(id, memberId);

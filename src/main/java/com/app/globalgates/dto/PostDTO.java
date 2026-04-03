@@ -30,15 +30,16 @@ public class PostDTO {
     private String memberProfileFileName;
     private String badgeType;
 
-    // 좋아요,댓글,북마크 개수
+    // 좋아요,댓글,조회수
     private int likeCount;
     private int replyCount;
-    private int bookmarkCount;
+    private int postReadCount;
 
-    // 좋아요, 북마크, 신고 여부
+    // 좋아요, 북마크, 신고, 팔로우 여부
     private boolean isLiked;
     private boolean isBookmarked;
     private boolean isReported;
+    private boolean isFollowed;
 
     // 해시태그
     private List<PostHashtagDTO> hashtags = new ArrayList<>();

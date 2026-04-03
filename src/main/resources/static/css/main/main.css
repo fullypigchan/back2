@@ -112,9 +112,13 @@ textarea {
     justify-content: center;
     width: fit-content;
     height: fit-content;
-    padding: 12px;
     border-radius: 9999px;
     align-self: center;
+}
+
+.nav-logo img {
+    width: 48px;
+    height: 48px;
 }
 
 .nav-logo:hover {
@@ -281,9 +285,7 @@ textarea {
     flex-direction: column;
     background-color: #ffffff;
     border-radius: 12px;
-    box-shadow:
-            rgba(101, 119, 134, 0.2) 0 0 15px 0,
-            rgba(101, 119, 134, 0.15) 0 0 3px 1px;
+    box-shadow: rgba(101, 119, 134, 0.2) 0 0 15px 0, rgba(101, 119, 134, 0.15) 0 0 3px 1px;
     overflow: hidden;
     max-width: 400px;
     width: max-content;

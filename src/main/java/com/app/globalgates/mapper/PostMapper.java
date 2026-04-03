@@ -22,6 +22,9 @@ public interface PostMapper {
     //    게시글삭제
     public void delete(Long id);
 
+    //    조회수 증가
+    public void updateReadCount(Long id);
+
     //    게시글 단건 조회
     public Optional<PostDTO> selectById(@Param("id") Long id, @Param("memberId") Long memberId);
 

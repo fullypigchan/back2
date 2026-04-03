@@ -33,5 +33,5 @@ const friendsService = (() => {
         await fetch(`/api/main/follows/${followerId}/${followingId}/delete`, { method: 'POST' });
     };
 
-    return { getMyInfo, getFriendsList, getCategories, follow, unfollow };
+    return { getMyInfo: getMyInfo, getFriendsList: getFriendsList, getCategories: getCategories, follow: follow, unfollow: unfollow };
 })();

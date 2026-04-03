@@ -46,5 +46,5 @@ const friendsLayout = (() => {
         }
     };
 
-    return { showFriendsList, buildAvatarDataUri };
+    return { showFriendsList: showFriendsList, buildAvatarDataUri: buildAvatarDataUri };
 })();
