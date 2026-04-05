@@ -2,7 +2,10 @@ package com.app.globalgates.controller.chat;
 
 import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.dto.MemberDTO;
+import com.app.globalgates.dto.MemberProfileFileDTO;
 import com.app.globalgates.repository.MemberDAO;
+import com.app.globalgates.service.MemberService;
+import com.app.globalgates.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -10,10 +13,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Duration;
+
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
     private final MemberDAO memberDAO;
+    private final MemberService memberService;
+    private final S3Service s3Service;
 
     @GetMapping("/chat")
     public String chatPage(
@@ -33,6 +40,16 @@ public class ChatController {
         model.addAttribute("memberId", currentMember.getId());
         model.addAttribute("memberName", currentMember.getMemberName());
         model.addAttribute("memberHandle", currentMember.getMemberHandle());
+
+        // 프로필 이미지
+        String profileImageUrl = "/images/profile/default_image.png";
+        try {
+            MemberProfileFileDTO profileFile = memberService.getProfileFile(memberId);
+            if (profileFile != null && profileFile.getFileName() != null) {
+                profileImageUrl = s3Service.getPresignedUrl(profileFile.getFileName(), Duration.ofMinutes(10));
+            }
+        } catch (Exception ignored) {}
+        model.addAttribute("profileImageUrl", profileImageUrl);
 
         if (partnerId != null) {
             MemberDTO partnerMember = memberDAO.findByMemberId(partnerId).orElse(null);

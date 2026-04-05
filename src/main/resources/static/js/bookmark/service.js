@@ -17,7 +17,7 @@ const BookmarkService = (function () {
                 return { ok: false, status: 401 };
             }
             if (res.status === 409) {
-                return { ok: false, status: 409, message: "이미 북마크된 게시물입니다" };
+                return { ok: false, status: 409, message: "이 폴더에 이미 북마크된 게시물입니다" };
             }
             if (!res.ok) {
                 return { ok: false, status: res.status, message: "오류가 발생했습니다" };

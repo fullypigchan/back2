@@ -28,17 +28,28 @@ public class ChatFileService {
         String todayPath = "chat/" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String s3Key = s3Service.uploadFile(file, todayPath);
 
-        FileDTO fileDTO = new FileDTO();
-        fileDTO.setOriginalName(file.getOriginalFilename());
-        fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
-        fileDTO.setFilePath(s3Key);
-        fileDTO.setFileSize(file.getSize());
-        fileDTO.setContentType(resolveContentType(file.getContentType()));
-        fileDAO.save(fileDTO);
+        try {
+            FileDTO fileDTO = new FileDTO();
+            fileDTO.setOriginalName(file.getOriginalFilename());
+            fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
+            fileDTO.setFilePath(s3Key);
+            fileDTO.setFileSize(file.getSize());
+            fileDTO.setContentType(resolveContentType(file.getContentType()));
+            fileDAO.save(fileDTO);
 
-        chatFileDAO.save(fileDTO.getId(), messageId);
-        log.info("채팅 파일 업로드 완료 - fileId: {}, messageId: {}", fileDTO.getId(), messageId);
-        return fileDTO;
+            chatFileDAO.save(fileDTO.getId(), messageId);
+            log.info("채팅 파일 업로드 완료 - fileId: {}, messageId: {}", fileDTO.getId(), messageId);
+            return fileDTO;
+        } catch (Exception e) {
+            log.error("채팅 파일 DB 저장 실패, S3 파일 삭제 시도 - s3Key: {}", s3Key, e);
+            try {
+                s3Service.deleteFile(s3Key);
+                log.info("S3 고아 파일 삭제 완료 - s3Key: {}", s3Key);
+            } catch (Exception s3Error) {
+                log.error("S3 고아 파일 삭제 실패 - s3Key: {}", s3Key, s3Error);
+            }
+            throw e;
+        }
     }
 
     private FileContentType resolveContentType(String mimeType) {

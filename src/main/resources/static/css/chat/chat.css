@@ -1,25 +1,13 @@
 @keyframes slideRight {
-    0% {
-        transform: translateX(0);
-    }
-    40% {
-        transform: translateX(20px);
-    }
-    100% {
-        transform: translateX(0);
-    }
+  0%   { transform: translateX(0); }
+  40%  { transform: translateX(20px); }
+  100% { transform: translateX(0); }
 }
 
 @keyframes slideLeft {
-    0% {
-        transform: translateX(0);
-    }
-    40% {
-        transform: translateX(-20px);
-    }
-    100% {
-        transform: translateX(0);
-    }
+  0%   { transform: translateX(0); }
+  40%  { transform: translateX(-20px); }
+  100% { transform: translateX(0); }
 }
 
 body {
@@ -242,11 +230,9 @@ body {
     padding: 0 4px;
     white-space: nowrap;
 }
-
 .Search-Clear-Btn:hover {
     color: #0f141a;
 }
-
 .Search-Clear-Btn.off {
     display: none;
 }
@@ -284,10 +270,10 @@ body {
     line-height: 24px;
 }
 
-/* 2열 그리드 (검색값 없을 때) */
+/* 4열 그리드 (검색값 없을 때) */
 .Search-Conv-Grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px 12px;
     padding-bottom: 24px;
 }
@@ -319,6 +305,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.Search-Conv-Avatar {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 9999px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.Search-Conv-Avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .Search-Conv-Avatar-Fallback {
@@ -384,7 +385,8 @@ body {
 }
 
 /* 리스트형 아바타는 작게 */
-.Search-Conv-Row .Search-Conv-Avatar-Fallback {
+.Search-Conv-Row .Search-Conv-Avatar-Fallback,
+.Search-Conv-Row .Search-Conv-Avatar {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -449,8 +451,9 @@ body {
     position: relative;
     overflow-anchor: none;
     width: 100%;
-    height: 160px;
-    visibility: hidden;
+    min-height: 160px;
+    height: auto;
+    visibility: visible;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -515,6 +518,7 @@ body {
     max-width: 100%;
     width: 100%;
     height: 100%;
+    object-fit: cover;
     dynamic-range-limit: standard;
 }
 
@@ -562,7 +566,7 @@ body {
     font-size: 15px;
     font-weight: 400;
     line-height: 20px;
-    color: #829aab;
+    color: #829aab; 
 }
 
 .UserName-Badge {
@@ -643,6 +647,28 @@ body {
     max-width: 100%;
 }
 
+.Room-UnreadCount {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.UnreadCount-Badge {
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 9999px;
+    align-items: center;
+    justify-content: center;
+    background-color: #1d9bf0;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .Chat-ChatContent {
     display: block;
     width: 100%;
@@ -655,7 +681,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-left: 1px solid #e4eaec;
+    border-left: 1px solid #e4eaec; 
     gap: 24px;
 }
 
@@ -706,7 +732,7 @@ body {
     font-size: 15px;
     line-height: 20px;
     outline-color: #0f141a;
-    background-color: #0f141a;
+    background-color: #0f141a;    
     border-radius: 9999px;
     align-items: center;
     justify-content: center;
@@ -737,6 +763,28 @@ body {
     width: 100%;
 }
 
+.mob-nav-item {
+    position: relative;
+}
+
+.mob-nav-badge {
+    display: inline-flex;
+    position: absolute;
+    top: -2px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9999px;
+    align-items: center;
+    justify-content: center;
+    background-color: #1d9bf0;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .ChatPage-Wrapper {
     display: flex;
     position: relative;
@@ -750,6 +798,7 @@ body {
     flex-direction: column;
     flex-grow: 1;
     height: 100%;
+    min-width: 0;
 }
 
 .ChatPage-Header {
@@ -829,17 +878,21 @@ body {
     overflow: hidden auto;
     overflow-anchor: none;
     width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 72px;
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    display: flex;
+    flex-direction: column;
 }
 
 .ChatPage-Main-Content {
     position: relative;
     overflow-anchor: none;
-    visibility: hidden;
     margin: 0;
     padding: 0;
-    height: 620px;
+    height: auto;
+    box-sizing: border-box;
 }
 
 .Each-Main-Content {
@@ -860,6 +913,7 @@ body {
 
 .UserProfile {
     padding: 32px 16px;
+    margin-top: 88px;
 }
 
 .User-Id-Text {
@@ -931,7 +985,7 @@ body {
     color: #6b7f8e;
 }
 
-.Left {
+.Left{
     flex-direction: column;
     align-items: flex-start;
 }
@@ -955,10 +1009,9 @@ body {
 
 .Chat-Message-Wrapper {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-end;
-    column-gap: 8px;
-    row-gap: 2px;
+    gap: 4px;
     max-width: 535px;
     margin-inline-start: -8px;
 }
@@ -1033,7 +1086,7 @@ body {
     font-size: 12px;
     list-style: 15px;
     font-weight: 400;
-    color: inherit;
+    color: inherit; 
 }
 
 .Message-SendTime {
@@ -1115,7 +1168,7 @@ body {
     justify-content: center;
     gap: 4px;
     border-radius: 9999px;
-    border: 1px solid transparent;
+    border: 1px solid  transparent;
     background-color: transparent;
     font-size: 14px;
     line-height: 16px;
@@ -1201,14 +1254,16 @@ body {
 
 .ChatPage-Footer {
     position: absolute;
-    width: 740px;
+    width: 100%;
     bottom: 0px;
-    left: 50%;
+    left: 0;
+    right: 0;
     isolation: isolate;
     background-color: rgba(255, 255, 255, 0.8);
     z-index: 10;
     padding: 16px;
-    transform: translate(-50%);
+    box-sizing: border-box;
+    transform: none;
 }
 
 .ChatPage-Input-Wrapper {
@@ -1326,10 +1381,11 @@ body {
 
 .Input-Image-Card img {
     max-width: 100%;
-    max-height: 400px;
+    max-height: 180px;
     border: 1px solid #ced9de;
     border-radius: 0.5rem;
     background-color: transparent;
+    object-fit: contain;
 }
 
 .remove-image {
@@ -1386,23 +1442,29 @@ body {
     color: #0f141a;
     border: none;
     outline: none;
-
-    max-height: 160px;
-    min-height: 24px;
-    padding: 4px 20px;
-    font-size: 15px;
+    
+    max-height: 160px;      
+    min-height: 24px;        
+    padding: 4px 20px;       
+    font-size: 15px;         
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.5;        
 
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 }
 
 .Submit-Button-Wrapper {
+    display: flex;
     height: 32px;
     align-items: flex-end;
     transform: none;
     padding-right: 10px;
+}
+
+.Message-ReadStatus {
+    display: inline-flex;
+    align-items: center;
 }
 
 .Submit-Button {
@@ -1573,10 +1635,11 @@ body {
 
 .Modal-ExpertList {
     position: relative;
-    visibility: hidden;
+    visibility: visible;
     overflow-anchor: none;
     width: 100%;
-    height: 280px;
+    min-height: 280px;
+    height: auto;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -1626,6 +1689,19 @@ body {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
     animation-duration: 200ms;
+}
+
+.Expert-Image-Fallback {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: #e0185e;
+    color: white;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 700;
 }
 
 .Expert-Image img {
@@ -1684,6 +1760,10 @@ body {
 
 .Expert-Badge svg {
     fill: #1e9cf1;
+}
+
+.Each-Expert.Empty .Each-Expert-Wrapper {
+    cursor: default;
 }
 
 .Expert-Id-Wrapper {
@@ -2138,6 +2218,9 @@ body {
     border-bottom-left-radius: 1.5rem;
     border-bottom-right-radius: 1.5rem;
 }
+.BanUser.banned {
+    color: inherit;
+}
 
 .Modal-Bottom-Setting:hover {
     background-color: #e4eaec;
@@ -2158,7 +2241,7 @@ body {
     font-size: 15px;
     line-height: 20px;
     font-weight: 400;
-    color: inherit;
+    color: inherit;   
 }
 
 .Bottom-Setting-Arrow {
@@ -2711,7 +2794,7 @@ button[name="delete"] {
     z-index: 9999;
     background: #ffffff;
     border-radius: 999px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     padding: 6px 10px;
 }
 
@@ -2770,11 +2853,11 @@ button[name="delete"] {
 
 /* 애니메이션 */
 .chat-pop-right {
-    animation: slideRight 0.5s ease;
+  animation: slideRight 0.5s ease;
 }
 
 .chat-pop-left {
-    animation: slideLeft 0.5s ease;
+  animation: slideLeft 0.5s ease;
 }
 
 
@@ -3013,4 +3096,79 @@ button[name="delete"] {
         height: 36px;
         min-width: 36px;
     }
+}
+
+/* 첨부파일 */
+.Chat-Message-Content-Wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.Right .Chat-Message-Content-Wrapper {
+    align-items: flex-end;
+}
+.Left .Chat-Message-Content-Wrapper {
+    align-items: flex-start;
+}
+.Message-File {
+    margin-bottom: 0;
+}
+.Message-File-Image .Chat-Image {
+    max-width: 240px;
+    max-height: 400px;
+    border-radius: 16px;
+    cursor: pointer;
+    object-fit: contain;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+.Message-Image-Wrapper {
+    position: relative;
+    display: inline-block;
+}
+.Message-Reactions-Image {
+    position: absolute;
+    bottom: -10px;
+    right: 8px;
+}
+.Message-Reactions-Image:not(:empty) ~ .Message-Time-Only,
+.Message-Image-Wrapper:has(.Message-Reactions-Image:not(:empty)) {
+    margin-bottom: 10px;
+}
+.Message-Time-Only {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 4px;
+}
+.Message-File-Doc {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    gap: 8px;
+}
+.Message-File-Doc svg {
+    flex-shrink: 0;
+    color: #6b7280;
+}
+.File-Info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.File-Detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.File-Name {
+    font-size: 13px;
+    font-weight: 500;
+    word-break: break-all;
+}
+.File-Size {
+    font-size: 11px;
+    color: #9ca3af;
 }

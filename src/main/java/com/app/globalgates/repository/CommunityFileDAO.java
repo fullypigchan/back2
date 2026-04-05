@@ -5,6 +5,7 @@ import com.app.globalgates.mapper.CommunityFileMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,5 +23,9 @@ public class CommunityFileDAO {
 
     public Optional<FileDTO> findByCommunityId(Long communityId) {
         return communityFileMapper.selectByCommunityId(communityId);
+    }
+
+    public List<FileDTO> findByDeletedCommunities() {
+        return communityFileMapper.selectByDeletedCommunities();
     }
 }

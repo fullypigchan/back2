@@ -21,6 +21,8 @@ public interface CommunityMapper {
     // 커뮤니티 조회
     public Optional<CommunityDTO> selectById(@Param("id") Long id, @Param("memberId") Long memberId);
     public List<CommunityDTO> selectAll(@Param("criteria") Criteria criteria);
+    public List<CommunityDTO> selectAllExcludeJoined(@Param("memberId") Long memberId, @Param("criteria") Criteria criteria);
+    public int selectCountExcludeJoined(@Param("memberId") Long memberId);
     public List<CommunityDTO> selectByMemberId(@Param("memberId") Long memberId, @Param("criteria") Criteria criteria);
     public List<CommunityDTO> selectByCategory(@Param("categoryId") Long categoryId, @Param("criteria") Criteria criteria);
     public int selectCount();
@@ -32,7 +34,7 @@ public interface CommunityMapper {
     public int selectCountByKeyword(@Param("keyword") String keyword);
 
     // 커뮤니티 내 게시글 조회
-    public List<PostDTO> selectPostsByCommunityId(@Param("communityId") Long communityId, @Param("memberId") Long memberId, @Param("criteria") Criteria criteria);
+    public List<PostDTO> selectPostsByCommunityId(@Param("communityId") Long communityId, @Param("memberId") Long memberId, @Param("criteria") Criteria criteria, @Param("type") String type);
     public int selectPostsCountByCommunityId(Long communityId);
 
     // 커뮤니티 내 게시글 검색

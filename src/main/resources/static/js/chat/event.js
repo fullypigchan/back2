@@ -18,7 +18,7 @@ window.onload = () => {
     const userInfoModal = document.querySelector(".Big-Modal.Info");
     const changeAliasModal = document.querySelector(".Big-Modal.ChangeAlias");
     const removedMsgModal = document.querySelector(".Big-Modal.RemovedMsg");
-    const removeAllMsgModal = document.querySelector(".Small-Modal.RemoveAll");
+
     const banScreanShotModal = document.querySelector(".Big-Modal.BanScreanShot");
     const deleteChatModal = document.querySelector(".Small-Modal.DeleteChat");
     const leaveModal = document.querySelector(".Small-Modal.Leave");
@@ -58,14 +58,22 @@ window.onload = () => {
     const chatSubmit = document.querySelector(".Submit-Button-Wrapper");
 
     // 1-7.상태 변수
+    const CONFIG = {
+        MOBILE_BREAKPOINT: 600,
+        TOAST_DURATION: 4000,
+        SOCKET_RETRY_DELAY: 3000,
+        MAX_MESSAGE_LENGTH: 4000,
+    };
+
     let expertSearchTimer = null;
     let roomRefreshTimer = null;
+    let socketReconnectTimer = null;
     let stageOneRooms = [];
     let activeBtn = null;
     let activeEmoteBtn = null;
     let picker = null;
-    let isCurrentRoomMuted = false;
     let isCurrentPartnerBlocked = false;
+    let isSending = false;
 
     // 1-8. 화상통화용 변수
     // [임시 - 로컬 테스트용 프록시]
@@ -121,10 +129,10 @@ window.onload = () => {
             partnerName,
             displayName,
             partnerHandle,
+            partnerProfileFileName: room?.partnerProfileFileName || "/images/profile/default_image.png",
             lastMessage: String(room?.lastMessage || "").trim(),
             lastMessageTime: room?.lastMessageTime ? ChatLayout.formatRoomTime(room.lastMessageTime) : "",
             unreadCount: Math.max(Number(room?.unreadCount || 0), 0),
-            muted: Boolean(room?.muted),
         };
     }
 
@@ -225,7 +233,7 @@ window.onload = () => {
     // 2-11.서버에서 방 목록 조회 후 렌더링
     async function loadStageOneRoomList() {
         try {
-            const rooms = await ChatService.getRooms(currentMemberId);
+            const rooms = await ChatService.getRooms();
             stageOneRooms = (Array.isArray(rooms) ? rooms : [])
                 .map(normalizeStageOneRoom)
                 .filter(Boolean);
@@ -393,7 +401,7 @@ window.onload = () => {
 
     // 4-1.모바일 여부 판단
     function isMobile() {
-        return window.innerWidth <= 600;
+        return window.innerWidth <= CONFIG.MOBILE_BREAKPOINT;
     }
 
     // 4-2.채팅방 열기
@@ -532,7 +540,7 @@ window.onload = () => {
                 const expertId = Number(expert.dataset.expertId || 0);
                 if (!expertId) return;
                 try {
-                    const room = await ChatService.createRoom("", currentMemberId, expertId);
+                    const room = await ChatService.createRoom("", expertId);
                     closeModal(searchExpertModal);
                     await loadStageOneRoomList();
                     const roomId = Number(room.id);
@@ -544,6 +552,7 @@ window.onload = () => {
                     }
                 } catch (error) {
                     console.error("전문가 채팅방 생성 실패", error);
+                    showErrorToast("채팅방 생성에 실패했습니다");
                 }
             });
         });
@@ -559,7 +568,7 @@ window.onload = () => {
     // 6-3.전문가 목록 서버 조회
     async function loadConnectedExpertsForModal(keyword = "") {
         try {
-            const experts = await ChatService.getConnectedExperts(currentMemberId, keyword);
+            const experts = await ChatService.getConnectedExperts(keyword);
             renderConnectedExperts(experts);
         } catch (error) {
             console.error("연결된 전문가 조회 실패", error);
@@ -752,7 +761,7 @@ window.onload = () => {
                             toast.classList.remove("show");
                             void toast.offsetWidth;
                             toast.classList.add("show");
-                            setTimeout(() => toast.classList.remove("show"), 4000);
+                            setTimeout(() => toast.classList.remove("show"), CONFIG.TOAST_DURATION);
                         })
                         .catch(() => console.error("클립보드 복사 실패"));
                     break;
@@ -847,7 +856,7 @@ window.onload = () => {
             modal.classList.remove("on");
             modal.classList.add("off");
             modalBackDrop.style.zIndex = "";
-            const anyOpen = document.querySelectorAll(".Big-Modal.on");
+            const anyOpen = document.querySelectorAll(".Big-Modal.on, .Small-Modal.on");
             if (anyOpen.length === 0) modalBackDrop.classList.add("off");
         } else {
             modalBackDrop.classList.add("off");
@@ -895,7 +904,11 @@ window.onload = () => {
 
         if (upperBtn) {
             if (upperBtn.classList.contains("Call")) return alert("추후 업데이트 예정입니다.");
-            if (upperBtn.classList.contains("Profile")) return;
+            if (upperBtn.classList.contains("Profile")) {
+                const url = currentPartnerHandle ? `/mypage/${currentPartnerHandle}` : "#";
+                if (url !== "#") window.location.href = url;
+                return;
+            }
             if (upperBtn.classList.contains("More")) {
                 userInfoModal.querySelector(".Extend-Menu-Wrapper").classList.toggle("off");
                 return;
@@ -937,22 +950,6 @@ window.onload = () => {
         button.addEventListener("click", async () => {
             const name = button.classList[1];
             switch (name) {
-                case "Mute":
-                    if (!currentRoomId) break;
-                    try {
-                        const result = await ChatService.toggleMute(currentRoomId, currentMemberId);
-                        isCurrentRoomMuted = result.muted;
-                        button.innerHTML = `
-                            ${isCurrentRoomMuted
-                            ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" data-icon="icon-notifications-off" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img" class="h-5 w-5"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.375 17C16.375 19.2091 14.5841 21 12.375 21C10.1659 21 8.375 19.2091 8.375 17"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.375 17H6.42522C5.21013 17 4.27578 15.9254 4.44462 14.7221L5.18254 9.46301C5.31208 8.25393 5.73464 7.14098 6.375 6.19173M9.375 3.65027C10.2917 3.23195 11.3086 3 12.375 3C16.0717 3 19.1736 5.78732 19.5675 9.46301L20.0536 14"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.375 3L21.375 21"></path></svg>`
-                            : `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" data-icon="icon-notifications-stroke" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img" class="h-5 w-5"><path d="M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958zM12 20c-1.306 0-2.417-.835-2.829-2h5.658c-.412 1.165-1.523 2-2.829 2zm-6.866-4l.847-6.698C6.364 6.272 8.941 4 11.996 4s5.627 2.268 6.013 5.295L18.864 16H5.134z"></path></svg>`
-                        }
-                            <div class="Menu-Text">${isCurrentRoomMuted ? "언뮤트" : "뮤트"}</div>
-                        `;
-                    } catch (error) {
-                        console.error("뮤트 토글 실패", error);
-                    }
-                    break;
                 case "Delete":
                     userInfoModal.querySelector(".Extend-Menu-Wrapper").classList.add("off");
                     openModal(leaveModal);
@@ -984,7 +981,7 @@ window.onload = () => {
         const newAlias = aliasInput.value.trim();
         if (!currentRoomId) return;
         try {
-            await ChatService.updateAlias(currentRoomId, currentMemberId, newAlias);
+            await ChatService.updateAlias(currentRoomId, newAlias);
             currentPartnerAlias = newAlias;
             currentPartnerDisplayName = newAlias || currentPartnerName;
             applyStageOnePartnerProfile();
@@ -998,26 +995,100 @@ window.onload = () => {
     });
 
     // 10-7.사라진 메세지 모달 이벤트
+    function createDisappearNoticeLi(text) {
+        const li = document.createElement("li");
+        li.className = "Each-Main-Content DisappearNotice";
+        li.innerHTML = `
+            <div class="CallEnd-Wrapper">
+                <div class="CallEnd-Container">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em" class="text-primary w-5 h-5 shrink-0">
+                        <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v6l5.25 3.15.75-1.23-4-2.42V7z"/>
+                    </svg>
+                    <div class="CallEnd-Text"></div>
+                </div>
+            </div>
+        `;
+        li.querySelector(".CallEnd-Text").textContent = text;
+        return li;
+    }
+
+    // 방 진입 시: activatedAt 시간 기준으로 메시지 사이에 알림 삽입
+    function updateDisappearNotice(setting, activatedAt) {
+        if (!chatMessageList) return;
+        chatMessageList.querySelectorAll(".DisappearNotice").forEach((el) => el.remove());
+        if (!setting || setting === "none" || setting === "없음") return;
+        if (!activatedAt) {
+            chatMessageList.appendChild(createDisappearNoticeLi(`사라진 메시지 시작 · ${setting} 후 삭제`));
+            return;
+        }
+
+        const activatedTime = new Date(activatedAt).getTime();
+        const noticeLi = createDisappearNoticeLi(`사라진 메시지 시작 · ${setting} 후 삭제`);
+
+        // 메시지 목록에서 activatedAt 이후 첫 메시지 앞에 삽입
+        const allMessages = chatMessageList.querySelectorAll(".Left, .Right, .MyReply, .Reply");
+        let insertBefore = null;
+        for (const msg of allMessages) {
+            const timeEl = msg.querySelector(".Message-SendTime span");
+            if (!timeEl) continue;
+            // data-message-id 기준으로 시간 비교가 어려우니, 메시지 순서(DOM 순서)와 activatedAt 비교
+            // 메시지의 created_datetime은 DOM에 없으므로, 모든 메시지를 순회하며 마지막 메시지 뒤에 삽입
+        }
+
+        // 간단한 방법: activatedAt 이전 메시지 중 마지막 것 다음에 삽입
+        // 메시지에 시간 정보가 DOM에 부족하므로, 메시지 목록 끝에 삽입
+        // (설정 시점 이후 메시지는 스케줄러가 삭제하므로, 남아있는 마지막 메시지 뒤가 맞음)
+        chatMessageList.appendChild(noticeLi);
+    }
+
+    // 설정 변경 시: 기존 알림 제거 후 새 알림 (항상 맨 아래)
+    function onDisappearSettingChanged(setting) {
+        if (!chatMessageList) return;
+        chatMessageList.querySelectorAll(".DisappearNotice").forEach((el) => el.remove());
+        const text = (!setting || setting === "none" || setting === "없음")
+            ? "사라진 메시지가 해제되었습니다"
+            : `사라진 메시지 시작 · ${setting} 후 삭제`;
+        chatMessageList.appendChild(createDisappearNoticeLi(text));
+    }
+
     const setRemoveTimes = removedMsgModal.querySelectorAll(".Set-Remove-Time");
-    const removeAll = removedMsgModal.querySelector(".Remove-All-Button");
+
     setRemoveTimes.forEach((setTime) => {
-        setTime.addEventListener("click", () => {
-            setRemoveTimes.forEach((btn) => btn.querySelector("svg").classList.add("off"));
-            setTime.querySelector("svg").classList.remove("off");
+        setTime.addEventListener("click", async () => {
+            if (!currentRoomId) return;
             const selectedTime = setTime.querySelector(".Area-Content-Text").textContent;
-            userInfoModal.querySelector(".Modal-Bottom-Setting.RemovedMsg .Setting-Arrow").textContent = selectedTime;
+            const dbSetting = selectedTime === "없음" ? "none" : selectedTime;
+            try {
+                await ChatService.updateDisappearMessage(currentRoomId, dbSetting);
+                setRemoveTimes.forEach((btn) => btn.querySelector("svg").classList.add("off"));
+                setTime.querySelector("svg").classList.remove("off");
+                userInfoModal.querySelector(".Modal-Bottom-Setting.RemovedMsg .Setting-Arrow").textContent = selectedTime;
+                onDisappearSettingChanged(dbSetting);
+            } catch (error) {
+                console.error("사라진 메시지 설정 실패", error);
+            }
         });
     });
-    removeAll.addEventListener("click", () => openModal(removeAllMsgModal));
+
 
     // 10-8.스크린샷 차단하기 모달 이벤트
     const toggleBtn = banScreanShotModal.querySelector(".Toggle-Button");
     const toggleSpan = banScreanShotModal.querySelector(".Toggle-Switch");
-    toggleBtn.addEventListener("click", () => {
-        toggleBtn.classList.toggle("clicked");
-        toggleSpan.classList.toggle("moved");
-        const isActive = toggleBtn.classList.contains("clicked");
-        userInfoModal.querySelector(".Modal-Bottom-Setting.BanScreanShot .Setting-Arrow").textContent = isActive ? "켜기" : "끄기";
+    toggleBtn.addEventListener("click", async () => {
+        if (!currentRoomId) return;
+        try {
+            const result = await ChatService.toggleScreenBlock(currentRoomId);
+            if (result.blocked) {
+                toggleBtn.classList.add("clicked");
+                toggleSpan.classList.add("moved");
+            } else {
+                toggleBtn.classList.remove("clicked");
+                toggleSpan.classList.remove("moved");
+            }
+            userInfoModal.querySelector(".Modal-Bottom-Setting.BanScreanShot .Setting-Arrow").textContent = result.blocked ? "켜기" : "끄기";
+        } catch (error) {
+            console.error("스크린샷 차단 토글 실패", error);
+        }
     });
 
     // 10-9.작은 모달 버튼 이벤트
@@ -1027,14 +1098,14 @@ window.onload = () => {
         const targetMessageId = deleteChatModal.dataset.targetMessageId;
         if (!targetMessageId) return;
         try {
-            await ChatService.deleteMessage(targetMessageId, currentMemberId);
+            await ChatService.deleteMessage(targetMessageId);
             const targetNode = chatMessageList?.querySelector(`[data-message-id="${targetMessageId}"]`);
             if (targetNode) targetNode.remove();
             closeModal(deleteChatModal);
             delete deleteChatModal.dataset.targetMessageId;
         } catch (error) {
             console.error("메시지 삭제 실패", error);
-            alert("메시지 삭제에 실패했습니다.");
+            showErrorToast("메시지 삭제에 실패했습니다");
         }
     });
 
@@ -1042,7 +1113,7 @@ window.onload = () => {
         e.stopPropagation();
         if (!currentRoomId) return;
         try {
-            await ChatService.deleteConversation(currentRoomId, currentMemberId);
+            await ChatService.deleteConversation(currentRoomId);
             closeModal(leaveModal);
             closeModal(userInfoModal);
             closeChatRoom();
@@ -1053,10 +1124,6 @@ window.onload = () => {
         }
     });
 
-    removeAllMsgModal.querySelector(".Small-Button.Ban").addEventListener("click", (e) => {
-        e.stopPropagation();
-        alert("추후 추가 예정");
-    });
 
     banUserModal.querySelector(".Small-Button.Ban").addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -1080,6 +1147,7 @@ window.onload = () => {
     let currentMemberId = Number(document.body.dataset.memberId || 1);
     let currentMemberName = document.body.dataset.memberName || "GG Business";
     let currentMemberHandle = document.body.dataset.memberHandle || "gg_business_member1";
+    let currentProfileImage = document.body.dataset.profileImage || "/images/profile/default_image.png";
     let currentPartnerId = Number(document.body.dataset.partnerId || 2);
     let currentPartnerName = document.body.dataset.partnerName || "GG Expert";
     let currentPartnerHandle = document.body.dataset.partnerHandle || "gg_expert_member2";
@@ -1089,12 +1157,17 @@ window.onload = () => {
     const chatMessageList = chatDiv.querySelector(".ChatPage-Main-Content");
     let currentRoomId = defaultConversationId;
     let lastRenderedDateKey = null;
+    let hasMoreMessages = false;
+    let oldestMessageCursor = null;
+    let isLoadingMore = false;
     let stompClient = null;
     const roomSubscriptions = new Map();
     let currentReadSubscription = null;
     let pendingSubscriptionRoomId = defaultConversationId || null;
 
     // 11-2.상대방 프로필 정보를 DOM에 반영
+    let currentPartnerProfileImage = "/images/profile/default_image.png";
+
     function applyStageOnePartnerProfile(partner = null) {
         if (partner) {
             currentPartnerId = Number(partner.invitedId || currentPartnerId);
@@ -1102,16 +1175,28 @@ window.onload = () => {
             currentPartnerHandle = partner.invitedHandle || currentPartnerHandle;
             currentPartnerAlias = typeof partner.alias === "string" ? partner.alias : "";
             currentPartnerDisplayName = partner.title || currentPartnerAlias || currentPartnerName;
+            if (partner.partnerProfileFileName) {
+                currentPartnerProfileImage = partner.partnerProfileFileName;
+            }
         }
 
         const chatHeaderName = chatDiv.querySelector(".ChatPage-UserInfo .UserName-Text");
         const chatProfileName = chatDiv.querySelector(".UserProfile .UserName-Text");
         const chatProfileHandle = chatDiv.querySelector(".User-Id-Text");
+        const chatProfileBtn = chatDiv.querySelector(".User-Profile-Btn");
+        const chatProfileAvatar = chatDiv.querySelector(".UserProfile .Avatar-Image");
+        const chatProfileImg = chatDiv.querySelector(".UserProfile .Avatar-Image img");
+        const chatHeaderAvatar = chatDiv.querySelector(".ChatPage-UserInfo .Avatar-Image");
+        const chatHeaderImg = chatDiv.querySelector(".ChatPage-UserInfo .Avatar-Image img");
         const infoModalName = userInfoModal.querySelector(".Text-Name");
         const infoModalHandle = userInfoModal.querySelector(".Info-Text-Id");
+        const infoModalImageLink = userInfoModal.querySelector(".Modal-Info-Image .Image-Link");
+        const infoModalImg = userInfoModal.querySelector(".Modal-Info-Image .Image-Link img");
         const currentRoomItem = getStageOneRoomItems().find(
             (roomItem) => Number(roomItem.dataset.conversationId || 0) === Number(currentRoomId),
         );
+
+        const partnerMypageUrl = currentPartnerHandle ? `/mypage/${currentPartnerHandle}` : "#";
 
         document.body.dataset.partnerId = String(currentPartnerId || "");
         document.body.dataset.partnerName = currentPartnerName || "";
@@ -1125,8 +1210,15 @@ window.onload = () => {
         if (chatHeaderName) chatHeaderName.textContent = currentPartnerDisplayName;
         if (chatProfileName) chatProfileName.textContent = currentPartnerDisplayName;
         if (chatProfileHandle) chatProfileHandle.textContent = `@${currentPartnerHandle}`;
+        if (chatProfileBtn) chatProfileBtn.href = partnerMypageUrl;
+        if (chatProfileAvatar) chatProfileAvatar.href = partnerMypageUrl;
+        if (chatProfileImg) chatProfileImg.src = currentPartnerProfileImage;
+        if (chatHeaderAvatar) chatHeaderAvatar.href = partnerMypageUrl;
+        if (chatHeaderImg) chatHeaderImg.src = currentPartnerProfileImage;
         if (infoModalName) infoModalName.textContent = currentPartnerDisplayName || currentPartnerName;
         if (infoModalHandle) infoModalHandle.textContent = `@${currentPartnerHandle}`;
+        if (infoModalImageLink) infoModalImageLink.href = partnerMypageUrl;
+        if (infoModalImg) infoModalImg.src = currentPartnerProfileImage;
         if (aliasInput) aliasInput.value = currentPartnerAlias || "";
 
         stageOneRooms = stageOneRooms.map((room) =>
@@ -1154,7 +1246,7 @@ window.onload = () => {
     // 11-3.서버에서 상대방 프로필 조회 후 반영
     async function refreshStageOnePartnerProfile(roomId) {
         try {
-            const partner = await ChatService.getPartner(roomId, currentMemberId);
+            const partner = await ChatService.getPartner(roomId);
             applyStageOnePartnerProfile(partner);
         } catch (error) {
             console.error("상대방 정보 조회 실패", error);
@@ -1190,12 +1282,61 @@ window.onload = () => {
         }
 
         try {
-            const messages = await ChatService.getMessages(currentRoomId, currentMemberId);
+            const screenBlock = await ChatService.getScreenBlock(currentRoomId);
+            const sToggleBtn = banScreanShotModal.querySelector(".Toggle-Button");
+            const sToggleSpan = banScreanShotModal.querySelector(".Toggle-Switch");
+            const sArrow = userInfoModal.querySelector(".Modal-Bottom-Setting.BanScreanShot .Setting-Arrow");
+            if (screenBlock.blocked) {
+                sToggleBtn?.classList.add("clicked");
+                sToggleSpan?.classList.add("moved");
+                if (sArrow) sArrow.textContent = "켜기";
+            } else {
+                sToggleBtn?.classList.remove("clicked");
+                sToggleSpan?.classList.remove("moved");
+                if (sArrow) sArrow.textContent = "끄기";
+            }
+        } catch (e) {
+            console.error("스크린샷 차단 상태 조회 실패", e);
+        }
+
+        let currentDisappearSetting = "none";
+        let currentDisappearActivatedAt = "";
+        try {
+            const disappear = await ChatService.getDisappearMessage(currentRoomId);
+            currentDisappearSetting = disappear.setting || "none";
+            currentDisappearActivatedAt = disappear.activatedAt || "";
+            const displayText = currentDisappearSetting === "none" ? "없음" : currentDisappearSetting;
+            const dArrow = userInfoModal.querySelector(".Modal-Bottom-Setting.RemovedMsg .Setting-Arrow");
+            if (dArrow) dArrow.textContent = displayText;
+            const dTimeBtns = removedMsgModal.querySelectorAll(".Set-Remove-Time");
+            dTimeBtns.forEach((btn) => {
+                const btnText = btn.querySelector(".Area-Content-Text").textContent;
+                const svgEl = btn.querySelector("svg");
+                if (btnText === displayText) {
+                    svgEl?.classList.remove("off");
+                } else {
+                    svgEl?.classList.add("off");
+                }
+            });
+        } catch (e) {
+            console.error("사라진 메시지 설정 조회 실패", e);
+        }
+
+        try {
+            const result = await ChatService.getMessages(currentRoomId);
+            const messages = result.messages || [];
+            hasMoreMessages = result.hasMore || false;
+            oldestMessageCursor = messages.length > 0 ? messages[0].id : null;
+
             if (!chatMessageList) return;
             clearStageOneMessages();
+            renderLoadMoreButton();
             messages.forEach((message) => appendStageOneMessage(message, { refreshRoomList: false, scroll: false }));
+
             syncStageOneRoomPreview(messages);
             chatDiv.style.visibility = "";
+            updateDisappearNotice(currentDisappearSetting, currentDisappearActivatedAt);
+            scrollToBottom();
 
             loadStageOneReactions(messages);
             loadAllImagePreviews();
@@ -1206,7 +1347,7 @@ window.onload = () => {
 
         if (!isCurrentPartnerBlocked) {
             try {
-                await ChatService.markAsRead(roomId, currentMemberId);
+                await ChatService.markAsRead(roomId);
             } catch (e) {
                 console.error("읽음 처리 실패", e);
             }
@@ -1215,25 +1356,46 @@ window.onload = () => {
         markCurrentStageOneRoom(roomId);
     }
 
+    // 11-4-1.에러 토스트 표시
+    function showErrorToast(message) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("on");
+        setTimeout(() => toast.classList.remove("on"), CONFIG.TOAST_DURATION);
+    }
+
     // 11-5.메시지 전송 이벤트
     chatForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        if (isSending) return;
+        isSending = true;
         const content = chatInput.value.trim();
         const file = chatAttach?.files[0] || null;
-        if (!content && !file) return;
+        if (!content && !file) {
+            isSending = false;
+            return;
+        }
         try {
             if (file) {
-                await ChatService.sendMessageWithFile(currentRoomId, currentMemberId, currentMemberName, content, file);
+                await ChatService.sendMessageWithFile(currentRoomId, content, file);
                 if (chatAttach) chatAttach.value = "";
                 if (inputImageEl) inputImageEl.src = "";
                 if (inputImageContainer) inputImageContainer.classList.add("off");
             } else {
-                await ChatService.sendMessage(currentRoomId, currentMemberId, currentMemberName, content);
+                await ChatService.sendMessage(currentRoomId, content);
             }
             chatInput.value = "";
             chatSubmit.classList.add("off");
         } catch (error) {
             console.error("메시지 전송 실패", error);
+            showErrorToast("메시지 전송에 실패했습니다");
+            if (file) {
+                if (chatAttach) chatAttach.value = "";
+                if (inputImageEl) inputImageEl.src = "";
+                if (inputImageContainer) inputImageContainer.classList.add("off");
+            }
+        } finally {
+            isSending = false;
         }
     });
 
@@ -1251,8 +1413,32 @@ window.onload = () => {
     // 12.WebSocket 관련
 
     // 12-1.소켓 연결
+    let userRestoreSubscription = null;
+
+    function disconnectExistingSocket() {
+        if (currentReadSubscription) {
+            currentReadSubscription.unsubscribe();
+            currentReadSubscription = null;
+        }
+        if (userRestoreSubscription) {
+            userRestoreSubscription.unsubscribe();
+            userRestoreSubscription = null;
+        }
+        roomSubscriptions.forEach((subs) => {
+            if (subs.msg) subs.msg.unsubscribe();
+            if (subs.reaction) subs.reaction.unsubscribe();
+        });
+        roomSubscriptions.clear();
+        if (stompClient && stompClient.connected) {
+            try { stompClient.disconnect(); } catch (e) { /* ignore */ }
+        }
+        stompClient = null;
+    }
+
     function connectStageOneSocket() {
         if (typeof SockJS === "undefined" || typeof Stomp === "undefined") return;
+
+        disconnectExistingSocket();
 
         const socket = new SockJS("/ws/chat");
         stompClient = Stomp.over(socket);
@@ -1264,7 +1450,8 @@ window.onload = () => {
             subscribeVideoCallEvents();
         }, (error) => {
             console.error("채팅 소켓 연결 실패", error);
-            setTimeout(connectStageOneSocket, 3000);
+            clearTimeout(socketReconnectTimer);
+            socketReconnectTimer = setTimeout(connectStageOneSocket, CONFIG.SOCKET_RETRY_DELAY);
         });
     }
 
@@ -1321,7 +1508,8 @@ window.onload = () => {
     // 12-3-1.사용자별 방 복원 알림 구독
     function subscribeUserRestore() {
         if (!stompClient || !stompClient.connected) return;
-        stompClient.subscribe(`/topic/user.${currentMemberId}.restore`, async (message) => {
+        if (userRestoreSubscription) userRestoreSubscription.unsubscribe();
+        userRestoreSubscription = stompClient.subscribe(`/topic/user.${currentMemberId}.restore`, async (message) => {
             const payload = JSON.parse(message.body);
             const restoredRoomId = Number(payload.conversationId || 0);
             if (!restoredRoomId) return;
@@ -1344,7 +1532,7 @@ window.onload = () => {
             appendStageOneMessage(message, { refreshRoomList: false });
             if (!isMine && !isCurrentPartnerBlocked) {
                 try {
-                    await ChatService.markAsRead(roomId, currentMemberId);
+                    await ChatService.markAsRead(roomId);
                 } catch (e) {
                     console.error("읽음 처리 실패", e);
                 }
@@ -1356,7 +1544,7 @@ window.onload = () => {
                 await loadStageOneRoomList();
                 return;
             }
-            if (!isMine && !targetRoom.muted) incrementStageOneRoomUnreadCount(roomId);
+            if (!isMine) incrementStageOneRoomUnreadCount(roomId);
             updateStageOneRoomPreviewLocally(roomId, message);
         }
     }
@@ -1496,7 +1684,7 @@ window.onload = () => {
         messageItem.querySelectorAll(".Reaction-Badge").forEach((badge) => {
             badge.addEventListener("click", () => addReaction(badge.dataset.emoji, messageItem));
         });
-        if (scroll) scrollContainer.scrollTop = 0;
+        if (scroll) scrollToBottom();
         syncStageOneRoomPreview([message]);
         if (refreshRoomList) scheduleStageOneRoomRefresh();
     }
@@ -1568,14 +1756,164 @@ window.onload = () => {
     // 13-3.메시지 목록 초기화
     function clearStageOneMessages() {
         if (!chatMessageList) return;
-        chatMessageList.querySelectorAll(".Left, .Right, .Date, .CallEnd")
+        chatMessageList.querySelectorAll(".Left, .Right, .MyReply, .Reply, .Date, .CallEnd, .LoadMore-Wrapper, .DisappearNotice")
             .forEach((messageNode) => messageNode.remove());
         lastRenderedDateKey = null;
+        hasMoreMessages = false;
+        oldestMessageCursor = null;
+        isLoadingMore = false;
     }
 
     // 13-4.실시간 메시지 수신시 최하단 스크롤
     function scrollToBottom() {
-        scrollContainer.scrollTop = 0;
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+
+    // 13-4-1."이전 메시지 보기" 버튼 렌더링
+    function renderLoadMoreButton() {
+        if (!chatMessageList) return;
+        chatMessageList.querySelectorAll(".LoadMore-Wrapper").forEach((el) => el.remove());
+
+        if (!hasMoreMessages) return;
+
+        const wrapper = document.createElement("li");
+        wrapper.className = "LoadMore-Wrapper";
+        wrapper.style.cssText = "display:flex; justify-content:center; padding:12px 0; list-style:none;";
+        wrapper.innerHTML = `
+            <button class="LoadMore-Button" style="
+                display:flex; align-items:center; gap:6px; padding:8px 20px;
+                background:transparent; border:1px solid #2f3336; border-radius:20px;
+                color:#1d9bf0; font-size:13px; font-weight:600; cursor:pointer;
+                transition:background 0.2s;
+            ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+                이전 메시지 보기
+            </button>
+        `;
+
+        const btn = wrapper.querySelector(".LoadMore-Button");
+        btn.addEventListener("mouseover", () => { btn.style.background = "rgba(29,155,240,0.1)"; });
+        btn.addEventListener("mouseout", () => { btn.style.background = "transparent"; });
+        btn.addEventListener("click", loadPreviousMessages);
+
+        const firstChild = chatMessageList.querySelector(".Left, .Right, .Date, .CallEnd");
+        if (firstChild) {
+            chatMessageList.insertBefore(wrapper, firstChild);
+        } else {
+            chatMessageList.appendChild(wrapper);
+        }
+    }
+
+    // 13-4-2.이전 메시지 로드
+    async function loadPreviousMessages() {
+        if (isLoadingMore || !hasMoreMessages || !oldestMessageCursor) return;
+        isLoadingMore = true;
+
+        const btn = chatMessageList.querySelector(".LoadMore-Button");
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `
+                <span style="width:14px;height:14px;border:2px solid #2f3336;border-top-color:#1d9bf0;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>
+                불러오는 중...
+            `;
+        }
+
+        try {
+            const result = await ChatService.getMessages(currentRoomId, oldestMessageCursor);
+            const messages = result.messages || [];
+            hasMoreMessages = result.hasMore || false;
+
+            if (messages.length > 0) {
+                oldestMessageCursor = messages[0].id;
+                const prevScrollHeight = scrollContainer.scrollHeight;
+                const prevScrollTop = scrollContainer.scrollTop;
+
+                chatMessageList.querySelectorAll(".LoadMore-Wrapper").forEach((el) => el.remove());
+
+                const savedDateKey = lastRenderedDateKey;
+                lastRenderedDateKey = null;
+
+                const refNode = chatMessageList.querySelector(".Left, .Right, .Date, .CallEnd");
+
+                messages.forEach((message) => {
+                    const msgTime = message.createdDatetime || new Date().toISOString();
+                    const dateKey = ChatLayout.getDateKey(msgTime);
+
+                    if (lastRenderedDateKey !== dateKey) {
+                        const dateItem = document.createElement("li");
+                        dateItem.className = "Each-Main-Content Date";
+                        dateItem.dataset.dateKey = dateKey;
+                        dateItem.style.visibility = "visible";
+                        dateItem.innerHTML = `<div class="Date-Wrapper"><div class="Date-Text">${ChatLayout.formatDateDivider(msgTime)}</div></div>`;
+                        if (refNode) {
+                            chatMessageList.insertBefore(dateItem, refNode);
+                        } else {
+                            chatMessageList.appendChild(dateItem);
+                        }
+                        lastRenderedDateKey = dateKey;
+                    }
+
+                    const isMine = Number(message.senderId) === currentMemberId;
+                    const messageItem = document.createElement("li");
+                    const messageId = message.id || Date.now();
+                    const safeContent = escapeStageOneHtml(message.content || "");
+                    const timeText = ChatLayout.formatMessageTime(message.createdDatetime || new Date().toISOString());
+                    const readByPartner = Boolean(message.readByPartner);
+                    const hasFile = Boolean(message.fileId);
+
+                    messageItem.className = `Each-Main-Content ${isMine ? "Right" : "Left"}`;
+                    messageItem.dataset.chatId = `msg-${messageId}`;
+                    messageItem.dataset.messageId = String(messageId);
+                    messageItem.dataset.dateKey = dateKey;
+
+                    const downloadBtnHtml = hasFile ? `<div class="Message-Button-Wrapper"><button class="Message-Button Download"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" data-icon="icon-arrow-down" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img"><path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path></svg></button></div>` : "";
+                    const msgButtonsHtml = `<div class="Message-Buttons off"><div class="Message-Button-Wrapper"><button class="Message-Button Emote"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em"><path d="M17 12v3h-2.998v2h3v3h2v-3h3v-2h-3.001v-3H17zm-5 6.839c-3.871-2.34-6.053-4.639-7.127-6.609-1.112-2.04-1.031-3.7-.479-4.82.561-1.13 1.667-1.84 2.91-1.91 1.222-.06 2.68.51 3.892 2.16l.806 1.09.805-1.09c1.211-1.65 2.668-2.22 3.89-2.16 1.242.07 2.347.78 2.908 1.91.334.677.49 1.554.321 2.59h2.011c.153-1.283-.039-2.469-.539-3.48-.887-1.79-2.647-2.91-4.601-3.01-1.65-.09-3.367.56-4.796 2.01-1.43-1.45-3.147-2.1-4.798-2.01-1.954.1-3.714 1.22-4.601 3.01-.896 1.81-.846 4.17.514 6.67 1.353 2.48 4.003 5.12 8.382 7.67l.502.299v-2.32z"></path></svg></button></div>${downloadBtnHtml}<div class="Message-Button-Wrapper"><button class="Message-Button Menu"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg></button></div></div>`;
+
+                    const imageHtml = getFileImageMarkup(message);
+                    const docHtml = getFileDocMarkup(message);
+                    const hasText = safeContent || docHtml;
+                    const bubbleHtml = hasText ? `<div class="Chat-Message"><div class="Message-Wrapper"><div class="Message-Container">${docHtml}${safeContent ? `<span class="Message-Content">${safeContent}</span>` : ""}</div><div class="Message-Reactions"></div><div class="Message-SendTime"><span>${timeText}</span></div>${isMine ? getStageOneReadStatusMarkup(readByPartner) : ""}</div></div>` : "";
+                    const imageWithReactionHtml = imageHtml ? `<div class="Message-Image-Wrapper">${imageHtml}${!hasText ? `<div class="Message-Reactions Message-Reactions-Image"></div>` : ""}</div>` : "";
+
+                    messageItem.innerHTML = isMine
+                        ? `<div class="Chat-Left"><div class="Chat-Message-Wrapper">${msgButtonsHtml}<div class="Chat-Message-Content-Wrapper">${imageWithReactionHtml}${bubbleHtml}</div></div></div>`
+                        : `<div class="Chat-Left"><div class="Chat-Message-Wrapper"><div class="Chat-Message-Content-Wrapper">${imageWithReactionHtml}${bubbleHtml}</div>${msgButtonsHtml}</div></div>`;
+
+                    if (refNode) {
+                        chatMessageList.insertBefore(messageItem, refNode);
+                    } else {
+                        chatMessageList.appendChild(messageItem);
+                    }
+                    bindMessageEvents(messageItem);
+                });
+
+                lastRenderedDateKey = savedDateKey;
+
+                const firstExistingDate = chatMessageList.querySelector(".Date:not(.LoadMore-Wrapper ~ .Date)");
+                if (firstExistingDate) {
+                    const prevDateKey = firstExistingDate.dataset.dateKey;
+                    const lastLoaded = messages[messages.length - 1];
+                    if (lastLoaded && ChatLayout.getDateKey(lastLoaded.createdDatetime) === prevDateKey) {
+                        firstExistingDate.remove();
+                    }
+                }
+
+                renderLoadMoreButton();
+                loadStageOneReactions(messages);
+
+                scrollContainer.scrollTop = prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
+            } else {
+                hasMoreMessages = false;
+                chatMessageList.querySelectorAll(".LoadMore-Wrapper").forEach((el) => el.remove());
+            }
+        } catch (error) {
+            console.error("이전 메시지 로드 실패", error);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `이전 메시지 보기 (재시도)`;
+            }
+        }
+        isLoadingMore = false;
     }
 
     // 13-5.이미지 로드 완료 대기
@@ -1773,7 +2111,7 @@ window.onload = () => {
 
         if (myCurrentReaction && myCurrentReaction.dataset.emoji === emoji) {
             try {
-                if (messageId) await ChatService.removeReaction(messageId, currentMemberId, emoji, currentRoomId);
+                if (messageId) await ChatService.removeReaction(messageId, emoji, currentRoomId);
             } catch (error) {
                 console.error("반응 삭제 실패", error);
             }
@@ -1792,7 +2130,7 @@ window.onload = () => {
         if (myCurrentReaction) {
             const oldEmoji = myCurrentReaction.dataset.emoji;
             try {
-                if (messageId) await ChatService.removeReaction(messageId, currentMemberId, oldEmoji, currentRoomId);
+                if (messageId) await ChatService.removeReaction(messageId, oldEmoji, currentRoomId);
             } catch (error) {
                 console.error("기존 반응 삭제 실패", error);
             }
@@ -1807,7 +2145,7 @@ window.onload = () => {
         }
 
         try {
-            if (messageId) await ChatService.addReaction(messageId, currentMemberId, emoji, currentRoomId);
+            if (messageId) await ChatService.addReaction(messageId, emoji, currentRoomId);
         } catch (error) {
             console.error("반응 추가 실패", error);
             return;

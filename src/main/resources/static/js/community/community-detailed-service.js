@@ -10,8 +10,9 @@ const CommunityDetailService = (() => {
         return await response.json();
     };
 
-    const getPosts = async (communityId, page) => {
-        const response = await fetch(`/api/communities/${communityId}/posts/${page}`);
+    const getPosts = async (communityId, page, type = "latest") => {
+        const params = new URLSearchParams({ type });
+        const response = await fetch(`/api/communities/${communityId}/posts/${page}?${params}`);
         if (!response.ok) throw new Error("게시글 목록 조회 실패");
         return await response.json();
     };

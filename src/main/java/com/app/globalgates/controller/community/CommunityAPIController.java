@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class CommunityAPIController {
     // ──────────────────────────────────────
 
     @PostMapping
-    public ResponseEntity<?> createCommunity(CommunityDTO dto,
+    public ResponseEntity<?> createCommunity(@Valid CommunityDTO dto,
                                              @RequestParam(required = false) MultipartFile coverImage,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         dto.setCreatorId(userDetails.getId());
@@ -40,7 +41,7 @@ public class CommunityAPIController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCommunity(@PathVariable Long id,
-                                             CommunityDTO dto,
+                                             @Valid CommunityDTO dto,
                                              @RequestParam(required = false) MultipartFile coverImage,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         communityService.updateCommunity(id, dto.toCommunityVO(), coverImage, userDetails.getId());
@@ -62,8 +63,13 @@ public class CommunityAPIController {
     }
 
     @GetMapping("/list/{page}")
-    public ResponseEntity<?> getExploreCommunities(@PathVariable int page) throws IOException {
-        return ResponseEntity.ok(communityService.getExploreCommunities(page));
+    public ResponseEntity<?> getExploreCommunities(@PathVariable int page,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
+        Long memberId = userDetails != null ? userDetails.getId() : null;
+        log.info("=== [API] GET /api/communities/list/{} === memberId={}", page, memberId);
+        var result = communityService.getExploreCommunities(page, memberId);
+        log.info("=== [API] 탐색 커뮤니티 목록 반환 === count={}", result.getCommunities() != null ? result.getCommunities().size() : 0);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/my/{page}")
@@ -75,6 +81,7 @@ public class CommunityAPIController {
     @GetMapping("/feed/home/{page}")
     public ResponseEntity<?> getHomeFeed(@PathVariable int page,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
         return ResponseEntity.ok(communityService.getMyCommunitiesFeed(page, userDetails.getId()));
     }
 
@@ -82,7 +89,11 @@ public class CommunityAPIController {
     public ResponseEntity<?> getExploreFeed(@PathVariable int page,
                                             @RequestParam(required = false) Long categoryId,
                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(communityService.getExploreFeed(page, userDetails.getId(), categoryId));
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+        log.info("=== [API] GET /api/communities/feed/explore/{} === memberId={}, categoryId={}", page, userDetails.getId(), categoryId);
+        var result = communityService.getExploreFeed(page, userDetails.getId(), categoryId);
+        log.info("=== [API] 탐색 피드 반환 === postCount={}", result.getPosts() != null ? result.getPosts().size() : 0);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/search/{page}")
@@ -104,14 +115,18 @@ public class CommunityAPIController {
     @PostMapping("/{id}/join")
     public ResponseEntity<?> joinCommunity(@PathVariable Long id,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("=== [API] POST /api/communities/{}/join === memberId={}", id, userDetails.getId());
         communityService.joinCommunity(id, userDetails.getId());
+        log.info("=== [API] 커뮤니티 가입 응답 완료 === communityId={}, memberId={}", id, userDetails.getId());
         return ResponseEntity.ok(Map.of("message", "커뮤니티 가입 완료"));
     }
 
     @DeleteMapping("/{id}/leave")
     public ResponseEntity<?> leaveCommunity(@PathVariable Long id,
                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("=== [API] DELETE /api/communities/{}/leave === memberId={}", id, userDetails.getId());
         communityService.leaveCommunity(id, userDetails.getId());
+        log.info("=== [API] 커뮤니티 탈퇴 응답 완료 === communityId={}, memberId={}", id, userDetails.getId());
         return ResponseEntity.ok(Map.of("message", "커뮤니티 탈퇴 완료"));
     }
 
@@ -155,9 +170,10 @@ public class CommunityAPIController {
     @GetMapping("/{id}/posts/{page}")
     public ResponseEntity<?> getCommunityPosts(@PathVariable Long id,
                                                @PathVariable int page,
+                                               @RequestParam(defaultValue = "latest") String type,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails != null ? userDetails.getId() : null;
-        return ResponseEntity.ok(communityService.getCommunityPosts(id, page, memberId));
+        return ResponseEntity.ok(communityService.getCommunityPosts(id, page, memberId, type));
     }
 
     // ──────────────────────────────────────

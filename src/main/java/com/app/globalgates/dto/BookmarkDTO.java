@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -22,6 +24,7 @@ public class BookmarkDTO {
     private String createdDatetime;
     private String updatedDatetime;
     // 게시물 작성자 정보
+    private Long postMemberId;
     private String memberNickname;
     private String memberHandle;
     private String memberProfileFileName;
@@ -29,6 +32,10 @@ public class BookmarkDTO {
     private int likeCount;
     private int replyCount;
     private int bookmarkCount;
+    // 좋아요 상태
+    private boolean liked;
+    // 첨부파일
+    private List<PostFileDTO> postFiles;
 
     public BookmarkVO toBookmarkVO() {
         return BookmarkVO.builder()

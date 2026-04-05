@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Mapper
@@ -35,13 +36,13 @@ public interface ChatRoomMapper {
     void updateAlias(@Param("conversationId") Long conversationId,
                      @Param("memberId") Long memberId,
                      @Param("alias") String alias);
-//    뮤트 설정
-    void updateMuted(@Param("conversationId") Long conversationId,
-                     @Param("memberId") Long memberId,
-                     @Param("muted") boolean muted);
-//    뮤트 상태 조회
-    boolean selectMuted(@Param("conversationId") Long conversationId,
-                        @Param("memberId") Long memberId);
+//    스크린샷 차단 상태 수정
+    void updateScreenBlocked(@Param("conversationId") Long conversationId,
+                             @Param("memberId") Long memberId,
+                             @Param("blocked") boolean blocked);
+//    스크린샷 차단 상태 조회
+    boolean selectScreenBlocked(@Param("conversationId") Long conversationId,
+                                @Param("memberId") Long memberId);
 //    대화방 soft delete
     void softDeleteConversation(@Param("conversationId") Long conversationId,
                                 @Param("memberId") Long memberId);
@@ -60,4 +61,11 @@ public interface ChatRoomMapper {
     void updateBlockReleasedMessageId(@Param("conversationId") Long conversationId,
                                        @Param("memberId") Long memberId,
                                        @Param("messageId") Long messageId);
+//    사라진 메시지 설정 변경
+    void updateDisappearMessage(@Param("conversationId") Long conversationId,
+                                @Param("memberId") Long memberId,
+                                @Param("setting") String setting);
+//    사라진 메시지 설정 조회
+    Map<String, Object> selectDisappearMessage(@Param("conversationId") Long conversationId,
+                                               @Param("memberId") Long memberId);
 }

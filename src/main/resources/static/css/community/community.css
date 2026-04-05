@@ -1,6 +1,7 @@
 body {
     background: #ffffff;
 }
+button { cursor: pointer; }
 
 .communityPage {
     display: flex;
@@ -42,42 +43,63 @@ body {
     gap: 4px;
 }
 
-/* 검색 오버레이 */
-.communitySearchOverlay {
-    position: sticky;
-    top: 53px;
-    z-index: 14;
-    background: #fff;
-    border-bottom: 1px solid #eff3f4;
-    padding: 8px 16px;
+/* 검색 (메인 스타일 인라인 드롭다운) */
+.communitySearchForm {
+    flex: 1;
+    position: relative;
+    min-width: 0;
 }
-.communitySearchOverlay__inner {
+.communitySearchField {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #eff3f4;
+    padding: 8px 14px;
     border-radius: 9999px;
-    padding: 8px 16px;
+    border: 1px solid #eff3f4;
+    background: #eff3f4;
+    max-height: 40px;
 }
-.communitySearchOverlay__input {
-    flex: 1;
-    border: none;
+.communitySearchForm.isFocused .communitySearchField {
+    background: #fff;
+    border-color: #1d9bf0;
+    box-shadow: 0 0 0 1px #1d9bf0;
+}
+.communitySearchIcon {
+    color: #536471;
+    flex-shrink: 0;
+    display: flex;
+}
+.communitySearchIcon svg { fill: currentColor; }
+.communitySearchForm.isFocused .communitySearchIcon { color: #1d9bf0; }
+.communitySearchInput {
+    width: 100%;
+    border: 0;
+    outline: 0;
     background: transparent;
-    font-size: 15px;
-    outline: none;
-}
-.communitySearchOverlay__close {
-    border: none;
-    background: none;
-    color: #1d9bf0;
+    color: #0f1419;
     font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
+    caret-color: #1d9bf0;
 }
-.communitySearchOverlay__results {
-    max-height: 400px;
+.communitySearchInput::placeholder { color: #536471; }
+.communitySearchPanel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    min-height: 40px;
+    max-height: calc(80vh - 53px);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(15, 20, 25, 0.15);
     overflow-y: auto;
+    z-index: 20;
 }
+.communitySearchPanel.off { display: none; }
+.communitySearchPanelEmpty { padding: 18px 16px; }
+.communitySearchPanelText { margin: 0; color: #536471; font-size: 14px; }
+.communitySearchResultList { display: flex; flex-direction: column; }
+.communitySearchResultList .communityListItem { cursor: pointer; }
+.communitySearchResultList .communityEmpty { padding: 24px 16px; text-align: center; color: #536471; }
 
 .communityIconButton {
     display: inline-flex;
@@ -89,7 +111,10 @@ body {
     border-radius: 999px;
     background: transparent;
     color: #0f1419;
-    cursor: default;
+    cursor: pointer;
+}
+.communityIconButton:hover {
+    background: rgba(15, 20, 25, 0.1);
 }
 
 .communityIconButton svg {
@@ -162,6 +187,29 @@ body {
 #communityTabExplore:checked ~ .communityPanels .communityPanel--explore {
     display: block;
 }
+
+.communityRail-wrap {
+    position: relative;
+}
+.communityRail-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.communityRail-arrow--left { left: 4px; }
+.communityRail-arrow--right { right: 4px; }
+.communityRail-arrow:hover { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
 .communityRail {
     display: flex;
@@ -753,13 +801,9 @@ body.modal-open {
         linear-gradient(135deg, #065f46 0%, #10b981 100%);
 }
 
-/* ===== FAB ===== */
+/* ===== FAB (삭제됨) ===== */
 .communityFab {
-    position: fixed;
-    bottom: 24px;
-    right: 16px;
-    z-index: 50;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     width: 56px;
@@ -1305,4 +1349,26 @@ body.modal-open {
 }
 .communityModal__description:focus {
     border-color: #1d9bf0;
+}
+
+/* ===== 로딩 스피너 ===== */
+.communityFeedSection--home.is-loading,
+.communityFeedSection--explore.is-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+.communityFeedSection--home.is-loading::after,
+.communityFeedSection--explore.is-loading::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e1e8ed;
+    border-top-color: #1d9bf0;
+    border-radius: 50%;
+    animation: communitySpinner 0.7s linear infinite;
+}
+@keyframes communitySpinner {
+    to { transform: rotate(360deg); }
 }

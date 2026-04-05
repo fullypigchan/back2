@@ -7,7 +7,13 @@
 -- where a.id > b.id and a.member_id = b.member_id and a.post_id = b.post_id;
 
 
-alter table tbl_bookmark add constraint uq_bookmark_member_post unique (member_id, post_id);
+-- [기존] 회원+게시물 단위 중복 방지 (폴더 간 중복 불가)
+-- alter table tbl_bookmark add constraint uq_bookmark_member_post unique (member_id, post_id);
+
+-- [변경] 회원+게시물+폴더 단위 중복 방지 (다른 폴더에는 같은 게시물 허용)
+-- 실행 순서: 1) 기존 제약 삭제 → 2) 새 제약 추가
+alter table tbl_bookmark drop constraint if exists uq_bookmark_member_post;
+alter table tbl_bookmark add constraint uq_bookmark_member_post_folder unique (member_id, post_id, folder_id);
 select * from tbl_member;
 select * from tbl_follow;
 select * from tbl_bookmark;

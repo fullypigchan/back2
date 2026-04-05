@@ -19,19 +19,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class LogAspect {
     @Around("logStatusAnnotated()")
-    public void around(ProceedingJoinPoint joinPoint) throws Throwable{
-        log.info("{}: {}",
-                joinPoint.getSignature().getName(),
-                Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", ")));
-        joinPoint.proceed();
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable{
+        String methodName = joinPoint.getSignature().getName();
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        String args = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
+        log.info("▶ [{}#{}] 호출 args=({})", className, methodName, args);
+        Object result = joinPoint.proceed();
+        log.info("◀ [{}#{}] 완료", className, methodName);
+        return result;
     }
 
     @AfterReturning(value = "logStatusWithReturnAnnotated()", returning = "returnValue")
     public void afterReturning(JoinPoint joinPoint, Object returnValue) throws IOException {
-        log.info("{}: {}",
-                joinPoint.getSignature().getName(),
-                Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", ")));
-        log.info("Return: {}", returnValue);
+        String methodName = joinPoint.getSignature().getName();
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        String args = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
+        log.info("▶ [{}#{}] 호출 args=({})", className, methodName, args);
+        log.info("◀ [{}#{}] Return: {}", className, methodName, returnValue);
     }
 
     @Pointcut("@annotation(com.app.globalgates.aop.annotation.LogStatus)")

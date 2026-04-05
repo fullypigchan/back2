@@ -1,5 +1,7 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.domain.CommunityVO;
@@ -42,24 +44,36 @@ public class CommunityService {
 
 
     @CacheEvict(value = "community:list", allEntries = true)
+    @LogStatus
     public void createCommunity(CommunityDTO dto, MultipartFile coverImage) throws IOException {
         communityDAO.save(dto);
 
-        if (coverImage != null && !coverImage.isEmpty()) {
-            saveCoverImage(dto.getId(), coverImage);
-        }
+        String uploadedS3Key = null;
+        try {
+            if (coverImage != null && !coverImage.isEmpty()) {
+                uploadedS3Key = saveCoverImageAndReturnKey(dto.getId(), coverImage);
+            }
 
-        // 생성자를 일반 멤버로 등록 (커뮤니티 관리 권한은 creator_id로 판별)
-        CommunityMemberDTO creatorMember = new CommunityMemberDTO();
-        creatorMember.setCommunityId(dto.getId());
-        creatorMember.setMemberId(dto.getCreatorId());
-        creatorMember.setMemberRole("member");
-        communityMemberDAO.save(creatorMember);
+            // 생성자를 일반 멤버로 등록 (커뮤니티 관리 권한은 creator_id로 판별)
+            CommunityMemberDTO creatorMember = new CommunityMemberDTO();
+            creatorMember.setCommunityId(dto.getId());
+            creatorMember.setMemberId(dto.getCreatorId());
+            creatorMember.setMemberRole("member");
+            communityMemberDAO.save(creatorMember);
+        } catch (Exception e) {
+            // DB 롤백은 @Transactional이 처리. S3 파일만 수동 삭제 (보상 패턴)
+            if (uploadedS3Key != null) {
+                try { s3Service.deleteFile(uploadedS3Key); } catch (Exception s3e) { log.error("S3 보상 삭제 실패: {}", uploadedS3Key, s3e); }
+            }
+            throw e;
+        }
     }
 
     @Caching(evict = {
             @CacheEvict(value = "community", allEntries = true),
-            @CacheEvict(value = "community:list", allEntries = true)
+            @CacheEvict(value = "community:list", allEntries = true),
+            @CacheEvict(value = "community:post:list", allEntries = true),
+            @CacheEvict(value = "community:member:list", allEntries = true)
     })
     public void updateCommunity(Long communityId, CommunityVO vo, MultipartFile coverImage, Long requesterId) throws IOException {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
@@ -71,7 +85,13 @@ public class CommunityService {
 
         // 이름/설명 등 필드가 있을 때만 UPDATE 실행
         if (vo.getCommunityName() != null) {
-            communityDAO.update(vo);
+            CommunityVO updateVo = CommunityVO.builder()
+                    .id(communityId)
+                    .communityName(vo.getCommunityName())
+                    .description(vo.getDescription())
+                    .categoryId(vo.getCategoryId())
+                    .build();
+            communityDAO.update(updateVo);
         }
 
         if (coverImage != null && !coverImage.isEmpty()) {
@@ -90,6 +110,7 @@ public class CommunityService {
             @CacheEvict(value = "community:member:list", allEntries = true),
             @CacheEvict(value = "community:post:list", allEntries = true)
     })
+    @LogStatus
     public void deleteCommunity(Long communityId, Long requesterId) {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -106,7 +127,7 @@ public class CommunityService {
         CommunityDTO result = communityDAO.findById(communityId, memberId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
 
-        if (result.getCoverFilePath() != null) {
+        if (result.getCoverFilePath() != null && !result.getCoverFilePath().startsWith("/uploads/")) {
             result.setCoverFilePath(s3Service.getPresignedUrl(result.getCoverFilePath(), Duration.ofMinutes(10)));
         }
 
@@ -130,16 +151,19 @@ public class CommunityService {
         return result;
     }
 
-    @Cacheable(value = "community:list", key = "'explore:page:' + #page")
-    public CommunityWithPagingDTO getExploreCommunities(int page) throws IOException {
-        int total = communityDAO.getCount();
+    @Cacheable(value = "community:list", key = "'explore:page:' + #page + ':member:' + #memberId")
+    public CommunityWithPagingDTO getExploreCommunities(int page, Long memberId) throws IOException {
+        log.info("[탐색 커뮤니티 목록 조회] page={}, memberId={} (캐시 미스 → DB 조회)", page, memberId);
+        int total = memberId != null ? communityDAO.getCountExcludeJoined(memberId) : communityDAO.getCount();
+        log.info("[탐색 커뮤니티 목록] 미가입 커뮤니티 총 {}개", total);
         Criteria criteria = new Criteria(page, total);
-        List<CommunityDTO> list = communityDAO.findAll(criteria);
+        List<CommunityDTO> list = memberId != null ? communityDAO.findAllExcludeJoined(memberId, criteria) : communityDAO.findAll(criteria);
 
         criteria.setHasMore(list.size() > criteria.getRowCount());
         if (criteria.isHasMore()) list.remove(list.size() - 1);
 
         convertCoverUrls(list);
+        log.info("[탐색 커뮤니티 목록] 반환 {}건, hasMore={}", list.size(), criteria.isHasMore());
 
         CommunityWithPagingDTO result = new CommunityWithPagingDTO();
         result.setCommunities(list);
@@ -168,7 +192,7 @@ public class CommunityService {
     // 커뮤니티 검색
     // ──────────────────────────────────────
 
-    @Cacheable(value = "community:list", key = "'search:' + #keyword + ':page:' + #page")
+    // 검색은 키워드 조합이 무한하여 캐시 무한 증가 위험 — 캐싱 비적용
     public CommunityWithPagingDTO searchCommunities(String keyword, int page) throws IOException {
         int total = communityDAO.getCountByKeyword(keyword);
         Criteria criteria = new Criteria(page, total);
@@ -192,10 +216,15 @@ public class CommunityService {
     @Caching(evict = {
             @CacheEvict(value = "community", allEntries = true),
             @CacheEvict(value = "community:member:list", allEntries = true),
-            @CacheEvict(value = "community:list", allEntries = true)
+            @CacheEvict(value = "community:list", allEntries = true),
+            @CacheEvict(value = "community:post:list", allEntries = true)
     })
+    @LogStatus
     public void joinCommunity(Long communityId, Long memberId) {
+        log.info("[커뮤니티 가입 시작] communityId={}, memberId={}", communityId, memberId);
+
         communityMemberDAO.findByIds(communityId, memberId).ifPresent(m -> {
+            log.warn("[커뮤니티 가입 실패] 이미 가입됨 communityId={}, memberId={}", communityId, memberId);
             throw new IllegalStateException("이미 가입한 커뮤니티입니다.");
         });
 
@@ -204,25 +233,35 @@ public class CommunityService {
         dto.setMemberId(memberId);
         dto.setMemberRole("member");
         communityMemberDAO.save(dto);
+        log.info("[커뮤니티 가입 완료] communityId={}, memberId={}, role=member → DB INSERT 성공", communityId, memberId);
     }
 
     @Caching(evict = {
             @CacheEvict(value = "community", allEntries = true),
             @CacheEvict(value = "community:member:list", allEntries = true),
-            @CacheEvict(value = "community:list", allEntries = true)
+            @CacheEvict(value = "community:list", allEntries = true),
+            @CacheEvict(value = "community:post:list", allEntries = true)
     })
+    @LogStatus
     public void leaveCommunity(Long communityId, Long memberId) {
+        log.info("[커뮤니티 탈퇴 시작] communityId={}, memberId={}", communityId, memberId);
+
         communityMemberDAO.findByIds(communityId, memberId)
-                .orElseThrow(() -> new IllegalStateException("가입하지 않은 커뮤니티입니다."));
+                .orElseThrow(() -> {
+                    log.warn("[커뮤니티 탈퇴 실패] 가입하지 않음 communityId={}, memberId={}", communityId, memberId);
+                    return new IllegalStateException("가입하지 않은 커뮤니티입니다.");
+                });
 
         CommunityDTO community = communityDAO.findById(communityId, memberId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
 
         if (memberId.equals(community.getCreatorId())) {
+            log.warn("[커뮤니티 탈퇴 실패] 생성자 탈퇴 시도 communityId={}, memberId={}", communityId, memberId);
             throw new IllegalStateException("커뮤니티 생성자는 탈퇴할 수 없습니다. 커뮤니티를 삭제해주세요.");
         }
 
         communityMemberDAO.delete(communityId, memberId);
+        log.info("[커뮤니티 탈퇴 완료] communityId={}, memberId={} → DB DELETE 성공", communityId, memberId);
     }
 
     @Cacheable(value = "community:member:list", key = "'community:' + #communityId + ':page:' + #page")
@@ -237,7 +276,7 @@ public class CommunityService {
         }
 
         for (CommunityMemberDTO member : list) {
-            if (member.getMemberProfileFilePath() != null) {
+            if (member.getMemberProfileFilePath() != null && !member.getMemberProfileFilePath().startsWith("/uploads/")) {
                 member.setMemberProfileFilePath(
                         s3Service.getPresignedUrl(member.getMemberProfileFilePath(), Duration.ofMinutes(10))
                 );
@@ -250,8 +289,12 @@ public class CommunityService {
         return result;
     }
 
-    @CacheEvict(value = {"community", "community:member:list"}, allEntries = true)
+    @CacheEvict(value = {"community", "community:member:list", "community:list"}, allEntries = true)
     public void updateMemberRole(Long communityId, Long targetMemberId, String role, Long requesterId) {
+        if (role == null || !List.of("admin", "moderator", "member").contains(role)) {
+            throw new IllegalStateException("유효하지 않은 역할입니다: " + role);
+        }
+
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
 
@@ -262,7 +305,7 @@ public class CommunityService {
         communityMemberDAO.updateRole(communityId, targetMemberId, role);
     }
 
-    @CacheEvict(value = {"community", "community:member:list"}, allEntries = true)
+    @CacheEvict(value = {"community", "community:member:list", "community:list", "community:post:list"}, allEntries = true)
     public void kickMember(Long communityId, Long targetMemberId, Long requesterId) {
         CommunityDTO community = communityDAO.findById(communityId, requesterId)
                 .orElseThrow(() -> new IllegalStateException("커뮤니티를 찾을 수 없습니다."));
@@ -283,6 +326,7 @@ public class CommunityService {
     // ──────────────────────────────────────
 
     @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
+    @LogStatus
     public void writeCommunityPost(PostDTO postDTO, List<MultipartFile> files, Long communityId) throws IOException {
         communityMemberDAO.findByIds(communityId, postDTO.getMemberId())
                 .orElseThrow(() -> new IllegalStateException("커뮤니티 멤버만 게시글을 작성할 수 있습니다."));
@@ -301,8 +345,9 @@ public class CommunityService {
                     fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
                     fileDTO.setFilePath(s3Key);
                     fileDTO.setFileSize(file.getSize());
-                    fileDTO.setContentType(file.getContentType().contains("image") ? FileContentType.IMAGE
-                            : file.getContentType().contains("video") ? FileContentType.VIDEO : FileContentType.ETC);
+                    String ct = file.getContentType();
+                    fileDTO.setContentType(ct != null && ct.contains("image") ? FileContentType.IMAGE
+                            : ct != null && ct.contains("video") ? FileContentType.VIDEO : FileContentType.ETC);
                     fileDAO.save(fileDTO);
 
                     PostFileDTO postFileDTO = new PostFileDTO();
@@ -346,7 +391,9 @@ public class CommunityService {
     // 탐색 피드: 미가입 커뮤니티 생성자 게시글 (카테고리 필터 지원)
     @Cacheable(value = "community:post:list", key = "'explore:page:' + #page + ':member:' + #memberId + ':cat:' + #categoryId")
     public PostWithPagingDTO getExploreFeed(int page, Long memberId, Long categoryId) {
+        log.info("[탐색 피드 조회] page={}, memberId={}, categoryId={} (캐시 미스 → DB 조회)", page, memberId, categoryId);
         int total = communityDAO.getExplorePostsCount(memberId, categoryId);
+        log.info("[탐색 피드] 미가입 커뮤니티 게시글 총 {}개", total);
         Criteria criteria = new Criteria(page, total);
         List<PostDTO> list = communityDAO.findExplorePosts(memberId, categoryId, criteria);
 
@@ -354,6 +401,7 @@ public class CommunityService {
         if (criteria.isHasMore()) list.remove(list.size() - 1);
 
         enrichPostFiles(list);
+        log.info("[탐색 피드] 반환 {}건, hasMore={}", list.size(), criteria.isHasMore());
 
         PostWithPagingDTO result = new PostWithPagingDTO();
         result.setPosts(list);
@@ -361,11 +409,11 @@ public class CommunityService {
         return result;
     }
 
-    @Cacheable(value = "community:post:list", key = "'community:' + #communityId + ':page:' + #page + ':member:' + #memberId")
-    public PostWithPagingDTO getCommunityPosts(Long communityId, int page, Long memberId) {
+    @Cacheable(value = "community:post:list", key = "'community:' + #communityId + ':page:' + #page + ':member:' + #memberId + ':type:' + #type")
+    public PostWithPagingDTO getCommunityPosts(Long communityId, int page, Long memberId, String type) {
         int total = communityDAO.getPostsCountByCommunityId(communityId);
         Criteria criteria = new Criteria(page, total);
-        List<PostDTO> list = communityDAO.findPostsByCommunityId(communityId, memberId, criteria);
+        List<PostDTO> list = communityDAO.findPostsByCommunityId(communityId, memberId, criteria, type);
 
         criteria.setHasMore(list.size() > criteria.getRowCount());
         if (criteria.isHasMore()) list.remove(list.size() - 1);
@@ -382,7 +430,7 @@ public class CommunityService {
     // 검색
     // ──────────────────────────────────────
 
-    @Cacheable(value = "community:post:list", key = "'search:' + #communityId + ':kw:' + #keyword + ':type:' + #type + ':page:' + #page + ':member:' + #memberId")
+    // 검색은 키워드 조합이 무한하여 캐시 무한 증가 위험 — 캐싱 비적용
     public PostWithPagingDTO searchCommunityPosts(Long communityId, String keyword, String type, int page, Long memberId) {
         int total = communityDAO.getPostsCountBySearch(communityId, keyword);
         Criteria criteria = new Criteria(page, total);
@@ -415,7 +463,7 @@ public class CommunityService {
         }
 
         for (PostFileDTO file : list) {
-            if (file.getFilePath() != null) {
+            if (file.getFilePath() != null && !file.getFilePath().startsWith("/uploads/")) {
                 file.setFilePath(s3Service.getPresignedUrl(file.getFilePath(), Duration.ofMinutes(10)));
             }
         }
@@ -431,6 +479,10 @@ public class CommunityService {
     // ──────────────────────────────────────
 
     private void saveCoverImage(Long communityId, MultipartFile coverImage) throws IOException {
+        saveCoverImageAndReturnKey(communityId, coverImage);
+    }
+
+    private String saveCoverImageAndReturnKey(Long communityId, MultipartFile coverImage) throws IOException {
         String todayPath = "community/" + LocalDate.now();
         String s3Key = s3Service.uploadFile(coverImage, todayPath);
 
@@ -439,16 +491,18 @@ public class CommunityService {
         fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
         fileDTO.setFilePath(s3Key);
         fileDTO.setFileSize(coverImage.getSize());
-        fileDTO.setContentType(coverImage.getContentType().contains("image") ? FileContentType.IMAGE
+        String coverCt = coverImage.getContentType();
+        fileDTO.setContentType(coverCt != null && coverCt.contains("image") ? FileContentType.IMAGE
                 : FileContentType.ETC);
         fileDAO.save(fileDTO);
 
         communityFileDAO.save(fileDTO.getId(), communityId);
+        return s3Key;
     }
 
     private void convertCoverUrls(List<CommunityDTO> list) throws IOException {
         for (CommunityDTO dto : list) {
-            if (dto.getCoverFilePath() != null) {
+            if (dto.getCoverFilePath() != null && !dto.getCoverFilePath().startsWith("/uploads/")) {
                 dto.setCoverFilePath(s3Service.getPresignedUrl(dto.getCoverFilePath(), Duration.ofMinutes(10)));
             }
         }
@@ -469,11 +523,23 @@ public class CommunityService {
         Map<Long, List<PostFileDTO>> fileMap = allFiles.stream()
                 .collect(Collectors.groupingBy(PostFileDTO::getPostId));
 
-        // 4. 각 게시글에 파일 세팅 + presigned URL 변환
+        // 4. 각 게시글에 파일 세팅 + presigned URL 변환 + 프로필 이미지 URL 변환
         posts.forEach(postDTO -> {
+            // 프로필 이미지 presigned URL 변환 (로컬 경로는 변환 생략)
+            if (postDTO.getMemberProfileFileName() != null
+                    && !postDTO.getMemberProfileFileName().startsWith("http")
+                    && !postDTO.getMemberProfileFileName().startsWith("/uploads/")) {
+                try {
+                    postDTO.setMemberProfileFileName(
+                            s3Service.getPresignedUrl(postDTO.getMemberProfileFileName(), Duration.ofMinutes(10)));
+                } catch (IOException e) {
+                    log.error("프로필 Presigned URL 생성 실패: {}", postDTO.getMemberProfileFileName(), e);
+                }
+            }
+
             List<PostFileDTO> files = fileMap.getOrDefault(postDTO.getId(), List.of());
             files.forEach(pf -> {
-                if (pf.getFilePath() != null) {
+                if (pf.getFilePath() != null && !pf.getFilePath().startsWith("/uploads/")) {
                     try {
                         pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
                     } catch (IOException e) {

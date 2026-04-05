@@ -16,10 +16,10 @@ public class ChatRoomDTO {
     private String invitedName;
     private String invitedHandle;
     private String alias;
+    private String partnerProfileFileName;
     private String lastMessage;
     private String lastMessageTime;
     private Long unreadCount;
-    private boolean muted;
     private String createdDatetime;
     private String updatedDatetime;
 

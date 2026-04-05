@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>[글반투] 글로벌 반도체 투자 커뮤니티 / X</title>
+  <title>커뮤니티</title>
   <link rel="stylesheet" href="/css/community/community-detailed.css" />
   <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
   <script src="/js/community/service.js"></script>
@@ -16,7 +16,7 @@
 <div class="app-container">
 
   <!-- 메인 콘텐츠 -->
-  <main class="main-content communityDetailPage" th:data-community-id="${communityId}" th:data-member-id="${memberId}">
+  <main class="main-content communityDetailPage" th:data-community-id="${communityId}" th:data-member-id="${memberId}" th:data-profile-image="${profileImageUrl}">
 
     <!-- 검색 오버레이 -->
     <div id="searchOverlay" class="search-overlay">
@@ -35,7 +35,7 @@
             <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"/>
           </svg>
         </button>
-        <span class="header-title">[글반투] 글로벌 반도체 투자 커뮤니티</span>
+        <span class="header-title" id="headerTitle">커뮤니티</span>
       </div>
     </header>
 
@@ -129,7 +129,7 @@
           </div>
         </article>
         <div class="tweet-modal__composer">
-          <img src="" alt="" class="tweet-modal__avatar-image" />
+          <img th:src="${profileImageUrl}" src="/images/profile/default_image.png" alt="" class="tweet-modal__avatar-image" />
           <div class="tweet-modal__input-wrap">
             <div class="tweet-modal__editor" contenteditable="true" role="textbox" aria-label="게시물 작성" aria-multiline="true" tabindex="0" data-testid="tweetTextarea_0" data-placeholder="답글 게시하기"></div>
             <div class="tweet-modal__attachment attachments" data-attachment-preview data-testid="attachments" hidden>

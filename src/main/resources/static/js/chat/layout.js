@@ -96,9 +96,14 @@ const ChatLayout = {
                 );
                 const conversationId = this.escapeHtml(room.conversationId || "");
 
+                const profileImage = this.escapeHtml(room.partnerProfileFileName || "");
+
                 return `
                     <div class="Search-Conv-Item" data-conversation-id="${conversationId}">
-                        <div class="Search-Conv-Avatar-Fallback">${fallback}</div>
+                        ${profileImage
+                            ? `<div class="Search-Conv-Avatar"><img src="${profileImage}" alt="" loading="lazy" draggable="false" onerror="this.onerror=null;this.src='/images/profile/default_image.png';"></div>`
+                            : `<div class="Search-Conv-Avatar-Fallback">${fallback}</div>`
+                        }
                         <div class="Search-Conv-Name">${displayName}</div>
                         <div class="Search-Conv-Handle">@${handle}</div>
                     </div>
@@ -119,9 +124,14 @@ const ChatLayout = {
                 const time = this.escapeHtml(room.lastMessageTime || "");
                 const conversationId = this.escapeHtml(room.conversationId || "");
 
+                const profileImage = this.escapeHtml(room.partnerProfileFileName || "");
+
                 return `
                     <li class="Search-Conv-Row" data-conversation-id="${conversationId}">
-                        <div class="Search-Conv-Avatar-Fallback">${fallback}</div>
+                        ${profileImage
+                            ? `<div class="Search-Conv-Avatar"><img src="${profileImage}" alt="" loading="lazy" draggable="false" onerror="this.onerror=null;this.src='/images/profile/default_image.png';"></div>`
+                            : `<div class="Search-Conv-Avatar-Fallback">${fallback}</div>`
+                        }
                         <div class="Search-Conv-Row-Info">
                             <div class="Search-Conv-Row-Upper">
                                 <span class="Search-Conv-Name">${displayName}</span>
@@ -147,6 +157,7 @@ const ChatLayout = {
                 const displayName = this.escapeHtml(
                     room.displayName || room.title || room.partnerName || room.invitedName || "",
                 );
+                const partnerProfileImage = this.escapeHtml(room.partnerProfileFileName || "/images/profile/default_image.png");
                 const lastMessage = this.escapeHtml(room.lastMessage || "");
                 const lastMessageTime = this.escapeHtml(room.lastMessageTime || "");
                 const unreadLabel = this.escapeHtml(this.formatUnreadCount(room.unreadCount));
@@ -169,7 +180,7 @@ const ChatLayout = {
                             <div class="EachUser-UserInfo">
                                 <div class="UserInfo-Avatar">
                                     <a class="Avatar-Image">
-                                        <img alt="user-avatar" src="" loading="lazy" draggable="false">
+                                        <img alt="user-avatar" src="${partnerProfileImage}" loading="lazy" draggable="false" onerror="this.onerror=null;this.src='/images/profile/default_image.png';">
                                     </a>
                                 </div>
                                 <div class="UserInfo-Info">
@@ -243,12 +254,17 @@ const ChatLayout = {
                     this.getSearchConversationFallback(expert.memberName || expert.memberNickname),
                 );
 
+                const profileImage = this.escapeHtml(expert.memberProfileFileName || "");
+
                 return `
                     <li class="Each-Expert" data-expert-id="${expertId}">
                         <div class="Each-Expert-Wrapper">
                             <div class="Expert-Image-Wrapper">
                                 <div class="Expert-Image">
-                                    <div class="Expert-Image-Fallback">${fallback}</div>
+                                    ${profileImage
+                                        ? `<img src="${profileImage}" alt="" loading="lazy" draggable="false" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.onerror=null;this.src='/images/profile/default_image.png';">`
+                                        : `<div class="Expert-Image-Fallback">${fallback}</div>`
+                                    }
                                 </div>
                             </div>
                             <div class="Expert-Info">

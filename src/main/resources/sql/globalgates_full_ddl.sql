@@ -285,7 +285,7 @@ CREATE TABLE tbl_bookmark (
     CONSTRAINT fk_bookmark_member FOREIGN KEY (member_id) REFERENCES tbl_member(id),
     CONSTRAINT fk_bookmark_post FOREIGN KEY (post_id) REFERENCES tbl_post(id),
     CONSTRAINT fk_bookmark_folder FOREIGN KEY (folder_id) REFERENCES tbl_bookmark_folder(id),
-    CONSTRAINT uq_bookmark_member_post UNIQUE (member_id, post_id)
+    CONSTRAINT uq_bookmark_member_post_folder UNIQUE (member_id, post_id, folder_id)
 );
 
 -- ============================================================

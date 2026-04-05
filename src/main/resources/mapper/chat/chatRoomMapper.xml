@@ -14,9 +14,13 @@
                 sub_msg.content as last_message,
                 sub_msg.created_datetime as last_message_time,
                 coalesce(unread_msg.cnt, 0) as unread_count,
-                coalesce(v.is_muted, false) as muted,
                 v.created_datetime,
                 v.updated_datetime,
+                (select f.file_name
+                 from tbl_member_profile_file mpf
+                 join tbl_file f on mpf.id = f.id
+                 where mpf.member_id = v.partner_id and mpf.profile_image_type = 'profile'
+                 limit 1) as partner_profile_file_name,
                 row_number() over (
                     partition by least(v.member_id, v.partner_id),
                                  greatest(v.member_id, v.partner_id)
@@ -48,10 +52,11 @@
             where v.member_id = #{memberId}
               and coalesce(v.is_deleted, false) = false
         )
-        select id, title, invited_id, invited_name, invited_handle,
-               last_message, last_message_time, unread_count, muted,
-               created_datetime, updated_datetime
-        from ranked
+        select r.id, r.title, r.invited_id, r.invited_name, r.invited_handle,
+               r.last_message, r.last_message_time, r.unread_count,
+               r.created_datetime, r.updated_datetime,
+               r.partner_profile_file_name
+        from ranked r
         where rn = 1
         order by coalesce(last_message_time, created_datetime) desc, id desc
         ]]>
@@ -109,7 +114,12 @@
                v.partner_handle as invited_handle,
                v.alias,
                v.conversation_id as id,
-               v.display_name as title
+               v.display_name as title,
+               (select f.file_name
+                from tbl_member_profile_file mpf
+                join tbl_file f on mpf.id = f.id
+                where mpf.member_id = v.partner_id and mpf.profile_image_type = 'profile'
+                limit 1) as partner_profile_file_name
         from v_my_chat v
         where v.conversation_id = #{conversationId}
           and v.member_id = #{memberId}
@@ -142,14 +152,14 @@
         where conversation_id = #{conversationId} and member_id = #{memberId}
     </update>
 
-    <update id="updateMuted">
+    <update id="updateScreenBlocked">
         update tbl_conversation_setting
-        set is_muted = #{muted}, updated_datetime = now()
+        set is_screen_blocked = #{blocked}, updated_datetime = now()
         where conversation_id = #{conversationId} and member_id = #{memberId}
     </update>
 
-    <select id="selectMuted" resultType="boolean">
-        select coalesce(is_muted, false)
+    <select id="selectScreenBlocked" resultType="boolean">
+        select coalesce(is_screen_blocked, false)
         from tbl_conversation_setting
         where conversation_id = #{conversationId} and member_id = #{memberId}
     </select>
@@ -178,5 +188,18 @@
         set block_released_message_id = #{messageId}, updated_datetime = now()
         where conversation_id = #{conversationId} and member_id = #{memberId}
     </update>
+
+    <update id="updateDisappearMessage">
+        update tbl_conversation_setting
+        set disappear_message = #{setting}, updated_datetime = now()
+        where conversation_id = #{conversationId} and member_id = #{memberId}
+    </update>
+
+    <select id="selectDisappearMessage" resultType="map">
+        select coalesce(disappear_message, 'none') as setting,
+               updated_datetime as activated_at
+        from tbl_conversation_setting
+        where conversation_id = #{conversationId} and member_id = #{memberId}
+    </select>
 
 </mapper>

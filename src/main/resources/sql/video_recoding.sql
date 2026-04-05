@@ -8,3 +8,4 @@ references tbl_file (id),
 constraint fk_recoding_session foreign key (video_session_id)
 references tbl_video_session (id)
 );
+

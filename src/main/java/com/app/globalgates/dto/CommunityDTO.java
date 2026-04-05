@@ -1,6 +1,7 @@
 package com.app.globalgates.dto;
 
 import com.app.globalgates.domain.CommunityVO;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.io.Serializable;
@@ -14,7 +15,9 @@ public class CommunityDTO implements Serializable {
 
     private Long id;
     private Long creatorId;
+    @Size(min = 3, max = 30, message = "커뮤니티 이름은 3~30자여야 합니다.")
     private String communityName;
+    @Size(max = 500, message = "설명은 500자 이하여야 합니다.")
     private String description;
     private String communityStatus;
     private Long categoryId;

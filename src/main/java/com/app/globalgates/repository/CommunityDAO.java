@@ -37,6 +37,14 @@ public class CommunityDAO {
         return communityMapper.selectAll(criteria);
     }
 
+    public List<CommunityDTO> findAllExcludeJoined(Long memberId, Criteria criteria) {
+        return communityMapper.selectAllExcludeJoined(memberId, criteria);
+    }
+
+    public int getCountExcludeJoined(Long memberId) {
+        return communityMapper.selectCountExcludeJoined(memberId);
+    }
+
     public List<CommunityDTO> findByMemberId(Long memberId, Criteria criteria) {
         return communityMapper.selectByMemberId(memberId, criteria);
     }
@@ -65,8 +73,8 @@ public class CommunityDAO {
         return communityMapper.selectCountByKeyword(keyword);
     }
 
-    public List<PostDTO> findPostsByCommunityId(Long communityId, Long memberId, Criteria criteria) {
-        return communityMapper.selectPostsByCommunityId(communityId, memberId, criteria);
+    public List<PostDTO> findPostsByCommunityId(Long communityId, Long memberId, Criteria criteria, String type) {
+        return communityMapper.selectPostsByCommunityId(communityId, memberId, criteria, type);
     }
 
     public int getPostsCountByCommunityId(Long communityId) {

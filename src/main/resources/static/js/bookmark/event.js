@@ -123,8 +123,8 @@
     const replyMediaPreviewImages = qAll("[data-media-preview-image]");
     const replyMediaAltInput = q("[data-media-alt-input]");
     const replyMediaAltCount = q("[data-media-alt-count]");
-    const replyDraftView = q(".tweet-modal__draft-view");
-    const replyDraftButton = q("[data-testid='unsentButton']");
+    const replyDraftView = null;
+    const replyDraftButton = null;
     const replyProductButton = q("[data-testid='productSelectButton']");
     const replyProductView = q("[data-product-select-modal]");
     const productSelectClose = replyProductView?.querySelector("[data-product-select-close]");
@@ -288,7 +288,9 @@
         toggleHiddenLayer(activeShareModal, false);
         activeShareModal = null;
         activeShareBookmarkButton = null;
-        activeShareBookmarkPostId = "";
+        if (!pendingShareBookmarkReopen) {
+            activeShareBookmarkPostId = "";
+        }
         if (shareChatSearchInput) {
             shareChatSearchInput.value = "";
         }
@@ -374,7 +376,9 @@
         const handle =
             postCard?.querySelector(".bookmark-post-handle")?.textContent?.trim() ||
             "@user";
-        return {postCard, handle};
+        const postMemberId = postCard?.dataset.postMemberId || null;
+        const postId = postCard?.dataset.postId || null;
+        return {postCard, handle, postMemberId, postId};
     }
 
     function getFollowMenuIcon(isFollowing) {
@@ -456,14 +460,13 @@
         if (!result.ok) return;
         const folders = result.data || [];
         let html = `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="">
-            <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.998 8.5c0-1.38 1.119-2.5 2.5-2.5h9c1.381 0 2.5 1.12 2.5 2.5v14.12l-7-3.5-7 3.5V8.5zM18.5 2H8.998v2H18.5c.275 0 .5.224.5.5V15l2 1.4V4.5c0-1.38-1.119-2.5-2.5-2.5z"/></svg></span>
+            <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
             <span class="bookmark-share-sheet-folder-name">미분류</span>
         </button>`;
         folders.forEach((f) => {
             html += `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="${f.id}">
-                <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.998 8.5c0-1.38 1.119-2.5 2.5-2.5h9c1.381 0 2.5 1.12 2.5 2.5v14.12l-7-3.5-7 3.5V8.5zM18.5 2H8.998v2H18.5c.275 0 .5.224.5.5V15l2 1.4V4.5c0-1.38-1.119-2.5-2.5-2.5z"/></svg></span>
+                <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
                 <span class="bookmark-share-sheet-folder-name">${escapeHtml(f.folderName)}</span>
-                <span class="bookmark-share-sheet-folder-count">${f.bookmarkCount || 0}</span>
             </button>`;
         });
         shareBookmarkFolderList.innerHTML = html;
@@ -646,6 +649,17 @@
         if (action === "follow-toggle") {
             const isFollowing = bookmarkFollowState.get(meta.handle) ?? false;
             bookmarkFollowState.set(meta.handle, !isFollowing);
+            if (meta.postMemberId && typeof memberId !== "undefined" && memberId) {
+                if (isFollowing) {
+                    fetch(`/api/main/follows/${memberId}/${meta.postMemberId}/delete`, { method: "POST" });
+                } else {
+                    fetch("/api/main/follows", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ followerId: memberId, followingId: Number(meta.postMemberId) }),
+                    });
+                }
+            }
             closePostMenus();
             showToast(
                 isFollowing
@@ -713,7 +727,11 @@
         listView.hidden = true;
         detailView.hidden = false;
         modalOpenButton?.setAttribute("hidden", "");
-        detailMoreButton?.removeAttribute("hidden");
+        if (currentFolderId) {
+            detailMoreButton?.removeAttribute("hidden");
+        } else {
+            detailMoreButton?.setAttribute("hidden", "");
+        }
         setHeaderTitle(currentFolderName);
         window.scrollTo({top: 0, behavior: "auto"});
     }
@@ -804,14 +822,36 @@
         folderNameInput &&
         folderNameCount
     ) {
+        const folderNameError = document.getElementById("folderNameError");
+
+        async function checkDuplicateFolderName(name) {
+            const result = await BookmarkService.getFolders(memberId);
+            if (!result.ok) return false;
+            return (result.data || []).some(f => f.folderName === name);
+        }
+
+        function showFolderError(msg) {
+            if (!folderNameError) return;
+            folderNameError.textContent = msg;
+            folderNameError.hidden = false;
+        }
+
+        function hideFolderError() {
+            if (!folderNameError) return;
+            folderNameError.textContent = "";
+            folderNameError.hidden = true;
+        }
+
         function updateModalState() {
             const value = folderNameInput.value.trim();
             folderNameCount.textContent = `${folderNameInput.value.length} / 25`;
             modalSubmitButton.disabled = value.length === 0;
+            hideFolderError();
         }
 
         function resetModalForm() {
             folderNameInput.value = "";
+            hideFolderError();
             updateModalState();
         }
 
@@ -843,21 +883,35 @@
             const value = folderNameInput.value.trim();
             if (!value) return;
             modalSubmitButton.disabled = true;
+            const isDuplicate = await checkDuplicateFolderName(value);
+            if (isDuplicate) {
+                showFolderError("중복된 북마크 이름입니다");
+                modalSubmitButton.disabled = false;
+                return;
+            }
+            const shouldAddPost = pendingShareBookmarkReopen && activeShareBookmarkPostId;
+            const savedPostId = activeShareBookmarkPostId;
             const result = await BookmarkService.createFolder(memberId, value);
             if (result.ok) {
-                showToast(`${value} 폴더를 만들었습니다`);
+                const newFolderId = result.data?.id;
+                if (shouldAddPost && newFolderId) {
+                    const existing = await BookmarkService.getByMemberAndPost(memberId, Number(savedPostId));
+                    if (existing.ok && existing.data) {
+                        await BookmarkService.moveFolder(existing.data.id, newFolderId);
+                    } else {
+                        await BookmarkService.add(memberId, Number(savedPostId), newFolderId);
+                    }
+                    showToast(`${value} 폴더에 추가했습니다`);
+                } else {
+                    showToast(`${value} 폴더를 만들었습니다`);
+                }
                 await loadFolders();
             } else if (result.message) {
                 showToast(result.message);
             }
+            pendingShareBookmarkReopen = false;
+            activeShareBookmarkPostId = "";
             closeModal();
-            if (pendingShareBookmarkReopen && activeShareBookmarkPostId) {
-                pendingShareBookmarkReopen = false;
-                toggleHiddenLayer(shareBookmarkModal, true);
-                activeShareModal = shareBookmarkModal;
-                updateBodyScrollLock();
-                await loadShareBookmarkFolders();
-            }
         });
     }
 
@@ -1036,13 +1090,24 @@
         }
     });
 
-    bookmarkBlockConfirmButton?.addEventListener("click", () => {
+    bookmarkBlockConfirmButton?.addEventListener("click", async () => {
         const handle = activeMorePostMeta?.handle || "@user";
+        const targetMemberId = activeMorePostMeta?.postMemberId;
+        const targetPostCard = activeMorePostMeta?.postCard;
+        if (targetMemberId && typeof memberId !== "undefined" && memberId) {
+            await fetch("/api/main/blocks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ blockerId: memberId, blockedId: Number(targetMemberId) }),
+            });
+            bookmarkPosts?.querySelectorAll(`.bookmark-post[data-post-member-id="${targetMemberId}"]`).forEach(card => card.remove());
+            syncBookmarkPostsEmpty();
+        }
         closeBookmarkNotificationModal();
         showToast(`${handle} 님을 차단했습니다`);
     });
 
-    bookmarkReportModal?.addEventListener("click", (event) => {
+    bookmarkReportModal?.addEventListener("click", async (event) => {
         if (
             event.target === bookmarkReportModal ||
             event.target.closest("#bookmarkReportCloseButton")
@@ -1055,8 +1120,21 @@
             return;
         }
         const reason = reportItem.dataset.reportReason || "신고";
+        const reportPostId = activeMorePostMeta?.postId;
+        if (reportPostId && typeof memberId !== "undefined" && memberId) {
+            await fetch("/api/main/reports", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reporterId: memberId, targetId: Number(reportPostId), targetType: "post", reason: reason }),
+            });
+            const reportedCard = bookmarkPosts?.querySelector(`.bookmark-post[data-post-id="${reportPostId}"]`);
+            if (reportedCard) {
+                reportedCard.remove();
+                syncBookmarkPostsEmpty();
+            }
+        }
         closeBookmarkNotificationModal();
-        showToast(reason);
+        showToast("신고가 접수되었습니다");
     });
 
     mediaPreviewClose?.addEventListener("click", closeMediaPreview);
@@ -1132,6 +1210,8 @@
             if (action === "like") {
                 const isActive = !actionButton.classList.contains("active");
                 const path = actionButton.querySelector("path");
+                const postCard = actionButton.closest(".bookmark-post");
+                const postId = postCard?.dataset.postId;
                 const baseCount = Number.parseInt(
                     actionButton.dataset.baseCount || "0",
                     10,
@@ -1149,6 +1229,17 @@
                             ? path.dataset.pathActive || path.getAttribute("d")
                             : path.dataset.pathInactive || path.getAttribute("d"),
                     );
+                }
+                if (postId && typeof memberId !== "undefined" && memberId) {
+                    if (isActive) {
+                        fetch("/api/main/likes", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ memberId: memberId, postId: Number(postId) }),
+                        });
+                    } else {
+                        fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method: "POST" });
+                    }
                 }
                 return;
             }
@@ -1173,6 +1264,16 @@
                     return;
                 }
                 openShareDropdown(actionButton);
+                return;
+            }
+        }
+
+        // 게시글 클릭 시 상세 페이지 이동
+        const clickedPost = target.closest(".bookmark-post");
+        if (clickedPost && !target.closest(".bookmark-post-action, .bookmark-post-more-wrap, .bookmark-post-more-menu, [data-more-action], [data-media-preview]")) {
+            const postId = clickedPost.dataset.postId;
+            if (postId && typeof memberId !== "undefined" && memberId) {
+                window.location.href = `/main/post/detail/${postId}?memberId=${memberId}`;
                 return;
             }
         }
@@ -1674,21 +1775,6 @@
         closeMediaEditor({discardChanges: false});
     }
 
-    // ── 임시저장 서브뷰 ──
-    function openDraftPanel() {
-        if (!composeView || !replyDraftView) return;
-        closeEmojiPicker();
-        composeView.hidden = true;
-        replyDraftView.hidden = false;
-    }
-
-    function closeDraftPanel({restoreFocus = true} = {}) {
-        if (!composeView || !replyDraftView || replyDraftView.hidden) return;
-        replyDraftView.hidden = true;
-        composeView.hidden = false;
-        if (restoreFocus) window.requestAnimationFrame(() => replyEditor?.focus());
-    }
-
     // ── 판매글 서브뷰 ──
     function openProductView() {
         if (!composeView || !replyProductView) return;
@@ -1781,10 +1867,12 @@
         window.requestAnimationFrame(() => replyEditor?.focus());
     }
 
-    function closeBookmarkReplyModal() {
+    function closeBookmarkReplyModal({skipConfirm = false} = {}) {
         if (!replyModalOverlay || replyModalOverlay.hidden) return;
-        const hasDraft = replyEditor?.textContent?.replace(/\u00a0/g, " ").trim().length > 0;
-        if ((hasDraft || attachedReplyFiles.length > 0) && !window.confirm("게시물을 삭제하시겠어요?")) return;
+        if (!skipConfirm) {
+            const hasDraft = replyEditor?.textContent?.replace(/\u00a0/g, " ").trim().length > 0;
+            if ((hasDraft || attachedReplyFiles.length > 0) && !window.confirm("작성 중인 댓글을 삭제하시겠어요?")) return;
+        }
         replyModalOverlay.hidden = true;
         clearAttachedReplyFileUrls();
         attachedReplyFiles = [];
@@ -1969,21 +2057,6 @@
         if (replyMediaAltCount) replyMediaAltCount.textContent = `${replyMediaAltInput.value.length} / ${maxReplyMediaAltLength.toLocaleString()}`;
     });
 
-    replyDraftButton?.addEventListener("click", () => {
-        if (replyDraftView && !replyDraftView.hidden) closeDraftPanel();
-        else openDraftPanel();
-    });
-    replyDraftView?.addEventListener("click", (e) => {
-        if (e.target.closest(".draft-panel__back")) {
-            closeDraftPanel();
-            return;
-        }
-        const item = e.target.closest(".draft-panel__item");
-        if (item) {
-            closeDraftPanel();
-        }
-    });
-
     replyProductButton?.addEventListener("click", () => {
         if (replyProductView && !replyProductView.hidden) closeProductView();
         else openProductView();
@@ -2019,10 +2092,23 @@
         closeProductView();
     });
 
-    replySubmitButton?.addEventListener("click", () => {
+    replySubmitButton?.addEventListener("click", async () => {
         const text = replyEditor?.textContent?.replace(/\u00a0/g, " ").trim() || "";
         if (!text && attachedReplyFiles.length === 0) return;
-        // 댓글 수 증가
+        const postCard = activeReplyTrigger?.closest(".bookmark-post");
+        const postId = postCard?.dataset.postId;
+        if (postId && typeof memberId !== "undefined" && memberId) {
+            const formData = new FormData();
+            formData.append("memberId", memberId);
+            formData.append("postContent", text);
+            if (attachedReplyFiles.length > 0) {
+                attachedReplyFiles.forEach(f => formData.append("files", f));
+            }
+            await fetch(`/api/main/posts/${postId}/replies`, {
+                method: "POST",
+                body: formData,
+            });
+        }
         if (activeReplyTrigger) {
             const countSpan = activeReplyTrigger.querySelector(".tweet-action-count");
             if (countSpan) {
@@ -2032,7 +2118,7 @@
                 activeReplyTrigger.setAttribute("aria-label", ariaLabel.replace(/^\d+/, String(count + 1)));
             }
         }
-        closeBookmarkReplyModal();
+        closeBookmarkReplyModal({skipConfirm: true});
         showToast("답글이 게시되었습니다");
     });
 

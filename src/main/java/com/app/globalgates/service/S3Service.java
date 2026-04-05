@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -81,7 +83,7 @@ public class S3Service {
                 GetObjectRequest.builder()
                         .bucket(bucketName)
                         .key(fileName)
-                        .responseContentDisposition("attachment; filename=" + originalFileName)
+                        .responseContentDisposition("attachment; filename*=UTF-8''" + URLEncoder.encode(originalFileName, StandardCharsets.UTF_8).replace("+", "%20"))
                         .build();
 
 

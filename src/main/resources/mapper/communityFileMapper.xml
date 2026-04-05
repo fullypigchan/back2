@@ -24,4 +24,13 @@
         limit 1
     </select>
 
+    <select id="selectByDeletedCommunities" resultType="fileDTO">
+        select f.id, f.original_name, f.file_name, f.file_path, f.file_size,
+               f.content_type, f.created_datetime
+        from tbl_community_file cf
+        join tbl_file f on cf.id = f.id
+        join tbl_community c on c.id = cf.community_id
+        where c.community_status = 'inactive'
+    </select>
+
 </mapper>

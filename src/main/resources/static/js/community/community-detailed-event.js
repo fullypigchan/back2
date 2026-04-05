@@ -66,7 +66,7 @@ window.onload = () => {
   const joinBtnContainer = document.querySelector(".communityDetailJoinArea");
   const popularFeedSection = document.querySelector("[data-feed='popular']");
   const latestFeedSection = document.querySelector("[data-feed='latest']");
-  const postFeedSection = popularFeedSection; // 기본은 인기 탭
+  let postFeedSection = popularFeedSection; // 활성 탭에 따라 변경
   const mediaSection = document.querySelector(".communityDetailMedia");
   const aboutSection = document.getElementById("communityAboutContent");
   const searchInput = document.querySelector(".communitySearchInput");
@@ -84,12 +84,20 @@ window.onload = () => {
       latest: { page: 1, isLoading: false, hasMore: true },
       posts: { page: 1, isLoading: false, hasMore: true },
       media: { page: 1, isLoading: false, hasMore: true },
+      members: { page: 1, isLoading: false, hasMore: true },
       search: { page: 1, isLoading: false, hasMore: true, keyword: "", type: "latest" },
       activeTab: "popular",
   };
 
+  const memberSection = document.querySelector("[data-feed='members']") || document.querySelector(".communityDetailMembers");
+
   // ─── 무한 스크롤 셋업 ───
+  const _observerMap = new Map();
   function setupInfiniteScroll(container, loadFn, tabState) {
+      // 이전 observer 정리
+      const prev = _observerMap.get(container);
+      if (prev) { prev.observer.disconnect(); prev.sentinel?.remove(); }
+
       const sentinel = document.createElement("div");
       sentinel.className = "scrollSentinel";
       container.appendChild(sentinel);
@@ -101,6 +109,7 @@ window.onload = () => {
           });
       }, { threshold: 0.1 });
       observer.observe(sentinel);
+      _observerMap.set(container, { sentinel, observer });
       return { sentinel, observer };
   }
 
@@ -111,6 +120,10 @@ window.onload = () => {
           detailState.community = data;
           const joined = data.isJoined ?? data.joined ?? false;
           if (headerSection) headerSection.innerHTML = CommunityDetailLayout.renderHeader(data, data.myRole);
+          // 헤더 타이틀 + 페이지 타이틀 동적 설정
+          const headerTitle = document.getElementById("headerTitle");
+          if (headerTitle) headerTitle.textContent = data.communityName ?? "커뮤니티";
+          document.title = (data.communityName ?? "커뮤니티") + " | GlobalGates";
 
           // 소개 탭: 멤버 목록 + 관리자 삭제 버튼
           try {
@@ -136,8 +149,9 @@ window.onload = () => {
       const s = detailState.posts;
       if (s.isLoading || !s.hasMore) return;
       s.isLoading = true;
+      if (s.page === 1) popularFeedSection?.classList.add("is-loading");
       try {
-          const data = await CommunityDetailService.getPosts(communityId, s.page);
+          const data = await CommunityDetailService.getPosts(communityId, s.page, "popular");
           const sentinel = postFeedSection?.querySelector(".scrollSentinel");
           const html = data.posts.map(p => CommunityDetailLayout.renderPostCard(p)).join("");
           if (sentinel) sentinel.insertAdjacentHTML("beforebegin", html);
@@ -149,6 +163,7 @@ window.onload = () => {
           console.error("게시글 로드 실패:", error);
       } finally {
           s.isLoading = false;
+          popularFeedSection?.classList.remove("is-loading");
       }
   }
 
@@ -157,8 +172,9 @@ window.onload = () => {
       const s = detailState.latest;
       if (s.isLoading || !s.hasMore) return;
       s.isLoading = true;
+      if (s.page === 1) latestFeedSection?.classList.add("is-loading");
       try {
-          const data = await CommunityDetailService.getPosts(communityId, s.page);
+          const data = await CommunityDetailService.getPosts(communityId, s.page, "latest");
           const sentinel = latestFeedSection?.querySelector(".scrollSentinel");
           const html = data.posts.map(p => CommunityDetailLayout.renderPostCard(p)).join("");
           if (sentinel) sentinel.insertAdjacentHTML("beforebegin", html);
@@ -170,6 +186,7 @@ window.onload = () => {
           console.error("최신 게시글 로드 실패:", error);
       } finally {
           s.isLoading = false;
+          latestFeedSection?.classList.remove("is-loading");
       }
   }
 
@@ -178,6 +195,7 @@ window.onload = () => {
       const s = detailState.media;
       if (s.isLoading || !s.hasMore) return;
       s.isLoading = true;
+      if (s.page === 1) mediaSection?.classList.add("is-loading");
       try {
           const data = await CommunityDetailService.getMedia(communityId, s.page);
           const sentinel = mediaSection?.querySelector(".scrollSentinel");
@@ -191,6 +209,7 @@ window.onload = () => {
           console.error("미디어 로드 실패:", error);
       } finally {
           s.isLoading = false;
+          mediaSection?.classList.remove("is-loading");
       }
   }
 
@@ -199,6 +218,7 @@ window.onload = () => {
       const s = detailState.members;
       if (s.isLoading || !s.hasMore) return;
       s.isLoading = true;
+      if (s.page === 1) memberSection?.classList.add("is-loading");
       try {
           const data = await CommunityService.getMembers(communityId, s.page);
           const sentinel = memberSection?.querySelector(".scrollSentinel");
@@ -213,6 +233,7 @@ window.onload = () => {
           console.error("멤버 로드 실패:", error);
       } finally {
           s.isLoading = false;
+          memberSection?.classList.remove("is-loading");
       }
   }
 
@@ -275,6 +296,10 @@ window.onload = () => {
               targetEl.classList.add("active");
           }
 
+          // 검색 타겟을 활성 탭의 피드 섹션으로 변경
+          if (target === "popular") postFeedSection = popularFeedSection;
+          else if (target === "latest") postFeedSection = latestFeedSection;
+
           if (target === "latest" && detailState.latest.page === 1) loadLatestPosts();
           if (target === "media" && detailState.media.page === 1) loadMedia();
       });
@@ -286,17 +311,29 @@ window.onload = () => {
       const leaveBtn = e.target.closest("[data-action='leave']");
 
       if (joinBtn) {
+          joinBtn.disabled = true;
           try {
               await CommunityService.join(communityId);
               loadDetail();
           } catch (err) { console.error(err); }
+          finally { joinBtn.disabled = false; }
       }
       if (leaveBtn) {
+          // 관리자(creator)는 탈퇴 불가 — 서버에서도 차단하지만 클라이언트에서 먼저 안내
+          if (detailState.community?.myRole === "creator") {
+              showToast("커뮤니티 생성자는 탈퇴할 수 없습니다. 커뮤니티를 삭제해주세요.");
+              return;
+          }
           if (!confirm("커뮤니티를 탈퇴하시겠습니까?")) return;
+          leaveBtn.disabled = true;
           try {
               await CommunityService.leave(communityId);
               loadDetail();
-          } catch (err) { console.error(err); }
+          } catch (err) {
+              console.error(err);
+              showToast("커뮤니티 탈퇴에 실패했습니다.");
+          }
+          finally { leaveBtn.disabled = false; }
       }
 
       const deleteBtn = e.target.closest("[data-action='delete-community']");
@@ -426,8 +463,11 @@ window.onload = () => {
               if (filePreview) filePreview.innerHTML = "";
               if (submitBtn) submitBtn.disabled = true;
               detailState.posts = { page: 1, isLoading: false, hasMore: true };
+              detailState.latest = { page: 1, isLoading: false, hasMore: true };
               if (postFeedSection) postFeedSection.innerHTML = "";
+              if (latestFeedSection) latestFeedSection.innerHTML = "";
               setupInfiniteScroll(postFeedSection, loadPosts, detailState.posts);
+              setupInfiniteScroll(latestFeedSection, loadLatestPosts, detailState.latest);
               loadPosts();
           } catch (err) {
               console.error("게시글 작성 실패:", err);
@@ -472,12 +512,14 @@ window.onload = () => {
 
   // ─── 초기 로드 ───
   loadDetail();
+  setupPostForm();
   if (popularFeedSection) {
       setupInfiniteScroll(popularFeedSection, loadPosts, detailState.posts);
       loadPosts();
   }
   if (latestFeedSection) setupInfiniteScroll(latestFeedSection, loadLatestPosts, detailState.latest);
   if (mediaSection) setupInfiniteScroll(mediaSection, loadMedia, detailState.media);
+  if (memberSection) setupInfiniteScroll(memberSection, loadMembers, detailState.members);
 
   // ===== Toast =====
   const showToast = (msg) => {
@@ -580,6 +622,11 @@ window.onload = () => {
   let selectedProduct = null;
 
   const maxReplyImages = 4, maxReplyMediaAltLength = 1000, replyMaxLength = 500;
+
+  // ===== 미완성 기능 숨김 (상품 선택, 임시저장) =====
+  if (replyProductButton) replyProductButton.hidden = true;
+  if (draftButton) draftButton.hidden = true;
+
   const emojiRecentsKey = 'community_reply_recent_emojis';
   const maxRecentEmojis = 18;
   const formatButtonLabels = {
@@ -761,6 +808,12 @@ window.onload = () => {
   function handleReplyFileChange(e) {
     const next = Array.from(e.target.files ?? []);
     if (next.length === 0) { pendingAttachmentEditIndex = null; syncReplySubmitState(); return; }
+    // 파일 크기/타입 검증
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    for (const f of next) {
+      if (f.size > MAX_FILE_SIZE) { showToast('10MB 이하 파일만 업로드 가능합니다'); e.target.value = ''; return; }
+      if (!f.type.startsWith('image/') && !f.type.startsWith('video/')) { showToast('이미지 또는 동영상만 업로드 가능합니다'); e.target.value = ''; return; }
+    }
     const rep = next[0], vid = next.find(f => f.type.startsWith('video/')), imgs = next.filter(f => f.type.startsWith('image/'));
     if (pendingAttachmentEditIndex !== null) { if (!rep) { pendingAttachmentEditIndex = null; return; } if (rep.type.startsWith('video/')) { attachedReplyFiles = [rep]; } else { const ed = isReplyVideoSet() ? [] : [...attachedReplyFiles]; attachedReplyFiles = ed.length === 0 ? [rep] : ((ed[pendingAttachmentEditIndex] = rep), ed.slice(0, maxReplyImages)); } pendingAttachmentEditIndex = null; renderReplyAttachment(); syncReplySubmitState(); return; }
     if (vid) { attachedReplyFiles = [vid]; renderReplyAttachment(); syncReplySubmitState(); return; }
@@ -1087,7 +1140,24 @@ window.onload = () => {
   replyTagChipList?.addEventListener('click', (e) => { const cb = e.target.closest('[data-tag-remove-id]'); if (!cb) return; const uid = cb.getAttribute('data-tag-remove-id'); pendingTaggedUsers = pendingTaggedUsers.filter(u => u.id !== uid); renderTagChipList(); runTagSearch(); replyTagSearchInput?.focus(); });
   replyTagResults?.addEventListener('click', (e) => { const ub = e.target.closest('[data-tag-user-id]'); if (!ub || ub.hasAttribute('disabled')) return; const uid = ub.getAttribute('data-tag-user-id'), user = currentTagResults.find(u => u.id === uid); if (!user || pendingTaggedUsers.some(u => u.id === user.id)) return; pendingTaggedUsers = [...pendingTaggedUsers, { ...user }]; renderTagChipList(); if (replyTagSearchInput) replyTagSearchInput.value = ''; renderTagResults([]); replyTagSearchInput?.focus(); });
 
-  replySubmitButton?.addEventListener('click', () => { if (replySubmitButton.disabled) return; if (activeReplyTrigger) updateReplyCount(activeReplyTrigger); closeReplyModal({ skipConfirm:true }); });
+  replySubmitButton?.addEventListener('click', async () => {
+    if (replySubmitButton.disabled) return;
+    const postCard = activeReplyTrigger?.closest('.communityPostCard, .postCard');
+    const postId = postCard?.dataset.postId;
+    const content = replyEditor?.textContent?.trim() ?? '';
+    if (postId && memberId && content) {
+      try {
+        const formData = new FormData();
+        formData.append('memberId', memberId);
+        formData.append('postContent', content);
+        attachedReplyFiles.forEach(f => formData.append('files', f));
+        await fetch(`/api/main/posts/${postId}/replies`, { method: 'POST', body: formData });
+        if (activeReplyTrigger) updateReplyCount(activeReplyTrigger);
+        showToast('답글이 게시되었습니다');
+      } catch (err) { console.error('답글 전송 실패:', err); }
+    }
+    closeReplyModal({ skipConfirm: true });
+  });
 
   draftButton?.addEventListener('click', (e) => { e.preventDefault(); openDraftPanel(); });
   draftBackButton?.addEventListener('click', (e) => { e.preventDefault(); closeDraftPanel(); });
@@ -1122,13 +1192,11 @@ window.onload = () => {
   }
   function getSharePostMeta(button) {
     const card = button.closest('.communityPostCard');
-    const all = Array.from(document.querySelectorAll('.communityPostCard'));
     const handle = getTextContent(card?.querySelector('.postHandle')) || '@user';
     const bk = card?.querySelector('.tweet-action-btn--bookmark') ?? null;
-    const tid = String(Math.max(all.indexOf(card), 0) + 1);
-    const url = new URL(window.location.href);
-    url.pathname = `/${handle.replace('@','') || 'user'}/status/${tid}`; url.hash = ''; url.search = '';
-    return { handle, permalink:url.toString(), bookmarkButton:bk };
+    const postId = card?.dataset.postId ?? '0';
+    const permalink = `${window.location.origin}/main/post/detail/${postId}?memberId=${memberId}`;
+    return { handle, permalink, bookmarkButton:bk };
   }
   function showShareToast(message) {
     activeShareToast?.remove();
@@ -1174,7 +1242,7 @@ window.onload = () => {
     if (!layersRoot) return; closeShareDropdown(); closeMoreDropdown();
     const rect = button.getBoundingClientRect(), top = rect.bottom + window.scrollY + 8, right = Math.max(16, window.innerWidth - rect.right);
     const lc = document.createElement('div'); lc.className = 'layers-dropdown-container';
-    lc.innerHTML = `<div class="layers-overlay"></div><div class="layers-dropdown-inner"><div role="menu" class="dropdown-menu" style="top:${top}px;right:${right}px;"><div class="dropdown-inner"><button type="button" role="menuitem" class="menu-item share-menu-item--copy"><span class="menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M18.36 5.64c-1.95-1.96-5.11-1.96-7.07 0L9.88 7.05 8.46 5.64l1.42-1.42c2.73-2.73 7.16-2.73 9.9 0 2.73 2.74 2.73 7.17 0 9.9l-1.42 1.42-1.41-1.42 1.41-1.41c1.96-1.96 1.96-5.12 0-7.07zm-2.12 3.53l-7.07 7.07-1.41-1.41 7.07-7.07 1.41 1.41zm-12.02.71l1.42-1.42 1.41 1.42-1.41 1.41c-1.96 1.96-1.96 5.12 0 7.07 1.95 1.96 5.11 1.96 7.07 0l1.41-1.41 1.42 1.41-1.42 1.42c-2.73 2.73-7.16 2.73-9.9 0-2.73-2.74-2.73-7.17 0-9.9z"></path></g></svg></span><span class="menu-item__label">링크 복사하기</span></button><button type="button" role="menuitem" class="menu-item share-menu-item--chat"><span class="menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"></path></g></svg></span><span class="menu-item__label">Chat으로 전송하기</span></button><button type="button" role="menuitem" class="menu-item share-menu-item--bookmark"><span class="menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M18 3V0h2v3h3v2h-3v3h-2V5h-3V3zm-7.5 1a.5.5 0 00-.5.5V7h3.5A2.5 2.5 0 0116 9.5v3.48l3 2.1V11h2v7.92l-5-3.5v7.26l-6.5-3.54L3 22.68V9.5A2.5 2.5 0 015.5 7H8V4.5A2.5 2.5 0 0110.5 2H12v2zm-5 5a.5.5 0 00-.5.5v9.82l4.5-2.46 4.5 2.46V9.5a.5.5 0 00-.5-.5z"></path></g></svg></span><span class="menu-item__label">폴더에 북마크 추가하기</span></button></div></div></div>`;
+    lc.innerHTML = `<div class="layers-overlay"></div><div class="layers-dropdown-inner"><div role="menu" class="dropdown-menu" style="top:${top}px;right:${right}px;"><div class="dropdown-inner"><button type="button" role="menuitem" class="menu-item share-menu-item--copy"><span class="menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M18.36 5.64c-1.95-1.96-5.11-1.96-7.07 0L9.88 7.05 8.46 5.64l1.42-1.42c2.73-2.73 7.16-2.73 9.9 0 2.73 2.74 2.73 7.17 0 9.9l-1.42 1.42-1.41-1.42 1.41-1.41c1.96-1.96 1.96-5.12 0-7.07zm-2.12 3.53l-7.07 7.07-1.41-1.41 7.07-7.07 1.41 1.41zm-12.02.71l1.42-1.42 1.41 1.42-1.41 1.41c-1.96 1.96-1.96 5.12 0 7.07 1.95 1.96 5.11 1.96 7.07 0l1.41-1.41 1.42 1.41-1.42 1.42c-2.73 2.73-7.16 2.73-9.9 0-2.73-2.74-2.73-7.17 0-9.9z"></path></g></svg></span><span class="menu-item__label">링크 복사하기</span></button><button type="button" role="menuitem" class="menu-item share-menu-item--bookmark"><span class="menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M18 3V0h2v3h3v2h-3v3h-2V5h-3V3zm-7.5 1a.5.5 0 00-.5.5V7h3.5A2.5 2.5 0 0116 9.5v3.48l3 2.1V11h2v7.92l-5-3.5v7.26l-6.5-3.54L3 22.68V9.5A2.5 2.5 0 015.5 7H8V4.5A2.5 2.5 0 0110.5 2H12v2zm-5 5a.5.5 0 00-.5.5v9.82l4.5-2.46 4.5 2.46V9.5a.5.5 0 00-.5-.5z"></path></g></svg></span><span class="menu-item__label">폴더에 북마크 추가하기</span></button></div></div></div>`;
     lc.addEventListener('click', (e) => { const item = e.target.closest('.menu-item'); if (!item) { e.stopPropagation(); return; } e.preventDefault(); e.stopPropagation(); if (item.classList.contains('share-menu-item--copy')) { copyShareLink(activeShareButton ?? button); return; } if (item.classList.contains('share-menu-item--chat')) { openShareChatModal(activeShareButton ?? button); return; } if (item.classList.contains('share-menu-item--bookmark')) { openShareBookmarkModal(activeShareButton ?? button); return; } closeShareDropdown(); });
     layersRoot.appendChild(lc); activeShareDropdown = lc; activeShareButton = button; button.setAttribute('aria-expanded','true');
   }
@@ -1204,26 +1272,26 @@ window.onload = () => {
     closeMoreDropdown(); closeCommunityModal();
     const modal = document.createElement('div'); modal.className = 'notification-dialog notification-dialog--block';
     modal.innerHTML = `<div class="notification-dialog__backdrop"></div><div class="notification-dialog__card notification-dialog__card--small" role="alertdialog" aria-modal="true" aria-labelledby="community-block-title" aria-describedby="community-block-desc"><h2 id="community-block-title" class="notification-dialog__title">${escapeHtml(handle)} 님을 차단할까요?</h2><p id="community-block-desc" class="notification-dialog__description">내 공개 게시물을 볼 수 있지만 더 이상 게시물에 참여할 수 없습니다. 또한 ${escapeHtml(handle)} 님은 나를 팔로우하거나 쪽지를 보낼 수 없으며, 이 계정과 관련된 알림도 내게 표시되지 않습니다.</p><div class="notification-dialog__actions"><button type="button" class="notification-dialog__danger notification-dialog__confirm-block">차단</button><button type="button" class="notification-dialog__secondary notification-dialog__close">취소</button></div></div>`;
-    modal.addEventListener('click', (e) => { if (e.target.classList.contains('notification-dialog__backdrop') || e.target.closest('.notification-dialog__close')) { e.preventDefault(); closeCommunityModal(); return; } if (e.target.closest('.notification-dialog__confirm-block')) { e.preventDefault(); if (memberId && targetMemberId) { fetch('/api/main/blocks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({blockerId:memberId, blockedId:targetMemberId}) }).catch(()=>{}); document.querySelectorAll(`.postCard[data-member-id="${targetMemberId}"]`).forEach(el => el.remove()); } showCommunityToast(`${handle} 님을 차단했습니다`); closeCommunityModal(); } });
+    modal.addEventListener('click', (e) => { if (e.target.classList.contains('notification-dialog__backdrop') || e.target.closest('.notification-dialog__close')) { e.preventDefault(); closeCommunityModal(); return; } if (e.target.closest('.notification-dialog__confirm-block')) { e.preventDefault(); if (memberId && targetMemberId) { fetch('/api/main/blocks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({blockerId:memberId, blockedId:targetMemberId}) }).catch(err => console.error(err)); document.querySelectorAll(`.postCard[data-member-id="${targetMemberId}"]`).forEach(el => el.remove()); } showCommunityToast(`${handle} 님을 차단했습니다`); closeCommunityModal(); } });
     document.body.appendChild(modal); document.body.classList.add('modal-open'); activeCommunityModal = modal;
   }
   function openCommunityReportModal() {
     closeMoreDropdown(); closeCommunityModal();
     const modal = document.createElement('div'); modal.className = 'notification-dialog notification-dialog--report';
     modal.innerHTML = `<div class="notification-dialog__backdrop"></div><div class="notification-dialog__card notification-dialog__card--report" role="dialog" aria-modal="true" aria-labelledby="community-report-title"><div class="notification-dialog__header"><button type="button" class="notification-dialog__icon-btn notification-dialog__close" aria-label="돌아가기"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g></svg></button><h2 id="community-report-title" class="notification-dialog__title">신고하기</h2></div><div class="notification-dialog__body"><p class="notification-dialog__question">이 게시물에 어떤 문제가 있나요?</p><ul class="notification-report__list">${communityReportReasons.map(r => `<li><button type="button" class="notification-report__item"><span>${escapeHtml(r)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.293 6.293 10.707 4.88 17.828 12l-7.121 7.12-1.414-1.413L14.999 12z"></path></g></svg></button></li>`).join('')}</ul></div></div>`;
-    modal.addEventListener('click', (e) => { if (e.target.classList.contains('notification-dialog__backdrop') || e.target.closest('.notification-dialog__close')) { e.preventDefault(); closeCommunityModal(); return; } if (e.target.closest('.notification-report__item')) { e.preventDefault(); const reason = e.target.closest('.notification-report__item')?.querySelector('span')?.textContent ?? ''; const postId = activeMoreButton?.closest('.postCard')?.dataset.postId; if (memberId && postId) fetch('/api/main/reports', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reporterId:memberId, targetId:postId, targetType:'post', reason}) }).catch(()=>{}); showCommunityToast('신고가 접수되었습니다'); closeCommunityModal(); } });
+    modal.addEventListener('click', (e) => { if (e.target.classList.contains('notification-dialog__backdrop') || e.target.closest('.notification-dialog__close')) { e.preventDefault(); closeCommunityModal(); return; } if (e.target.closest('.notification-report__item')) { e.preventDefault(); const reason = e.target.closest('.notification-report__item')?.querySelector('span')?.textContent ?? ''; const postId = activeMoreButton?.closest('.postCard')?.dataset.postId; if (memberId && postId) fetch('/api/main/reports', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reporterId:memberId, targetId:postId, targetType:'post', reason}) }).catch(err => console.error(err)); showCommunityToast('신고가 접수되었습니다'); closeCommunityModal(); } });
     document.body.appendChild(modal); document.body.classList.add('modal-open'); activeCommunityModal = modal;
   }
   function handleMoreDropdownAction(button, actionClass) {
     const { card, handle } = getCommunityUserMeta(button);
     const targetMemberId = card?.dataset.memberId;
     if (actionClass === 'menu-item--follow-toggle') {
-      const isF = communityFollowState.get(handle) ?? false;
-      communityFollowState.set(handle, !isF);
+      const isF = card?.dataset.isFollowed === 'true';
+      if (card) card.dataset.isFollowed = isF ? 'false' : 'true';
       closeMoreDropdown();
       if (memberId && targetMemberId) {
-        if (isF) fetch(`/api/main/follows/${memberId}/${targetMemberId}/delete`, { method:'POST' }).catch(()=>{});
-        else fetch('/api/main/follows', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({followerId:memberId, followingId:targetMemberId}) }).catch(()=>{});
+        if (isF) fetch(`/api/main/follows/${memberId}/${targetMemberId}/delete`, { method:'POST' }).catch(err => console.error(err));
+        else fetch('/api/main/follows', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({followerId:memberId, followingId:targetMemberId}) }).catch(err => console.error(err));
       }
       showCommunityToast(isF ? `${handle} 님 팔로우를 취소했습니다` : `${handle} 님을 팔로우했습니다`);
       return;
@@ -1233,7 +1301,7 @@ window.onload = () => {
     if (actionClass === 'menu-item--delete') {
       const postId = card?.dataset.postId;
       if (postId && confirm('게시물을 삭제할까요?')) {
-        fetch(`/api/main/posts/delete/${postId}`, { method:'POST' }).then(() => { card.remove(); showCommunityToast('게시물이 삭제되었습니다'); }).catch(()=>{});
+        fetch(`/api/main/posts/delete/${postId}`, { method:'POST' }).then(() => { card.remove(); showCommunityToast('게시물이 삭제되었습니다'); }).catch(err => console.error(err));
       }
       closeMoreDropdown();
       return;
@@ -1248,7 +1316,7 @@ window.onload = () => {
         { actionClass:'menu-item--delete', label:'게시물 삭제하기', icon:'<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"></path></g></svg>' },
       ];
     }
-    const isF = communityFollowState.get(handle) ?? false;
+    const isF = card?.dataset.isFollowed === 'true';
     return [
       { actionClass:'menu-item--follow-toggle', label:isF ? `${handle} 님 언팔로우하기` : `${handle} 님 팔로우하기`, icon:isF ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM6 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4zm12.586 3l-2.043-2.04 1.414-1.42L20 7.59l2.043-2.05 1.414 1.42L21.414 9l2.043 2.04-1.414 1.42L20 10.41l-2.043 2.05-1.414-1.42L18.586 9zM3.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C13.318 13.65 11.838 13 10 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C5.627 11.85 7.648 11 10 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H1.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46z"></path></g></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM6 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4zm4 7c-3.053 0-5.563 1.193-7.443 3.596l1.548 1.207C5.573 15.922 7.541 15 10 15s4.427.922 5.895 2.803l1.548-1.207C15.563 14.193 13.053 13 10 13zm8-6V5h-3V3h-2v2h-3v2h3v3h2V7h3z"></path></g></svg>' },
       { actionClass:'menu-item--block', label:`${handle} 님 차단하기`, icon:'<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M12 3.75c-4.55 0-8.25 3.69-8.25 8.25 0 1.92.66 3.68 1.75 5.08L17.09 5.5C15.68 4.4 13.92 3.75 12 3.75zm6.5 3.17L6.92 18.5c1.4 1.1 3.16 1.75 5.08 1.75 4.56 0 8.25-3.69 8.25-8.25 0-1.92-.65-3.68-1.75-5.08zM1.75 12C1.75 6.34 6.34 1.75 12 1.75S22.25 6.34 22.25 12 17.66 22.25 12 22.25 1.75 17.66 1.75 12z"></path></g></svg>' },
@@ -1282,8 +1350,8 @@ window.onload = () => {
       if (likePath) likePath.setAttribute('d', on ? LIKE_PATH_ON : LIKE_PATH_OFF);
       const postId = likeBtn.dataset.postId;
       if (postId && memberId) {
-        if (on) fetch('/api/main/likes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(()=>{});
-        else fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method:'POST' }).catch(()=>{});
+        if (on) fetch('/api/main/likes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(err => console.error(err));
+        else fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method:'POST' }).catch(err => console.error(err));
       }
       return;
     }
@@ -1296,8 +1364,8 @@ window.onload = () => {
       if (bkPath) bkPath.setAttribute('d', on ? BK_PATH_ON : BK_PATH_OFF);
       const postId = bookmarkBtn.dataset.postId;
       if (postId && memberId) {
-        if (on) fetch('/api/main/bookmarks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(()=>{});
-        else fetch(`/api/main/bookmarks/members/${memberId}/posts/${postId}/delete`, { method:'POST' }).catch(()=>{});
+        if (on) fetch('/api/main/bookmarks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(err => console.error(err));
+        else fetch(`/api/main/bookmarks/members/${memberId}/posts/${postId}/delete`, { method:'POST' }).catch(err => console.error(err));
       }
       return;
     }

@@ -67,23 +67,21 @@ const CommunityDetailLayout = {
                     : count === 3 ? "postMediaGrid--3"
                     : count === 2 ? "postMediaGrid--2" : "";
                 const items = post.postFiles.map(pf =>
-                    `<img class="postMediaImage Post-Media-Img" src="${pf.filePath}">`
+                    `<img class="postMediaImage Post-Media-Img" src="${pf.filePath}" onerror="this.style.display='none'">`
                 ).join("");
                 mediaHtml = `<div class="postMedia"><div class="postMediaGrid ${gridClass}">${items}</div></div>`;
             }
         }
 
         return `
-        <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}">
+        <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-is-followed="${post.isFollowed ? 'true' : 'false'}">
             <div class="communityPostMeta">
                 <span class="communityPostMeta__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M7.471 21H.472l.029-1.027c.184-6.618 3.736-8.977 7-8.977.963 0 1.95.212 2.87.672-.761.992-1.339 2.159-1.693 3.46-.349 1.284-.449 2.637-.283 3.872H7.471zm-3.59-2h1.79c.281-3.072 1.985-5.606 4.476-6.726A5.7 5.7 0 0 0 7.5 12.004c-2.246 0-4.86 1.607-5.06 6.996h.441zM7.5 12.002c-2.59 0-4.669-2.108-4.669-4.699C2.831 4.681 4.91 2.58 7.5 2.58c2.59 0 4.668 2.1 4.668 4.723 0 2.591-2.078 4.699-4.668 4.699zm0-7.39a2.67 2.67 0 0 0-2.669 2.691c0 1.481 1.192 2.699 2.669 2.699 1.477 0 2.668-1.218 2.668-2.699A2.67 2.67 0 0 0 7.5 4.612zM21.412 21H13.56l.03-1.027c.184-6.618 3.736-8.977 7-8.977s6.816 2.358 7 8.977L27.62 21h-6.208zm-5.443-2h7.893c-.2-5.389-2.815-6.996-5.06-6.996-2.246 0-4.86 1.607-5.06 6.996h2.227zm2.803-7.998c-2.59 0-4.669-2.108-4.669-4.699 0-2.622 2.078-4.723 4.669-4.723 2.59 0 4.668 2.1 4.668 4.723 0 2.591-2.078 4.699-4.668 4.699zm0-7.39a2.67 2.67 0 0 0-2.669 2.691c0 1.481 1.192 2.699 2.669 2.699 1.477 0 2.668-1.218 2.668-2.699a2.67 2.67 0 0 0-2.668-2.691z"></path></svg>
                 </span>
             </div>
             <div class="postAvatar">
-                ${post.memberProfileFileName
-                    ? `<img class="postAvatarImage" src="${post.memberProfileFileName}" alt="">`
-                    : nickname.charAt(0)}
+                <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
             </div>
             <div class="postBody">
                 <header class="postHeader">
@@ -111,8 +109,8 @@ const CommunityDetailLayout = {
                                 : 'M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z'}"></path></g></svg>
                             <span class="tweet-action-count">${post.likeCount ?? 0}</span>
                         </button>
-                        <button class="tweet-action-btn tweet-action-btn--views">
-                            <svg class="tweet-action-icon" viewBox="0 0 24 24"><g><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path></g></svg>
+                        <button class="tweet-action-btn tweet-action-btn--views" aria-label="북마크 ${post.bookmarkCount ?? 0}">
+                            <svg class="tweet-action-icon" viewBox="0 0 24 24"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>
                             <span class="tweet-action-count">${post.bookmarkCount ?? 0}</span>
                         </button>
                         <div class="tweet-action-right">
@@ -152,9 +150,7 @@ const CommunityDetailLayout = {
             return `
             <article class="about-member-row" data-member-id="${member.memberId}">
                 <div class="about-member-avatar">
-                    ${member.memberProfileFilePath
-                        ? `<img src="${member.memberProfileFilePath}" alt="">`
-                        : `<span class="about-member-avatar__initial">${nick.charAt(0)}</span>`}
+                    <img src="${member.memberProfileFilePath || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
                 </div>
                 <div class="about-member-info">
                     <strong class="about-member-name">${nick}</strong>
@@ -169,11 +165,11 @@ const CommunityDetailLayout = {
             <h2>커뮤니티 정보</h2>
             <p>${desc}</p>
             <div class="about-info-row">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#536471"><path d="M7.501 19.917L7.471 21H.472l.029-1.027c.184-6.618 3.736-8.977 7-8.977.963 0 1.95.212 2.87.572-.444.478-.851 1.03-1.212 1.67-.507-.185-1.067-.302-1.658-.302-2.767 0-4.57 1.786-4.989 6.981h4.989zm8.498 0L15.97 21H23v-1.028c-.186-6.618-3.737-8.977-7.001-8.977-.962 0-1.949.212-2.869.572.443.478.851 1.03 1.212 1.671.506-.186 1.067-.303 1.657-.303 2.768 0 4.571 1.786 4.99 6.982h-4.99zM12 11c2.209 0 4-1.791 4-4s-1.791-4-4-4-4 1.791-4 4 1.791 4 4 4zm0-2c-1.105 0-2-.896-2-2s.896-2 2-2 2 .896 2 2-.895 2-2 2z"/></svg>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#536471"><g><path d="M7.471 21H.472l.029-1.027c.184-6.618 3.736-8.977 7-8.977.963 0 1.95.212 2.87.672-1.608 1.732-2.762 4.389-2.869 8.248l-.03 1.083zM9.616 9.27C10.452 8.63 11 7.632 11 6.5 11 4.57 9.433 3 7.5 3S4 4.57 4 6.5c0 1.132.548 2.13 1.384 2.77.589.451 1.317.73 2.116.73s1.527-.279 2.116-.73zm6.884 1.726c-3.264 0-6.816 2.358-7 8.977L9.471 21h14.057l-.029-1.027c-.184-6.618-3.736-8.977-7-8.977zm2.116-1.726C19.452 8.63 20 7.632 20 6.5 20 4.57 18.433 3 16.5 3S13 4.57 13 6.5c0 1.132.548 2.13 1.384 2.77.589.451 1.317.73 2.116.73s1.527-.279 2.116-.73z"></path></g></svg>
                 <span>멤버만 게시물을 작성할 수 있습니다.</span>
             </div>
             <div class="about-info-row">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#536471"><path d="M12 10c-3.976 0-8 1.43-8 4.5v2h16v-2c0-3.07-4.024-4.5-8-4.5zm0-2c1.656 0 3-1.344 3-3s-1.344-3-3-3-3 1.344-3 3 1.344 3 3 3z"/></svg>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#536471"><g><path d="M12 1.75C6.34 1.75 1.75 6.34 1.75 12S6.34 22.25 12 22.25 22.25 17.66 22.25 12 17.66 1.75 12 1.75zm-.25 10.48L10.5 17.5l-2-1.5v-3.5L7.5 9 5.03 7.59c1.42-2.24 3.89-3.75 6.72-3.84L11 6l-2 .5L8.5 9l5 1.5-1.75 1.73zM17 14v-3l-1.5-3 2.88-1.23c1.17 1.42 1.87 3.24 1.87 5.23 0 1.3-.3 2.52-.83 3.61L17 14z"></path></g></svg>
                 <div>
                     <strong>모든 커뮤니티는 전체 공개됩니다.</strong>
                     <p style="margin:2px 0 0;color:#536471;font-size:14px;">누구나 이 커뮤니티에 가입할 수 있습니다.</p>
@@ -198,7 +194,7 @@ const CommunityDetailLayout = {
         const handle = this.formatHandle(member.memberHandle);
         const role = member.memberRole || "member";
         const roleLabel = role === "admin" ? "관리자" : role === "moderator" ? "중재자" : "";
-        const canManage = myRole === "admin" && role !== "admin";
+        const canManage = (myRole === "admin" || myRole === "creator") && role !== "admin" && role !== "creator";
         return `
         <div class="member-item" data-member-id="${member.memberId}">
             <div class="member-info">

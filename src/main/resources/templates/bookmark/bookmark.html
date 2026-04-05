@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/bookmark/bookmark.css"/>
     <script th:inline="javascript">
         const memberId = /*[[${memberId}]]*/ 0;
+        const profileImageUrl = /*[[${profileImageUrl}]]*/ '/images/profile/default_image.png';
     </script>
     <script src="/js/bookmark/service.js"></script>
     <script src="/js/bookmark/layout.js"></script>
@@ -94,15 +95,7 @@
                 <!-- 폴더 목록은 JS에서 동적 생성 -->
             </section>
 
-            <section class="empty-state" aria-live="polite">
-                <div class="empty-copy">
-                    <h2 class="empty-title">나중을 위해 게시물 저장</h2>
-                    <p class="empty-description">
-                        게시물을 나중에 다시 쉽게 찾을 수 있도록 북마크에
-                        추가하세요.
-                    </p>
-                </div>
-            </section>
+
         </section>
 
         <section
@@ -526,6 +519,7 @@
                         spellcheck="false"
                 />
             </label>
+            <p class="bookmark-modal-error" id="folderNameError" hidden style="color: #f4212e; font-size: 13px; margin-top: 4px;"></p>
         </div>
     </div>
 </div>

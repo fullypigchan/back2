@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -60,14 +61,14 @@ public class ChatRoomDAO {
         chatRoomMapper.updateAlias(conversationId, memberId, alias);
     }
 
-//    뮤트 설정
-    public void updateMuted(Long conversationId, Long memberId, boolean muted) {
-        chatRoomMapper.updateMuted(conversationId, memberId, muted);
+//    스크린샷 차단 상태 수정
+    public void updateScreenBlocked(Long conversationId, Long memberId, boolean blocked) {
+        chatRoomMapper.updateScreenBlocked(conversationId, memberId, blocked);
     }
 
-//    뮤트 상태 조회
-    public boolean isMuted(Long conversationId, Long memberId) {
-        return chatRoomMapper.selectMuted(conversationId, memberId);
+//    스크린샷 차단 상태 조회
+    public boolean isScreenBlocked(Long conversationId, Long memberId) {
+        return chatRoomMapper.selectScreenBlocked(conversationId, memberId);
     }
 
 //    대화방 soft delete
@@ -99,5 +100,15 @@ public class ChatRoomDAO {
 //    차단 해제 시점 메시지 ID 저장
     public void updateBlockReleasedMessageId(Long conversationId, Long memberId, Long messageId) {
         chatRoomMapper.updateBlockReleasedMessageId(conversationId, memberId, messageId);
+    }
+
+//    사라진 메시지 설정 변경
+    public void updateDisappearMessage(Long conversationId, Long memberId, String setting) {
+        chatRoomMapper.updateDisappearMessage(conversationId, memberId, setting);
+    }
+
+//    사라진 메시지 설정 조회
+    public Map<String, Object> getDisappearMessage(Long conversationId, Long memberId) {
+        return chatRoomMapper.selectDisappearMessage(conversationId, memberId);
     }
 }

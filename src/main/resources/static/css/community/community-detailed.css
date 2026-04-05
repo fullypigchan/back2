@@ -3,6 +3,7 @@
   padding: 0;
   box-sizing: border-box;
 }
+button { cursor: pointer; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -2078,3 +2079,27 @@ body.modal-open { overflow: hidden; }
 
 /* 무한 스크롤 센티널 */
 .scrollSentinel { height: 1px; }
+
+/* ===== 로딩 스피너 ===== */
+[data-feed].is-loading,
+.communityDetailMedia.is-loading,
+.communityDetailMembers.is-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+[data-feed].is-loading::after,
+.communityDetailMedia.is-loading::after,
+.communityDetailMembers.is-loading::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e1e8ed;
+    border-top-color: #1d9bf0;
+    border-radius: 50%;
+    animation: communitySpinner 0.7s linear infinite;
+}
+@keyframes communitySpinner {
+    to { transform: rotate(360deg); }
+}

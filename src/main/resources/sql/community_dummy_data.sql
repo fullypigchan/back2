@@ -1,383 +1,213 @@
--- =============================================
--- 커뮤니티 더미 데이터
--- dummy_data.sql 회원 기준 (kim~noh@test.com)
--- =============================================
+-- ============================================================
+-- 커뮤니티 더미데이터 SQL (PostgreSQL)
+-- 실행 순서: 이 파일을 통째로 실행
+-- 주의: 기존 데이터가 있는 테이블은 ON CONFLICT 또는 WHERE NOT EXISTS 처리
+-- ============================================================
 
--- [1] 커뮤니티 생성 (creator_id는 회원 서브쿼리로)
-INSERT INTO tbl_community (creator_id, community_name, description, category_id)
-VALUES
-    -- 수출 관련
-    ((SELECT id FROM tbl_member WHERE member_email = 'lee@test.com'),
-     '미주 수출 실무 포럼',
-     '미국·캐나다·멕시코 수출 실무 경험과 노하우를 나누는 커뮤니티입니다. FDA 인증, 미국 관세, USMCA 활용 전략 등을 함께 논의합니다.',
-     (SELECT id FROM tbl_category WHERE category_name = '미주')),
+-- 1) 더미 회원 50명 추가 (기존 회원과 충돌 방지)
+INSERT INTO tbl_member (member_name, member_email, member_password, member_nickname, member_handle, member_bio, member_region, member_status, member_role)
+SELECT
+    '테스트유저' || gs,
+    'community_test_' || gs || '@globalgates.com',
+    '$2a$10$dummyHashedPasswordForTestingPurposes',
+    CASE (gs % 10)
+        WHEN 0 THEN '무역전문가' || gs
+        WHEN 1 THEN '수출담당' || gs
+        WHEN 2 THEN '물류매니저' || gs
+        WHEN 3 THEN '관세사' || gs
+        WHEN 4 THEN '바이어' || gs
+        WHEN 5 THEN '셀러' || gs
+        WHEN 6 THEN '포워더' || gs
+        WHEN 7 THEN 'FTA전문' || gs
+        WHEN 8 THEN '해외영업' || gs
+        ELSE '글로벌트레이더' || gs
+    END,
+    'comm_user_' || gs,
+    '글로벌 무역 커뮤니티 테스트 유저 #' || gs,
+    CASE (gs % 5)
+        WHEN 0 THEN '서울'
+        WHEN 1 THEN '부산'
+        WHEN 2 THEN '인천'
+        WHEN 3 THEN '대구'
+        ELSE '광주'
+    END,
+    'active',
+    'business'
+FROM generate_series(1, 50) gs
+WHERE NOT EXISTS (
+    SELECT 1 FROM tbl_member WHERE member_email = 'community_test_' || gs || '@globalgates.com'
+);
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'han@test.com'),
-     'FTA 활용 전략 연구회',
-     'FTA 원산지 판정, 협정세율 활용, C/O 발급 등 FTA 실무 전반을 다루는 전문가 커뮤니티. RCEP, 한-EU, 한-아세안 등 주요 협정별 사례를 공유합니다.',
-     (SELECT id FROM tbl_category WHERE category_name = 'FTA')),
+-- 2) 커뮤니티 10개 생성
+INSERT INTO tbl_community (community_name, description, creator_id, community_status, category_id)
+SELECT
+    comm_name,
+    comm_desc,
+    (SELECT id FROM tbl_member WHERE member_email = 'community_test_' || creator_idx || '@globalgates.com'),
+    'active',
+    cat_id
+FROM (VALUES
+    ('글로벌 수출 포럼', '수출 관련 정보와 노하우를 공유하는 커뮤니티입니다.', 1, 1::bigint),
+    ('수입 바이어 네트워크', '해외 제품 수입에 관심 있는 바이어들의 네트워크입니다.', 2, 2::bigint),
+    ('해운물류 전문가 모임', '해운, 항공, 육상 물류 전문가들이 모여 최신 물류 트렌드를 공유합니다.', 3, 3::bigint),
+    ('FTA/관세 스터디', 'FTA 활용법, HS코드 분류, 관세 환급 등 관세 실무를 함께 공부합니다.', 4, 4::bigint),
+    ('무역금융 인사이트', '무역금융, 환율 리스크 관리, LC 실무 등 금융 관련 인사이트를 공유합니다.', 5, 5::bigint),
+    ('무역 IT 혁신', '무역 플랫폼, 자동화, 블록체인 등 IT 기술을 활용한 무역 혁신을 논의합니다.', 6, 6::bigint),
+    ('K-Food 수출 클럽', '한국 식품의 해외 수출 전략, 인증, 마케팅 경험을 공유합니다.', 7, 7::bigint),
+    ('K-Beauty 글로벌', '한국 화장품 수출, 해외 인증, 유통 채널 정보를 나누는 커뮤니티입니다.', 8, 8::bigint),
+    ('자동차부품 수출입', '자동차 부품의 수출입, OEM/ODM, 품질 인증 관련 정보를 교환합니다.', 9, 9::bigint),
+    ('친환경 에너지 무역', '태양광, 풍력, ESG 관련 친환경 에너지 무역 트렌드를 공유합니다.', 10, 12::bigint)
+) AS t(comm_name, comm_desc, creator_idx, cat_id)
+WHERE NOT EXISTS (
+    SELECT 1 FROM tbl_community WHERE community_name = t.comm_name
+);
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'seo@test.com'),
-     'K-Food 해외진출 네트워크',
-     '한국 식품의 해외 수출을 위한 정보 공유 커뮤니티. HACCP, FDA, HALAL 인증 절차와 일본·동남아 시장 진출 전략을 함께 고민합니다.',
-     (SELECT id FROM tbl_category WHERE category_name = '식품')),
+-- 3) 커뮤니티 멤버 가입 (creator 포함)
+-- creator 먼저
+INSERT INTO tbl_community_member (community_id, member_id, member_role)
+SELECT c.id, c.creator_id, 'member'
+FROM tbl_community c
+WHERE c.community_status = 'active'
+  AND c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임','FTA/관세 스터디','무역금융 인사이트','무역 IT 혁신','K-Food 수출 클럽','K-Beauty 글로벌','자동차부품 수출입','친환경 에너지 무역')
+ON CONFLICT (community_id, member_id) DO NOTHING;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'choi@test.com'),
-     'HS코드 & 관세 실무',
-     'HS코드 분류, 관세율 확인, 관세 환급, 세관 심사 대응 등 관세 실무 전반을 다루는 커뮤니티입니다.',
-     (SELECT id FROM tbl_category WHERE category_name = 'HS코드')),
+-- 일반 멤버 (50% 확률 가입)
+INSERT INTO tbl_community_member (community_id, member_id, member_role)
+SELECT c.id, m.id, 'member'
+FROM tbl_community c
+CROSS JOIN tbl_member m
+WHERE c.community_status = 'active'
+  AND c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임','FTA/관세 스터디','무역금융 인사이트','무역 IT 혁신','K-Food 수출 클럽','K-Beauty 글로벌','자동차부품 수출입','친환경 에너지 무역')
+  AND m.member_email LIKE 'community_test_%@globalgates.com'
+  AND random() < 0.5
+ON CONFLICT (community_id, member_id) DO NOTHING;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'oh@test.com'),
-     '국제물류 최적화 그룹',
-     '해운·항공·복합운송 물류비 절감, 포워딩 계약, 부산항·인천항 운영 노하우를 공유하는 물류 전문가 모임입니다.',
-     (SELECT id FROM tbl_category WHERE category_name = '해운')),
+-- 기존 유저도 일부 커뮤니티에 가입
+INSERT INTO tbl_community_member (community_id, member_id, member_role)
+SELECT c.id, m.id, 'member'
+FROM tbl_community c
+CROSS JOIN tbl_member m
+WHERE c.community_status = 'active'
+  AND c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임')
+  AND m.member_email NOT LIKE 'community_test_%@globalgates.com'
+  AND m.member_status = 'active'
+ON CONFLICT (community_id, member_id) DO NOTHING;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'shin@test.com'),
-     '섬유·의류 수출 트렌드',
-     '유럽·일본 SPA 브랜드 OEM 수출, 친환경 소재 트렌드, 바이어 매칭 정보를 공유하는 의류 수출 전문 커뮤니티.',
-     (SELECT id FROM tbl_category WHERE category_name = '섬유/의류')),
+-- 4) 게시글 300개 생성 (커뮤니티당 30개)
+DO $$
+DECLARE
+    comm_rec RECORD;
+    member_ids bigint[];
+    member_count int;
+    i int;
+    contents text[] := ARRAY[
+        '오늘 미국 바이어와 첫 미팅을 했습니다. 생각보다 MOQ 기준이 높아서 협상이 필요할 것 같습니다.',
+        '베트남 공장 실사 다녀왔습니다. 품질은 괜찮은데 납기가 좀 걱정됩니다.',
+        'HS코드 분류 관련 질문입니다. 복합 소재 제품의 경우 어떤 기준으로 분류해야 하나요?',
+        '유럽 REACH 규정 업데이트 공유합니다. 2026년부터 추가 물질이 규제 대상에 포함됩니다.',
+        '환율이 또 출렁이네요. 헤지 전략 어떻게 가져가시나요? 선물환 vs NDF 고민 중입니다.',
+        '아마존 FBA로 미국 시장 진출 준비 중입니다. 물류비 절감 팁 있으면 공유해주세요!',
+        '올해 식품 박람회 일정 정리했습니다. SIAL Paris, Anuga, FoodEx Japan 등 참가 예정이신 분?',
+        'LC(신용장) 조건 해석이 어렵습니다. 특히 transferable LC 관련해서 은행마다 해석이 다릅니다.',
+        '중국 공장과의 커뮤니케이션 팁 공유합니다. WeChat 비즈니스 계정 활용하면 훨씬 효율적이에요.',
+        '친환경 패키징으로 전환하면서 비용이 30% 증가했는데, 바이어 설득 방법이 고민입니다.',
+        '일본 시장 진출 시 JIS 인증이 필수인데 인증 절차가 복잡합니다. 경험담 공유합니다.',
+        '무역보험 가입하신 분들 어떤 상품 선택하셨나요? 한국무역보험공사 vs 민간보험 비교 중입니다.',
+        '컨테이너 운임이 다시 오르고 있습니다. 장기 계약 vs 스팟 운임 어떤 전략이 좋을까요?',
+        'K-뷰티 제품 FDA 등록 완료했습니다. 미국 시장 진출 준비 중인 분들 질문 있으시면 답변드릴게요.',
+        'ESG 경영과 탄소국경조정제도(CBAM)가 앞으로 무역에 큰 영향을 줄 것 같습니다.',
+        '동남아 시장이 정말 뜨거워요. 특히 인도네시아와 베트남에서 한국 제품 수요가 급증하고 있습니다.',
+        '수출 대금 결제 방식 변경으로 인한 리스크 관리 방안 공유드립니다.',
+        '무역 클레임 처리 경험 공유합니다. 품질 이슈로 바이어와 분쟁이 생겼을 때 대처법.',
+        '올해 KOTRA 지원사업 신청하신 분 계신가요? 해외 시장 조사 지원금이 꽤 괜찮습니다.',
+        '블록체인 기반 무역금융 플랫폼 시연해봤는데 서류 처리가 확실히 빨라지더라고요.',
+        '중동 시장 진출 시 할랄 인증 취득 과정과 비용 정리해서 공유합니다.',
+        '한-아세안 FTA 활용 시 원산지 증명서 발급 실무 팁 공유합니다.',
+        '수출 포장 기준이 나라마다 다른데 주요 국가별 요구사항 정리했습니다.',
+        '무역 영어 이메일 템플릿 모음입니다. 바이어 발굴부터 클레임 처리까지 상황별로 정리했어요.',
+        '해외 전시회 참가 후기입니다. 부스 디자인과 샘플 준비가 정말 중요하더라고요.',
+        '수입 통관 지연 시 대처 방법과 추가 비용 최소화 전략 공유합니다.',
+        '국제 운송 보험 가입 시 주의사항. ICC(A), ICC(B), ICC(C) 조건 차이 설명합니다.',
+        '해외 지사 설립 vs 현지 에이전트 활용, 어떤 방식이 더 효율적일까요?',
+        '글로벌 공급망 다변화 전략. 중국 의존도를 줄이면서 품질을 유지하는 방법.',
+        '신규 수출 시장 개척 시 가장 먼저 해야 할 5가지 체크리스트 공유합니다.'
+    ];
+BEGIN
+    FOR comm_rec IN
+        SELECT c.id AS community_id
+        FROM tbl_community c
+        WHERE c.community_status = 'active'
+          AND c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임','FTA/관세 스터디','무역금융 인사이트','무역 IT 혁신','K-Food 수출 클럽','K-Beauty 글로벌','자동차부품 수출입','친환경 에너지 무역')
+    LOOP
+        SELECT array_agg(cm.member_id) INTO member_ids
+        FROM tbl_community_member cm
+        WHERE cm.community_id = comm_rec.community_id;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'moon@test.com'),
-     '신재생에너지 무역 포럼',
-     '태양광·풍력 설비 수출입, ESG 무역 트렌드, 탄소국경세 대응 전략 등 에너지 무역 이슈를 논의하는 커뮤니티.',
-     (SELECT id FROM tbl_category WHERE category_name = '에너지')),
+        member_count := array_length(member_ids, 1);
+        IF member_count IS NULL OR member_count = 0 THEN CONTINUE; END IF;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'jo@test.com'),
-     '전자부품 글로벌 소싱',
-     '반도체, 디스플레이, 전자부품의 글로벌 소싱·ODM/OEM 매칭 정보를 공유합니다. 유럽·중동 바이어 네트워크 연결.',
-     (SELECT id FROM tbl_category WHERE category_name = '전자부품')),
+        FOR i IN 1..30 LOOP
+            INSERT INTO tbl_post (member_id, content, community_id, post_status, created_datetime)
+            VALUES (
+                member_ids[1 + (i % member_count)],
+                contents[1 + (i % 30)],
+                comm_rec.community_id,
+                'active',
+                now() - ((i * 3 + floor(random() * 24)::int) * interval '1 hour')
+            );
+        END LOOP;
+    END LOOP;
+END $$;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'song@test.com'),
-     '원산지 관리 실무자 모임',
-     '원산지 판정, 증명서 발급, 사후검증 대응 등 원산지 관리 실무를 다루는 커뮤니티. 섬유·의류·화학 업종 사례 중심.',
-     (SELECT id FROM tbl_category WHERE category_name = '통관')),
+-- 5) 첨부파일 (로컬 static 경로 사용)
+INSERT INTO tbl_file (original_name, file_name, file_path, file_size, content_type)
+SELECT
+    'sample-' || ((p.id % 20) + 1) || '.svg',
+    'sample-' || ((p.id % 20) + 1) || '.svg',
+    '/uploads/community/sample-' || ((p.id % 20) + 1) || '.svg',
+    1024,
+    'image'
+FROM tbl_post p
+JOIN tbl_community c ON c.id = p.community_id
+WHERE c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임','FTA/관세 스터디','무역금융 인사이트','무역 IT 혁신','K-Food 수출 클럽','K-Beauty 글로벌','자동차부품 수출입','친환경 에너지 무역')
+  AND p.post_status = 'active'
+  AND random() < 0.6
+  AND NOT EXISTS (SELECT 1 FROM tbl_post_file pf WHERE pf.post_id = p.id);
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'noh@test.com'),
-     '반도체 수출규제 대응',
-     '미국 EAR, 일본 수출규제, EU 반도체법 등 반도체 수출 관련 규제 동향과 컴플라이언스 대응 전략을 공유합니다.',
-     (SELECT id FROM tbl_category WHERE category_name = 'IT')),
+-- 6) tbl_post_file 연결
+INSERT INTO tbl_post_file (post_id, file_id)
+SELECT p.id, f.id
+FROM tbl_post p
+JOIN tbl_community c ON c.id = p.community_id
+CROSS JOIN LATERAL (
+    SELECT f2.id FROM tbl_file f2
+    WHERE f2.file_path LIKE '/uploads/community/sample-%'
+    ORDER BY random()
+    LIMIT 1
+) f
+WHERE c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임','FTA/관세 스터디','무역금융 인사이트','무역 IT 혁신','K-Food 수출 클럽','K-Beauty 글로벌','자동차부품 수출입','친환경 에너지 무역')
+  AND p.post_status = 'active'
+  AND NOT EXISTS (SELECT 1 FROM tbl_post_file pf WHERE pf.post_id = p.id)
+  AND random() < 0.5;
 
-    ((SELECT id FROM tbl_member WHERE member_email = 'yoon@test.com'),
-     '통관·보세운송 Q&A',
-     '수출입 통관 절차, 보세운송, 관세 심사 대응에 대한 질문과 답변을 나누는 실무 커뮤니티.',
-     (SELECT id FROM tbl_category WHERE category_name = '통관')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'hwang@test.com'),
-     '원단 소싱 네트워크',
-     '인도·방글라데시·베트남 원단 소싱 정보, 면직물·합성섬유·기능성 원단 거래처 공유 커뮤니티.',
-     (SELECT id FROM tbl_category WHERE category_name = '섬유/의류'))
+-- 7) 좋아요 더미
+INSERT INTO tbl_post_like (member_id, post_id)
+SELECT DISTINCT cm.member_id, p.id
+FROM tbl_post p
+JOIN tbl_community c ON c.id = p.community_id
+JOIN tbl_community_member cm ON cm.community_id = c.id
+WHERE c.community_name IN ('글로벌 수출 포럼','수입 바이어 네트워크','해운물류 전문가 모임','FTA/관세 스터디','무역금융 인사이트','무역 IT 혁신','K-Food 수출 클럽','K-Beauty 글로벌','자동차부품 수출입','친환경 에너지 무역')
+  AND p.post_status = 'active'
+  AND random() < 0.15
 ON CONFLICT DO NOTHING;
 
+-- 8) 인덱스
+CREATE INDEX IF NOT EXISTS idx_post_community_feed
+    ON tbl_post (community_id, post_status, reply_post_id, created_datetime DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_post_file_post
+    ON tbl_post_file (post_id, file_id);
+CREATE INDEX IF NOT EXISTS idx_community_member_list
+    ON tbl_community_member (community_id, joined_at ASC, member_id);
 
--- [2] 커뮤니티 멤버 가입 (생성자는 admin, 나머지는 member)
--- 각 커뮤니티에 생성자 + 여러 멤버 배정
-
--- 커뮤니티 1: 미주 수출 실무 포럼 (creator: lee)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'lee@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '미주 수출 실무 포럼'
-  AND m.member_email IN ('lee@test.com', 'kim@test.com', 'park@test.com', 'kang@test.com', 'han@test.com', 'choi@test.com', 'bae@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 2: FTA 활용 전략 연구회 (creator: han)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'han@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = 'FTA 활용 전략 연구회'
-  AND m.member_email IN ('han@test.com', 'lee@test.com', 'choi@test.com', 'song@test.com', 'yoon@test.com', 'seo@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 3: K-Food 해외진출 네트워크 (creator: seo)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'seo@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = 'K-Food 해외진출 네트워크'
-  AND m.member_email IN ('seo@test.com', 'kim@test.com', 'lee@test.com', 'jung@test.com', 'lim@test.com', 'kwon@test.com', 'yang@test.com', 'noh@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 4: HS코드 & 관세 실무 (creator: choi)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'choi@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = 'HS코드 & 관세 실무'
-  AND m.member_email IN ('choi@test.com', 'han@test.com', 'yoon@test.com', 'song@test.com', 'lee@test.com', 'park@test.com', 'jung@test.com', 'oh@test.com', 'moon@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 5: 국제물류 최적화 그룹 (creator: oh)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'oh@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '국제물류 최적화 그룹'
-  AND m.member_email IN ('oh@test.com', 'jung@test.com', 'bae@test.com', 'yang@test.com', 'kwon@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 6: 섬유·의류 수출 트렌드 (creator: shin)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'shin@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '섬유·의류 수출 트렌드'
-  AND m.member_email IN ('shin@test.com', 'hwang@test.com', 'song@test.com', 'kang@test.com', 'lim@test.com', 'jo@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 7: 신재생에너지 무역 포럼 (creator: moon)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'moon@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '신재생에너지 무역 포럼'
-  AND m.member_email IN ('moon@test.com', 'yang@test.com', 'kwon@test.com', 'noh@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 8: 전자부품 글로벌 소싱 (creator: jo)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'jo@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '전자부품 글로벌 소싱'
-  AND m.member_email IN ('jo@test.com', 'noh@test.com', 'kim@test.com', 'park@test.com', 'bae@test.com', 'kang@test.com', 'moon@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 9: 원산지 관리 실무자 모임 (creator: song)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'song@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '원산지 관리 실무자 모임'
-  AND m.member_email IN ('song@test.com', 'han@test.com', 'choi@test.com', 'hwang@test.com', 'shin@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 10: 반도체 수출규제 대응 (creator: noh)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'noh@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '반도체 수출규제 대응'
-  AND m.member_email IN ('noh@test.com', 'jo@test.com', 'kim@test.com', 'lee@test.com', 'choi@test.com', 'han@test.com', 'moon@test.com', 'park@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 11: 통관·보세운송 Q&A (creator: yoon)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'yoon@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '통관·보세운송 Q&A'
-  AND m.member_email IN ('yoon@test.com', 'choi@test.com', 'oh@test.com', 'jung@test.com', 'kwon@test.com', 'seo@test.com')
-ON CONFLICT DO NOTHING;
-
--- 커뮤니티 12: 원단 소싱 네트워크 (creator: hwang)
-INSERT INTO tbl_community_member (community_id, member_id, member_role, joined_at)
-SELECT c.id, m.id,
-       CASE WHEN m.member_email = 'hwang@test.com' THEN 'admin'::community_member_role ELSE 'member'::community_member_role END,
-       now() - interval '1 day' * (random() * 30)::int
-FROM tbl_community c, tbl_member m
-WHERE c.community_name = '원단 소싱 네트워크'
-  AND m.member_email IN ('hwang@test.com', 'shin@test.com', 'song@test.com', 'kang@test.com', 'lim@test.com')
-ON CONFLICT DO NOTHING;
-
-
--- [3] 커뮤니티 게시글 (community_id 연결)
--- 각 커뮤니티 생성자가 작성한 게시글 + 멤버 게시글
-
--- 커뮤니티 1: 미주 수출 실무 포럼
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'lee@test.com'), 'active',
-     '2026년 미국 관세 인상 품목 정리',
-     '올해 미국이 추가 관세를 부과한 품목 리스트를 정리했습니다. 특히 철강·알루미늄 관련 추가 관세가 확대되었으니, 해당 품목 수출 기업은 반드시 확인하시기 바랍니다. 관세율 변경 상세 내용은 USTR 공지를 참고해주세요.',
-     (SELECT id FROM tbl_community WHERE community_name = '미주 수출 실무 포럼')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'lee@test.com'), 'active',
-     'USMCA 원산지 규정 변경 사항 안내',
-     'USMCA(미국-멕시코-캐나다 협정) 원산지 규정이 2026년부터 일부 변경됩니다. 자동차 부품의 역내 부가가치 비율이 75%로 상향되었고, 철강·알루미늄 원산지 요건이 강화되었습니다. 해당 품목 수출 기업은 원산지 관리 체계를 점검하시기 바랍니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '미주 수출 실무 포럼')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'kim@test.com'), 'active',
-     '미국 아마존 FBA 입고 시 통관 팁',
-     '미국 아마존 FBA 창고에 직접 입고할 때 통관 과정에서 겪었던 시행착오를 공유합니다. ISF 신고 타이밍, 관세 분류, FDA 사전 신고 등 실무 포인트를 정리했습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '미주 수출 실무 포럼')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'park@test.com'), 'active',
-     '캐나다 바이어 미팅 후기',
-     '지난주 토론토에서 진행한 바이어 미팅 후기입니다. 캐나다 시장은 품질 인증을 매우 중시하며, CSA 인증이 사실상 필수입니다. 한국 중소기업이 캐나다 시장에 진출할 때 유의할 점을 정리했습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '미주 수출 실무 포럼'));
-
--- 커뮤니티 2: FTA 활용 전략 연구회
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'han@test.com'), 'active',
-     'RCEP 활용 시 주의할 원산지 기준',
-     'RCEP은 품목별로 원산지 기준이 다르게 적용됩니다. 특히 섬유·의류 품목은 2공정 기준이 적용되어, 단순 봉제만으로는 원산지를 인정받기 어렵습니다. 주요 품목별 원산지 결정기준을 정리했습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'FTA 활용 전략 연구회')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'han@test.com'), 'active',
-     '한-EU FTA C/O 발급 실무 가이드',
-     '한-EU FTA에서는 인증수출자 제도를 통해 자율증명이 가능합니다. 인증수출자 신청 절차, 원산지 소명 자료 준비 방법, 그리고 실제 C/O 발급 시 자주 발생하는 실수와 해결 방법을 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'FTA 활용 전략 연구회')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'choi@test.com'), 'active',
-     'FTA 세율 적용 vs 일반 세율, 어느 게 유리한가?',
-     '모든 품목에서 FTA 세율이 유리한 것은 아닙니다. WTO 양허세율이 이미 0%인 품목이나, FTA 원산지 증빙 비용이 관세 절감액보다 큰 경우가 있습니다. 품목별로 비교 검토한 사례를 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'FTA 활용 전략 연구회'));
-
--- 커뮤니티 3: K-Food 해외진출 네트워크
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'seo@test.com'), 'active',
-     '일본 식품 수출 시 필요한 인증 총정리',
-     '일본에 식품을 수출하기 위해 필요한 인증과 라벨링 요건을 정리했습니다. 식품위생법, JAS 규격, 영양표시 기준 등을 품목별로 구분하여 안내합니다. 특히 최근 변경된 첨가물 표시 규정에 주의하세요.',
-     (SELECT id FROM tbl_community WHERE community_name = 'K-Food 해외진출 네트워크')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'seo@test.com'), 'active',
-     'HALAL 인증 취득 절차 및 비용 안내',
-     '동남아·중동 시장 진출을 위한 HALAL 인증 취득 절차를 정리했습니다. 인증 기관 선택, 현장 심사 준비, 비용 구조, 그리고 갱신 주기까지 실무자가 알아야 할 핵심 사항을 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'K-Food 해외진출 네트워크')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'kim@test.com'), 'active',
-     '베트남 K-Food 전시회 참가 후기',
-     '호치민 K-Food 박람회에 참가한 후기입니다. 현지 바이어들의 관심 품목, 가격대 반응, 유통 채널 특성 등을 정리했습니다. 베트남 시장 진출을 고려하시는 분들에게 도움이 되길 바랍니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'K-Food 해외진출 네트워크'));
-
--- 커뮤니티 4: HS코드 & 관세 실무
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'choi@test.com'), 'active',
-     'HS코드 분류 오류로 인한 관세 추징 사례',
-     '최근 HS코드 분류 오류로 관세를 추징당한 사례를 분석했습니다. 특히 전자제품과 기계류에서 자주 발생하는 분류 오류 유형과, 사전심사 제도를 활용한 예방 방법을 설명합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'HS코드 & 관세 실무')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'choi@test.com'), 'active',
-     '관세 환급 신청 실무 체크리스트',
-     '수출용 원재료에 대한 관세 환급 신청 시 필요한 서류와 절차를 체크리스트로 정리했습니다. 간이정액환급과 개별환급의 차이, 환급 신청 기한, 그리고 자주 반려되는 사유를 함께 안내합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'HS코드 & 관세 실무')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'yoon@test.com'), 'active',
-     '화장품 HS코드 분류 기준 문의',
-     '화장품 수출 시 HS코드 분류가 헷갈리는 부분이 있어 질문 드립니다. 기능성 화장품(자외선 차단, 미백 등)은 의약외품으로 분류되는지, 화장품으로 분류되는지에 따라 세율이 달라지는데, 실무에서 어떻게 판단하시는지 의견 부탁합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = 'HS코드 & 관세 실무'));
-
--- 커뮤니티 5: 국제물류 최적화 그룹
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'oh@test.com'), 'active',
-     '부산항 컨테이너 선적 지연 대응 방안',
-     '최근 부산항에서 컨테이너 선적 지연이 빈번하게 발생하고 있습니다. 주요 원인과 함께, 포워더와 협의하여 지연을 최소화할 수 있는 실무 대응 방안을 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '국제물류 최적화 그룹')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'oh@test.com'), 'active',
-     '해운 vs 항공 운송 비용 비교 (2026년 상반기)',
-     '2026년 상반기 기준 주요 노선별 해운·항공 운송비를 비교 정리했습니다. 유럽, 미주, 동남아 노선의 운임 동향과 함께, 긴급 화물 발생 시 최적의 운송 모드를 선택하는 기준을 제시합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '국제물류 최적화 그룹'));
-
--- 커뮤니티 6: 섬유·의류 수출 트렌드
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'shin@test.com'), 'active',
-     '2026 S/S 유럽 SPA 브랜드 트렌드 분석',
-     '올해 유럽 SPA 브랜드의 S/S 시즌 트렌드를 분석했습니다. 친환경 소재 사용 비율이 전년 대비 30% 증가했고, 리사이클 폴리에스터와 오가닉 코튼 수요가 급증하고 있습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '섬유·의류 수출 트렌드')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'hwang@test.com'), 'active',
-     '베트남 원단 소싱 최신 단가 공유',
-     '베트남 호치민·빈증 지역 주요 원단 공장의 2026년 단가를 정리했습니다. TC 원단, CVC 원단, 폴리에스터 원단별 FOB 가격과 MOQ를 비교했습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '섬유·의류 수출 트렌드'));
-
--- 커뮤니티 7: 신재생에너지 무역 포럼
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'moon@test.com'), 'active',
-     'EU CBAM 시행에 따른 수출 영향 분석',
-     'EU 탄소국경조정메커니즘(CBAM)이 본격 시행되면서 철강, 알루미늄, 시멘트, 비료, 전력 수출에 영향을 미치고 있습니다. 한국 수출기업이 준비해야 할 탄소배출량 보고 체계와 비용 영향을 분석했습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '신재생에너지 무역 포럼')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'moon@test.com'), 'active',
-     '태양광 모듈 수출 동향 (2026년 1분기)',
-     '2026년 1분기 태양광 모듈 수출 실적과 시장 동향을 정리했습니다. 미국 IRA법에 따른 보조금 영향, 동남아 우회 수출 규제 강화 등 주요 이슈를 분석합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '신재생에너지 무역 포럼'));
-
--- 커뮤니티 8: 전자부품 글로벌 소싱
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'jo@test.com'), 'active',
-     '삼성·LG 협력사 매칭 성공 사례 공유',
-     '유럽 바이어와 삼성·LG 협력사를 ODM 방식으로 매칭한 사례를 공유합니다. 바이어 요구 사항 분석, 공장 선정 기준, 샘플링 프로세스, 그리고 계약 조건 협상 과정을 단계별로 정리했습니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '전자부품 글로벌 소싱')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'noh@test.com'), 'active',
-     '반도체 소싱 시 수출규제 확인 절차',
-     '반도체 부품 소싱 시 미국 EAR, 한국 전략물자 수출통제 확인 절차를 정리했습니다. ECCN 분류, 최종 사용자 확인, 수출허가 신청 절차 등 실무에서 반드시 거쳐야 할 단계를 설명합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '전자부품 글로벌 소싱'));
-
--- 커뮤니티 9: 원산지 관리 실무자 모임
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'song@test.com'), 'active',
-     '원산지 사후검증 대응 매뉴얼',
-     '관세청의 원산지 사후검증 요청을 받았을 때 대응하는 절차를 정리했습니다. 검증 통보서 수령 후 자료 준비, 소명서 작성 요령, 현장 검증 시 유의사항을 단계별로 안내합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '원산지 관리 실무자 모임')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'song@test.com'), 'active',
-     '원산지 관리 시스템(FTA-PASS) 활용 팁',
-     'FTA-PASS를 활용한 원산지 판정 및 증명서 발급 실무 팁을 공유합니다. 시스템 초기 설정, BOM 등록, 원산지 판정서 자동 생성 기능을 효율적으로 활용하는 방법을 설명합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '원산지 관리 실무자 모임'));
-
--- 커뮤니티 10: 반도체 수출규제 대응
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'noh@test.com'), 'active',
-     '미국 EAR 규정 최신 업데이트 요약',
-     '2026년 상반기 미국 수출관리규정(EAR) 주요 변경 사항을 요약했습니다. 반도체 장비 및 AI 칩 관련 규제가 강화되었으며, 대중국 수출통제 엔티티 리스트가 확대되었습니다. 한국 기업이 확인해야 할 핵심 포인트를 정리합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '반도체 수출규제 대응')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'noh@test.com'), 'active',
-     '전략물자 자가판정 vs 전문기관 판정',
-     '전략물자 해당 여부를 자가판정할 때와 전문기관에 의뢰할 때의 장단점을 비교했습니다. 자가판정이 적합한 경우, 전문기관 판정이 필요한 경우를 품목 유형별로 구분하여 설명합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '반도체 수출규제 대응')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'jo@test.com'), 'active',
-     '일본 반도체 소재 수입 대체 현황',
-     '일본 수출규제 이후 한국의 반도체 소재(포토레지스트, 불화수소, EUV 펠리클) 국산화 및 수입 다변화 현황을 정리했습니다. 벨기에, 독일 등 대체 수입국 확보 현황도 함께 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '반도체 수출규제 대응'));
-
--- 커뮤니티 11: 통관·보세운송 Q&A
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'yoon@test.com'), 'active',
-     '수입 통관 시 자주 발생하는 서류 보완 사유',
-     '수입 통관 과정에서 세관이 자주 요청하는 서류 보완 사유를 정리했습니다. 가격 신고 관련, 원산지 증명 관련, 요건 확인 관련 보완 요청이 가장 많으며, 각각의 대응 방법을 설명합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '통관·보세운송 Q&A')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'yoon@test.com'), 'active',
-     '보세구역 반입 및 반출 절차 안내',
-     '보세구역(보세창고, 자유무역지역) 반입·반출 절차와 필요한 서류를 정리했습니다. 내국물품 반입, 외국물품 반출, 보세운송 신고 등 실무에서 헷갈리기 쉬운 부분을 중점적으로 설명합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '통관·보세운송 Q&A'));
-
--- 커뮤니티 12: 원단 소싱 네트워크
-INSERT INTO tbl_post (member_id, post_status, title, content, community_id)
-VALUES
-    ((SELECT id FROM tbl_member WHERE member_email = 'hwang@test.com'), 'active',
-     '인도 면직물 소싱 시 품질 검수 포인트',
-     '인도산 면직물 소싱 시 반드시 확인해야 할 품질 검수 포인트를 정리했습니다. 원사 등급, 직조 밀도, 수축률, 색상 견뢰도 등 품질 이슈를 최소화할 수 있는 검수 체크리스트를 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '원단 소싱 네트워크')),
-
-    ((SELECT id FROM tbl_member WHERE member_email = 'hwang@test.com'), 'active',
-     '방글라데시 원단 공장 직접 방문 후기',
-     '다카 인근 원단 공장 3곳을 직접 방문한 후기입니다. 시설 규모, 생산 능력, 납기 신뢰도, 가격 경쟁력을 비교 평가했습니다. 소규모 오더에도 대응 가능한 공장 정보를 함께 공유합니다.',
-     (SELECT id FROM tbl_community WHERE community_name = '원단 소싱 네트워크'));
+-- 완료 확인
+SELECT '=== 더미데이터 적재 완료 ===' AS status;

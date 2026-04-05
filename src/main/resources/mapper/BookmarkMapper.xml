@@ -51,14 +51,19 @@
                b.post_id,
                b.folder_id,
                b.created_datetime,
+               p.member_id as postMemberId,
                p.title   as postTitle,
                p.content as postContent,
-               m.member_nickname as memberNickname,
+               coalesce(m.member_nickname, m.member_name) as memberNickname,
                m.member_handle as memberHandle,
                (select f.file_name from tbl_member_profile_file mpf join tbl_file f on mpf.id = f.id where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile' limit 1) as memberProfileFileName,
                (select count(*) from tbl_post_like pl where pl.post_id = p.id) as likeCount,
                (select count(*) from tbl_post rp where rp.reply_post_id = p.id and rp.post_status = 'active') as replyCount,
-               (select count(*) from tbl_bookmark bk where bk.post_id = p.id) as bookmarkCount
+               (select count(*) from tbl_bookmark bk where bk.post_id = p.id) as bookmarkCount,
+               case when exists (
+                   select 1 from tbl_post_like pl2
+                   where pl2.post_id = p.id and pl2.member_id = #{memberId}
+               ) then true else false end as liked
         from tbl_bookmark b
                  left join tbl_post p on b.post_id = p.id
                  left join tbl_member m on p.member_id = m.id
@@ -72,14 +77,19 @@
                b.post_id,
                b.folder_id,
                b.created_datetime,
+               p.member_id as postMemberId,
                p.title   as postTitle,
                p.content as postContent,
-               m.member_nickname as memberNickname,
+               coalesce(m.member_nickname, m.member_name) as memberNickname,
                m.member_handle as memberHandle,
                (select f.file_name from tbl_member_profile_file mpf join tbl_file f on mpf.id = f.id where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile' limit 1) as memberProfileFileName,
                (select count(*) from tbl_post_like pl where pl.post_id = p.id) as likeCount,
                (select count(*) from tbl_post rp where rp.reply_post_id = p.id and rp.post_status = 'active') as replyCount,
-               (select count(*) from tbl_bookmark bk where bk.post_id = p.id) as bookmarkCount
+               (select count(*) from tbl_bookmark bk where bk.post_id = p.id) as bookmarkCount,
+               case when exists (
+                   select 1 from tbl_post_like pl2
+                   where pl2.post_id = p.id and pl2.member_id = b.member_id
+               ) then true else false end as liked
         from tbl_bookmark b
                  left join tbl_post p on b.post_id = p.id
                  left join tbl_member m on p.member_id = m.id
@@ -93,14 +103,19 @@
                b.post_id,
                b.folder_id,
                b.created_datetime,
+               p.member_id as postMemberId,
                p.title   as postTitle,
                p.content as postContent,
-               m.member_nickname as memberNickname,
+               coalesce(m.member_nickname, m.member_name) as memberNickname,
                m.member_handle as memberHandle,
                (select f.file_name from tbl_member_profile_file mpf join tbl_file f on mpf.id = f.id where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile' limit 1) as memberProfileFileName,
                (select count(*) from tbl_post_like pl where pl.post_id = p.id) as likeCount,
                (select count(*) from tbl_post rp where rp.reply_post_id = p.id and rp.post_status = 'active') as replyCount,
-               (select count(*) from tbl_bookmark bk where bk.post_id = p.id) as bookmarkCount
+               (select count(*) from tbl_bookmark bk where bk.post_id = p.id) as bookmarkCount,
+               case when exists (
+                   select 1 from tbl_post_like pl2
+                   where pl2.post_id = p.id and pl2.member_id = #{memberId}
+               ) then true else false end as liked
         from tbl_bookmark b
                  left join tbl_post p on b.post_id = p.id
                  left join tbl_member m on p.member_id = m.id

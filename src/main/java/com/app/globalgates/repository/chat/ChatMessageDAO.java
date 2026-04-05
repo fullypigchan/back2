@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,8 +24,23 @@ public class ChatMessageDAO {
         return chatMessageMapper.selectAllByConversationId(conversationId, memberId);
     }
 
+//    대화 내역 조회 (커서 기반 페이징)
+    public List<ChatMessageDTO> findByConversationIdWithCursor(Long conversationId, Long memberId, Long cursor, int pageSize) {
+        return chatMessageMapper.selectByConversationIdWithCursor(conversationId, memberId, cursor, pageSize);
+    }
+
 //    내 계정에서만 메시지 삭제
     public void softDeleteForMember(Long messageId, Long memberId) {
         chatMessageMapper.softDeleteForMember(messageId, memberId);
+    }
+
+//    사라진 메시지 설정이 활성화된 대화방 조회
+    public List<Map<String, Object>> findActiveDisappearSettings() {
+        return chatMessageMapper.selectActiveDisappearSettings();
+    }
+
+//    만료된 메시지 일괄 soft delete
+    public int softDeleteExpiredMessages(Long conversationId, java.time.LocalDateTime settingActivatedAt, java.time.LocalDateTime cutoffTime) {
+        return chatMessageMapper.softDeleteExpiredMessages(conversationId, settingActivatedAt, cutoffTime);
     }
 }
