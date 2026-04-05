@@ -23,7 +23,7 @@ const layout = (() => {
         const avatarInitial = (post.memberNickname || post.memberHandle || "?").charAt(0);
         const avatarHtml = post.memberProfileFileName
             ? `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="${post.memberProfileFileName}"></div>`
-            : `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="${buildAvatarDataUri(avatarInitial)}"></div>`;
+            : `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="/images/profile/default_image.png"></div>`;
 
         const handle = post.memberHandle ? post.memberHandle : "";
         const nickname = post.memberNickname || post.memberHandle || "";
@@ -140,7 +140,7 @@ const layout = (() => {
         const avatarInitial = (expert.memberNickname || expert.memberHandle || "?").charAt(0);
         const avatarHtml = expert.memberProfileFileName
             ? `<div class="user-avatar user-avatar--image"><img class="user-avatar-img" src="${expert.memberProfileFileName}"></div>`
-            : `<div class="user-avatar user-avatar--image"><img class="user-avatar-img" src="${buildAvatarDataUri(avatarInitial)}"></div>`;
+            : `<div class="user-avatar user-avatar--image"><img class="user-avatar-img" src="/images/profile/default_image.png"></div>`;
 
         const handle = expert.memberHandle ? expert.memberHandle : "";
         const nickname = expert.memberNickname || expert.memberHandle || "";

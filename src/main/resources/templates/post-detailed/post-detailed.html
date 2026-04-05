@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>게시물 / X</title>
     <link rel="stylesheet" href="/css/post-detailed/post-detailed.css"/>
+    <link rel="stylesheet" href="/css/bookmark/bookmark.css"/>
     <script th:inline="javascript">
         const memberId = [[${memberId}]];
         const postId = [[${post.id}]];
@@ -17,6 +18,7 @@
 <!--    <script src="/js/post-detailed/post-detailed-copy/layout.js"></script>-->
 <!--    <script src="/js/post-detailed/post-detailed-copy/service.js"></script>-->
 <!--    <script src="/js/post-detailed/post-detailed-copy/event.js"></script>-->
+    <script src="/js/bookmark/service.js"></script>
     <script src="/js/post-detailed/layout.js"></script>
     <script src="/js/post-detailed/service.js"></script>
     <script src="/js/post-detailed/event.js"></script>
@@ -37,11 +39,8 @@
             <div class="post-detail-hero postCard" data-post-card th:data-post-id="${post.id}" th:data-member-id="${post.memberId}">
                 <div class="post-detail-hero-top">
                     <div class="post-detail-profile">
-                        <div th:if="${post.memberProfileFileName != null}" class="post-detail-avatar post-detail-avatar--image">
-                            <img th:src="${post.memberProfileFileName}" alt="프로필"/>
-                        </div>
-                        <div th:unless="${post.memberProfileFileName != null}" class="post-detail-avatar post-detail-avatar--brand">
-                            <span th:text="${post.memberNickname != null ? post.memberNickname.substring(0,1) : (post.memberHandle != null ? post.memberHandle.substring(0,1) : '?')}"></span>
+                        <div class="post-detail-avatar post-detail-avatar--image">
+                            <img th:src="${post.memberProfileFileName != null ? post.memberProfileFileName : '/images/profile/default_image.png'}" alt="프로필"/>
                         </div>
                         <div class="post-detail-profile-copy">
                             <div class="post-detail-name-row">
@@ -150,10 +149,8 @@
 
                     <div class="post-detail-inline-reply-card tweet-modal__composer">
                         <div class="post-detail-inline-reply-avatar">
-                            <img th:if="${loginMember.fileName != null}" th:src="${loginMember.fileName}" alt="내 프로필"
+                            <img th:src="${loginMember.fileName != null ? loginMember.fileName : '/images/profile/default_image.png'}" alt="내 프로필"
                                  class="tweet-modal__avatar-image"/>
-                            <span th:unless="${loginMember.fileName != null}" class="tweet-modal__avatar-initial"
-                                  th:text="${loginMember.memberNickname != null ? loginMember.memberNickname.substring(0,1) : (loginMember.memberHandle != null ? loginMember.memberHandle.substring(0,1) : '?')}"></span>
                         </div>
                         <div class="post-detail-inline-reply-body tweet-modal__input-wrap">
                             <div class="composerField">
@@ -964,6 +961,47 @@
 </div>
 
 <div id="layers" aria-hidden="true"></div>
+
+<!-- 북마크 폴더 선택 모달 -->
+<div class="bookmark-share-sheet" id="shareBookmarkModal" hidden>
+    <div class="bookmark-share-sheet-backdrop" data-share-close="true"></div>
+    <div class="bookmark-share-sheet-card bookmark-share-sheet-card--bookmark"
+         role="dialog" aria-modal="true" aria-labelledby="shareBookmarkTitle">
+        <div class="bookmark-share-sheet-header">
+            <button type="button" class="bookmark-share-sheet-icon-btn" data-share-close="true" aria-label="돌아가기">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></svg>
+            </button>
+            <h2 id="shareBookmarkTitle" class="bookmark-share-sheet-title">폴더에 추가</h2>
+            <span class="bookmark-share-sheet-header-spacer"></span>
+        </div>
+        <button type="button" class="bookmark-share-sheet-create-folder" id="shareBookmarkCreateFolder">
+            새 북마크 폴더 만들기
+        </button>
+        <div class="bookmark-share-sheet-folder-list" id="shareBookmarkFolderList">
+            <!-- 폴더 목록은 JS에서 동적 생성 -->
+        </div>
+    </div>
+</div>
+
+<!-- 폴더 만들기 모달 -->
+<div class="bookmark-modal-overlay" id="createFolderModal" aria-hidden="true">
+    <div class="bookmark-modal" role="dialog" aria-modal="true" aria-labelledby="createFolderModalTitle">
+        <div class="bookmark-modal-header">
+            <button class="bookmark-modal-close" id="createFolderClose" type="button" aria-label="뒤로 가기">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"/></svg>
+            </button>
+            <h2 class="bookmark-modal-title" id="createFolderModalTitle">폴더 만들기</h2>
+            <button class="bookmark-modal-submit" id="createFolderSubmit" type="button" disabled>만들기</button>
+        </div>
+        <div class="bookmark-modal-body">
+            <label class="bookmark-modal-field" for="createFolderInput">
+                <span class="bookmark-modal-label">이름</span>
+                <span class="bookmark-modal-count" id="createFolderCount" aria-live="polite">0 / 25</span>
+                <input class="bookmark-modal-input" id="createFolderInput" type="text" maxlength="25" autocomplete="off" />
+            </label>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

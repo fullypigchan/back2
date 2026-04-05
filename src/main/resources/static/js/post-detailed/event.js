@@ -348,7 +348,7 @@ window.onload = () => {
             '<div role="menu" class="dropdown-menu" style="top:' + (rect.bottom + 8) + 'px;right:' + (window.innerWidth - rect.right) + 'px;display:flex;">' +
             '<div><div class="dropdown-inner">' +
             '<button type="button" class="menu-item share-menu-item--copy"><span class="menu-item__icon"><svg viewBox="0 0 24 24"><path d="M18.36 5.64c-1.95-1.96-5.11-1.96-7.07 0L9.88 7.05 8.46 5.64l1.42-1.42c2.73-2.73 7.16-2.73 9.9 0 2.73 2.74 2.73 7.17 0 9.9l-1.42 1.42-1.41-1.42 1.41-1.41c1.96-1.96 1.96-5.12 0-7.07zm-2.12 3.53l-7.07 7.07-1.41-1.41 7.07-7.07 1.41 1.41zm-12.02.71l1.42-1.42 1.41 1.42-1.41 1.41c-1.96 1.96-1.96 5.12 0 7.07 1.95 1.96 5.11 1.96 7.07 0l1.41-1.41 1.42 1.41-1.42 1.42c-2.73 2.73-7.16 2.73-9.9 0-2.73-2.74-2.73-7.17 0-9.9z"></path></svg></span><span class="menu-item__label">링크 복사하기</span></button>' +
-            '<button type="button" class="menu-item share-menu-item--chat"><span class="menu-item__icon"><svg viewBox="0 0 24 24"><path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"></path></svg></span><span class="menu-item__label">Chat으로 전송하기</span></button>' +
+            '<button type="button" class="menu-item share-menu-item--bookmark"><span class="menu-item__icon"><svg viewBox="0 0 24 24"><path d="M18 3V0h2v3h3v2h-3v3h-2V5h-3V3zm-7.5 1a.5.5 0 00-.5.5V7h3.5A2.5 2.5 0 0116 9.5v3.48l3 2.1V11h2v7.92l-5-3.5v7.26l-6.5-3.54L3 22.68V9.5A2.5 2.5 0 015.5 7H8V4.5A2.5 2.5 0 0110.5 2H12v2zm-5 5a.5.5 0 00-.5.5v9.82l4.5-2.46 4.5 2.46V9.5a.5.5 0 00-.5-.5z"></path></svg></span><span class="menu-item__label">폴더에 북마크 추가하기</span></button>' +
             '</div></div></div></div>';
 
         lc.addEventListener("click", async (ev) => {
@@ -360,8 +360,11 @@ window.onload = () => {
                 const url = window.location.origin + "/main/post/detail/" + (meta?.postId || postId) + "?memberId=" + memberId;
                 await navigator.clipboard?.writeText(url);
                 showToast("링크가 복사되었습니다.");
-            } else if (item.classList.contains("share-menu-item--chat")) {
-                showToast("Chat 전송 기능은 준비 중입니다.");
+            } else if (item.classList.contains("share-menu-item--bookmark")) {
+                console.log("상세북마크 들어옴1, postId:", meta?.postId || postId);
+                closeShareDrop();
+                openShareBookmarkModal(meta?.postId || postId);
+                return;
             }
             closeShareDrop();
         });
@@ -371,6 +374,110 @@ window.onload = () => {
         activeShareDrop = lc;
         activeShareBtn = btn;
     });
+
+    // ── 5-2. 북마크 폴더 모달 ──
+    const shareBookmarkModal = document.getElementById("shareBookmarkModal");
+    const shareBookmarkFolderList = document.getElementById("shareBookmarkFolderList");
+    const shareBookmarkCreateFolder = document.getElementById("shareBookmarkCreateFolder");
+    let shareBookmarkTargetPostId = null;
+
+    async function openShareBookmarkModal(targetPostId) {
+        shareBookmarkTargetPostId = targetPostId;
+        if (!shareBookmarkModal) return;
+        shareBookmarkModal.hidden = false;
+        console.log("상세북마크 들어옴2 모달열기, postId:", targetPostId);
+        const result = await BookmarkService.getFolders(memberId);
+        console.log("상세북마크 들어옴3 폴더목록:", result);
+        if (!result.ok) return;
+        const folders = result.data || [];
+        let html = `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="">
+            <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
+            <span class="bookmark-share-sheet-folder-name">미분류</span>
+        </button>`;
+        folders.forEach((f) => {
+            html += `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="${f.id}">
+                <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
+                <span class="bookmark-share-sheet-folder-name">${f.folderName}</span>
+            </button>`;
+        });
+        shareBookmarkFolderList.innerHTML = html;
+    }
+
+    if (shareBookmarkFolderList) {
+        shareBookmarkFolderList.addEventListener("click", async (e) => {
+            const folderBtn = e.target.closest(".bookmark-share-sheet-folder");
+            if (!folderBtn) return;
+            const folderId = folderBtn.dataset.shareFolderId || null;
+            console.log("상세북마크 들어옴4 선택:", memberId, shareBookmarkTargetPostId, folderId);
+            const result = await BookmarkService.add(memberId, shareBookmarkTargetPostId, folderId);
+            console.log("상세북마크 들어옴5 결과:", result);
+            shareBookmarkModal.hidden = true;
+            if (result.ok) {
+                // 북마크 아이콘 active 처리
+                const card = document.querySelector(`.postCard[data-post-id="${shareBookmarkTargetPostId}"]`);
+                if (card) {
+                    const btn = card.querySelector(".tweet-action-btn--bookmark");
+                    if (btn) btn.classList.add("active");
+                }
+                showToast("북마크 폴더에 추가되었습니다.");
+            } else if (result.status === 409) {
+                showToast("이 폴더에 이미 북마크된 게시물입니다.");
+            } else {
+                showToast("북마크 추가에 실패했습니다.");
+            }
+        });
+    }
+
+    // 새 폴더 만들기 (커스텀 모달)
+    const createFolderModal = document.getElementById("createFolderModal");
+    const createFolderInput = document.getElementById("createFolderInput");
+    const createFolderSubmit = document.getElementById("createFolderSubmit");
+    const createFolderClose = document.getElementById("createFolderClose");
+    const createFolderCount = document.getElementById("createFolderCount");
+
+    if (shareBookmarkCreateFolder && createFolderModal) {
+        shareBookmarkCreateFolder.addEventListener("click", () => {
+            console.log("상세새폴더 들어옴1 모달열기");
+            shareBookmarkModal.hidden = true;
+            createFolderInput.value = "";
+            createFolderSubmit.disabled = true;
+            createFolderCount.textContent = "0 / 25";
+            createFolderModal.classList.add("is-open");
+            createFolderInput.focus();
+        });
+
+        createFolderInput.addEventListener("input", () => {
+            const len = createFolderInput.value.length;
+            createFolderCount.textContent = len + " / 25";
+            createFolderSubmit.disabled = !createFolderInput.value.trim();
+        });
+
+        createFolderSubmit.addEventListener("click", async () => {
+            const folderName = createFolderInput.value.trim();
+            if (!folderName) return;
+            console.log("상세새폴더 들어옴2:", folderName);
+            createFolderSubmit.disabled = true;
+            const result = await BookmarkService.createFolder(memberId, folderName);
+            console.log("상세새폴더 들어옴3 결과:", result);
+            createFolderModal.classList.remove("is-open");
+            if (result.ok) {
+                showToast(folderName + " 폴더를 만들었습니다.");
+                await openShareBookmarkModal(shareBookmarkTargetPostId);
+            }
+        });
+
+        createFolderClose.addEventListener("click", () => {
+            createFolderModal.classList.remove("is-open");
+        });
+    }
+
+    if (shareBookmarkModal) {
+        shareBookmarkModal.addEventListener("click", (e) => {
+            if (e.target.closest("[data-share-close]") || e.target.classList.contains("bookmark-share-sheet-backdrop")) {
+                shareBookmarkModal.hidden = true;
+            }
+        });
+    }
 
     // ── 6. 더보기 드롭다운 (이벤트 위임) ──
     const moreDropdown = document.getElementById("postDetailMoreDropdown");

@@ -19,10 +19,11 @@ const layout = (() => {
     }
 
     const buildReplyCard = (r, inThread) => {
+        console.log("댓글카드 들어옴1:", r.memberNickname, r.memberHandle);
         const initial = (r.memberNickname || r.memberHandle || "?").charAt(0);
         const avatar = r.memberProfileFileName
             ? `<div class="post-detail-avatar post-detail-avatar--image"><img src="${esc(r.memberProfileFileName)}" alt="프로필"/></div>`
-            : `<div class="post-detail-avatar post-detail-avatar--image"><img src="${buildAvatarDataUri(initial)}" alt="프로필"/></div>`;
+            : `<div class="post-detail-avatar post-detail-avatar--image"><img src="/images/profile/default_image.png" alt="프로필"/></div>`;
 
         const threadClass = inThread ? " post-detail-thread-item" : "";
 

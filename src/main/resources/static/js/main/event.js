@@ -487,6 +487,115 @@ window.onload = () => {
         showShareToast("링크가 복사되었습니다.");
     });
 
+    // ── 2-2. 북마크 폴더에 추가하기 ──
+    const shareBookmarkModal = document.getElementById("shareBookmarkModal");
+    const shareBookmarkFolderList = document.getElementById("shareBookmarkFolderList");
+    const shareBookmarkCreateFolder = document.getElementById("shareBookmarkCreateFolder");
+
+    document.querySelector(".share-menu-item--bookmark").addEventListener("click", async (e) => {
+        console.log("북마크폴더 들어옴1, postId:", shareTargetPostId);
+        closeAllMenus();
+        if (!shareBookmarkModal) return;
+        shareBookmarkModal.hidden = false;
+        // 폴더 목록 로드
+        const memberId = loginMember.id;
+        const result = await BookmarkService.getFolders(memberId);
+        console.log("북마크폴더 들어옴2 폴더목록:", result);
+        if (!result.ok) return;
+        const folders = result.data || [];
+        let html = `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="">
+            <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
+            <span class="bookmark-share-sheet-folder-name">미분류</span>
+        </button>`;
+        folders.forEach((f) => {
+            html += `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="${f.id}">
+                <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
+                <span class="bookmark-share-sheet-folder-name">${f.folderName}</span>
+            </button>`;
+        });
+        shareBookmarkFolderList.innerHTML = html;
+    });
+
+    // 폴더 선택 시 북마크 추가
+    if (shareBookmarkFolderList) {
+        shareBookmarkFolderList.addEventListener("click", async (e) => {
+            const folderBtn = e.target.closest(".bookmark-share-sheet-folder");
+            if (!folderBtn) return;
+            const folderId = folderBtn.dataset.shareFolderId || null;
+            const memberId = loginMember.id;
+            console.log("북마크폴더 들어옴3 선택:", memberId, shareTargetPostId, folderId);
+            const result = await BookmarkService.add(memberId, shareTargetPostId, folderId);
+            console.log("북마크폴더 들어옴4 결과:", result);
+            shareBookmarkModal.hidden = true;
+            if (result.ok) {
+                // 북마크 아이콘 active 처리
+                const card = document.querySelector(`.postCard[data-post-id="${shareTargetPostId}"]`);
+                if (card) {
+                    const btn = card.querySelector(".tweet-action-btn--bookmark");
+                    if (btn) btn.classList.add("active");
+                }
+                showShareToast("북마크 폴더에 추가되었습니다.");
+            } else if (result.status === 409) {
+                showShareToast("이 폴더에 이미 북마크된 게시물입니다.");
+            } else {
+                showShareToast("북마크 추가에 실패했습니다.");
+            }
+        });
+    }
+
+    // 새 폴더 만들기 (커스텀 모달)
+    const createFolderModal = document.getElementById("createFolderModal");
+    const createFolderInput = document.getElementById("createFolderInput");
+    const createFolderSubmit = document.getElementById("createFolderSubmit");
+    const createFolderClose = document.getElementById("createFolderClose");
+    const createFolderCount = document.getElementById("createFolderCount");
+
+    if (shareBookmarkCreateFolder && createFolderModal) {
+        shareBookmarkCreateFolder.addEventListener("click", () => {
+            console.log("새폴더생성 들어옴1 모달열기");
+            shareBookmarkModal.hidden = true;
+            createFolderInput.value = "";
+            createFolderSubmit.disabled = true;
+            createFolderCount.textContent = "0 / 25";
+            createFolderModal.classList.add("is-open");
+            createFolderInput.focus();
+        });
+
+        createFolderInput.addEventListener("input", () => {
+            const len = createFolderInput.value.length;
+            createFolderCount.textContent = len + " / 25";
+            createFolderSubmit.disabled = !createFolderInput.value.trim();
+        });
+
+        createFolderSubmit.addEventListener("click", async () => {
+            const folderName = createFolderInput.value.trim();
+            if (!folderName) return;
+            console.log("새폴더생성 들어옴2:", folderName);
+            createFolderSubmit.disabled = true;
+            const result = await BookmarkService.createFolder(loginMember.id, folderName);
+            console.log("새폴더생성 들어옴3 결과:", result);
+            createFolderModal.classList.remove("is-open");
+            if (result.ok) {
+                showShareToast(folderName + " 폴더를 만들었습니다.");
+                // 폴더 선택 모달 다시 열기
+                document.querySelector(".share-menu-item--bookmark").click();
+            }
+        });
+
+        createFolderClose.addEventListener("click", () => {
+            createFolderModal.classList.remove("is-open");
+        });
+    }
+
+    // 모달 닫기
+    if (shareBookmarkModal) {
+        shareBookmarkModal.addEventListener("click", (e) => {
+            if (e.target.closest("[data-share-close]") || e.target.classList.contains("bookmark-share-sheet-backdrop")) {
+                shareBookmarkModal.hidden = true;
+            }
+        });
+    }
+
     document.addEventListener("click", (e) => {
         if (!e.target.closest("#mainShareDropdown") && !e.target.closest(".tweet-action-btn--share")) {
             mainShareDropdown.classList.add("off");
@@ -668,14 +777,14 @@ window.onload = () => {
                     listEl.innerHTML = '<p style="padding:16px;color:#71767b;text-align:center;">검색 결과가 없습니다.</p>';
                 } else {
                     listEl.innerHTML = members.map(m => {
-                        const initial = (m.memberNickname || m.memberName || "?").charAt(0);
+                        const initial = (m.memberName || m.memberHandle || "?").charAt(0);
                         const avatarHtml = m.memberProfileFileName
                             ? `<img class="searchResultAvatar" src="${m.memberProfileFileName}" />`
-                            : `<img class="searchResultAvatar" src="${layout.buildAvatarDataUri(initial)}" />`;
+                            : `<img class="searchResultAvatar" src="/images/profile/default_image.png" />`;
                         return `<div class="searchResultItem" data-member-id="${m.id}">
                             ${avatarHtml}
                             <div class="searchResultProfile">
-                                <span class="searchResultName">${m.memberNickname || m.memberName || ""}</span>
+                                <span class="searchResultName">${m.memberName || ""}</span>
                                 <span class="searchResultHandle">${m.memberHandle || ""}</span>
                             </div>
                         </div>`;
@@ -1765,8 +1874,7 @@ window.onload = () => {
         layout.setLoginMemberId(memberId);
         layout.setAdInterval(loginMember.tier);
 
-        // 프로필 이미지 없으면 SVG 아바타 동적 생성
-        const myInitial = (loginMember.memberNickname || loginMember.memberHandle || "?").charAt(0);
+        // 프로필 이미지 없으면 기본 이미지 설정
         const avatarTargets = [
             document.getElementById("accountAvatar"),
             document.getElementById("composeAvatar"),
@@ -1775,7 +1883,7 @@ window.onload = () => {
         avatarTargets.forEach(el => {
             if (!el) return;
             if (el.querySelector("img")) return;
-            el.innerHTML = `<img src="${layout.buildAvatarDataUri(myInitial)}" alt="" />`;
+            el.innerHTML = `<img src="/images/profile/default_image.png" alt="" />`;
         });
 
         service.getAds((ads) => {
@@ -1799,16 +1907,17 @@ window.onload = () => {
                     return;
                 }
                 members.forEach(m => {
-                    const initial = (m.memberNickname || m.memberHandle || "?").charAt(0);
+                    console.log("팔로우추천 들어옴1:", m.memberName, m.memberHandle);
+                    const initial = (m.memberName || m.memberHandle || "?").charAt(0);
                     const avatarHtml = m.fileName
                         ? `<img class="suggestionAvatarImg" src="${m.fileName}" />`
-                        : `<img class="suggestionAvatarImg" src="${layout.buildAvatarDataUri(initial)}" />`;
+                        : `<img class="suggestionAvatarImg" src="/images/profile/default_image.png" />`;
                     const div = document.createElement("div");
                     div.className = "suggestionItem trend-item";
                     div.innerHTML =
                         `<div class="suggestionAvatar">${avatarHtml}</div>` +
                         `<div class="suggestionProfile">` +
-                            `<span class="suggestionName">${m.memberNickname || ""}</span>` +
+                            `<span class="suggestionName">${m.memberName || ""}</span>` +
                             `<span class="sidebar-user-handle">${m.memberHandle || ""}</span>` +
                         `</div>` +
                         `<button class="connect-btn-sm default" data-member-id="${m.id}">Connect</button>`;

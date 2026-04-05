@@ -5,7 +5,7 @@
     <!-- 전문가 목록 조회 -->
     <select id="selectAll">
         select m.id,
-               m.member_nickname,
+               m.member_name as member_nickname,
                m.member_handle,
                m.member_bio,
                (select f.file_path from tbl_member_profile_file mpf
@@ -13,7 +13,7 @@
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,
                bg.badge_type,
-               (select mm.member_nickname from tbl_follow fl2
+               (select mm.member_name from tbl_follow fl2
                    join tbl_member mm on fl2.follower_id = mm.id
                 where fl2.following_id = m.id and fl2.follower_id != #{memberId}
                 limit 1) as follower_intro

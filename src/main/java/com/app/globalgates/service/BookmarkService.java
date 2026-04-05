@@ -54,21 +54,21 @@ public class BookmarkService {
     }
 
     //    북마크 추가
-    @CacheEvict(value = "bookmark:list", allEntries = true)
+    @CacheEvict(value = {"bookmark:list", "post:list", "post"}, allEntries = true)
     @LogStatus
     public void addBookmark(BookmarkDTO bookmarkDTO) {
         bookmarkDAO.save(bookmarkDTO);
     }
 
     //    북마크 삭제
-    @CacheEvict(value = "bookmark:list", allEntries = true)
+    @CacheEvict(value = {"bookmark:list", "post:list", "post"}, allEntries = true)
     @LogStatus
     public void deleteBookmark(Long id) {
         bookmarkDAO.delete(id);
     }
 
     //    회원/게시글 기준 북마크 삭제
-    @CacheEvict(value = "bookmark:list", allEntries = true)
+    @CacheEvict(value = {"bookmark:list", "post:list", "post"}, allEntries = true)
     @LogStatus
     public void deleteBookmark(Long memberId, Long postId) {
         bookmarkDAO.deleteByMemberIdAndPostId(memberId, postId);
