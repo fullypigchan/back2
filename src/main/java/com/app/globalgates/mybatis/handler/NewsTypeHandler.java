@@ -1,6 +1,7 @@
 package com.app.globalgates.mybatis.handler;
 
 import com.app.globalgates.common.enumeration.NewsType;
+import com.app.globalgates.common.enumeration.PaymentStatus;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
 import org.apache.ibatis.type.TypeHandler;
@@ -16,16 +17,28 @@ public class NewsTypeHandler implements TypeHandler<NewsType> {
 
     @Override
     public NewsType getResult(ResultSet rs, String columnName) throws SQLException {
-        return NewsType.getNewsType(rs.getString(columnName));
+        return switch (rs.getString(columnName)) {
+            case "genetal" -> NewsType.GENERAL;
+            case "emergency" -> NewsType.EMERGENCY;
+            default -> null;
+        };
     }
 
     @Override
     public NewsType getResult(ResultSet rs, int columnIndex) throws SQLException {
-        return NewsType.getNewsType(rs.getString(columnIndex));
+        return switch (rs.getString(columnIndex)) {
+            case "genetal" -> NewsType.GENERAL;
+            case "emergency" -> NewsType.EMERGENCY;
+            default -> null;
+        };
     }
 
     @Override
     public NewsType getResult(CallableStatement cs, int columnIndex) throws SQLException {
-        return NewsType.getNewsType(cs.getString(columnIndex));
+        return switch (cs.getString(columnIndex)) {
+            case "genetal" -> NewsType.GENERAL;
+            case "emergency" -> NewsType.EMERGENCY;
+            default -> null;
+        };
     }
 }

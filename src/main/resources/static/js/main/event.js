@@ -262,9 +262,8 @@ window.onload = () => {
             if (reportItem) {
                 e.preventDefault();
                 if (postId) {
+                    console.log("신고 접수 postId:", postId);
                     await service.report(memberId, postId, 'post', reportItem.dataset.reason);
-                    const card = document.querySelector(`.postCard[data-post-id="${postId}"]`);
-                    if (card) card.remove();
                 }
                 showPostMoreToast("신고가 접수되었습니다");
                 closePostMoreModal();
@@ -471,8 +470,6 @@ window.onload = () => {
     });
 
     // 공유 드롭다운 항목
-    const mainShareChatSheet = document.getElementById("mainShareChatSheet");
-
     function showShareToast(message) {
         const existing = document.querySelector(".share-toast");
         if (existing) { existing.remove(); }
@@ -490,45 +487,114 @@ window.onload = () => {
         showShareToast("링크가 복사되었습니다.");
     });
 
-    document.querySelector(".share-menu-item--chat").addEventListener("click", async (e) => {
+    // ── 2-2. 북마크 폴더에 추가하기 ──
+    const shareBookmarkModal = document.getElementById("shareBookmarkModal");
+    const shareBookmarkFolderList = document.getElementById("shareBookmarkFolderList");
+    const shareBookmarkCreateFolder = document.getElementById("shareBookmarkCreateFolder");
+
+    document.querySelector(".share-menu-item--bookmark").addEventListener("click", async (e) => {
+        console.log("북마크폴더 들어옴1, postId:", shareTargetPostId);
         closeAllMenus();
-        const followings = await service.getFollowings(memberId);
-        const userList = document.getElementById("shareChatUserList");
-        if (followings.length === 0) {
-            userList.innerHTML = '<p style="padding:16px;color:#71767b;text-align:center;">팔로우 중인 사용자가 없습니다.</p>';
-        } else {
-            userList.innerHTML = followings.map(f => {
-                const initial = (f.memberNickname || f.memberHandle || "?").charAt(0);
-                const avatarHtml = f.memberProfileFileName
-                    ? `<span class="share-sheet__user-avatar"><img src="${f.memberProfileFileName}" alt="${f.memberNickname || ''}"/></span>`
-                    : `<span class="share-sheet__user-avatar"><img src="${layout.buildAvatarDataUri(initial)}" alt="${f.memberNickname || ''}"/></span>`;
-                return `<button type="button" class="share-sheet__user" data-share-user-id="${f.followingId}">
-                    ${avatarHtml}
-                    <span class="share-sheet__user-body">
-                        <span class="share-sheet__user-name">${f.memberNickname || f.memberHandle || ""}</span>
-                        <span class="share-sheet__user-handle">${f.memberHandle || ""}</span>
-                    </span>
-                </button>`;
-            }).join("");
-        }
-        mainShareChatSheet.classList.remove("off");
+        if (!shareBookmarkModal) return;
+        shareBookmarkModal.hidden = false;
+        // 폴더 목록 로드
+        const memberId = loginMember.id;
+        const result = await BookmarkService.getFolders(memberId);
+        console.log("북마크폴더 들어옴2 폴더목록:", result);
+        if (!result.ok) return;
+        const folders = result.data || [];
+        let html = `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="">
+            <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
+            <span class="bookmark-share-sheet-folder-name">미분류</span>
+        </button>`;
+        folders.forEach((f) => {
+            html += `<button type="button" class="bookmark-share-sheet-folder" data-share-folder-id="${f.id}">
+                <span class="bookmark-share-sheet-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 3h10.5A2.25 2.25 0 0119.5 5.25v15.07a.75.75 0 01-1.2.6L12 16.2l-6.3 4.72a.75.75 0 01-1.2-.6V5.25A2.25 2.25 0 016.75 3z"/></svg></span>
+                <span class="bookmark-share-sheet-folder-name">${f.folderName}</span>
+            </button>`;
+        });
+        shareBookmarkFolderList.innerHTML = html;
     });
 
-    // 공유 사용자 클릭 시 전송 (채팅 API 연결 시 교체)
-    document.getElementById("shareChatUserList").addEventListener("click", (e) => {
-        const userBtn = e.target.closest(".share-sheet__user");
-        if (!userBtn) return;
-        const userName = userBtn.querySelector(".share-sheet__user-name").textContent;
-        mainShareChatSheet.classList.add("off");
-        showShareToast(userName + " 님에게 공유했습니다.");
-    });
+    // 폴더 선택 시 북마크 추가
+    if (shareBookmarkFolderList) {
+        shareBookmarkFolderList.addEventListener("click", async (e) => {
+            const folderBtn = e.target.closest(".bookmark-share-sheet-folder");
+            if (!folderBtn) return;
+            const folderId = folderBtn.dataset.shareFolderId || null;
+            const memberId = loginMember.id;
+            console.log("북마크폴더 들어옴3 선택:", memberId, shareTargetPostId, folderId);
+            const result = await BookmarkService.add(memberId, shareTargetPostId, folderId);
+            console.log("북마크폴더 들어옴4 결과:", result);
+            shareBookmarkModal.hidden = true;
+            if (result.ok) {
+                // 북마크 아이콘 active 처리
+                const card = document.querySelector(`.postCard[data-post-id="${shareTargetPostId}"]`);
+                if (card) {
+                    const btn = card.querySelector(".tweet-action-btn--bookmark");
+                    if (btn) btn.classList.add("active");
+                }
+                showShareToast("북마크 폴더에 추가되었습니다.");
+            } else if (result.status === 409) {
+                showShareToast("이 폴더에 이미 북마크된 게시물입니다.");
+            } else {
+                showShareToast("북마크 추가에 실패했습니다.");
+            }
+        });
+    }
 
-    mainShareChatSheet.querySelector(".share-sheet__backdrop").addEventListener("click", (e) => {
-        mainShareChatSheet.classList.add("off");
-    });
-    mainShareChatSheet.querySelector(".share-sheet__icon-btn").addEventListener("click", (e) => {
-        mainShareChatSheet.classList.add("off");
-    });
+    // 새 폴더 만들기 (커스텀 모달)
+    const createFolderModal = document.getElementById("createFolderModal");
+    const createFolderInput = document.getElementById("createFolderInput");
+    const createFolderSubmit = document.getElementById("createFolderSubmit");
+    const createFolderClose = document.getElementById("createFolderClose");
+    const createFolderCount = document.getElementById("createFolderCount");
+
+    if (shareBookmarkCreateFolder && createFolderModal) {
+        shareBookmarkCreateFolder.addEventListener("click", () => {
+            console.log("새폴더생성 들어옴1 모달열기");
+            shareBookmarkModal.hidden = true;
+            createFolderInput.value = "";
+            createFolderSubmit.disabled = true;
+            createFolderCount.textContent = "0 / 25";
+            createFolderModal.classList.add("is-open");
+            createFolderInput.focus();
+        });
+
+        createFolderInput.addEventListener("input", () => {
+            const len = createFolderInput.value.length;
+            createFolderCount.textContent = len + " / 25";
+            createFolderSubmit.disabled = !createFolderInput.value.trim();
+        });
+
+        createFolderSubmit.addEventListener("click", async () => {
+            const folderName = createFolderInput.value.trim();
+            if (!folderName) return;
+            console.log("새폴더생성 들어옴2:", folderName);
+            createFolderSubmit.disabled = true;
+            const result = await BookmarkService.createFolder(loginMember.id, folderName);
+            console.log("새폴더생성 들어옴3 결과:", result);
+            createFolderModal.classList.remove("is-open");
+            if (result.ok) {
+                showShareToast(folderName + " 폴더를 만들었습니다.");
+                // 폴더 선택 모달 다시 열기
+                document.querySelector(".share-menu-item--bookmark").click();
+            }
+        });
+
+        createFolderClose.addEventListener("click", () => {
+            createFolderModal.classList.remove("is-open");
+        });
+    }
+
+    // 모달 닫기
+    if (shareBookmarkModal) {
+        shareBookmarkModal.addEventListener("click", (e) => {
+            if (e.target.closest("[data-share-close]") || e.target.classList.contains("bookmark-share-sheet-backdrop")) {
+                shareBookmarkModal.hidden = true;
+            }
+        });
+    }
 
     document.addEventListener("click", (e) => {
         if (!e.target.closest("#mainShareDropdown") && !e.target.closest(".tweet-action-btn--share")) {
@@ -711,14 +777,14 @@ window.onload = () => {
                     listEl.innerHTML = '<p style="padding:16px;color:#71767b;text-align:center;">검색 결과가 없습니다.</p>';
                 } else {
                     listEl.innerHTML = members.map(m => {
-                        const initial = (m.memberNickname || m.memberName || "?").charAt(0);
+                        const initial = (m.memberName || m.memberHandle || "?").charAt(0);
                         const avatarHtml = m.memberProfileFileName
                             ? `<img class="searchResultAvatar" src="${m.memberProfileFileName}" />`
-                            : `<img class="searchResultAvatar" src="${layout.buildAvatarDataUri(initial)}" />`;
+                            : `<img class="searchResultAvatar" src="/images/profile/default_image.png" />`;
                         return `<div class="searchResultItem" data-member-id="${m.id}">
                             ${avatarHtml}
                             <div class="searchResultProfile">
-                                <span class="searchResultName">${m.memberNickname || m.memberName || ""}</span>
+                                <span class="searchResultName">${m.memberName || ""}</span>
                                 <span class="searchResultHandle">${m.memberHandle || ""}</span>
                             </div>
                         </div>`;
@@ -864,6 +930,7 @@ window.onload = () => {
         composeSubmit.disabled = true;
         editPostId = null;
         composeSubmit.textContent = "게시";
+        composeMention.closeMentionDropdown();
         if (resetCompose) { resetCompose(); }
     }
 
@@ -910,6 +977,12 @@ window.onload = () => {
         if (location) {
             formData.append("location", location);
         }
+
+        // 멘션 handle 전송
+        const mentionHandles = collectMentionHandles(composeEditor);
+        mentionHandles.forEach((h, i) => {
+            formData.append(`mentionedHandles[${i}]`, h);
+        });
 
         if (editPostId) {
             await service.updatePost(editPostId, formData);
@@ -975,6 +1048,7 @@ window.onload = () => {
         replyGaugeText.style.color = "";
         replySubmit.disabled = true;
         replyTargetPostId = null;
+        replyMention.closeMentionDropdown();
         if (resetReply) { resetReply(); }
     }
 
@@ -1006,10 +1080,158 @@ window.onload = () => {
             const replyFormData = new FormData();
             replyFormData.append("memberId", memberId);
             replyFormData.append("postContent", replyEditor.textContent);
+            // 멘션 handle 전송
+            const replyMentionHandles = collectMentionHandles(replyEditor);
+            replyMentionHandles.forEach((h, i) => {
+                replyFormData.append(`mentionedHandles[${i}]`, h);
+            });
             await service.writeReply(replyTargetPostId, replyFormData);
         }
         closeReplyModal();
     });
+
+    // ── 멘션 공통 ──
+    function setupMention(editor, dropdownContainer) {
+        console.log("멘션셋업 들어옴1");
+        let mentionMode = false;
+        let mentionQuery = '';
+        let mentionActiveIndex = 0;
+        let mentionResults = [];
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'mention-dropdown off';
+        document.body.appendChild(dropdown);
+
+        editor.addEventListener('input', async () => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            const textNode = range.startContainer;
+            if (textNode.nodeType !== Node.TEXT_NODE) { closeMentionDropdown(); return; }
+
+            const text = textNode.textContent;
+            const cursorPos = range.startOffset;
+            const beforeCursor = text.substring(0, cursorPos);
+            const atIndex = beforeCursor.lastIndexOf('@');
+
+            if (atIndex === -1 || (atIndex > 0 && beforeCursor[atIndex - 1] !== ' ' && beforeCursor[atIndex - 1] !== '\n')) {
+                closeMentionDropdown(); return;
+            }
+
+            const query = beforeCursor.substring(atIndex + 1);
+            if (query.includes(' ')) { closeMentionDropdown(); return; }
+
+            mentionMode = true;
+            mentionQuery = query;
+            console.log("멘션모드 들어옴1 query:", query);
+
+            if (query.length === 0) { closeMentionDropdown(); return; }
+
+            const members = await service.searchMentionMembers(query, memberId);
+            mentionResults = members;
+            mentionActiveIndex = 0;
+
+            if (members.length === 0) { closeMentionDropdown(); return; }
+
+            dropdown.innerHTML = layout.buildMentionDropdown(members);
+            // 입력중인 줄 기준으로 드롭다운 표시 (x는 에디터 왼쪽, y는 커서 줄 아래)
+            const cursorRect = range.getBoundingClientRect();
+            const editorRect = editor.getBoundingClientRect();
+            dropdown.style.left = editorRect.left + 'px';
+            dropdown.style.top = (cursorRect.bottom + 4) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.classList.remove('off');
+            console.log("멘션드롭다운 들어옴2 열림");
+
+            dropdown.querySelectorAll('.mention-item').forEach((item, idx) => {
+                item.addEventListener('mousedown', (e) => { e.preventDefault(); selectMention(idx); });
+            });
+        });
+
+        editor.addEventListener('keydown', (e) => {
+            if (!mentionMode || dropdown.classList.contains('off')) return;
+            if (e.key === 'ArrowDown') { e.preventDefault(); mentionActiveIndex = Math.min(mentionActiveIndex + 1, mentionResults.length - 1); updateActiveItem(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); mentionActiveIndex = Math.max(mentionActiveIndex - 1, 0); updateActiveItem(); }
+            else if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionActiveIndex); }
+            else if (e.key === 'Escape') { closeMentionDropdown(); }
+        });
+
+        function updateActiveItem() {
+            dropdown.querySelectorAll('.mention-item').forEach((item, idx) => {
+                item.classList.toggle('active', idx === mentionActiveIndex);
+                if (idx === mentionActiveIndex) item.scrollIntoView({ block: 'nearest' });
+            });
+        }
+
+        function selectMention(index) {
+            console.log("멘션선택 들어옴1 index:", index);
+            const member = mentionResults[index];
+            if (!member) return;
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            const textNode = range.startContainer;
+            if (textNode.nodeType !== Node.TEXT_NODE) return;
+
+            const text = textNode.textContent;
+            const cursorPos = range.startOffset;
+            const beforeCursor = text.substring(0, cursorPos);
+            const atIndex = beforeCursor.lastIndexOf('@');
+            const before = text.substring(0, atIndex);
+            const after = text.substring(cursorPos);
+
+            textNode.textContent = before;
+
+            const mentionSpan = document.createElement('span');
+            mentionSpan.className = 'mention-tag';
+            mentionSpan.contentEditable = 'false';
+            mentionSpan.dataset.handle = member.memberHandle;
+            mentionSpan.dataset.memberId = member.id;
+            mentionSpan.textContent = member.memberHandle;
+
+            const afterNode = document.createTextNode('\u00A0' + after);
+            const parent = textNode.parentNode;
+            const nextSibling = textNode.nextSibling;
+            parent.insertBefore(mentionSpan, nextSibling);
+            parent.insertBefore(afterNode, mentionSpan.nextSibling);
+
+            const newRange = document.createRange();
+            newRange.setStart(afterNode, 1);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+
+            closeMentionDropdown();
+            console.log("멘션선택 들어옴2 완료:", member.memberHandle);
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        function closeMentionDropdown() {
+            mentionMode = false;
+            mentionQuery = '';
+            mentionResults = [];
+            dropdown.classList.add('off');
+            dropdown.innerHTML = '';
+        }
+
+        return { closeMentionDropdown };
+    }
+
+    function collectMentionHandles(editor) {
+        const mentions = editor.querySelectorAll('.mention-tag');
+        const handles = [];
+        mentions.forEach((m) => {
+            const handle = m.dataset.handle;
+            if (handle && !handles.includes(handle)) handles.push(handle);
+        });
+        console.log("멘션수집 들어옴1 handles:", handles);
+        return handles;
+    }
+
+    // 게시물 작성 모달에 멘션 셋업
+    const composeMention = setupMention(composeEditor, composeEditor.parentElement);
+    // 답글 모달에 멘션 셋업
+    const replyMention = setupMention(replyEditor, replyEditor.parentElement);
 
     // ── 9. 서브뷰 토글 (게시물 + 답글 공통) ──
     // main.js의 setupSubViews 그대로 가져옴 (태그, 카테고리, 임시저장, 위치, 판매글, 볼드/이탤릭, 이모지, 파일첨부)
@@ -1808,8 +2030,7 @@ window.onload = () => {
         layout.setLoginMemberId(memberId);
         layout.setAdInterval(loginMember.tier);
 
-        // 프로필 이미지 없으면 SVG 아바타 동적 생성
-        const myInitial = (loginMember.memberNickname || loginMember.memberHandle || "?").charAt(0);
+        // 프로필 이미지 없으면 기본 이미지 설정
         const avatarTargets = [
             document.getElementById("accountAvatar"),
             document.getElementById("composeAvatar"),
@@ -1818,7 +2039,7 @@ window.onload = () => {
         avatarTargets.forEach(el => {
             if (!el) return;
             if (el.querySelector("img")) return;
-            el.innerHTML = `<img src="${layout.buildAvatarDataUri(myInitial)}" alt="" />`;
+            el.innerHTML = `<img src="/images/profile/default_image.png" alt="" />`;
         });
 
         service.getAds((ads) => {
@@ -1842,16 +2063,17 @@ window.onload = () => {
                     return;
                 }
                 members.forEach(m => {
-                    const initial = (m.memberNickname || m.memberHandle || "?").charAt(0);
+                    console.log("팔로우추천 들어옴1:", m.memberName, m.memberHandle);
+                    const initial = (m.memberName || m.memberHandle || "?").charAt(0);
                     const avatarHtml = m.fileName
                         ? `<img class="suggestionAvatarImg" src="${m.fileName}" />`
-                        : `<img class="suggestionAvatarImg" src="${layout.buildAvatarDataUri(initial)}" />`;
+                        : `<img class="suggestionAvatarImg" src="/images/profile/default_image.png" />`;
                     const div = document.createElement("div");
                     div.className = "suggestionItem trend-item";
                     div.innerHTML =
                         `<div class="suggestionAvatar">${avatarHtml}</div>` +
                         `<div class="suggestionProfile">` +
-                            `<span class="suggestionName">${m.memberNickname || ""}</span>` +
+                            `<span class="suggestionName">${m.memberName || ""}</span>` +
                             `<span class="sidebar-user-handle">${m.memberHandle || ""}</span>` +
                         `</div>` +
                         `<button class="connect-btn-sm default" data-member-id="${m.id}">Connect</button>`;

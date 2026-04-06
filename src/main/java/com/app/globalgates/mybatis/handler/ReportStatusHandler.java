@@ -1,5 +1,6 @@
 package com.app.globalgates.mybatis.handler;
 
+import com.app.globalgates.common.enumeration.AdStatus;
 import com.app.globalgates.common.enumeration.ReportStatus;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
@@ -15,17 +16,32 @@ public class ReportStatusHandler implements TypeHandler<ReportStatus> {
     }
 
     @Override
-    public ReportStatus getResult(ResultSet rs, int columnIndex) throws SQLException {
-        return ReportStatus.getReportStatus(rs.getString(columnIndex));
+    public ReportStatus getResult(ResultSet rs, String columnName) throws SQLException {
+        return switch (rs.getString(columnName)) {
+            case "pending" -> ReportStatus.APPLIED;
+            case "applied" -> ReportStatus.APPLIED;
+            case "rejected" -> ReportStatus.REJECTED;
+            default -> null;
+        };
     }
 
     @Override
-    public ReportStatus getResult(ResultSet rs, String columnName) throws SQLException {
-        return ReportStatus.getReportStatus(rs.getString(columnName));
+    public ReportStatus getResult(ResultSet rs, int columnIndex) throws SQLException {
+        return switch (rs.getString(columnIndex)) {
+            case "pending" -> ReportStatus.APPLIED;
+            case "applied" -> ReportStatus.APPLIED;
+            case "rejected" -> ReportStatus.REJECTED;
+            default -> null;
+        };
     }
 
     @Override
     public ReportStatus getResult(CallableStatement cs, int columnIndex) throws SQLException {
-        return ReportStatus.getReportStatus(cs.getString(columnIndex));
+        return switch (cs.getString(columnIndex)) {
+            case "pending" -> ReportStatus.APPLIED;
+            case "applied" -> ReportStatus.APPLIED;
+            case "rejected" -> ReportStatus.REJECTED;
+            default -> null;
+        };
     }
 }

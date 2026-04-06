@@ -27,7 +27,7 @@ select p.id,
        p.reply_post_id,
        p.created_datetime,
        p.updated_datetime,
-       m.member_nickname,
+       m.member_name as member_nickname,
        m.member_handle,
        (select f.file_name from tbl_member_profile_file mpf
            join tbl_file f on mpf.id = f.id

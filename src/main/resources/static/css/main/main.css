@@ -1214,6 +1214,7 @@ a.menu-item:visited {
 .tweet-modal__composer {
     display: flex;
     gap: 12px;
+    height: 65px;
     align-items: flex-start;
     padding: 6px 0 6px;
 }
@@ -2734,7 +2735,7 @@ input.tweet-modal__location-display-text-inner {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    min-height: 116px;
+    height: 65px;
     padding: 6px 0 12px;
 }
 
@@ -3513,7 +3514,7 @@ input.tweet-modal__location-display-text-inner {
     transform: rotate(45deg) translateY(-1px);
 }
 
-/* The board menu is a small dropdown attached to the audience button. */
+ /* 커뮤니티드롭다운 */
 .boardMenu {
     position: fixed;
     top: 16px;
@@ -3777,6 +3778,13 @@ input.tweet-modal__location-display-text-inner {
     font-weight: 700;
     color: #1d9bf0;
     font-size: 16px;
+}
+
+.user-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .user-info {

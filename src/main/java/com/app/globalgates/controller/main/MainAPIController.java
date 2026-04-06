@@ -31,6 +31,7 @@ public class MainAPIController {
     private final S3Service s3Service;
     private final AdvertisementService advertisementService;
     private final PostTempService postTempService;
+    private final com.app.globalgates.repository.MentionDAO mentionDAO;
 
 //    피드에 광고
     @GetMapping("/ads")
@@ -81,6 +82,8 @@ public class MainAPIController {
         log.info("게시글 작성됐나요?");
         postService.writePost(postDTO, files);
         log.info("ㅇㅇ됨. 작성자(내아디)(memberId)는: {}, 내용은(content): {}", postDTO.getMemberId(), postDTO.getPostContent());
+        // 멘션 저장
+        postService.saveMentions(postDTO.getId(), postDTO.getMemberId(), postDTO.getMentionedHandles());
         log.info("첨부파일은 있나요?");
         if (files != null && !files.isEmpty()) {
             log.info("파일인식함");
@@ -140,6 +143,8 @@ public class MainAPIController {
         log.info("댓글 작성 — postId: {}, memberId: {}, content: {}", postId, postDTO.getMemberId(), postDTO.getPostContent());
         postDTO.setReplyPostId(postId);
         postService.writeReply(postDTO);
+        // 멘션 저장
+        postService.saveMentions(postDTO.getId(), postDTO.getMemberId(), postDTO.getMentionedHandles());
 
         if (files != null && !files.isEmpty()) {
             String todayPath = postService.getTodayPath();
@@ -308,7 +313,25 @@ public class MainAPIController {
     public void report(@RequestBody ReportDTO reportDTO) {
         log.info("신고합니다~ 내아이디: {}, 신고당한거아이디: {}, 신고한게 글인지 회원인지: {}, 사유는? {}", reportDTO.getReporterId(), reportDTO.getTargetId(), reportDTO.getTargetType(), reportDTO.getReason());
         reportService.report(reportDTO);
-        log.info("게시물신고해서 방금 신고한 포스트만 안나옴 — targetId: {}", reportDTO.getTargetId());
+    }
+
+//    멘션 검색 (handle로 검색, 양방향 차단 제외, 최대 10개)
+    @GetMapping("/mentions/search")
+    public List<com.app.globalgates.dto.MentionDTO> searchMentionMembers(@RequestParam String keyword, @RequestParam Long memberId) {
+        log.info("멘션검색 들어옴1 keyword: {}, memberId: {}", keyword, memberId);
+        List<com.app.globalgates.dto.MentionDTO> result = mentionDAO.searchForMention(keyword, memberId);
+        log.info("멘션검색 들어옴2 결과수: {}", result.size());
+        // 프로필 이미지 presigned URL 변환
+        result.forEach(m -> {
+            if (m.getProfileFileName() != null) {
+                try {
+                    m.setProfileFileName(s3Service.getPresignedUrl(m.getProfileFileName(), java.time.Duration.ofMinutes(10)));
+                } catch (java.io.IOException e) {
+                    m.setProfileFileName(null);
+                }
+            }
+        });
+        return result;
     }
 
 //    임시저장하기

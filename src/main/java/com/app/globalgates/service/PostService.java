@@ -7,12 +7,11 @@ import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.exception.PostNotFoundException;
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.common.search.PostSearch;
+import com.app.globalgates.common.enumeration.NotificationType;
 import com.app.globalgates.domain.PostFileVO;
 import com.app.globalgates.dto.*;
-import com.app.globalgates.repository.FileDAO;
-import com.app.globalgates.repository.PostDAO;
-import com.app.globalgates.repository.PostFileDAO;
-import com.app.globalgates.repository.PostHashtagDAO;
+import com.app.globalgates.repository.*;
+import com.app.globalgates.mapper.MemberMapper;
 import com.app.globalgates.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +37,9 @@ public class PostService {
     private final FileDAO fileDAO;
     private final PostHashtagDAO postHashtagDAO;
     private final S3Service s3Service;
+    private final MentionDAO mentionDAO;
+    private final MemberMapper memberMapper;
+    private final NotificationService notificationService;
 
 //    게시글 작성
     @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
@@ -317,26 +319,102 @@ public class PostService {
 //    댓글 작성
     @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
     public void writeReply(PostDTO postDTO) {
+        log.info("writeReply 들어옴1 memberId: {}, content: {}", postDTO.getMemberId(), postDTO.getPostContent());
         postDAO.save(postDTO);
+        log.info("writeReply 들어옴2 savedId: {}", postDTO.getId());
+
+        // 댓글 해시태그 저장
+        if (postDTO.getHashtags() != null && !postDTO.getHashtags().isEmpty()) {
+            log.info("writeReply 해시태그 들어옴3 size: {}", postDTO.getHashtags().size());
+            postDTO.getHashtags().forEach(hashtagDTO -> {
+                Optional<PostHashtagDTO> foundHashtag = postHashtagDAO.findByTagName(hashtagDTO.getTagName());
+                if (foundHashtag.isEmpty()) {
+                    postHashtagDAO.save(hashtagDTO);
+                } else {
+                    hashtagDTO.setId(foundHashtag.get().getId());
+                }
+                postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
+            });
+        }
     }
 
 //    댓글 목록 조회 (대댓글 포함)
     public List<PostDTO> getReplies(Long postId, Long memberId) {
+        log.info("getReplies 들어옴1 postId: {}, memberId: {}", postId, memberId);
         List<PostDTO> comments = postDAO.findRepliesByPostId(postId, memberId);
         if (comments.isEmpty()) return comments;
 
+        // 댓글 첨부파일 조회
+        comments.forEach(c -> {
+            List<PostFileDTO> files = new ArrayList<>(postFileDAO.findAllByPostId(c.getId()));
+            if (!files.isEmpty()) {
+                c.setPostFiles(files);
+            }
+            c.setHashtags(postHashtagDAO.findAllByPostId(c.getId()));
+        });
+
         List<Long> commentIds = comments.stream().map(PostDTO::getId).collect(Collectors.toList());
         List<PostDTO> subReplies = postDAO.findSubRepliesByParentIds(commentIds, memberId);
+
+        // 대댓글 첨부파일 조회
+        subReplies.forEach(sub -> {
+            List<PostFileDTO> files = new ArrayList<>(postFileDAO.findAllByPostId(sub.getId()));
+            if (!files.isEmpty()) {
+                sub.setPostFiles(files);
+            }
+            sub.setHashtags(postHashtagDAO.findAllByPostId(sub.getId()));
+        });
 
         Map<Long, List<PostDTO>> subMap = subReplies.stream()
                 .collect(Collectors.groupingBy(PostDTO::getReplyPostId));
 
         comments.forEach(c -> c.setSubReplies(subMap.getOrDefault(c.getId(), List.of())));
+        log.info("getReplies 들어옴2 댓글수: {}", comments.size());
         return comments;
     }
 
     // 오늘자 경로 생성
     public String getTodayPath(){
         return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+    }
+
+    // 멘션 저장 + 알림 발송
+    public void saveMentions(Long postId, Long taggerId, List<String> mentionedHandles) {
+        if (mentionedHandles == null || mentionedHandles.isEmpty()) return;
+        log.info("멘션저장 들어옴1 postId: {}, taggerId: {}, handles: {}", postId, taggerId, mentionedHandles);
+
+        for (String handle : mentionedHandles) {
+            log.info("멘션저장 들어옴2 handle: {}", handle);
+            // DB에 @포함 형태로 저장되어 있으므로 @가 없으면 붙여서 검색
+            String searchHandle = handle.startsWith("@") ? handle : "@" + handle;
+            Optional<MemberDTO> taggedMember = memberMapper.selectMemberByMemberHandle(searchHandle);
+            if (taggedMember.isEmpty()) {
+                log.info("멘션저장 handle 못찾음: {}", searchHandle);
+                continue;
+            }
+
+            Long taggedId = taggedMember.get().getId();
+            // 자기 자신 멘션 무시
+            if (taggedId.equals(taggerId)) continue;
+
+            MentionDTO mentionDTO = new MentionDTO();
+            mentionDTO.setMentionTaggerId(taggerId);
+            mentionDTO.setMentionTaggedId(taggedId);
+            mentionDTO.setPostId(postId);
+            mentionDAO.save(mentionDTO);
+            log.info("멘션저장 들어옴3 저장완료 taggedId: {}", taggedId);
+
+            // 알림 발송
+            NotificationDTO noti = new NotificationDTO();
+            noti.setRecipientId(taggedId);
+            noti.setSenderId(taggerId);
+            noti.setNotificationType(NotificationType.HANDLE);
+            noti.setTitle("멘션");
+            noti.setContent("회원님을 멘션했습니다.");
+            noti.setTargetId(postId);
+            noti.setTargetType("post");
+            notificationService.createNotification(noti);
+            log.info("멘션알림 들어옴4 발송완료 recipientId: {}", taggedId);
+        }
     }
 }

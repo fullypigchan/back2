@@ -2,8 +2,10 @@ package com.app.globalgates.service;
 
 import com.app.globalgates.dto.FollowDTO;
 import com.app.globalgates.dto.MemberDTO;
+import com.app.globalgates.repository.BlockDAO;
 import com.app.globalgates.repository.FollowDAO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +16,25 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(rollbackFor = Exception.class)
+@Slf4j
 public class FollowService {
     private final FollowDAO followDAO;
+    private final BlockDAO blockDAO;
 
     //    팔로우 추가
     @CacheEvict(value = {"member", "post", "post:list"}, allEntries = true)
     public void follow(FollowDTO followDTO) {
+        log.info("팔로우 시도 followerId: {}, followingId: {}", followDTO.getFollowerId(), followDTO.getFollowingId());
+        if (blockDAO.isBlockedEither(followDTO.getFollowerId(), followDTO.getFollowingId())) {
+            log.info("차단 관계라 팔로우 불가");
+            return;
+        }
         if (followDAO.findByFollowerIdAndFollowingId(followDTO.getFollowerId(), followDTO.getFollowingId()).isPresent()) {
+            log.info("이미 팔로우 중");
             return;
         }
         followDAO.save(followDTO);
+        log.info("팔로우 저장 완료");
     }
 
     //    팔로우 해제

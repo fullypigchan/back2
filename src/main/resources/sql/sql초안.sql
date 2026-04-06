@@ -95,10 +95,12 @@ member_role          member_role   not null default 'business',           -- 회
 push_enabled     boolean       not null default true,                       -- 푸시 알림 허용 (join-modal-notification)
 member_language      varchar(255),                                              -- 웹사이트 URL (mypage 프로필 편집)
 birth_date       varchar(255),                                              -- 생년월일 (YYYYMMDD, join-modal)
+member_country varchar(255),
 created_datetime    timestamp     not null default now(),                    -- 가입 일시
 updated_datetime    timestamp     not null default now(),                    -- 회원 정보 최종 수정 일시
 last_login_at timestamp                                                -- 마지막 로그인 일시
 );
+select * from tbl_member;
 alter table tbl_member add website_url varchar(255);
 -- [4] tbl_business_member  ─ 사업회원 확장 (1:1 → tbl_member)
 --     pk = fk → id 패턴 (상속 구조)
@@ -225,18 +227,6 @@ updated_datetime     timestamp       not null default now(),
 constraint fk_post_member foreign key(member_id)
 references tbl_member(id),
 constraint fk_post_reply_post foreign key(reply_post_id)
-references tbl_post(id)
-);
-
-drop table tbl_reply_product_rel;
-
-create table tbl_reply_product_rel (
-id              bigint generated always as identity primary key,
-reply_post_id   bigint not null,
-product_post_id bigint not null,
-constraint fk_reply_product_reply foreign key(reply_post_id)
-references tbl_post(id),
-constraint fk_reply_product_product foreign key(product_post_id)
 references tbl_post(id)
 );
 
@@ -766,13 +756,6 @@ drop table tbl_notification_preference;
 create table tbl_notification_preference (
      id bigint generated always as identity primary key,
      member_id bigint not null unique,
-     quality_filter_enabled boolean not null default true,
-     muted_non_following boolean not null default false,
-     muted_not_following_you boolean not null default false,
-     muted_new_account boolean not null default false,
-     muted_default_profile boolean not null default false,
-     muted_unverified_email boolean not null default false,
-     muted_unverified_phone boolean not null default false,
      push_connect boolean not null default true,
      push_expert boolean not null default true,
      push_likes boolean not null default true,
@@ -785,9 +768,8 @@ create table tbl_notification_preference (
      created_datetime timestamp not null default now(),
      updated_datetime timestamp not null default now(),
      constraint fk_notification_preference_member
-         foreign key(member_id) references tbl_member(id)
+     foreign key(member_id) references tbl_member(id)
 );
-
 
 -- [63] tbl_block  ─ 사용자 차단 (setting 화면)
 

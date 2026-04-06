@@ -46,7 +46,7 @@
     </select>
     <!-- 아직 팔로우하지 않은 회원 3명 (최신 가입순) -->
     <select id="selectUnfollowedMembers" resultType="com.app.globalgates.dto.MemberDTO">
-        select m.id, m.member_nickname, m.member_handle,
+        select m.id, m.member_name, m.member_handle,
                (select fi.file_name from tbl_member_profile_file mpf
                    join tbl_file fi on mpf.id = fi.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'

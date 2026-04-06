@@ -5,4 +5,13 @@
         insert into tbl_report (reporter_id, target_id, target_type, reason)
         values (#{reporterId}, #{targetId}, #{targetType}, #{reason})
     </insert>
+
+    <select id="selectByReporterAndTarget">
+        select id, reporter_id, target_id, target_type, reason, status, created_datetime, updated_datetime
+        from tbl_report
+        where reporter_id = #{reporterId}
+          and target_id = #{targetId}
+          and target_type = #{targetType}
+        limit 1
+    </select>
 </mapper>

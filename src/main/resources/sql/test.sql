@@ -7,6 +7,13 @@ select * from tbl_post;
 select * from tbl_block;
 
 delete from tbl_block where blocked_id = 85;
+delete from tbl_block where blocked_id = 41;
+
+delete from tbl_report where reporter_id = 87;
+delete from tbl_report where reporter_id = 88;
+delete from tbl_report where reporter_id = 41;
+
+select * from tbl_mention;
 
 select * from tbl_report;
 
@@ -74,3 +81,4 @@ delete from tbl_badge where member_id = 41;
 update tbl_member set member_role = 'business' where id = 41;
 delete from tbl_payment_subscribe where member_id = 41;
 delete from tbl_subscription where member_id = 41;
+

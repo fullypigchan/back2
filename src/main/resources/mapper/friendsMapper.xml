@@ -6,10 +6,7 @@
         <if test="categoryId != null">
             and m.id in (
                 select mcr.member_id from tbl_member_category_rel mcr
-                where mcr.category_id in (
-                    select c.id from tbl_category c
-                    where c.id = #{categoryId} or c.product_category_parent_id = #{categoryId}
-                )
+                where mcr.category_id = #{categoryId}
             )
         </if>
     </sql>
@@ -19,7 +16,7 @@
                m.member_nickname,
                m.member_handle,
                m.member_bio,
-               (select f.file_name from tbl_member_profile_file mpf
+               (select f.file_path from tbl_member_profile_file mpf
                    join tbl_file f on mpf.id = f.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,

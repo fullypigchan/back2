@@ -209,8 +209,22 @@ window.onload = () => {
         });
     }
 
-    // 9. 페이지 최초 진입 시 추천 상품 로드 + 무한 스크롤 등록
-    loadProducts(true);
+    // 9. 페이지 최초 진입 시 탭 파라미터 확인 후 로드
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get("tab");
+    console.log("[explore] tab 파라미터:", tabParam);
+
+    if (tabParam === "news" && tabNews) {
+        console.log("[explore] 뉴스 탭 자동 활성화");
+        (async () => {
+            await exploreService.getNews((data) => {
+                exploreLayout.showNewsList(data);
+            });
+            showNewsTab();
+        })();
+    } else {
+        loadProducts(true);
+    }
     setupInfiniteScroll();
 
     // 10. Trending 서브탭

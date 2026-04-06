@@ -287,25 +287,6 @@ button {
     flex: 1;
 }
 
-.header-settings {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    transition: background .2s;
-    color: #0f1419;
-}
-
-.header-settings:hover {
-    background: #eff3f4;
-}
-
-.header-settings-icon {
-    display: block;
-}
 
 /* ===== Category Banner ===== */
 .category-banner {
@@ -363,40 +344,6 @@ button {
     border-color: #1d9bf0;
 }
 
-.cat-chip.parent-highlight {
-    background: #1d9bf0;
-    color: #fff;
-    font-weight: 700;
-    border-color: #1d9bf0;
-}
-
-.cat-chip.sub-active {
-    background: #1d9bf0;
-    color: #fff;
-    font-weight: 700;
-    border-color: #1d9bf0;
-}
-
-.cat-back-btn {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s;
-    border: 1px solid #cfd9de;
-}
-
-
-
-.cat-back-btn svg {
-    width: 18px;
-    height: 18px;
-    fill: #0f1419;
-}
 
 .category-scroll-arrow {
     position: absolute;
@@ -440,13 +387,14 @@ button {
     height: 40px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: #cfe8fc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #1d9bf0;
-    font-size: 16px;
+    overflow: hidden;
+}
+
+.user-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .user-info {

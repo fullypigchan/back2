@@ -1251,7 +1251,7 @@ input {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    min-height: 116px;
+    height: 65px;
     padding: 6px 0 12px;
 }
 

@@ -169,4 +169,3 @@ where m.member_email = 'mid_hong@test.com' and c.category_name = '중동';
 insert into tbl_member_category_rel (member_id, category_id)
 select m.id, c.id from tbl_member m, tbl_category c
 where m.member_email = 'hs_ryu@test.com' and c.category_name = 'HS코드';
-

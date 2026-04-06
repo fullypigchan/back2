@@ -35,21 +35,16 @@ window.onload = () => {
         });
     };
 
-    // 카테고리 칩 렌더링
+    // 카테고리 칩 렌더링 (대카테고리만)
     const renderCategoryChips = () => {
         if (!scrollEl) return;
+        console.log("들어옴1 renderCategoryChips, categories:", categories);
 
         const parents = categories.filter(c => c.productCategoryParentId === null);
 
         let html = `<button class="cat-chip active" data-cat-id="">전체</button>`;
         parents.forEach(parent => {
-            const children = categories.filter(c => c.productCategoryParentId === parent.id);
-            if (children.length > 0) {
-                const subs = children.map(c => `${c.id}:${c.categoryName}`).join(",");
-                html += `<button class="cat-chip has-subs" data-cat-id="${parent.id}" data-subs="${subs}">${parent.categoryName} ›</button>`;
-            } else {
-                html += `<button class="cat-chip" data-cat-id="${parent.id}">${parent.categoryName}</button>`;
-            }
+            html += `<button class="cat-chip" data-cat-id="${parent.id}">${parent.categoryName}</button>`;
         });
 
         scrollEl.innerHTML = html;
@@ -99,65 +94,19 @@ window.onload = () => {
         window.setTimeout(updateScrollArrowVisibility, 50);
     }
 
-    function restoreMainCategories() {
-        if (!scrollEl) return;
-        scrollEl.innerHTML = originalChipsHTML;
-        scrollEl.scrollLeft = 0;
-        scheduleScrollArrowVisibilityUpdate();
-    }
-
-    function renderSubCategories(parentId, parentName, subCategories) {
-        if (!scrollEl) return;
-        let nextMarkup =
-            '<button class="cat-back-btn"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(270 12 12)"/></svg></button>';
-        nextMarkup += `<button class="cat-chip parent-highlight" data-cat-id="${parentId}">${parentName}</button>`;
-        subCategories.forEach((sub) => {
-            nextMarkup += `<button class="cat-chip" data-cat-id="${sub.id}" data-is-sub="true">${sub.name}</button>`;
-        });
-        scrollEl.innerHTML = nextMarkup;
-        scrollEl.scrollLeft = 0;
-        scheduleScrollArrowVisibilityUpdate();
-    }
-
     function setActiveChip(chip) {
         if (!scrollEl || !chip) return;
-        const allChips = scrollEl.querySelectorAll(".cat-chip:not(.parent-highlight)");
+        const allChips = scrollEl.querySelectorAll(".cat-chip");
         allChips.forEach((chipButton) => {
-            chipButton.classList.remove("active", "sub-active");
+            chipButton.classList.remove("active");
         });
-        if (chip.dataset.isSub) {
-            chip.classList.add("sub-active");
-            return;
-        }
         chip.classList.add("active");
     }
 
     async function handleCategoryClick(event) {
         const clickedChip = event.target.closest(".cat-chip");
-        const clickedBackButton = event.target.closest(".cat-back-btn");
-
-        if (clickedBackButton) {
-            restoreMainCategories();
-            return;
-        }
         if (!clickedChip) return;
-
-        // 대카테고리 → 소카테고리 펼치기
-        if (clickedChip.classList.contains("has-subs")) {
-            const parentId = clickedChip.dataset.catId;
-            const parentName = clickedChip.textContent.replace(" ›", "").trim();
-            const subs = (clickedChip.dataset.subs || "").split(",").filter(Boolean).map(s => {
-                const [id, name] = s.split(":");
-                return { id: id, name: name };
-            });
-            renderSubCategories(parentId, parentName, subs);
-
-            // 대카테고리 선택 시 해당 대카테고리로 필터
-            selectedCategoryId = parentId || null;
-            page = 1;
-            await loadFriendsList();
-            return;
-        }
+        console.log("들어옴1 handleCategoryClick, catId:", clickedChip.dataset.catId);
 
         setActiveChip(clickedChip);
 

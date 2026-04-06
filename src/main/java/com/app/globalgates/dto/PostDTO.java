@@ -57,6 +57,9 @@ public class PostDTO {
     // 대댓글 (댓글의 댓글)
     private List<PostDTO> subReplies;
 
+    // 멘션
+    private List<String> mentionedHandles;
+
     public PostVO toPostVO() {
         return PostVO.builder()
                 .id(id)

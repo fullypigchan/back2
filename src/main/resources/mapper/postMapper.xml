@@ -38,7 +38,7 @@
                p.reply_post_id,
                p.created_datetime,
                p.updated_datetime,
-               m.member_nickname,
+               m.member_name as member_nickname,
                m.member_handle,
                (select f.file_name from tbl_member_profile_file mpf
                    join tbl_file f on mpf.id = f.id
@@ -87,6 +87,7 @@
                ) then true else false end as is_followed
         from view_post_feed v
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
+          and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{memberId})
           and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
           and v.id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'post')
         order by v.created_datetime desc
@@ -111,6 +112,7 @@
         ) then true else false end as is_followed
         from view_post_feed v
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{postSearch.memberId})
+        and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{postSearch.memberId})
         and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{postSearch.memberId} and r.target_type = 'member')
         and v.id not in (select r.target_id from tbl_report r where r.reporter_id = #{postSearch.memberId} and r.target_type = 'post')
         <if test="postSearch.keyword != null and postSearch.keyword != ''">
@@ -258,7 +260,7 @@
         p.reply_post_id,
         p.created_datetime,
         p.updated_datetime,
-        m.member_nickname,
+        m.member_name as member_nickname,
         m.member_handle,
         (select f.file_name from tbl_member_profile_file mpf
             join tbl_file f on mpf.id = f.id
@@ -281,17 +283,17 @@
         ) then true else false end as is_reported
     </sql>
 
-    <!-- 댓글 목록 조회 (특정 게시글의 reply) -->
     <select id="selectRepliesByPostId">
         select <include refid="replyColumns"/>
         from tbl_post p
         join tbl_member m on p.member_id = m.id
         where p.reply_post_id = #{postId}
           and p.post_status = 'active'
+          and p.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
+          and p.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{memberId})
         order by p.created_datetime asc
     </select>
 
-    <!-- 대댓글 목록 조회 (여러 댓글의 대댓글을 한번에) -->
     <select id="selectSubRepliesByParentIds">
         select <include refid="replyColumns"/>
         from tbl_post p
@@ -301,6 +303,8 @@
             #{id}
         </foreach>
           and p.post_status = 'active'
+          and p.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
+          and p.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{memberId})
         order by p.created_datetime asc
     </select>
 

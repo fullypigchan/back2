@@ -19,21 +19,13 @@ const layout = (() => {
     }
 
     const buildReplyCard = (r, inThread) => {
+        console.log("댓글카드 들어옴1:", r.memberNickname, r.memberHandle);
         const initial = (r.memberNickname || r.memberHandle || "?").charAt(0);
         const avatar = r.memberProfileFileName
             ? `<div class="post-detail-avatar post-detail-avatar--image"><img src="${esc(r.memberProfileFileName)}" alt="프로필"/></div>`
-            : `<div class="post-detail-avatar post-detail-avatar--image"><img src="${buildAvatarDataUri(initial)}" alt="프로필"/></div>`;
+            : `<div class="post-detail-avatar post-detail-avatar--image"><img src="/images/profile/default_image.png" alt="프로필"/></div>`;
 
         const threadClass = inThread ? " post-detail-thread-item" : "";
-
-        if (r.reported) {
-            return `
-            <div class="post-detail-reply-card post-detail-reply-card--reported postCard${threadClass}" data-post-card data-post-id="${r.id}" data-member-id="${r.memberId}">
-                <div class="post-detail-reply-content post-detail-reply-content--reported">
-                    <p class="post-detail-reply-reported-text">신고한 글입니다.</p>
-                </div>
-            </div>`;
-        }
 
         const replyBtn = `<button class="post-detail-action-button tweet-action-btn" type="button" data-testid="reply">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></svg>
@@ -58,6 +50,11 @@ const layout = (() => {
                     </div>
                 </header>
                 <p class="post-detail-reply-text">${esc(r.postContent || "")}</p>
+                ${r.postFiles && r.postFiles.length > 0 ? `<div class="post-detail-media-grid${r.postFiles.length === 1 ? ' post-detail-media-grid--single' : (r.postFiles.length === 3 ? ' post-detail-media-grid--triple' : '')}">
+                    ${r.postFiles.map(pf => pf.contentType === 'VIDEO' ? `<video controls class="post-detail-media-image"><source src="${esc(pf.filePath)}"/></video>` : `<img src="${esc(pf.filePath)}" alt="첨부 이미지" class="post-detail-media-image"/>`).join('')}
+                </div>` : ''}
+                ${r.location ? `<div class="postLocation"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="postLocation__icon"><g><path d="M12 2c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 11.5c-1.65 0-3-1.34-3-3s1.35-3 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3z"></path></g></svg><span class="postLocation__text">${esc(r.location)}</span></div>` : ''}
+                ${r.hashtags && r.hashtags.length > 0 ? `<div class="postHashtags">${r.hashtags.map(tag => `<a class="postHashtag" href="/explore/search?keyword=${encodeURIComponent(tag.tagName)}">#${esc(tag.tagName)}</a>`).join('')}</div>` : ''}
                 <div class="post-detail-actions post-detail-actions--reply">
                     ${replyBtn}
                     <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like ${r.liked ? 'active' : ''}" type="button" data-testid="like">
@@ -77,5 +74,29 @@ const layout = (() => {
         </a>`;
     };
 
-    return { SVG: SVG, esc: esc, buildAvatarDataUri: buildAvatarDataUri, buildReplyCard: buildReplyCard };
+    // ── 멘션 드롭다운 아이템 HTML ──
+    const badgeSvgMention = {
+        pro: `<svg class="postBadge" fill="#1d9bf0" viewBox="0 0 22 22"><g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g></svg>`,
+        pro_plus: `<svg class="postBadge" fill="#cac670" viewBox="0 0 22 22"><g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g></svg>`,
+        expert: `<svg class="postBadge" fill="purple" viewBox="0 0 22 22"><g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g></svg>`
+    };
+
+    const buildMentionDropdown = (members) => {
+        console.log("멘션드롭다운 들어옴1 members:", members.length);
+        return members.map((m, i) => {
+            const profileImg = m.profileFileName
+                ? m.profileFileName
+                : '/images/profile/default_image.png';
+            const badge = m.badgeType && badgeSvgMention[m.badgeType] ? badgeSvgMention[m.badgeType] : '';
+            return `<button type="button" class="mention-item${i === 0 ? ' active' : ''}" data-handle="${m.memberHandle}" data-member-id="${m.id}">
+                <img class="mention-item-avatar" src="${profileImg}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                <div class="mention-item-info">
+                    <span class="mention-item-name">${m.memberName || m.memberHandle}${badge}</span>
+                    <span class="mention-item-handle">${m.memberHandle}</span>
+                </div>
+            </button>`;
+        }).join('');
+    };
+
+    return { SVG: SVG, esc: esc, buildAvatarDataUri: buildAvatarDataUri, buildReplyCard: buildReplyCard, buildMentionDropdown: buildMentionDropdown };
 })();

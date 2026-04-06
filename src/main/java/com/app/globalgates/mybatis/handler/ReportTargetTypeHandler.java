@@ -1,5 +1,6 @@
 package com.app.globalgates.mybatis.handler;
 
+import com.app.globalgates.common.enumeration.AdStatus;
 import com.app.globalgates.common.enumeration.ReportTargetType;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
@@ -16,16 +17,28 @@ public class ReportTargetTypeHandler implements TypeHandler<ReportTargetType> {
 
     @Override
     public ReportTargetType getResult(ResultSet rs, int columnIndex) throws SQLException {
-        return ReportTargetType.getReportTargetType(rs.getString(columnIndex));
+        return switch (rs.getString(columnIndex)) {
+            case "post" -> ReportTargetType.POST;
+            case "member" -> ReportTargetType.MEMBER;
+            default -> null;
+        };
     }
 
     @Override
     public ReportTargetType getResult(ResultSet rs, String columnName) throws SQLException {
-        return ReportTargetType.getReportTargetType(rs.getString(columnName));
+        return switch (rs.getString(columnName)) {
+            case "post" -> ReportTargetType.POST;
+            case "member" -> ReportTargetType.MEMBER;
+            default -> null;
+        };
     }
 
     @Override
     public ReportTargetType getResult(CallableStatement cs, int columnIndex) throws SQLException {
-        return ReportTargetType.getReportTargetType(cs.getString(columnIndex));
+        return switch (cs.getString(columnIndex)) {
+            case "post" -> ReportTargetType.POST;
+            case "member" -> ReportTargetType.MEMBER;
+            default -> null;
+        };
     }
 }
