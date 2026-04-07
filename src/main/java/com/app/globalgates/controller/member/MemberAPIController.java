@@ -1,6 +1,7 @@
 package com.app.globalgates.controller.member;
 
 import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.auth.JwtTokenProvider;
 import com.app.globalgates.dto.MemberDTO;
@@ -34,7 +35,7 @@ import java.util.Map;
 @RequestMapping("/api/member/**")
 @RequiredArgsConstructor
 @Slf4j
-public class MemberAPIController {
+public class MemberAPIController implements MemberAPIControllerDocs {
     private final MemberService memberService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
@@ -76,6 +77,7 @@ public class MemberAPIController {
     }
 
     @PostMapping("oauth/join")
+    @LogStatusWithReturn
     public ResponseEntity<?> oauthJoin(
             MemberDTO memberDTO,
             @RequestParam(value = "file", required = false) MultipartFile file
@@ -87,20 +89,24 @@ public class MemberAPIController {
     }
 
     @GetMapping("check-email")
+    @LogStatusWithReturn
     public boolean checkEmail(@RequestParam String memberEmail){
         return memberService.checkEmail(memberEmail);
     }
     @GetMapping("check-phone")
+    @LogStatusWithReturn
     public boolean checkPhone(@RequestParam String memberPhone){
         return memberService.checkPhone(memberPhone);
     }
     @GetMapping("check-handle")
+    @LogStatusWithReturn
     public boolean checkHandle(@RequestParam String memberHandle){
         // 아이디 모달에서 blur 시 중복검사를 호출한다.
         return memberService.checkHandle(memberHandle);
     }
 
     @PostMapping("login")
+    @LogStatusWithReturn
     public ResponseEntity<?> login(@RequestBody MemberDTO memberDTO){
         log.info("memberDTO: {}", memberDTO);
         try{
@@ -135,6 +141,7 @@ public class MemberAPIController {
     // 일반 로그인은 그대로 두고, 재활성화는 로그인 실패 후 별도 흐름으로만 진입시킨다.
     // 여기서는 inactive 계정인지와 비밀번호 일치 여부만 확인해 확인 모달용 최소 정보만 내려준다.
     @PostMapping("reactivation/prepare")
+    @LogStatusWithReturn
     public ResponseEntity<?> prepareReactivation(@RequestBody MemberDTO memberDTO) {
         try {
             MemberDTO member = memberService.getInactiveMemberForReactivation(
@@ -156,6 +163,7 @@ public class MemberAPIController {
     // 인증코드 확인이 끝난 뒤 inactive 상태만 active로 복구하고,
     // 기존 로그인과 같은 인증 매니저 흐름으로 access/refresh 토큰 발급까지 마무리한다.
     @PostMapping("reactivation/complete")
+    @LogStatusWithReturn
     public ResponseEntity<?> completeReactivation(@RequestBody MemberDTO memberDTO) {
         try {
             memberService.reactivateMember(
@@ -187,6 +195,7 @@ public class MemberAPIController {
     }
 
     @GetMapping("info")
+    @LogStatusWithReturn
     public MemberDTO getUserInfo(HttpServletRequest request) {
         String token = jwtTokenProvider.parseTokenFromHeader(request);
         String userName = jwtTokenProvider.getUsername(token);
@@ -197,6 +206,7 @@ public class MemberAPIController {
 
     //  프로필 수정
     @PostMapping("profile/update")
+    @LogStatus
     public ResponseEntity<?> updateProfile(
             MemberDTO memberDTO,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,

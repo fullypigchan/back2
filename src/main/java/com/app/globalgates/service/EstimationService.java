@@ -1,5 +1,7 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.dto.EstimationDTO;
 import com.app.globalgates.dto.EstimationExpertDTO;
@@ -28,6 +30,7 @@ public class EstimationService {
     private final MemberDAO memberDAO;
     private final PostProductService postProductService;
 
+    @LogStatus
     public void write(EstimationDTO estimationDTO) {
         if (estimationDTO.getStatus() == null) {
             estimationDTO.setStatus("requesting");
@@ -61,6 +64,7 @@ public class EstimationService {
     }
 
     @Transactional(readOnly = true)
+    @LogStatusWithReturn
     public EstimationWithPagingDTO getList(int page, Long receiverId) {
         Criteria criteria = new Criteria(page, receiverId == null ? 0 : estimationDAO.findTotal(receiverId));
         List<EstimationDTO> estimations =
@@ -82,6 +86,7 @@ public class EstimationService {
     }
 
     @Transactional(readOnly = true)
+    @LogStatusWithReturn
     public EstimationWithPagingDTO getRequestedList(int page, Long requesterId) {
         Criteria criteria = new Criteria(page, requesterId == null ? 0 : estimationDAO.findRequestedTotal(requesterId));
         List<EstimationDTO> estimations =
@@ -103,6 +108,7 @@ public class EstimationService {
     }
 
     @Transactional(readOnly = true)
+    @LogStatusWithReturn
     public Optional<EstimationDTO> getDetail(Long id) {
         Optional<EstimationDTO> estimation = estimationDAO.findById(id);
         estimation.ifPresent(estimationDTO ->
@@ -112,6 +118,7 @@ public class EstimationService {
     }
 
     @Transactional(readOnly = true)
+    @LogStatusWithReturn
     public List<EstimationExpertDTO> getExpertsForRequest(Long memberId, String keyword) {
         if (memberId == null) {
             return List.of();
@@ -126,6 +133,7 @@ public class EstimationService {
     }
 
     @Transactional(readOnly = true)
+    @LogStatusWithReturn
     public List<PostProductDTO> getProductsForRequest(Long memberId) {
         if (memberId == null) {
             return List.of();

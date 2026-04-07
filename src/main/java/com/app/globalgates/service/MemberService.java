@@ -1,5 +1,6 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatus;
 import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.enumeration.FileContentType;
 import com.app.globalgates.common.enumeration.Status;
@@ -43,6 +44,7 @@ public class MemberService {
 
     //  일반 회원가입
     @Transactional
+    @LogStatus
     public void join(MemberDTO memberDTO, MultipartFile profile){
         memberDTO.setMemberPassword(passwordEncoder.encode(memberDTO.getMemberPassword()));
         memberDAO.save(memberDTO);
@@ -68,6 +70,7 @@ public class MemberService {
     }
 
     @Transactional
+    @LogStatus
     public void joinOAuth(MemberDTO memberDTO, MultipartFile profile, String s3Key) {
         // OAuth 신규가입은 일반 회원가입과 달리 비밀번호 암호화를 하지 않는다.
         // 이미 OAuth 인증을 마친 사용자가 추가정보만 입력한 뒤 최종 가입하는 흐름이다.
@@ -109,6 +112,7 @@ public class MemberService {
 
     //  프로필 이미지 저장
     @Transactional
+    @LogStatus
     public void saveFile(Long memberId, MultipartFile image, String s3Key) {
         FileDTO fileDTO = new FileDTO();
         fileDTO.setOriginalName(image.getOriginalFilename());
@@ -127,6 +131,7 @@ public class MemberService {
 
     //  배너 이미지 저장
     @Transactional
+    @LogStatus
     public void saveBannerFile(Long memberId, MultipartFile image, String s3Key) {
         // 프로필 이미지 저장 로직과 같은 구조를 유지하되,
         // 회원-파일 관계만 배너 전용 mapper를 타도록 분리한다.
@@ -147,6 +152,7 @@ public class MemberService {
 
     //  프로필 수정 텍스트 저장
     @Transactional
+    @LogStatus
     public void update(MemberDTO memberDTO) {
         // 이름(닉네임), 자기소개, 생년월일만 갱신한다.
         // 이미지 교체 흐름은 컨트롤러에서 upload/save/delete 순서로 직접 조합한다.
@@ -154,17 +160,20 @@ public class MemberService {
     }
 
     //  현재 프로필 이미지 조회
+    @LogStatusWithReturn
     public MemberProfileFileDTO getProfileFile(Long memberId) {
         return memberProfileFileDAO.findByMemberId(memberId);
     }
 
     //  현재 배너 이미지 조회
+    @LogStatusWithReturn
     public MemberProfileFileDTO getBannerFile(Long memberId) {
         return memberProfileFileDAO.findBannerByMemberId(memberId);
     }
 
     //  프로필/배너 이미지 관계 및 파일 메타 삭제
     @Transactional
+    @LogStatus
     public void deleteProfileFile(Long fileId) {
         // member_profile_file 관계와 tbl_file 메타는 항상 같이 지워야
         // 다음 조회에서 이미 삭제된 파일 id가 남지 않는다.
@@ -173,11 +182,13 @@ public class MemberService {
     }
 
     //  이메일 검사(true : 사용가능)
+    @LogStatusWithReturn
     public boolean checkEmail(String memberEmail){
         return memberDAO.findMemberByMemberEmail(memberEmail).isEmpty();
     }
 
     //  핸드폰 검사(true : 사용가능)
+    @LogStatusWithReturn
     public boolean checkPhone(String memberPhone){
         return memberDAO.findMemberByMemberPhone(memberPhone).isEmpty();
     }
@@ -191,6 +202,7 @@ public class MemberService {
 
     // 현재 로그인한 사용자의 raw password가 DB의 encoded password와 일치하는지 검사한다.
     // 기존 "중복검사" 계열 메서드와 달리, 이 메서드는 인증 성공 여부를 그대로 true/false로 돌려준다.
+    @LogStatusWithReturn
     public boolean checkPassword(String loginId, String memberPassword){
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -205,6 +217,7 @@ public class MemberService {
     }
 
     @Transactional
+    @LogStatus
     public void updatePassword(String loginId, String currentPassword, String nextPassword) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -219,6 +232,7 @@ public class MemberService {
         memberDAO.updatePassword(member.getId(), passwordEncoder.encode(nextPassword));
     }
     //  handle 검사(true : 사용가능)
+    @LogStatusWithReturn
     public boolean checkHandle(String memberHandle){
         // DB에는 @가 포함된 형태로 저장되므로 조회 시에도 동일한 형태로 맞춘다.
         return memberDAO.findMemberByMemberHandle("@" + memberHandle).isEmpty();
@@ -226,6 +240,7 @@ public class MemberService {
 
     @Transactional
     @CachePut(value="member", key="#loginId")
+    @LogStatus
     public void updateHandle(String loginId, String memberHandle) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -257,6 +272,7 @@ public class MemberService {
 
     @Transactional
     @CachePut(value="member", key="#loginId")
+    @LogStatus
     public void updatePhone(String loginId, String memberPhone) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -285,6 +301,7 @@ public class MemberService {
 
     @Transactional
     @CachePut(value="member", key="#loginId")
+    @LogStatus
     public void updateEmail(String loginId, String memberEmail) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -316,6 +333,7 @@ public class MemberService {
     // 다음 setting 진입이나 새로고침 시 최신 언어가 다시 내려오게 만든다.
     @Transactional
     @CachePut(value="member", key="#loginId")
+    @LogStatus
     public void updateLanguage(String loginId, String memberLanguage) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -337,6 +355,7 @@ public class MemberService {
     // memberRegion은 주소용으로 이미 쓰고 있으므로 국가 저장은 member_country만 별도로 갱신한다.
     @Transactional
     @CachePut(value = "member", key = "#loginId")
+    @LogStatus
     public void updateCountry(String loginId, String memberCountry) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -359,6 +378,7 @@ public class MemberService {
     // void 반환 메서드에서는 CachePut보다 CacheEvict가 안전하므로 다음 조회에서 최신 member를 다시 읽게 만든다.
     @Transactional
     @CacheEvict(value="member", key="#loginId")
+    @LogStatus
     public void updatePushEnabled(String loginId, boolean pushEnabled) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -381,6 +401,7 @@ public class MemberService {
         notificationPreferenceDAO.save(current);
     }
 
+    @LogStatusWithReturn
     public NotificationPreferenceDTO getNotificationPreference(String loginId) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -412,6 +433,7 @@ public class MemberService {
 
     @Transactional
     @CacheEvict(value="member", key="#loginId")
+    @LogStatus
     public void updateNotificationPushPreference(String loginId, NotificationPreferenceDTO request) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -452,6 +474,7 @@ public class MemberService {
     // getMember/login 계열이 member 캐시를 사용할 수 있으므로 비활성화 후에는 캐시도 함께 비운다.
     @Transactional
     @CacheEvict(value="member", key="#loginId")
+    @LogStatus
     public void deactivateMember(String loginId, String memberPassword) {
         MemberDTO member = memberDAO.findMemberByLoginId(loginId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -478,6 +501,7 @@ public class MemberService {
 
     // 재활성화는 active 조회를 쓰지 않고, 상태와 무관한 로그인 식별값 조회로 시작해야 한다.
     // 그래야 inactive 회원을 일반 로그인과 분리해서 별도 복구 흐름으로 보낼 수 있다.
+    @LogStatusWithReturn
     public MemberDTO getInactiveMemberForReactivation(String loginId, String memberPassword) {
         MemberDTO member = memberDAO.findMemberByLoginIdAnyStatus(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("입력한 정보가 일치하지 않습니다."));
@@ -493,6 +517,7 @@ public class MemberService {
         return member;
     }
 
+    @LogStatusWithReturn
     public String getMaskedReactivationTarget(String loginId, MemberDTO member) {
         // 재활성화 안내 화면은 실제 연락처 전체를 보여줄 필요가 없으므로
         // 로그인에 사용한 식별자 채널만 남기고 마스킹된 문자열로 내려준다.
@@ -529,6 +554,7 @@ public class MemberService {
     // 이후 인증/토큰 발급은 기존 로그인과 같은 보안 흐름을 컨트롤러가 이어서 마무리한다.
     @Transactional
     @CacheEvict(value="member", key="#loginId")
+    @LogStatus
     public void reactivateMember(String loginId, String memberPassword) {
         MemberDTO member = getInactiveMemberForReactivation(loginId, memberPassword);
         memberDAO.reactivate(member.getId());
@@ -536,18 +562,21 @@ public class MemberService {
 
     //    로그인
     @Transactional
+    @LogStatusWithReturn
     public MemberDTO login(MemberDTO memberDTO){
         return memberDAO.findMemberForLogin(memberDTO.toMemberVO()).orElseThrow(MemberLoginFailException::new);
     }
 
     //    회원정보 조회
     @Cacheable(value="member", key="#loginId")
+    @LogStatusWithReturn
     public MemberDTO getMember(String loginId){
         return memberDAO.findMemberByLoginId(loginId).orElseThrow(MemberNotFoundException::new);
     }
 
     // 마이페이지의 상대 프로필 조회는 로그인 식별값이 아니라 회원 id로 바로 조회한다.
     // 1차는 화면 분기만 필요하므로 별도 DTO 가공 없이 기존 member 조회를 그대로 재사용한다.
+    @LogStatusWithReturn
     public MemberDTO getMemberById(Long memberId) {
         return memberDAO.findByMemberId(memberId).orElseThrow(MemberNotFoundException::new);
     }
@@ -604,6 +633,7 @@ public class MemberService {
     }
 
     // 프로필 이미지 삭제
+    @LogStatus
     public void delete(Long id) {
         MemberProfileFileDTO file = memberProfileFileDAO.findByMemberId(id);
         memberProfileFileDAO.deleteByMemberId(id);

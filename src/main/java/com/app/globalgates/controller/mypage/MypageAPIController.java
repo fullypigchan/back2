@@ -1,5 +1,6 @@
 package com.app.globalgates.controller.mypage;
 
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.common.enumeration.MemberRole;
 import com.app.globalgates.dto.EstimationWithPagingDTO;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/mypage")
 @RequiredArgsConstructor
 @Slf4j
-public class MypageAPIController {
+public class MypageAPIController implements MypageAPIControllerDocs {
     private final PostProductService postProductService;
     private final S3Service s3Service;
     private final PostService postService;
@@ -41,6 +42,7 @@ public class MypageAPIController {
     // 마이페이지의 "내 상품" 탭은 로그인한 사용자 본인의 상품만 보여줘야 한다.
     // 그래서 memberId를 프론트에서 받지 않고, 인증 객체에서만 꺼내서 조회한다.
     @GetMapping("/products")
+    @LogStatusWithReturn
     public PostProductWithPagingDTO getMyProducts(
             @RequestParam(defaultValue = "1") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -72,6 +74,7 @@ public class MypageAPIController {
     // 상대 프로필의 상품 탭도 같은 카드 UI를 재사용하므로,
     // owner 전용 응답 구조는 유지하고 조회 기준만 페이지 주인 memberId로 바꾼다.
     @GetMapping("/profile/products")
+    @LogStatusWithReturn
     public PostProductWithPagingDTO getProfileProducts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam Long memberId
@@ -97,6 +100,7 @@ public class MypageAPIController {
     // memberId를 프론트에서 받지 않고 인증 객체에서만 꺼내서 조회해야
     // 다른 사용자의 게시물을 임의로 조회하는 요청을 막을 수 있다.
     @GetMapping("/posts")
+    @LogStatusWithReturn
     public PostWithPagingDTO getMyPosts(
             @RequestParam(defaultValue = "1") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -124,6 +128,7 @@ public class MypageAPIController {
 
     // 상대 프로필의 게시물 탭은 페이지 주인이 작성한 일반 게시글만 공개 조회한다.
     @GetMapping("/profile/posts")
+    @LogStatusWithReturn
     public PostWithPagingDTO getProfilePosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam Long memberId
@@ -147,6 +152,7 @@ public class MypageAPIController {
     // 마이페이지에서는 "내가 작성한 댓글"만 별도 조건으로 조회하고,
     // 화면 렌더는 동일한 카드 컴포넌트를 재사용한다.
     @GetMapping("/replies")
+    @LogStatusWithReturn
     public PostWithPagingDTO getMyReplies(
             @RequestParam(defaultValue = "1") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -171,6 +177,7 @@ public class MypageAPIController {
     // 상대 프로필의 답글 탭도 동일한 카드 구조를 재사용하므로
     // 조회 기준만 현재 로그인 사용자가 아니라 페이지 주인으로 바꾼다.
     @GetMapping("/profile/replies")
+    @LogStatusWithReturn
     public PostWithPagingDTO getProfileReplies(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam Long memberId
@@ -194,6 +201,7 @@ public class MypageAPIController {
     // 화면은 동일한 카드 컴포넌트를 재사용하고,
     // 데이터만 "내가 좋아요한 게시글"로 바꿔 내려주는 방식이 유지보수에 가장 유리하다.
     @GetMapping("/likes")
+    @LogStatusWithReturn
     public PostWithPagingDTO getMyLikedPosts(
             @RequestParam(defaultValue = "1") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -216,6 +224,7 @@ public class MypageAPIController {
     }
 
     @GetMapping("/estimations/summary")
+    @LogStatusWithReturn
     public ResponseEntity<?> getMyEstimationsSummary(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -234,6 +243,7 @@ public class MypageAPIController {
     }
 
     @GetMapping("/estimations/requested")
+    @LogStatusWithReturn
     public EstimationWithPagingDTO getMyRequestedEstimations(
             @RequestParam(defaultValue = "1") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -247,6 +257,7 @@ public class MypageAPIController {
     // 2. 파일이 있으면 S3 업로드
     // 3. 업로드 성공분만 DB 연결
     @PostMapping("/products")
+    @LogStatusWithReturn
     public ResponseEntity<?> writeProduct(
             PostProductDTO postProductDTO,
             @RequestParam(value = "images", required = false) List<MultipartFile> images,
@@ -292,6 +303,7 @@ public class MypageAPIController {
     }
 
     @PostMapping("/products/delete")
+    @LogStatusWithReturn
     public ResponseEntity<?> deleteProduct(
             @RequestParam Long productId,
             @AuthenticationPrincipal CustomUserDetails userDetails

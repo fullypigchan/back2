@@ -8,9 +8,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Tag(name = "Auth", description = "Auth API")
 public interface AuthControllerDocs {
+
+    @Operation(
+            summary = "OAuth 회원가입",
+            description = "SNS 소셜 로그인 후 추가 정보를 입력하여 회원가입을 완료한다. 완료 시 JWT 쿠키를 발급한다.",
+            parameters = {
+                    @Parameter(name = "memberDTO", description = "회원가입 정보 (provider, providerId, memberEmail 등)"),
+                    @Parameter(name = "file", description = "프로필 이미지 (선택)")
+            })
+    public ResponseEntity<?> join(MemberDTO memberDTO, MultipartFile file) throws IOException;
+
     @Operation(
             summary = "일반 회원 로그인",
             description = "일반 회원이 로그인할 때 토큰 발급",

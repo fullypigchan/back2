@@ -1,5 +1,7 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.dto.BlockDTO;
 import com.app.globalgates.dto.BlockWithPagingDTO;
@@ -29,6 +31,7 @@ public class BlockService {
 
     //    차단 추가
     @CacheEvict(value = {"member", "post:list", "page:search"}, allEntries = true)
+    @LogStatus
     public void block(BlockDTO blockDTO) {
         log.info("서비스들어옴. 차단한사람 {} 차단당한사람 {}", blockDTO.getBlockerId(), blockDTO.getBlockedId());
         followDAO.delete(blockDTO.getBlockerId(), blockDTO.getBlockedId());
@@ -40,21 +43,25 @@ public class BlockService {
 
     //    차단 해제
     @CacheEvict(value = {"member", "post:list", "page:search"}, allEntries = true)
+    @LogStatus
     public void unblock(Long blockerId, Long blockedId) {
         blockDAO.delete(blockerId, blockedId);
     }
 
     //    차단 여부 조회
+    @LogStatusWithReturn
     public Optional<BlockDTO> getBlock(Long blockerId, Long blockedId) {
         return blockDAO.findByBlockerIdAndBlockedId(blockerId, blockedId);
     }
 
     //    차단 목록 조회
+    @LogStatusWithReturn
     public List<BlockDTO> getBlockList(Long blockerId) {
         return blockDAO.findAllByBlockerId(blockerId);
     }
 
     //  차단 목록 조회(페이징)
+    @LogStatusWithReturn
     public BlockWithPagingDTO getBlockListByMemberId(int page, Long memberId) {
         BlockWithPagingDTO blockWithPagingDTO = new BlockWithPagingDTO();
         Criteria criteria = new Criteria(page, memberBlockDAO.getTotalByMemberId(memberId));
@@ -91,12 +98,14 @@ public class BlockService {
     }
 
 //    양방향 차단 여부 조회 (채팅 연동용)
+    @LogStatusWithReturn
     public boolean isBlockedEither(Long memberId1, Long memberId2) {
         return blockDAO.isBlockedEither(memberId1, memberId2);
     }
 
 //    차단 추가 + 대화방 차단 시점 기록
     @Transactional
+    @LogStatus
     public void blockWithConversation(BlockDTO blockDTO, Long conversationId, Long lastMessageId) {
         blockDAO.save(blockDTO);
         chatRoomDAO.updateBlockedAfterMessageId(conversationId, blockDTO.getBlockerId(), lastMessageId);
@@ -104,6 +113,7 @@ public class BlockService {
 
 //    차단 해제 + 대화방 차단 해제 시점 기록
     @Transactional
+    @LogStatus
     public void unblockWithConversation(Long blockerId, Long blockedId, Long conversationId, Long lastMessageId) {
         blockDAO.delete(blockerId, blockedId);
         chatRoomDAO.updateBlockReleasedMessageId(conversationId, blockerId, lastMessageId);
