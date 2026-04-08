@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/explore/**")
 @Slf4j
-public class ExploreSearchController {
+public class ExploreSearchController implements ExploreSearchControllerDocs {
     private final PostService postService;
     private final MemberService memberService;
     private final S3Service s3service;

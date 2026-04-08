@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/inqury/**")
 @RequiredArgsConstructor
 @Slf4j
-public class InquiryAPIController {
+public class InquiryAPIController implements InquiryAPIControllerDocs {
     private final MemberService memberService;
     private final S3Service s3Service;
 
