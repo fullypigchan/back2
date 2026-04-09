@@ -416,7 +416,7 @@ body {
     height: 20px;
 }
 
-.Edit:hover, .Request:hover, .More:hover {
+.Edit:hover, .Request:hover, .More:hover, .Chat:hover {
     background-color: rgba(15, 20, 26, 0.05);
 }
 

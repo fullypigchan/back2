@@ -54,7 +54,7 @@
                     <div class="Profile-Avatar-Container" data-testid="UserAvatar-Container-JeongSIkLe247">
                         <div class="Profile-Avatar-Img-Wrap">
                             <div class="Profile-Avatar-Circle">
-                                <img th:src="${profileImageUrl}" src="/images/main/global-gates-logo.png" alt="프로필 이미지" class="Profile-Avatar-Img"/>
+                                <img th:src="${profileImageUrl}" src="/images/profile/default_image.png" alt="프로필 이미지" class="Profile-Avatar-Img"/>
                             </div>
                         </div>
                     </div>
@@ -81,11 +81,7 @@
                                     type="button"
                                     class="Profile-Edit-Btn Request"
                                     title="견적요청">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" style="color: rgb(15, 20, 25);">
-                                    <g>
-                                        <path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"></path>
-                                    </g>
-                                </svg>
+                                견적 요청
                             </button>
 
                             <!-- 상대 페이지에서만 채팅 시작 진입점을 보여준다.
@@ -144,9 +140,9 @@
                     <span class="Profile-Description-Text" th:text="${member.memberBio ?: ''}"></span>
                 </div>
                 <div class="Profile-Meta" data-testid="UserProfileHeader_Items">
-                    <a href="" class="Profile-Join-Date" data-testid="UserJoinDate">
+                    <span class="Profile-Join-Date" data-testid="UserJoinDate">
                         가입일: 2026년 3월
-                    </a>
+                    </span>
                 </div>
                 <div class="Profile-Follow-Row">
                     <a href="" class="Profile-Follow-Link">
@@ -222,10 +218,10 @@
 
             <!-- 내 상품 목록 -->
             <div class="Profile-Content MyProducts off">
-                <div class="Profile-Content-Header">
+                <div class="Profile-Content-Header" th:if="${isOwner}">
                     <div class="Content-Header-Text">더 좋은 상품으로 다른 사업자분들과 연결되세요.</div>
                     <!-- 상품 등록은 owner 화면에서만 노출한다. -->
-                    <button th:if="${isOwner}" type="button" class="Content-Header-Button">상품 등록</button>
+                    <button  type="button" class="Content-Header-Button">상품 등록</button>
                 </div>
                 <!-- 내 상품은 더미 마크업을 두지 않고, layout.js가 실제 목록을 뿌린다. -->
                 <!-- 첫 페이지에 데이터가 없으면 layout.js가 "등록된 상품이 없습니다." 문구를 넣는다. -->
@@ -555,7 +551,6 @@
                     </svg>
                 </button>
                 <h2 id="reply-modal-title" class="tweet-modal__title">답글</h2>
-                <button type="button" class="tweet-modal__draft" data-testid="unsentButton">임시저장</button>
             </div>
             <!-- 본문 -->
             <div class="tweet-modal__body">

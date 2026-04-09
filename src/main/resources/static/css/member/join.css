@@ -47,24 +47,25 @@ body {
 }
 
 .join-logo {
-    width: min(516px, 53%);
+    height: 100%;
     color: var(--text);
     fill: currentColor;
+    z-index: 1;
 }
 
 .join-panel {
-    grid-column: 3 / 5;
+    grid-column: 4 / 5;
     grid-row: 2 / 5;
     align-self: stretch;
     width: min(620px, 100%);
     justify-self: start;
-    margin-left: 52px;
+    margin-left: -230px;
     padding-top: 0;
 }
 
 .join-title {
     margin: -10px 0 0;
-    font-size: clamp(59px, 4.75vw, 86px);
+    font-size: clamp(59px, 4.75vw, 75px);
     line-height: 1.03;
     letter-spacing: -0.03em;
     font-weight: 700;
@@ -73,7 +74,7 @@ body {
 
 .join-subtitle {
     margin: 54px 0 22px;
-    font-size: clamp(42px, 3.15vw, 53px);
+    font-size: clamp(42px, 3.15vw, 45px);
     line-height: 1.08;
     letter-spacing: -0.02em;
     font-weight: 500;
@@ -84,6 +85,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-left: 160px;
 }
 
 .join-actions > .sns-section {

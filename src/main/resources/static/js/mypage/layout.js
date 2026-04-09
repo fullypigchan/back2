@@ -387,10 +387,18 @@ const mypageLayout = (() => {
         const estimations = data?.estimations ?? [];
         const isExpert = !!data?.expert;
 
-        if (estimations.length === 0) {
+        if (estimations.length === 0 && isExpert) {
             section.innerHTML = `
                 <div class="Request-Container">
                     <div class="Request-Title">견적 요청이 없습니다.</div>
+                </div>
+            `;
+            return;
+        }
+        if (estimations.length === 0 && !isExpert) {
+            section.innerHTML = `
+                <div class="Request-Container">
+                    <div class="Request-Title">요청한 견적이 없습니다.</div>
                 </div>
             `;
             return;

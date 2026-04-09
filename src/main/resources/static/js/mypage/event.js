@@ -2339,15 +2339,6 @@ window.onload = function () {
                 closeProductSelectPanel();
                 return;
             }
-            if (isDraftConfirmOpen()) {
-                closeDraftConfirm();
-                renderDraftPanel();
-                return;
-            }
-            if (isDraftPanelOpen()) {
-                closeDraftPanel();
-                return;
-            }
             closeReplyModal();
             return;
         }
@@ -2587,56 +2578,6 @@ window.onload = function () {
         },
         {passive: true},
     );
-
-    // Draft panel events
-    draftButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openDraftPanel();
-    });
-    draftBackButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        closeDraftPanel();
-    });
-    draftActionButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        draftPanelState.isEditMode ? exitDraftEditMode() : enterDraftEditMode();
-        renderDraftPanel();
-    });
-    draftSelectAllButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        toggleDraftSelectAll();
-        renderDraftPanel();
-    });
-    draftDeleteButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openDraftConfirm();
-        renderDraftPanel();
-    });
-    draftConfirmDeleteButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        deleteSelectedDrafts();
-        renderDraftPanel();
-    });
-    draftConfirmCancelButton?.addEventListener("click", (e) => {
-        e.preventDefault();
-        closeDraftConfirm();
-        renderDraftPanel();
-    });
-    draftConfirmBackdrop?.addEventListener("click", (e) => {
-        e.preventDefault();
-        closeDraftConfirm();
-        renderDraftPanel();
-    });
-    draftList?.addEventListener("click", (e) => {
-        const item = getDraftItemByElement(e.target);
-        if (!item) return;
-        if (draftPanelState.isEditMode) {
-            toggleDraftSelection(item);
-            renderDraftPanel();
-            return;
-        }
-        loadDraftIntoComposer(item);
-    });
 
     // 마이페이지 기존 기능들
     // 프로필 수정 모달
