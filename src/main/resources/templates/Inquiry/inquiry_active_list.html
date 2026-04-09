@@ -3,49 +3,49 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>嫄곕옒泥??쒕룞 紐⑸줉</title>
+    <title>거래처 활동 목록</title>
     <link rel="stylesheet" href="/css/Inquiry/inquiry_active_list.css"/>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
-<!-- inquiry_active_list ?붾㈃ ?꾩껜 ?섑띁 -->
+<!-- inquiry_active_list 화면 전체 래퍼 -->
 <main class="activity-page">
     <div class="activity-layout">
         <div class="activity-shell">
-            <!-- ?곷떒 ?쒕ぉ + ???ㅻ퉬寃뚯씠??-->
+            <!-- 상단 제목 + 탭 네비게이션 -->
             <header class="activity-header">
                 <div class="activity-header__inner">
-                    <h1 class="activity-header__title">???쒕룞 ?쒕늿??蹂닿린</h1>
+                    <h1 class="activity-header__title">거래처 활동 목록 보기</h1>
                 </div>
-                <!-- ?곷떒 ?? 400px ?댄븯?먯꽌??CSS?먯꽌 4?깅텇 怨좎젙 ?ш린濡??щ같移섎맂??-->
-                <nav class="inquiry-tabnav" aria-label="嫄곕옒泥??쒕룞 ?? role="navigation">
+                <!-- 상단 탭은 400px 이하에서도 4등분 고정 크기로 배치된다 -->
+                <nav class="inquiry-tabnav" aria-label="거래처 활동 목록" role="navigation">
                     <div class="inquiry-tabnav__inner">
                         <div role="tablist" class="inquiry-tabnav__list" data-testid="ScrollSnap-List">
                             <div role="presentation" class="inquiry-tabnav__item">
                                 <button type="button" role="tab" aria-selected="false" class="inquiry-tab"
                                         data-inquiry-tab="summary">
-                                    <span class="inquiry-tab__label">?붿빟</span>
+                                    <span class="inquiry-tab__label">요약</span>
                                     <span class="inquiry-tab__indicator"></span>
                                 </button>
                             </div>
                             <div role="presentation" class="inquiry-tabnav__item">
                                 <button type="button" role="tab" aria-selected="false" class="inquiry-tab"
                                         data-inquiry-tab="partners">
-                                    <span class="inquiry-tab__label">嫄곕옒泥??깅줉 紐⑸줉</span>
+                                    <span class="inquiry-tab__label">거래처 등록 목록</span>
                                     <span class="inquiry-tab__indicator"></span>
                                 </button>
                             </div>
                             <div role="presentation" class="inquiry-tabnav__item">
                                 <button type="button" role="tab" aria-selected="true"
                                         class="inquiry-tab inquiry-tab--active" data-inquiry-tab="activity">
-                                    <span class="inquiry-tab__label">嫄곕옒泥??쒕룞 紐⑸줉</span>
+                                    <span class="inquiry-tab__label">거래처 활동 목록</span>
                                     <span class="inquiry-tab__indicator"></span>
                                 </button>
                             </div>
                             <div role="presentation" class="inquiry-tabnav__item">
                                 <button type="button" role="tab" aria-selected="false" class="inquiry-tab"
                                         data-inquiry-tab="quotes">
-                                    <span class="inquiry-tab__label">寃ъ쟻 ?붿껌 紐⑸줉</span>
+                                    <span class="inquiry-tab__label">견적 요청 목록</span>
                                     <span class="inquiry-tab__indicator"></span>
                                 </button>
                             </div>
@@ -54,18 +54,18 @@
                 </nav>
             </header>
 
-            <!-- ??퀎 ?⑤꼸 而⑦뀒?대꼫: ?꾩옱 ?뚯씪? activity ?⑤꼸留??ㅼ젣 ?댁슜???ъ슜?쒕떎 -->
+            <!-- 탭 패널 컨테이너: 현재는 activity 패널만 실제 내용을 사용한다 -->
             <section class="inquiry-panels">
-                <!-- 鍮꾩뼱 ?덈뒗 ??placeholder: ?꾩옱???쒓컖?곸씤 ???꾪솚留??대떦 -->
+                <!-- 비어 있는 패널 placeholder -->
                 <section class="inquiry-panel inquiry-panel--blank" data-inquiry-panel="summary" hidden=""></section>
                 <section class="inquiry-panel inquiry-panel--blank" data-inquiry-panel="partners" hidden=""></section>
 
-                <!-- 嫄곕옒泥??쒕룞 紐⑸줉 ?ㅼ젣 肄섑뀗痢?-->
+                <!-- 거래처 활동 목록 실제 콘텐츠 -->
                 <section class="inquiry-panel inquiry-panel--activity" data-inquiry-panel="activity">
                     <!-- 議고쉶 湲곌컙 -->
-                    <section class="activity-toolbar" aria-label="議고쉶 ?꾪꽣">
+                    <section class="activity-toolbar" aria-label="조회 필터">
                         <div class="activity-toolbar__right">
-                            <div class="activity-date-range" aria-label="議고쉶 湲곌컙">
+                            <div class="activity-date-range" aria-label="조회 기간">
                                 <input
                                         type="date"
                                         class="activity-date-input"
@@ -82,7 +82,7 @@
                             </div>
                         </div>
                     </section>
-                    <!-- ?꾪꽣 ?쒕∼?ㅼ슫 + 鍮좊Ⅸ 湲곌컙 移? 媛숈? 以??섎떒 諛곗튂 -->
+                    <!-- 필터 드롭다운 + 빠른 기간 칩 -->
                     <div class="activity-toolbar-bottom">
                         <div class="activity-filter-dropdown">
                             <button
@@ -92,7 +92,7 @@
                                     aria-haspopup="menu"
                                     aria-expanded="false"
                             >
-                                <span data-activity-filter-label>?듦?</span>
+                                <span data-activity-filter-label">답글</span>
                                 <span class="activity-toolbar__caret" aria-hidden="true"></span>
                             </button>
                             <div
@@ -108,8 +108,8 @@
                                         aria-checked="false"
                                         data-activity-filter-item="posts"
                                 >
-                                    <span class="activity-filter-menu__check" aria-hidden="true">??/span>
-                                    <span class="activity-filter-menu__label">寃뚯떆臾?/span>
+                                    <span class="activity-filter-menu__check" aria-hidden="true">✓</span>
+                                    <span class="activity-filter-menu__label">게시물</span>
                                 </button>
                                 <button
                                         type="button"
@@ -118,8 +118,8 @@
                                         aria-checked="false"
                                         data-activity-filter-item="posts-replies"
                                 >
-                                    <span class="activity-filter-menu__check" aria-hidden="true">??/span>
-                                    <span class="activity-filter-menu__label">寃뚯떆臾?諛??듦?</span>
+                                    <span class="activity-filter-menu__check" aria-hidden="true">✓</span>
+                                    <span class="activity-filter-menu__label">게시물 및 답글</span>
                                 </button>
                                 <button
                                         type="button"
@@ -128,8 +128,8 @@
                                         aria-checked="true"
                                         data-activity-filter-item="replies"
                                 >
-                                    <span class="activity-filter-menu__check" aria-hidden="true">??/span>
-                                    <span class="activity-filter-menu__label">?듦?</span>
+                                    <span class="activity-filter-menu__check" aria-hidden="true">✓</span>
+                                    <span class="activity-filter-menu__label">답글</span>
                                 </button>
                                 <button
                                         type="button"
@@ -138,12 +138,12 @@
                                         aria-checked="false"
                                         data-activity-filter-item="community"
                                 >
-                                    <span class="activity-filter-menu__check" aria-hidden="true">??/span>
-                                    <span class="activity-filter-menu__label">而ㅻ??덊떚 寃뚯떆湲</span>
+                                    <span class="activity-filter-menu__check" aria-hidden="true">✓</span>
+                                    <span class="activity-filter-menu__label">커뮤니티 게시글</span>
                                 </button>
                             </div>
                         </div>
-                        <div class="activity-toolbar__chips" aria-label="鍮좊Ⅸ 湲곌컙">
+                        <div class="activity-toolbar__chips" aria-label="빠른 기간">
                             <button type="button" class="period-chip period-chip--active" data-period-chip="7D">7D
                             </button>
                             <button type="button" class="period-chip" data-period-chip="2W">2W</button>
@@ -151,7 +151,7 @@
                             <button type="button" class="period-chip" data-period-chip="3M">3M</button>
                         </div>
                     </div>
-                    <!-- ?쒕룞 移대뱶 紐⑸줉: ?꾨옒 .postCard 援ъ“媛 媛숈? ?뺥깭濡?諛섎났?쒕떎 -->
+                    <!-- 활동 카드 목록 -->
                     <article
                             class="postCard"
                             id="postCard101"
@@ -165,13 +165,13 @@
                                     >TradeHub Official</strong
                                     >
                                     <span class="postHandle">@TradeHub_KR</span>
-                                    <span class="postTime">2?쒓컙</span>
+                                    <span class="postTime">2시간</span>
                                 </div>
                                 <button
                                         class="postMoreButton"
                                         id="postMore101"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -190,7 +190,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -209,7 +209,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@TradeHub_KR ???붾줈?고븯湲?/span>
+                                        <span>@TradeHub_KR 팔로우하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -227,7 +227,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@TradeHub_KR ??李⑤떒?섍린</span>
+                                        <span>@TradeHub_KR 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -245,18 +245,18 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>寃뚯떆臾??좉퀬?섍린</span>
+                                        <span>게시물 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText">
-                                2026??臾댁뿭 ?먮쫫 ?붿빟怨??④퍡 ?대쾲 二?湲濡쒕쾶 愿??
-                                蹂???ы빆???뺣━?덉뒿?덈떎.
+                                2026년 무역 흐름 요약과 함께 이번 주 글로벌 관세
+                                변동 사항을 정리했습니다.
                             </p>
                             <div class="postMedia" id="postMedia101">
                                 <img
                                         src="/images/main/KakaoTalk_20260310_145435590.jpg"
-                                        alt="臾댁뿭 ?곗씠??由ы룷??誘몃━蹂닿린 ?대?吏"
+                                        alt="무역 데이터 리포트 미리보기 이미지"
                                         class="postMediaImage"
                                         id="postMediaImage101"
                                 />
@@ -268,7 +268,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount101"
                                             data-testid="reply"
-                                            aria-label="?듦? 24"
+                                            aria-label="답글 24"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -313,7 +313,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount101"
-                                            aria-label="議고쉶??32"
+                                            aria-label="조회수 32"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -336,7 +336,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount101"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -356,7 +356,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost101"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -386,7 +386,7 @@
                         <div class="postAvatar postAvatar--image">
                             <img
                                     src="/images/main/ad.png"
-                                    alt="?꾨줈???대?吏"
+                                    alt="프로필 이미지"
                                     class="postAvatarImage"
                                     id="postAvatar202"
                             />
@@ -395,20 +395,20 @@
                             <header class="postHeader">
                                 <div class="postIdentity">
                                     <strong class="postName" id="postName202"
-                                    >?띿꽦??/strong
+                                    >코딩맨</strong
                                     >
                                     <span class="postHandle" id="postHandle202"
                                     >@codingTest0120</span
                                     >
                                     <span class="postTime" id="postTime202"
-                                    >吏湲?/span
+                                    >지금</span
                                     >
                                 </div>
                                 <button
                                         class="postMoreButton"
                                         id="postMore202"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -427,7 +427,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -447,7 +447,7 @@
                                             </g>
                                         </svg>
                                         <span
-                                        >@codingTest0120 ???붾줈?고븯湲?/span
+                                        >@codingTest0120 팔로우하기</span
                                         >
                                     </button>
                                     <button
@@ -466,7 +466,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@codingTest0120 ??李⑤떒?섍린</span>
+                                        <span>@codingTest0120 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -484,20 +484,14 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>寃뚯떆臾??좉퀬?섍린</span>
+                                        <span>게시물 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText" id="postText202">
-                                ?붿쬁 湲濡쒕쾶 怨듦툒留??먮쫫??苑?鍮좊Ⅴ寃?諛붾뚭퀬 ?덈뒗
-                                寃?媛숈뒿?덈떎. ?뱁엳 ?숇궓?꾩? ?몃룄 履??쒖“ ?덈툕媛
-                                ?뺣??섎㈃??湲곗〈 以묎뎅 以묒떖 臾쇰쪟 援ъ“媛 議곌툑??
-                                遺꾩궛?섎뒗 ?먮굦?댁뿉?? ?섏텧???곗씠?곕? 蹂대㈃ ?댁긽
-                                臾쇰룞???⑦꽩??誘몃쵖?섍쾶 蹂?섍퀬 ?덈뒗?? ?섏쑉怨?
-                                ?댁엫, ?듦? 由щ뱶??꾧퉴吏 媛숈씠 蹂댁? ?딆쑝硫?泥닿컧??
-                                ???섎뒗 援ш컙??留롮뒿?덈떎. ?꾩뾽?먯꽌???앹궛湲곗?
-                                ?댁쟾 ?댁뒋? ??쭔 ?곸껜, ?ш퀬 ?꾨왂 蹂?붽? ?숈떆??
-                                ??뿬???먮떒?????대젮?뚯쭊 寃?媛숇꽕??
+                                요즘 글로벌 공급망 흐름이 꽤 빠르게 바뀌는 것 같습니다.
+                                단일 공급처에만 의존하던 구조보다 여러 지역을 함께 보는
+                                방식이 실제 체감 리스크를 줄여주는 경우가 많습니다.
                             </p>
                             <div
                                     class="postMediaGrid postMediaGrid--2"
@@ -505,13 +499,13 @@
                             >
                                 <img
                                         src="/images/main/ad.png"
-                                        alt="寃뚯떆臾??대?吏 1"
+                                        alt="게시물 이미지 1"
                                         class="postMediaImage"
                                         id="postMediaImage202_1"
                                 />
                                 <img
                                         src="/images/main/ad.png"
-                                        alt="寃뚯떆臾??대?吏 2"
+                                        alt="게시물 이미지 2"
                                         class="postMediaImage"
                                         id="postMediaImage202_2"
                                 />
@@ -523,7 +517,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount202"
                                             data-testid="reply"
-                                            aria-label="?듦? 12"
+                                            aria-label="답글 12"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -568,7 +562,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount202"
-                                            aria-label="議고쉶??18留?
+                                            aria-label="조회수 18만"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -582,7 +576,7 @@
                                             </g>
                                         </svg>
                                         <span class="tweet-action-count"
-                                        >18留?/span
+                                        >18만</span
                                         >
                                     </button>
                                     <div class="tweet-action-right">
@@ -591,7 +585,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount202"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -611,7 +605,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost202"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -641,7 +635,7 @@
                         <div class="postAvatar postAvatar--image">
                             <img
                                     src="/images/main/lown1.jpg"
-                                    alt="?꾨줈???대?吏"
+                                    alt="프로필 이미지"
                                     class="postAvatarImage"
                                     id="postAvatar203"
                             />
@@ -650,20 +644,20 @@
                             <header class="postHeader">
                                 <div class="postIdentity">
                                     <strong class="postName" id="postName203"
-                                    >濡쒖슫?댁쓽 ?쇱긽</strong
+                                    >로운이의 일상</strong
                                     >
                                     <span class="postHandle" id="postHandle203"
                                     >@lown_222</span
                                     >
                                     <span class="postTime" id="postTime203"
-                                    >3?쒓컙</span
+                                    >3시간</span
                                     >
                                 </div>
                                 <button
                                         class="postMoreButton"
                                         id="postMore203"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -682,7 +676,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -701,7 +695,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@lown_222 ???붾줈?고븯湲?/span>
+                                        <span>@lown_222 팔로우하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -719,7 +713,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@lown_222 ??李⑤떒?섍린</span>
+                                        <span>@lown_222 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -737,12 +731,12 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>寃뚯떆臾??좉퀬?섍린</span>
+                                        <span>게시물 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText" id="postText203">
-                                ?대쾲 二?濡쒖슫??洹?ъ? 理쒖쥌寃곗궛~~
+                                이번 주 로운님 거래 정산 메모입니다.
                             </p>
                             <div
                                     class="postMediaGrid postMediaGrid--3"
@@ -750,19 +744,19 @@
                             >
                                 <img
                                         src="/images/main/KakaoTalk_20260310_145435590.jpg"
-                                        alt="寃뚯떆臾??대?吏 1"
+                                        alt="게시물 이미지 1"
                                         class="postMediaImage"
                                         id="postMediaImage203_1"
                                 />
                                 <img
                                         src="/images/main/KakaoTalk_20260310_145435590_01.jpg"
-                                        alt="寃뚯떆臾??대?吏 2"
+                                        alt="게시물 이미지 2"
                                         class="postMediaImage"
                                         id="postMediaImage203_2"
                                 />
                                 <img
                                         src="/images/main/KakaoTalk_20260310_145435590_02.jpg"
-                                        alt="寃뚯떆臾??대?吏 3"
+                                        alt="게시물 이미지 3"
                                         class="postMediaImage"
                                         id="postMediaImage203_3"
                                 />
@@ -774,7 +768,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount203"
                                             data-testid="reply"
-                                            aria-label="?듦? 21"
+                                            aria-label="답글 21"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -819,7 +813,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount203"
-                                            aria-label="議고쉶??77留?
+                                            aria-label="조회수 77만"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -833,7 +827,7 @@
                                             </g>
                                         </svg>
                                         <span class="tweet-action-count"
-                                        >77留?/span
+                                        >77만</span
                                         >
                                     </button>
                                     <div class="tweet-action-right">
@@ -842,7 +836,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount203"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -862,7 +856,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost203"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -892,7 +886,7 @@
                         <div class="postAvatar postAvatar--image">
                             <img
                                     src="/images/main/ad.png"
-                                    alt="?꾨줈???대?吏"
+                                    alt="프로필 이미지"
                                     class="postAvatarImage"
                                     id="postAvatar204"
                             />
@@ -901,20 +895,20 @@
                             <header class="postHeader">
                                 <div class="postIdentity">
                                     <strong class="postName" id="postName204"
-                                    >?몃젅?대뱶?щ쾭</strong
+                                    >트레이드랩</strong
                                     >
                                     <span class="postHandle" id="postHandle204"
                                     >@trade_lover</span
                                     >
                                     <span class="postTime" id="postTime204"
-                                    >3?쒓컙</span
+                                    >3시간</span
                                     >
                                 </div>
                                 <button
                                         class="postMoreButton"
                                         id="postMore204"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -933,7 +927,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -952,7 +946,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@trade_lover ???붾줈?고븯湲?/span>
+                                        <span>@trade_lover 팔로우하기/span>
                                     </button>
                                     <button
                                             type="button"
@@ -970,7 +964,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@trade_lover ??李⑤떒?섍린</span>
+                                        <span>@trade_lover 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -988,15 +982,15 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>寃뚯떆臾??좉퀬?섍린</span>
+                                        <span>게시물 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText" id="postText204">
-                                ?뺣━?????먮즺媛 留롮븘???щ씪?대뱶 罹≪쿂瑜???踰덉뿉
-                                ?щ젮遊낅땲?? 4???댁긽 ?섏뼱媛硫??ㅽ엳??吏묒쨷??
-                                遺꾩궛?쇱꽌 媛쒖씤?곸쑝濡쒕뒗 ???뺣룄 諛곗뿴??蹂닿린 媛??
-                                ?명븯?붾씪怨좎슂.
+                                정리할 자료가 많아서 슬라이드 캡처를 한 번에
+                                올려 둡니다. 전체 흐름을 보기에
+                                가장 깔끔한 방식인 것 같네요.
+                                
                             </p>
                             <div
                                     class="postMediaGrid postMediaGrid--4"
@@ -1004,25 +998,25 @@
                             >
                                 <img
                                         src="/images/main/ad.png"
-                                        alt="寃뚯떆臾??대?吏 1"
+                                        alt="게시물 이미지 1"
                                         class="postMediaImage"
                                         id="postMediaImage204_1"
                                 />
                                 <img
                                         src="/images/main/ad.png"
-                                        alt="寃뚯떆臾??대?吏 2"
+                                        alt="게시물 이미지 2"
                                         class="postMediaImage"
                                         id="postMediaImage204_2"
                                 />
                                 <img
                                         src="/images/main/ad.png"
-                                        alt="寃뚯떆臾??대?吏 3"
+                                        alt="게시물 이미지 3"
                                         class="postMediaImage"
                                         id="postMediaImage204_3"
                                 />
                                 <img
                                         src="/images/main/ad.png"
-                                        alt="寃뚯떆臾??대?吏 4"
+                                        alt="게시물 이미지 4"
                                         class="postMediaImage"
                                         id="postMediaImage204_4"
                                 />
@@ -1034,7 +1028,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount204"
                                             data-testid="reply"
-                                            aria-label="?듦? 34"
+                                            aria-label="답글 34"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1079,7 +1073,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount204"
-                                            aria-label="議고쉶??132留?
+                                            aria-label="조회수 132만"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1093,7 +1087,7 @@
                                             </g>
                                         </svg>
                                         <span class="tweet-action-count"
-                                        >132留?/span
+                                        >132만</span
                                         >
                                     </button>
                                     <div class="tweet-action-right">
@@ -1102,7 +1096,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount204"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -1122,7 +1116,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost204"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -1152,7 +1146,7 @@
                         <div class="postAvatar postAvatar--image">
                             <img
                                     src="/images/main/ad.png"
-                                    alt="?꾨줈???대?吏"
+                                    alt="프로필 이미지"
                                     class="postAvatarImage"
                                     id="postAvatar201"
                             />
@@ -1174,7 +1168,7 @@
                                         class="postMoreButton"
                                         id="postMore201"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -1193,7 +1187,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -1212,7 +1206,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@CodeKim1218 ??李⑤떒?섍린</span>
+                                        <span>@CodeKim1218 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -1230,14 +1224,14 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>愿묎퀬 ?좉퀬?섍린</span>
+                                        <span>광고 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText" id="postText201">
-                                ?붿빟 由ы룷??????ㅼ젣濡??뺤씤???곸긽 ?섎굹
-                                ?щ젮?〓땲?? 理쒓렐 湲濡쒕쾶 ?먯옄???먮쫫怨??쒖“??
-                                ?섏슂 諛섏쓳??媛숈씠 蹂대㈃ ?앷컖蹂대떎 ?곌껐?섎뒗 ?ъ씤?멸?
+                                요약 리포트를 실제로 확인할 수 있는 화면입니다.
+                                최근 글로벌 이슈와 작성자 반응, 참고 포인트를
+                                같이 보면 감각보다 명확해지는 지점이 있습니다.
                                 留롫뜑援곗슂.
                             </p>
                             <div
@@ -1266,7 +1260,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount201"
                                             data-testid="reply"
-                                            aria-label="?듦? 5"
+                                            aria-label="답글 5"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1311,7 +1305,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount201"
-                                            aria-label="議고쉶??524留?
+                                            aria-label="조회수 524만"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1325,7 +1319,7 @@
                                             </g>
                                         </svg>
                                         <span class="tweet-action-count"
-                                        >524留?/span
+                                        >524만</span
                                         >
                                     </button>
                                     <div class="tweet-action-right">
@@ -1334,7 +1328,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount201"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -1354,7 +1348,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost201"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -1381,19 +1375,19 @@
                             id="postCard102"
                             data-post-id="102"
                     >
-                        <div class="postAvatar">臾?/div>
+                        <div class="postAvatar">무</div>
                         <div class="postBody">
                             <header class="postHeader">
                                 <div class="postIdentity">
-                                    <strong class="postName">臾댁뿭 ?댁뒪</strong>
+                                    <strong class="postName">무역 뉴스</strong>
                                     <span class="postHandle">@TradeNewsKR</span>
-                                    <span class="postTime">5?쒓컙</span>
+                                    <span class="postTime">5시간</span>
                                 </div>
                                 <button
                                         class="postMoreButton"
                                         id="postMore102"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -1412,7 +1406,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -1431,7 +1425,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@TradeNewsKR ???붾줈?고븯湲?/span>
+                                        <span>@TradeNewsKR 팔로우하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -1449,7 +1443,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@TradeNewsKR ??李⑤떒?섍린</span>
+                                        <span>@TradeNewsKR 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -1467,13 +1461,13 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>寃뚯떆臾??좉퀬?섍린</span>
+                                        <span>게시물 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText">
-                                ?꾩떆??二쇱슂 ??쭔 ?댁엫???ㅼ떆 ?곸듅?몃? 蹂댁씠怨?
-                                ?덉뒿?덈떎. 怨듦툒留??쇱젙 ?뺤씤???꾩슂?⑸땲??
+                                오늘 주요 무역 이슈만 다시 압축해서 정리해 두었습니다.
+                                공급망 일정 확인이 필요한 분들에게 도움이 됩니다.
                             </p>
                             <footer class="postMetrics">
                                 <div class="tweet-action-bar">
@@ -1482,7 +1476,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount102"
                                             data-testid="reply"
-                                            aria-label="?듦? 8"
+                                            aria-label="답글 8"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1527,7 +1521,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount102"
-                                            aria-label="議고쉶??9"
+                                            aria-label="조회수 9"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1550,7 +1544,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount102"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -1570,7 +1564,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost102"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -1597,23 +1591,23 @@
                             id="postCard103"
                             data-post-id="103"
                     >
-                        <div class="postAvatar">??/div>
+                        <div class="postAvatar">수</div>
                         <div class="postBody">
                             <header class="postHeader">
                                 <div class="postIdentity">
                                     <strong class="postName"
-                                    >?섏텧??留덉폆</strong
+                                    >수출입 마켓</strong
                                     >
                                     <span class="postHandle"
                                     >@ExportMarket</span
                                     >
-                                    <span class="postTime">?댁젣</span>
+                                    <span class="postTime">어제</span>
                                 </div>
                                 <button
                                         class="postMoreButton"
                                         id="postMore103"
                                         type="button"
-                                        aria-label="寃뚯떆臾???蹂닿린"
+                                        aria-label="게시물 더보기"
                                         aria-haspopup="menu"
                                         aria-expanded="false"
                                 >
@@ -1632,7 +1626,7 @@
                                 <div
                                         class="post-more-menu"
                                         role="menu"
-                                        aria-label="寃뚯떆臾??붾낫湲?硫붾돱"
+                                        aria-label="게시물 더보기 메뉴"
                                         hidden
                                 >
                                     <button
@@ -1651,7 +1645,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@ExportMarket ???붾줈?고븯湲?/span>
+                                        <span>@ExportMarket 팔로우하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -1669,7 +1663,7 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>@ExportMarket ??李⑤떒?섍린</span>
+                                        <span>@ExportMarket 차단하기</span>
                                     </button>
                                     <button
                                             type="button"
@@ -1687,13 +1681,13 @@
                                                 ></path>
                                             </g>
                                         </svg>
-                                        <span>寃뚯떆臾??좉퀬?섍린</span>
+                                        <span>게시물 신고하기</span>
                                     </button>
                                 </div>
                             </header>
                             <p class="postText">
-                                以묒냼 ?섏텧湲곗뾽???꾪븳 臾쇰쪟鍮??덇컧 泥댄겕由ъ뒪?몃?
-                                諛고룷?⑸땲?? ?ㅻТ ?대떦?먯뿉寃?怨듭쑀??蹂댁꽭??
+                                중소 수출기업을 위한 물류비 절감 체크리스트를 배포합니다.
+                                실무 담당자에게 공유해 보세요.
                             </p>
                             <footer class="postMetrics">
                                 <div class="tweet-action-bar">
@@ -1702,7 +1696,7 @@
                                             class="tweet-action-btn"
                                             id="replyCount103"
                                             data-testid="reply"
-                                            aria-label="?듦? 16"
+                                            aria-label="답글 16"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1747,7 +1741,7 @@
                                             type="button"
                                             class="tweet-action-btn tweet-action-btn--views"
                                             id="viewCount103"
-                                            aria-label="議고쉶??48"
+                                            aria-label="조회수 48"
                                     >
                                         <svg
                                                 viewBox="0 0 24 24"
@@ -1770,7 +1764,7 @@
                                                 class="tweet-action-btn tweet-action-btn--bookmark"
                                                 id="bookmarkCount103"
                                                 data-testid="bookmark"
-                                                aria-label="遺곷쭏??
+                                                aria-label="북마크"
                                         >
                                             <svg
                                                     viewBox="0 0 24 24"
@@ -1790,7 +1784,7 @@
                                                 type="button"
                                                 class="tweet-action-btn tweet-action-btn--share"
                                                 id="sharePost103"
-                                                aria-label="寃뚯떆臾?怨듭쑀?섍린"
+                                                aria-label="게시물 공유하기"
                                                 aria-haspopup="menu"
                                                 aria-expanded="false"
                                         >
@@ -1816,7 +1810,7 @@
                 <section
                         class="friendsSection"
                         id="friendsSection"
-                        aria-label="移쒓뎄 ?곌껐 異붿쿇"
+                                        aria-label="친구 연결 추천"
                         hidden
                 >
                     <div class="friendsSectionInner" id="friendsSectionInner">
@@ -1835,7 +1829,7 @@
                                                 @elnelunar
                                             </div>
                                             <div class="user-followed-by">
-                                                22B ?섏씠 ?붾줈?고빀?덈떎
+                                        22B 님이 팔로우합니다
                                             </div>
                                         </div>
                                         <button
@@ -1855,12 +1849,12 @@
                                     id="friendCardLeeYoungji"
                                     data-handle="@dokgodieinsaeng"
                             >
-                                <div class="user-avatar">??/div>
+                                <div class="user-avatar">이</div>
                                 <div class="user-info">
                                     <div class="user-top">
                                         <div class="user-name-group">
                                             <div class="user-name">
-                                                ?댁쁺吏
+                                                이영지
                                                 <svg
                                                         viewBox="0 0 22 22"
                                                         class="verified-badge"
@@ -1883,7 +1877,7 @@
                                         </button>
                                     </div>
                                     <div class="user-bio">
-                                        zz ?щ컡?붽구 ?대뼞??
+                                        zz 러버구 여행중
                                     </div>
                                 </div>
                             </div>
@@ -1893,12 +1887,12 @@
                                     id="friendCardSon"
                                     data-handle="@Aborainz7"
                             >
-                                <div class="user-avatar">??/div>
+                                <div class="user-avatar">손</div>
                                 <div class="user-info">
                                     <div class="user-top">
                                         <div class="user-name-group">
                                             <div class="user-name">
-                                                ?먰씎誘?
+                                                손흥민
                                                 <svg
                                                         viewBox="0 0 22 22"
                                                         class="verified-badge"
@@ -1912,7 +1906,7 @@
                                                 @Aborainz7
                                             </div>
                                             <div class="user-followed-by">
-                                                kanye ?섏씠 ?붾줈?고빀?덈떎
+                                                kanye 님이 팔로우합니다
                                             </div>
                                         </div>
                                         <button
@@ -1924,7 +1918,7 @@
                                         </button>
                                     </div>
                                     <div class="user-bio">
-                                        Tottenham Hotspur #7 ?쏜웻곧웻?
+                                        Tottenham Hotspur #7 손흥민
                                     </div>
                                 </div>
                             </div>
@@ -1934,12 +1928,12 @@
                                     id="friendCardTradeExperts"
                                     data-handle="@TradeExperts"
                             >
-                                <div class="user-avatar">臾?/div>
+                                <div class="user-avatar">무</div>
                                 <div class="user-info">
                                     <div class="user-top">
                                         <div class="user-name-group">
                                             <div class="user-name">
-                                                臾댁뿭 ?꾨Ц媛 洹몃９
+                                                무역 전문가 그룹
                                                 <svg
                                                         viewBox="0 0 22 22"
                                                         class="verified-badge"
@@ -1962,8 +1956,8 @@
                                         </button>
                                     </div>
                                     <div class="user-bio">
-                                        ?섏텧???꾨Ц媛 ?ㅽ듃?뚰겕. B2B 留ㅼ묶 ?쒕퉬??
-                                        ?쒓났
+                                        수출입 전문가 네트워크. B2B 매칭 서비스 운영
+                                        중
                                     </div>
                                 </div>
                             </div>
@@ -1977,53 +1971,53 @@
         </div>
     </div>
 </main>
-<!-- ===== ?숈쟻 ?덉씠??留덉슫??吏??(#layers) =====
-     openShareDropdown()媛 怨듭쑀 ?쒕∼?ㅼ슫(.layers-dropdown-container)???ш린???숈쟻?쇰줈 異붽??쒕떎.
-     openMoreDropdown()媛 ?붾낫湲??쒕∼?ㅼ슫(.layers-dropdown-container)???ш린???숈쟻?쇰줈 異붽??쒕떎.
-     ???쒕∼?ㅼ슫 紐⑤몢 ?ロ옄 ??DOM?먯꽌 remove()濡??쒓굅?쒕떎. -->
+<!-- ===== 동적 레이어 마운트 지점 (#layers) =====
+          openShareDropdown()가 공유 드롭다운을 동적으로 추가한다.
+          openMoreDropdown()가 더보기 드롭다운을 동적으로 추가한다.
+          닫을 때는 DOM에서 remove()로 제거한다. -->
 <div id="layers"></div>
 
-<!-- ===== ?듦? 紐⑤떖 ([data-reply-modal]) =====
-     ???ㅻ쾭?덉씠??HTML??誘몃━ 議댁옱?섎뒗 怨④꺽?대떎.
-     event.js??openReplyModal()??寃뚯떆臾??곗씠?곕줈 ?댁슜??梨꾩슦怨?hidden ?띿꽦???쒓굅?댁꽌 ?쒖떆?쒕떎.
-     ?レ쓣 ?뚮뒗 hidden???ㅼ떆 ?ㅼ젙?섍퀬 ?대? ?낅젰 ?곹깭瑜?珥덇린?뷀븳??
-     ?대????ㅼ쓬 ?쒕툕酉곕뱾???ы븿?섏뼱 ?덉쑝硫? hidden ?띿꽦?쇰줈 ?섎굹???꾪솚?쒕떎:
-       - compose-view : 湲곕낯 ?듦? ?묒꽦 ?붾㈃
-       - location-view : ?꾩튂 ?좏깮 ?쒕툕酉?
-       - tag-view : ?ъ슜???쒓렇 ?쒕툕酉?
-       - media-view : 誘몃뵒???ㅻ챸(ALT) ?몄쭛 ?쒕툕酉?
-       - draft-view : ?꾩떆????쒕툕酉?
-       - product-view : ?먮ℓ湲 ?좏깮 ?쒕툕酉?
+<!-- ===== 답글 모달 ([data-reply-modal]) =====
+          이 레이어는 HTML에 미리 존재한다.
+          event.js의 openReplyModal()이 게시물 데이터로 내용을 채우고 표시한다.
+          닫을 때는 hidden을 다시 설정하고 입력 상태를 초기화한다.
+          아래 서브뷰들은 hidden 속성으로 전환한다:
+            - compose-view : 기본 답글 작성 화면
+            - location-view : 위치 선택 서브뷰
+            - tag-view : 사용자 태그 서브뷰
+            - media-view : 미디어 설명(ALT) 편집 서브뷰
+            - draft-view : 임시저장 서브뷰
+            - product-view : 판매글 선택 서브뷰
 
-     李멸퀬: 怨듭쑀 諛뷀??쒗듃(.share-sheet), ?뚮┝ ?좎뒪??.notification-toast),
-     李⑤떒/?좉퀬 ??붿긽??.notification-dialog)????HTML???놁쑝硫?
-     event.js媛 <body>???숈쟻?쇰줈 異붽??쒕떎. -->
+          참고: 공유 바텀시트(.share-sheet), 알림 토스트(.notification-toast),
+          차단/신고 다이얼로그(.notification-dialog)는 HTML에 없으면
+          event.js가 <body>에 동적으로 추가한다. -->
 <div class="tweet-modal-overlay" data-reply-modal hidden>
     <div class="tweet-modal" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
-        <!-- ===== ?쒕툕酉?1: ?묒꽦 ?붾㈃ (compose-view) =====
-             ?듦? ?낅젰李? ?먮낯 寃뚯떆臾??붿빟, 泥⑤? 誘몃━蹂닿린, ?섎떒 ?대컮(?대え吏/?꾩튂/?쒖떇/誘몃뵒??,
-             ?먰삎 湲?먯닔 寃뚯씠吏, ?듦? ?쒖텧 踰꾪듉???ㅼ뼱媛??湲곕낯 ?붾㈃?대떎.
-             ?ㅻⅨ ?쒕툕酉곕줈 ?꾪솚????hidden 泥섎━?섍퀬, ?뚯븘?????ㅼ떆 ?쒖떆?쒕떎. -->
+        <!-- ===== 서브뷰 1: 작성 화면 (compose-view) =====
+                  답글 입력창, 원본 게시물 요약, 첨부 미리보기, 하단 도구 영역을 포함한다.
+                  작성 진행률과 답글 제출 버튼이 들어가는 기본 화면이다.
+                  다른 서브뷰로 전환할 때는 hidden 처리로 화면을 바꾼다. -->
         <div class="tweet-modal__compose-view">
-            <!-- ?묒꽦 吏꾪뻾瑜? ?먰삎 寃뚯씠吏??footer-bottom??composerActions??諛곗튂 -->
+            <!-- 작성 진행률을 원형 게이지로 footer-bottom의 composerActions에 배치 -->
 
-            <!-- ?듦? 紐⑤떖 ?ㅻ뜑: ?リ린? ?꾩떆???吏꾩엯 踰꾪듉 -->
+            <!-- 답글 모달 헤더 -->
             <div class="tweet-modal__header">
-                <button type="button" class="tweet-modal__close" aria-label="?リ린" data-testid="app-bar-close">
+                <button type="button" class="tweet-modal__close" aria-label="닫기" data-testid="app-bar-close">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                         <g>
                             <path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
                         </g>
                     </svg>
                 </button>
-                <h2 id="reply-modal-title" class="tweet-modal__title">?듦?</h2>
-                <button type="button" class="tweet-modal__draft" data-testid="unsentButton">?꾩떆???/button>
+                <h2 id="reply-modal-title" class="tweet-modal__title">답글</h2>
+                <button type="button" class="tweet-modal__draft" data-testid="unsentButton">임시저장</button>
             </div>
 
-            <!-- ?듦? ?묒꽦 蹂몃Ц: ?먮낯 寃뚯떆臾?+ ?먮뵒??+ 泥⑤? 誘몃━蹂닿린 -->
+            <!-- 답글 작성 본문 -->
             <div class="tweet-modal__body">
                 <button type="button" class="tweet-modal__context-button">
-                    ?듦? 蹂대궡??以?
+                    답글 보내는 중
                 </button>
 
                 <article class="tweet-modal__source-tweet" data-testid="tweet">
@@ -2056,15 +2050,15 @@
                                 class="tweet-modal__editor"
                                 contenteditable="true"
                                 role="textbox"
-                                aria-label="寃뚯떆臾??묒꽦"
+                                aria-label="게시물 작성"
                                 aria-multiline="true"
                                 tabindex="0"
                                 data-testid="tweetTextarea_0"
-                                data-placeholder="?듦? 寃뚯떆?섍린"
+                                data-placeholder="답글 게시하기"
                                 data-reply-editor
                         ></div>
-                        <!-- 泥⑤? 誘몃━蹂닿린 ?곸뿭: event.js媛 [data-attachment-preview] hidden???좉??섍퀬
-                             [data-attachment-media] ?덉뿉 ?대?吏/?숈쁺???뚯씪 移대뱶瑜??숈쟻?쇰줈 梨꾩슫??-->
+                        <!-- 첨부 미리보기 영역: event.js가 [data-attachment-preview] hidden을 제거하고
+                             [data-attachment-media] 안에 이미지/동영상 카드들을 동적으로 채운다. -->
                         <div class="tweet-modal__attachment attachments" data-attachment-preview
                              data-testid="attachments" hidden>
                             <div class="tweet-modal__attachment-media media-grid-wrapper" data-attachment-media></div>
@@ -2079,7 +2073,7 @@
                                             <path d="M5.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C15.318 13.65 13.838 13 12 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46zM12 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM8 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4z"></path>
                                         </g>
                                     </svg>
-                                    <span data-user-tag-label>?ъ슜???쒓렇?섍린</span>
+                                    <span data-user-tag-label>사용자 태그하기</span>
                                 </button>
                                 <button
                                         type="button"
@@ -2091,7 +2085,7 @@
                                             <path d="M3 4.5C3 3.12 4.12 2 5.5 2h13C19.88 2 21 3.12 21 4.5v15c0 1.38-1.12 2.5-2.5 2.5h-13C4.12 22 3 20.88 3 19.5v-15zM5.5 4c-.28 0-.5.22-.5.5v15c0 .28.22.5.5.5h13c.28 0 .5-.22.5-.5v-15c0-.28-.22-.5-.5-.5h-13zM16 10H8V8h8v2zm-8 2h8v2H8v-2z"></path>
                                         </g>
                                     </svg>
-                                    <span data-media-alt-label>?ㅻ챸 異붽?</span>
+                                    <span data-media-alt-label>설명 추가</span>
                                 </button>
                             </div>
                         </div>
@@ -2099,7 +2093,7 @@
                 </div>
             </div>
 
-            <!-- ?듦? 紐⑤떖 ?섎떒 ?곸뿭: ?꾩튂 ?쒖떆, ?대컮, ?대え吏 踰꾪듉, ?쒖텧 踰꾪듉 -->
+            <!-- 답글 모달 하단 영역 -->
             <div class="tweet-modal__footer">
                 <div class="tweet-modal__footer-meta">
                     <div class="tweet-modal__footer-meta-slot tweet-modal__footer-meta-slot--end">
@@ -2125,7 +2119,7 @@
                 <div class="tweet-modal__footer-bottom">
                     <div class="tweet-modal__toolbar" data-testid="toolBar">
                         <div class="tweet-modal__tool-file">
-                            <button type="button" class="tweet-modal__tool-btn" aria-label="?ъ쭊 ?먮뒗 ?숈쁺??異붽?"
+                            <button type="button" class="tweet-modal__tool-btn" aria-label="사진 또는 동영상 추가"
                                     data-testid="mediaUploadButton">
                                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                                     <g>
@@ -2142,7 +2136,7 @@
                                     class="tweet-modal__file-input"
                             />
                         </div>
-                        <button type="button" class="tweet-modal__tool-btn" aria-label="?먮ℓ湲 ?좏깮"
+                        <button type="button" class="tweet-modal__tool-btn" aria-label="판매글 선택"
                                 data-testid="productSelectButton">
                             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                                 <g>
@@ -2156,7 +2150,7 @@
                         <button
                                 type="button"
                                 class="tweet-modal__tool-btn"
-                                aria-label="?대え?곗퐯 異붽??섍린"
+                                aria-label="이모지 추가하기"
                                 data-testid="emojiButton"
                                 aria-expanded="false"
                                 aria-haspopup="menu"
@@ -2168,7 +2162,7 @@
                             </svg>
                         </button>
                         <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--geo"
-                                aria-label="?꾩튂 ?쒓렇?섍린" data-testid="geoButton">
+                                aria-label="위치 태그하기" data-testid="geoButton">
                             <div dir="ltr" class="tweet-modal__tool-btn-inner">
                                 <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
                                      class="tweet-modal__tool-btn-icon tweet-modal__tool-btn-icon--geo">
@@ -2186,7 +2180,7 @@
                             </div>
                         </button>
                         <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--format"
-                                aria-label="援듦쾶, (CTRL+B) ?? data-format="bold">
+                                aria-label="굵게, (CTRL+B)" data-format="bold">
                             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
                                  class="tweet-modal__tool-format-icon">
                                 <g>
@@ -2195,7 +2189,7 @@
                             </svg>
                         </button>
                         <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--format"
-                                aria-label="湲곗슱?꾧섦, (CTRL+I) ?? data-format="italic">
+                                aria-label="기울임꼴, (CTRL+I)" data-format="italic">
                             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
                                  class="tweet-modal__tool-format-icon">
                                 <g>
@@ -2204,8 +2198,8 @@
                             </svg>
                         </button>
                     </div>
-                    <!-- 湲곗〈 而ㅼ뒪? ?대え吏 ?쇱빱 留덊겕?? ?몃? ?쇱씠釉뚮윭由??ㅽ뙣 ??fallback ?⑸룄濡??좎? -->
-                    <div class="tweet-modal__emoji-picker" role="dialog" aria-label="?대え?곗퐯 ?좏깮湲? hidden>
+                    <!-- 기본 커스텀 이모지 팝업 마크업은 라이브러리 실패 시 fallback 용도다 -->
+                    <div class="tweet-modal__emoji-picker" role="dialog" aria-label="이모지 선택기" hidden>
                         <div class="tweet-modal__emoji-search">
                             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"
                                  class="tweet-modal__emoji-search-icon">
@@ -2217,27 +2211,27 @@
                                     type="search"
                                     class="tweet-modal__emoji-search-input"
                                     data-testid="emojiSearchInput"
-                                    placeholder="?대え?곗퐯 寃?됲븯湲?
-                                    aria-label="?대え?곗퐯 寃?됲븯湲?
+                                    placeholder="이모지 검색하기"
+                                    aria-label="이모지 검색하기"
                             />
                         </div>
 
-                        <div class="tweet-modal__emoji-tabs" role="tablist" aria-label="?대え吏 移댄뀒怨좊━">
+                        <div class="tweet-modal__emoji-tabs" role="tablist" aria-label="이모지 카테고리">
                             <button type="button" class="tweet-modal__emoji-tab tweet-modal__emoji-tab--active"
                                     data-emoji-category="recent" role="tab" aria-selected="true"
                                     aria-label="理쒓렐"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="smileys"
-                                    role="tab" aria-selected="false" aria-label="?ㅻ쭏?쇰━ 諛??щ엺"></button>
+                                    role="tab" aria-selected="false" aria-label="스마일리 및 감정"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="animals"
-                                    role="tab" aria-selected="false" aria-label="?숇Ъ 諛??먯뿰"></button>
+                                    role="tab" aria-selected="false" aria-label="동물 및 자연"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="food" role="tab"
-                                    aria-selected="false" aria-label="?뚯떇 諛??뚮즺"></button>
+                                    aria-selected="false" aria-label="음식 및 음료"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="activities"
-                                    role="tab" aria-selected="false" aria-label="?쒕룞"></button>
+                                    role="tab" aria-selected="false" aria-label="활동"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="travel" role="tab"
-                                    aria-selected="false" aria-label="?ы뻾 諛??μ냼"></button>
+                                    aria-selected="false" aria-label="여행 및 장소"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="objects"
-                                    role="tab" aria-selected="false" aria-label="?щЪ"></button>
+                                    role="tab" aria-selected="false" aria-label="사물"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="symbols"
                                     role="tab" aria-selected="false" aria-label="湲고샇"></button>
                             <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="flags" role="tab"
@@ -2251,7 +2245,7 @@
                                 class="composerGauge"
                                 data-reply-gauge
                                 role="progressbar"
-                                aria-label="湲????吏꾪뻾瑜?
+                                aria-label="글자 수 진행률"
                                 aria-valuemin="0"
                                 aria-valuemax="500"
                                 aria-valuenow="0"
@@ -2259,23 +2253,23 @@
                             <span class="composerGaugeText" data-reply-gauge-text>500</span>
                         </div>
                         <button type="button" class="tweet-modal__submit" data-reply-submit data-testid="tweetButton"
-                                disabled>?듦?
+                                disabled>답글
                         </button>
                     </div>
                 </div>
             </div>
         </div><!-- /.tweet-modal__compose-view -->
 
-        <!-- ===== ?쒕툕酉?2: ?꾩튂 ?좏깮 (location-view) =====
-             compose-view瑜??④린怨???釉붾줉??????쒖떆?쒕떎.
-             ?꾩튂 寃???낅젰, ?꾩튂 紐⑸줉, ??젣/?꾨즺 踰꾪듉???ы븿?섏뼱 ?덈떎.
-             event.js??openLocationPanel()?쇰줈 ?대━怨?closeLocationPanel()?쇰줈 ?ロ엺?? -->
+        <!-- ===== 서브뷰 2: 위치 선택 (location-view) =====
+                  compose-view를 닫고 이 블록만 표시한다.
+                  위치 검색 입력, 위치 목록, 삭제/완료 버튼을 포함한다.
+                  event.js의 openLocationPanel()로 열고 closeLocationPanel()로 닫는다. -->
         <div class="tweet-modal__location-view" hidden>
             <div class="tweet-modal__location-modal" role="dialog" aria-modal="true"
                  aria-labelledby="location-modal-title">
-                <!-- ?꾩튂 ?좏깮 ?ㅻ뜑: ?リ린, ??젣, ?꾨즺 踰꾪듉 -->
+	                <!-- 위치 선택 헤더 -->
                 <div class="tweet-modal__location-header">
-                    <button type="button" class="tweet-modal__location-close" aria-label="?リ린"
+                    <button type="button" class="tweet-modal__location-close" aria-label="닫기"
                             data-testid="location-back">
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <g>
@@ -2283,18 +2277,18 @@
                             </g>
                         </svg>
                     </button>
-                    <h2 id="location-modal-title" class="tweet-modal__location-title">?꾩튂 ?쒓렇?섍린</h2>
+                    <h2 id="location-modal-title" class="tweet-modal__location-title">위치 태그하기</h2>
                     <div class="tweet-modal__location-actions">
                         <button type="button" class="tweet-modal__location-action tweet-modal__location-action--ghost"
-                                data-location-delete hidden>??젣
+                                data-location-delete hidden>삭제
                         </button>
                         <button type="button" class="tweet-modal__location-action tweet-modal__location-action--solid"
-                                data-location-complete disabled>?꾨즺
+                                data-location-complete disabled>완료
                         </button>
                     </div>
                 </div>
 
-                <!-- ?꾩튂 寃???낅젰 ?곸뿭 -->
+                <!-- 위치 검색 입력 영역 -->
                 <div class="tweet-modal__location-search">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
                          class="tweet-modal__location-search-icon">
@@ -2303,64 +2297,64 @@
                         </g>
                     </svg>
                     <input type="search" class="tweet-modal__location-search-input" data-location-search
-                           placeholder="?꾩튂 寃?? aria-label="?꾩튂 寃??/>
+                           placeholder="위치 검색" aria-label="위치 검색"/>
                 </div>
 
-                <!-- ?꾩튂 紐⑸줉: ?쒕쾭 ?뚮뜑留???媛숈? 援ъ“瑜?諛섎났?댁꽌 ?ｌ쑝硫??쒕떎 -->
+                <!-- 위치 목록 -->
                 <div class="tweet-modal__location-list" role="menu" data-location-list>
                     <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">??쒕?援??쒖큹援?/span>
+                        <span class="tweet-modal__location-item-label">서울특별시 서초구/span>
                         <span class="tweet-modal__location-item-check"></span>
                     </button>
                     <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">??쒕?援?媛뺣궓援?/span>
+                        <span class="tweet-modal__location-item-label">서울특별시 강남구/span>
                         <span class="tweet-modal__location-item-check"></span>
                     </button>
                     <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">??쒕?援??≫뙆援?/span>
+                        <span class="tweet-modal__location-item-label">서울특별시 송파구/span>
                         <span class="tweet-modal__location-item-check"></span>
                     </button>
                     <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">??쒕?援?愿묒쭊援?/span>
+                        <span class="tweet-modal__location-item-label">서울특별시 광진구/span>
                         <span class="tweet-modal__location-item-check"></span>
                     </button>
                     <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">??쒕?援??숈옉援?/span>
+                        <span class="tweet-modal__location-item-label">서울특별시 동작구/span>
                         <span class="tweet-modal__location-item-check"></span>
                     </button>
                     <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">??쒕?援?以묎뎄</span>
+                        <span class="tweet-modal__location-item-label">서울특별시 중구</span>
                         <span class="tweet-modal__location-item-check"></span>
                     </button>
                 </div>
             </div>
         </div><!-- /.tweet-modal__location-view -->
 
-        <!-- ===== ?쒕툕酉?3: ?ъ슜???쒓렇 (tag-view) =====
-             泥⑤? 誘몃뵒?댁쓽 ?쒓렇 ????ъ슜?먮? 寃?됲븯怨??좏깮?섎뒗 ?붾㈃?대떎.
-             compose-view瑜??④린怨???釉붾줉??????쒖떆?쒕떎.
-             event.js??openTagPanel()?쇰줈 ?대━怨?closeTagPanel()?쇰줈 ?ロ엺?? -->
+        <!-- ===== 서브뷰 3: 사용자 태그 (tag-view) =====
+                  첨부 미디어의 태그 대상으로 사용자를 검색하고 선택하는 화면이다.
+                  compose-view를 닫고 이 블록만 표시한다.
+                  event.js의 openTagPanel()로 열고 closeTagPanel()로 닫는다. -->
         <div class="tweet-modal__tag-view" hidden>
             <div class="tweet-modal__tag-modal" role="dialog" aria-modal="true" aria-labelledby="tag-modal-title">
-                <!-- ?쒓렇 紐⑤떖 ?ㅻ뜑: ?リ린 / ?쒕ぉ / ?꾨즺 踰꾪듉 -->
+	                <!-- 태그 모달 헤더 -->
                 <div class="tweet-modal__tag-header">
-                    <button type="button" class="tweet-modal__tag-close" aria-label="?リ린" data-testid="tag-back">
+                    <button type="button" class="tweet-modal__tag-close" aria-label="닫기" data-testid="tag-back">
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <g>
                                 <path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
                             </g>
                         </svg>
                     </button>
-                    <h2 id="tag-modal-title" class="tweet-modal__tag-title">?ъ슜???쒓렇?섍린</h2>
+                    <h2 id="tag-modal-title" class="tweet-modal__tag-title">사용자 태그하기</h2>
                     <div class="tweet-modal__tag-actions">
-                        <button type="button" class="tweet-modal__tag-action" data-tag-complete>?꾨즺</button>
+                        <button type="button" class="tweet-modal__tag-action" data-tag-complete>완료</button>
                     </div>
                 </div>
 
-                <!-- ?쒓렇 寃???곸뿭: ?좏깮???ъ슜??chip + 寃???낅젰 + 寃곌낵 紐⑸줉 -->
+                <!-- 태그 검색 영역 -->
                 <div class="tweet-modal__tag-search">
                     <form role="search" class="tweet-modal__tag-search-form" data-tag-search-form>
-                        <!-- 寃???낅젰 ?? ?뗫낫湲??꾩씠肄? ?좏깮???ъ슜??chip, 寃??input -->
+                        <!-- 검색 입력, 선택된 사용자 chip, 검색 input -->
                         <div class="tweet-modal__tag-search-shell">
                             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
                                  class="tweet-modal__tag-search-icon" data-testid="searchPeople_label">
@@ -2369,9 +2363,9 @@
                                 </g>
                             </svg>
                             <div class="tweet-modal__tag-chip-list" data-tag-chip-list></div>
-                            <!-- 寃??湲곕줉???꾩삁 ?놁쓣 ???ъ슜?????덈뒗 ?덉떆 UI
+                            <!-- 검색 기록이 비어 있을 때의 예시 UI
                             <p class="tweet-modal__tag-history-empty">
-                                理쒓렐 寃??湲곕줉???놁뒿?덈떎. ?대쫫?대굹 ?꾩씠?붾? ?낅젰?섎㈃ ?꾨옒??紐⑸줉???쒖떆?⑸땲??
+                                최근 검색 기록이 없습니다. 이름이나 아이디를 입력하면 아래에 목록이 표시됩니다.
                             </p>
                             -->
                             <input
@@ -2379,52 +2373,52 @@
                                     class="tweet-modal__tag-search-input"
                                     data-tag-search
                                     data-testid="searchPeople"
-                                    placeholder="?ъ슜??寃??
-                                    aria-label="?ъ슜??寃??
+                                    placeholder="사용자 검색"
+                                    aria-label="사용자 검색"
                                     role="combobox"
                                     aria-expanded="false"
                                     autocomplete="off"
                             />
                         </div>
 
-                        <!-- 寃??寃곌낵 紐⑸줉: ?꾩옱 ?붾㈃?먯꽌 ?쎌뼱???ъ슜??以?寃?됱뼱? 留욌뒗 ??ぉ???쒖떆??-->
+                        <!-- 검색 결과 목록 -->
                         <div class="tweet-modal__tag-results" data-tag-results></div>
                     </form>
                 </div>
             </div>
         </div><!-- /.tweet-modal__tag-view -->
 
-        <!-- ===== ?쒕툕酉?4: 誘몃뵒???ㅻ챸 ?몄쭛 (media-view) =====
-             泥⑤? ?대?吏??ALT(?泥??띿뒪??瑜??섏젙?섎뒗 ?붾㈃?대떎.
-             compose-view瑜??④린怨???釉붾줉??????쒖떆?쒕떎.
-             event.js??openMediaEditor()濡??대━怨?closeMediaEditor()濡??ロ엺?? -->
+        <!-- ===== 서브뷰 4: 미디어 설명 편집 (media-view) =====
+                  첨부 이미지의 ALT(대체 텍스트)를 수정하는 화면이다.
+                  compose-view를 닫고 이 블록만 표시한다.
+                  event.js의 openMediaEditor()로 열고 closeMediaEditor()로 닫는다. -->
         <div class="tweet-modal__media-view" hidden>
             <div class="tweet-modal__media-editor" role="dialog" aria-modal="true" aria-labelledby="media-editor-title">
-                <!-- 誘몃뵒???ㅻ챸 ?ㅻ뜑: ?ㅻ줈媛湲? ?댁쟾/?ㅼ쓬, ???踰꾪듉 -->
+                <!-- 미디어 설명 헤더 -->
                 <div class="tweet-modal__media-header">
                     <button type="button" class="tweet-modal__media-header-btn tweet-modal__media-header-btn--ghost"
-                            data-testid="media-back" aria-label="?뚯븘媛湲?>
+                            data-testid="media-back" aria-label="돌아가기">
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <g>
                                 <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
                             </g>
                         </svg>
                     </button>
-                    <h2 id="media-editor-title" class="tweet-modal__media-title" data-media-title>?대?吏 ?ㅻ챸 ?섏젙</h2>
+                    <h2 id="media-editor-title" class="tweet-modal__media-title" data-media-title>이미지 설명 수정</h2>
                     <div class="tweet-modal__media-header-actions">
-                        <button type="button" class="tweet-modal__media-header-btn" data-media-prev aria-label="?댁쟾 ?대?吏">
-                            ?댁쟾
+                        <button type="button" class="tweet-modal__media-header-btn" data-media-prev aria-label="이전 이미지">
+                            이전
                         </button>
-                        <button type="button" class="tweet-modal__media-header-btn" data-media-next aria-label="?ㅼ쓬 ?대?吏">
-                            ?ㅼ쓬
+                        <button type="button" class="tweet-modal__media-header-btn" data-media-next aria-label="다음 이미지">
+                            다음
                         </button>
                         <button type="button" class="tweet-modal__media-header-btn tweet-modal__media-header-btn--solid"
-                                data-testid="endEditingButton" data-media-save>???
+                                data-testid="endEditingButton" data-media-save>저장
                         </button>
                     </div>
                 </div>
 
-                <!-- 誘몃뵒???ㅻ챸 蹂몃Ц: ?좏깮???대?吏 誘몃━蹂닿린? ?ㅻ챸 ?낅젰李?-->
+                <!-- 미디어 설명 본문 -->
                 <div class="tweet-modal__media-body">
                     <section class="tweet-modal__media-panel tweet-modal__media-panel--active">
                         <div class="tweet-modal__media-alt-preview">
@@ -2432,9 +2426,9 @@
                                  class="tweet-modal__media-preview-image tweet-modal__media-preview-image--alt"
                                  data-media-preview-image/>
                         </div>
-                        <label class="tweet-modal__media-alt-field" aria-label="?泥??띿뒪??>
+                        <label class="tweet-modal__media-alt-field" aria-label="대체 텍스트">
                             <div class="tweet-modal__media-alt-meta">
-                                <span class="tweet-modal__media-alt-label">?ㅻ챸</span>
+                                <span class="tweet-modal__media-alt-label">설명</span>
                                 <span class="tweet-modal__media-alt-count" data-media-alt-count>0 / 1,000</span>
                             </div>
                             <textarea class="tweet-modal__media-alt-input" data-testid="altTextInput"
@@ -2445,39 +2439,39 @@
             </div>
         </div><!-- /.tweet-modal__media-view -->
 
-        <!-- ===== ?쒕툕酉?5: ?꾩떆???(draft-view) =====
-             compose-view ????쒖떆?섎ŉ ?꾩떆???紐⑸줉, ?섏젙/??젣 紐⑤뱶, ??젣 ?뺤씤 ??붿긽?먮? ?ы븿?쒕떎.
-             event.js??openDraftPanel()濡??대━怨?closeDraftPanel()濡??ロ엺?? -->
+        <!-- ===== 서브뷰 5: 임시저장 (draft-view) =====
+                  compose-view 대신 표시되며 임시저장 목록과 수정/삭제 모드를 포함한다.
+                  event.js의 openDraftPanel()로 열고 closeDraftPanel()로 닫는다. -->
         <div class="tweet-modal__draft-view" hidden>
-            <!-- ?꾩떆????ㅻ뜑: ?ㅻ줈媛湲? ?쒕ぉ, ?섏젙 踰꾪듉 -->
+            <!-- 임시저장 헤더 -->
             <div class="draft-panel__header">
-                <button type="button" class="draft-panel__back" data-testid="app-bar-back" aria-label="?뚯븘媛湲?>
+                <button type="button" class="draft-panel__back" data-testid="app-bar-back" aria-label="돌아가기">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                         <g>
                             <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
                         </g>
                     </svg>
                 </button>
-                <h2 class="draft-panel__title">?꾩떆???/h2>
-                <button type="button" class="draft-panel__action">?섏젙</button>
+                <h2 class="draft-panel__title">임시저장</h2>
+                <button type="button" class="draft-panel__action">수정</button>
             </div>
 
-            <!-- ?꾩떆??????곸뿭: ?꾩옱???⑥씪 ?쇰꺼留??ъ슜 -->
-            <div class="draft-panel__tablist" aria-label="珥덉븞 ??>
+            <!-- 임시저장 탭 영역 -->
+            <div class="draft-panel__tablist" aria-label="초안 탭">
                 <div class="draft-panel__tab draft-panel__tab--active draft-panel__tab--single">
-                    ?꾩떆???
+                    임시저장
                 </div>
             </div>
 
-            <!-- ?꾩떆???蹂몃Ц: 紐⑸줉 ?먮뒗 鍮??곹깭媛 ?ㅼ뼱媛???곸뿭 -->
+            <!-- 임시저장 본문 -->
             <div class="draft-panel__content">
-                <!-- ?꾩떆???紐⑸줉???꾩삁 ?놁쓣 ?뚮쭔 ?곕뒗 ?⑥닚 援ъ“ ?덉떆
+                <!-- 임시저장 목록이 비어 있을 때의 예시
                 <div class="draft-panel__empty">
-                    <p class="draft-panel__empty-title">?좎떆 ?앷컖???뺣━?⑸땲??/p>
-                    <p class="draft-panel__empty-body">?꾩쭅 寃뚯떆??以鍮꾧? ?섏? ?딆븯?섏슂? ?꾩떆??ν빐 ?먭퀬 ?섏쨷???댁뼱???묒꽦?섏꽭??</p>
+                    <p class="draft-panel__empty-title">잠시 생각을 정리합니다./p>
+                    <p class="draft-panel__empty-body">아직 게시물 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성해보세요.</p>
                 </div>
                 -->
-                <!-- ?꾩떆???紐⑸줉: ?쒕쾭 ?뚮뜑留???.draft-panel__item 援ъ“瑜?諛섎났?댁꽌 ?ｌ쑝硫??쒕떎 -->
+                <!-- 임시저장 목록 -->
                 <div class="draft-panel__list">
                     <button type="button" class="draft-panel__item" aria-pressed="false">
                         <img
@@ -2486,9 +2480,9 @@
                                 src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg"
                         />
                         <span class="draft-panel__item-body">
-                                    <span class="draft-panel__meta">@tmtsugar ?섏뿉寃?蹂대궡???듦?</span>
-                                    <span class="draft-panel__text">?꾨줈??臾멸뎄 ?섏젙 ???뺤씤 遺?곷뱶由쎈땲??</span>
-                                    <span class="draft-panel__date">3??10???ㅼ쟾 11:20</span>
+                                    <span class="draft-panel__meta">@tmtsugar 님에게 보내는 답글</span>
+                                    <span class="draft-panel__text">프로필 문구 수정 전 확인 부탁드립니다.</span>
+                                    <span class="draft-panel__date">3월 10일 오전 11:20</span>
                                 </span>
                     </button>
                     <button type="button" class="draft-panel__item" aria-pressed="false">
@@ -2498,25 +2492,25 @@
                                 src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png"
                         />
                         <span class="draft-panel__item-body">
-                                    <span class="draft-panel__meta">@elonmusk ?섏뿉寃?蹂대궡???듦?</span>
-                                    <span class="draft-panel__text">?뚯쓽 ?앸굹怨?珥덉븞 ?뺣━?댁꽌 ?ㅼ떆 蹂대궪寃뚯슂.</span>
-                                    <span class="draft-panel__date">3??9???ㅽ썑 7:10</span>
+                                    <span class="draft-panel__meta">@elonmusk 님에게 보내는 답글</span>
+                                    <span class="draft-panel__text">회의 끝나고 초안 정리해서 다시 보내드릴게요.</span>
+                                    <span class="draft-panel__date">3월 9일 오후 7:10</span>
                                 </span>
                     </button>
                 </div>
                 <div class="draft-panel__empty" hidden>
-                    <p class="draft-panel__empty-title">?좎떆 ?앷컖???뺣━?⑸땲??/p>
-                    <p class="draft-panel__empty-body">?꾩쭅 寃뚯떆??以鍮꾧? ?섏? ?딆븯?섏슂? ?꾩떆??ν빐 ?먭퀬 ?섏쨷???댁뼱???묒꽦?섏꽭??</p>
+                    <p class="draft-panel__empty-title">잠시 생각을 정리합니다./p>
+                    <p class="draft-panel__empty-body">아직 게시물 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성해보세요.</p>
                 </div>
             </div>
 
-            <!-- ?꾩떆????섏젙 紐⑤뱶 ?섎떒 諛? ?꾩껜 ?좏깮, ??젣 -->
+            <!-- 임시저장 수정 모드 하단 바 -->
             <div class="draft-panel__footer" hidden>
-                <button type="button" class="draft-panel__footer-link draft-panel__select-all">紐⑤몢 ?좏깮</button>
-                <button type="button" class="draft-panel__footer-delete" disabled>??젣?섍린</button>
+                <button type="button" class="draft-panel__footer-link draft-panel__select-all">모두 선택</button>
+                <button type="button" class="draft-panel__footer-delete" disabled>삭제하기</button>
             </div>
 
-            <!-- ??젣 ?뺤씤 ?덉씠?? ?ㅼ젣 ??젣 ?꾩뿉 ??踰???臾삳뒗 ?곸뿭 -->
+            <!-- 삭제 확인 레이어 -->
             <div class="draft-panel__confirm-overlay" hidden>
                 <div class="draft-panel__confirm-backdrop"></div>
                 <div
@@ -2526,13 +2520,13 @@
                         aria-labelledby="draft-confirm-title"
                         aria-describedby="draft-confirm-desc"
                 >
-                    <h3 id="draft-confirm-title" class="draft-panel__confirm-title">?꾩넚?섏? ?딆? 寃뚯떆臾???젣?섍린</h3>
+                    <h3 id="draft-confirm-title" class="draft-panel__confirm-title">전송하지 않은 게시물 삭제하기</h3>
                     <p id="draft-confirm-desc" class="draft-panel__confirm-desc">
-                        ???묒뾽? 痍⑥냼?????놁쑝硫??좏깮???꾩넚?섏? ?딆? 寃뚯떆臾쇱씠 ??젣?⑸땲??
+                        이 작업은 취소할 수 없으며 선택한 전송되지 않은 게시물이 삭제됩니다.
                     </p>
                     <div class="draft-panel__confirm-actions">
-                        <button type="button" class="draft-panel__confirm-primary">??젣?섍린</button>
-                        <button type="button" class="draft-panel__confirm-secondary">痍⑥냼</button>
+                        <button type="button" class="draft-panel__confirm-primary">삭제하기</button>
+                        <button type="button" class="draft-panel__confirm-secondary">취소</button>
                     </div>
                 </div>
             </div>
@@ -2580,5 +2574,7 @@
 <script src="/js/inquiry_active_list/event.js"></script>
 </body>
 </html>
+
+
 
 

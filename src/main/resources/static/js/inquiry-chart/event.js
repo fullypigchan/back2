@@ -108,7 +108,7 @@
         }, PREVIEW_DURATION_MS);
     };
 
-    // ===== ?대┛ UI ?リ린 ?ы띁 =====
+    // ===== 공통 UI 유틸 =====
     const closeFilterMenu = () => {
         if (!filterTrigger || !filterMenu) {
             return;
@@ -118,7 +118,7 @@
         filterTrigger.setAttribute("aria-expanded", "false");
     };
 
-    // ===== 珥덇린 ?대깽??諛붿씤??=====
+    // ===== 초기 이벤트 바인딩 =====
     const initializeTabs = () => {
         ensureActivityPanelVisible();
         tabButtons.forEach((tab) => {
@@ -169,14 +169,14 @@
         });
     };
 
-    // ?붾㈃???꾩슂??紐⑤뱺 ?곹샇?묒슜????踰덉뿉 ?곌껐?쒕떎.
+    // 화면에 필요한 모든 상호작용을 한 번에 연결한다.
     initializeTabs();
     initializePeriodChips();
     initializeFilterDropdown();
 
-    // ?????????????????????????????????????????????????????
-    // 李⑦듃 ?뚰듃 *******************************************
-    // ?????????????????????????????????????????????????????
+    // =====================================================
+    // 차트 파트
+    // =====================================================
     google.charts.load("current", {
         packages: ["corechart", "geochart"],
         language: "ko",
@@ -189,7 +189,7 @@
     /**
      * TODO: GET /api/expert/stats/profile-views?period={period}
      * @param {'7d'|'30d'|'6m'} period
-     * @returns {Array<[string, number]>}  [?좎쭨/湲곌컙 ?쇰꺼, 媛?
+     * @returns {Array<[string, number]>} [날짜/기간 라벨, 값]
      */
 
     function fetchProfileViewData(period) {
@@ -217,7 +217,7 @@
             });
         }
 
-        // 6m ???붾퀎 吏묎퀎
+        // 6개월 월별 집계
         return Array.from({length: 6}, (_, i) => {
             const d = new Date(now);
             d.setMonth(d.getMonth() - (5 - i));
@@ -298,11 +298,11 @@
 
     /**
      * TODO: GET /api/expert/stats/deal-countries
-     * ?깆궗 怨꾩빟 嫄곕옒泥?援?? 遺꾪룷
+     * 성사 계약 거래처 국가 분포
      */
     function fetchDealCountryData() {
         return [
-            ["Country", "嫄곕옒 嫄댁닔"],
+            ["Country", "거래 건수"],
             ["China", 210],
             ["United States", 175],
             ["Germany", 132],
@@ -316,7 +316,7 @@
         ];
     }
 
-    /** Google Charts ?꾨컲??嫄몄퀜 怨듭쑀?섎뒗 湲곕낯 ?고듃/???ㅼ젙 */
+    /** Google Charts 전반에 걸쳐 공유하는 기본 차트 옵션 */
     function baseOptions() {
         return {
             fontName: "DM Sans",
@@ -347,12 +347,12 @@
     }
 
     // =====================================================
-    // 4. 李⑦듃 ?뚮뜑??
+    // 4. 차트 렌더링
     // =====================================================
 
-    // ?? 2痢? ??洹몃옒????????????????????????????????????
+    // 2층 왼쪽 라인 차트
 
-    /** ?꾩옱 ?쒖꽦 吏?쒖? 湲곌컙??異붿쟻?섎뒗 ?곹깭 */
+    /** 현재 선택된 지표와 기간을 추적하는 상태 */
     const lineChartState = {
         metric: "profileViewCount", // 'profileViewCount' | 'inquiryRequestCount'
         period: "7d", // '7d' | '30d' | '6m'
@@ -360,12 +360,12 @@
 
     let lineChartInstance = null;
 
-    // ??洹몃옒?????쒕뜑留?
+    // 라인 차트 렌더링
     function drawLineChart() {
         const container = document.getElementById("chart-line");
         if (!container) return;
 
-        // 濡쒕뵫 ?쒖떆
+        // 로딩 표시
         container.classList.add("is-loading");
 
         // 지표에 맞는 데이터 선택
@@ -418,12 +418,12 @@
         lineChartInstance.draw(data, options);
     }
 
-    // ?? 3痢??쇱そ: 留됰? 洹몃옒?????????????????????????????
+    // 3층 왼쪽 막대 차트
 
     let barChartInstance = null;
 
     /**
-     * 而ㅻ꽖??蹂??異붿씠 留됰? 洹몃옒?꾨? ?뚮뜑留곹븳??
+     * 커넥트 변화 추이 막대 그래프를 렌더링한다.
      */
     function drawBarChart() {
         const container = document.getElementById("chart-bar");
@@ -434,9 +434,9 @@
         const rawRows = fetchConnectChangeData();
 
         const data = new google.visualization.DataTable();
-        data.addColumn("string", "湲곌컙");
-        data.addColumn("number", "Apporve");
-        data.addColumn("number", "DIsapporve");
+        data.addColumn("string", "기간");
+        data.addColumn("number", "승인");
+        data.addColumn("number", "반려");
         data.addRows(rawRows);
 
         const options = {
@@ -473,12 +473,12 @@
         barChartInstance.draw(data, options);
     }
 
-    // ?? 3痢??ㅻⅨ履? ?꾨꽋 洹몃옒???????????????????????????
+    // 3층 오른쪽 도넛 차트
 
     let donutChartInstance = null;
 
     /**
-     * 嫄곕옒 移댄뀒怨좊━ 遺꾪룷 ?꾨꽋 李⑦듃瑜??뚮뜑留곹븳??
+     * 거래 카테고리 분포 도넛 차트를 렌더링한다.
      */
     function drawDonutChart() {
         const container = document.getElementById("chart-donut");
@@ -536,12 +536,12 @@
         donutChartInstance.draw(data, options);
     }
 
-    // ?? 4痢? 吏??李⑦듃 ??????????????????????????????????
+    // 4층 지오 차트
 
     let geoChartInstance = null;
 
     /**
-     * 嫄곕옒???ъ뾽???섎씪 遺꾪룷 吏??李⑦듃瑜??뚮뜑留곹븳??
+     * 거래 국가 분포 지오 차트를 렌더링한다.
      */
     function drawGeoChart() {
         const container = document.getElementById("chart-geo");
@@ -587,7 +587,7 @@
     }
 
     // =====================================================
-    // 5. 由ъ궗?댁쫰 ???
+    // 5. 리사이즈 대응
     // =====================================================
     let resizeTimer = null;
     window.addEventListener("resize", () => {
@@ -601,7 +601,7 @@
     });
 
     // =====================================================
-    // 6. 紐⑤뱺 李⑦듃 珥덇린 ?뚮뜑
+    // 6. 모든 차트 초기 렌더
     // =====================================================
     function initCharts() {
         drawLineChart();
@@ -611,12 +611,11 @@
     }
 
     // =====================================================
-    // 7. UI ?곹샇?묒슜 珥덇린??
-    //    [?섏젙] window.addEventListener("DOMContentLoaded") ?섑띁 ?쒓굅
-    //           ??window.onload ?덉뿉??吏곸젒 ?ㅽ뻾?섎룄濡?蹂寃?
+    // 7. UI 상호작용 초기화
+    //    window.onload 안에서 직접 실행되도록 구성한다.
     // =====================================================
 
-    // ?? 2痢? 吏???쒕∼?ㅼ슫 ???????????????????????????
+    // 2층 지표 드롭다운 영역
     const dropbox = document.querySelector("[data-dropbox]");
     const dropTrigger = document.querySelector("[data-dropbox-trigger]");
     const dropMenu = document.querySelector("[data-dropbox-menu]");
@@ -643,23 +642,23 @@
             const newMetric = option.dataset.metric;
             if (!newMetric) return;
 
-            // ?좏깮 ?곹깭 ?낅뜲?댄듃
+    // 선택 상태 업데이트
             dropOptions.forEach((o) => {
                 const isSelected = o === option;
                 o.setAttribute("aria-selected", String(isSelected));
             });
 
-            // ?쇰꺼 ?낅뜲?댄듃
+    // 라벨 업데이트
             if (dropLabel) dropLabel.textContent = option.textContent.trim();
 
-            // 李⑦듃 ?곹깭 ?낅뜲?댄듃 ???щ젋??
+    // 차트 상태 업데이트 및 리프레시
             lineChartState.metric = newMetric;
             closeDropbox();
             drawLineChart();
         });
     });
 
-    // ?? 2痢? 湲곌컙 ?꾪꽣 踰꾪듉 ??????????????????????????
+    // 2층 기간 필터 버튼
     const periodButtons = Array.from(
         document.querySelectorAll("[data-line-period]"),
     );
@@ -678,14 +677,14 @@
         });
     });
 
-    // ?? ?꾩뿭 ?대┃: ?쒕∼?ㅼ슫 ?リ린 ?????????????????????
+    // 문서 영역 클릭 시 드롭다운 닫기
     document.addEventListener("click", (e) => {
         if (dropbox && !dropbox.contains(e.target)) {
             closeDropbox();
         }
     });
 
-    // ?? ESC ?? ?쒕∼?ㅼ슫 ?リ린 ????????????????????????
+    // ESC 키로 드롭다운 닫기
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeDropbox();
     });
@@ -713,7 +712,7 @@
     }
 
     function fetchDealCategoryData() {
-        return [["移댄뀒怨좊━", "嫄댁닔"]].concat(
+        return [["카테고리", "건수"]].concat(
             (expertDashboard?.dealCategories ?? []).map((point) => [
                 point.label,
                 point.value ?? 0,
@@ -722,7 +721,7 @@
     }
 
     function fetchDealCountryData() {
-        return [["Country", "嫄곕옒 嫄댁닔"]].concat(
+        return [["Country", "거래 건수"]].concat(
             (expertDashboard?.dealCountries ?? []).map((point) => [
                 point.label,
                 point.value ?? 0,
@@ -732,3 +731,4 @@
 
     loadDashboard();
 };
+
