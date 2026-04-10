@@ -28,10 +28,11 @@ public class AdminAPIController {
     public ResponseEntity<AdminMemberWithPagingDTO> getAdminMembers(
             @PathVariable int page,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String memberRole,
+            @RequestParam(required = false) String subscriptionTier,
+            @RequestParam(required = false) String subscriptionStatus,
             @RequestParam(required = false) String memberStatus
     ) {
-        return ResponseEntity.ok(adminService.getAdminMembers(page, keyword, memberRole, memberStatus));
+        return ResponseEntity.ok(adminService.getAdminMembers(page, keyword, subscriptionTier, subscriptionStatus, memberStatus));
     }
 
     @GetMapping("/posts/{page}")

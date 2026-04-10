@@ -15,12 +15,12 @@ import java.util.List;
 public class AdminDAO {
     private final AdminMapper adminMapper;
 
-    public int findAdminMemberTotal(String keyword, String memberRole, String memberStatus) {
-        return adminMapper.selectAdminMemberTotal(keyword, memberRole, memberStatus);
+    public int findAdminMemberTotal(String keyword, String subscriptionTier, String subscriptionStatus, String memberStatus) {
+        return adminMapper.selectAdminMemberTotal(keyword, subscriptionTier, subscriptionStatus, memberStatus);
     }
 
-    public List<AdminMemberListDTO> findAdminMembers(Criteria criteria, String keyword, String memberRole, String memberStatus) {
-        return adminMapper.selectAdminMembers(criteria, keyword, memberRole, memberStatus);
+    public List<AdminMemberListDTO> findAdminMembers(Criteria criteria, String keyword, String subscriptionTier, String subscriptionStatus, String memberStatus) {
+        return adminMapper.selectAdminMembers(criteria, keyword, subscriptionTier, subscriptionStatus, memberStatus);
     }
 
     public int findAdminPostTotal(String keyword, String postType, String categoryName, String postStatus) {

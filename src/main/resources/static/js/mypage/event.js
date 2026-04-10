@@ -86,7 +86,6 @@ window.onload = function () {
     const replyMediaPreviewImages = qAll("[data-media-preview-image]");
     const replyMediaAltInput = q("[data-media-alt-input]");
     const replyMediaAltCount = q("[data-media-alt-count]");
-
     // ===== 2. State =====
     let activeReplyTrigger = null,
         savedReplySelection = null,

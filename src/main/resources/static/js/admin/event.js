@@ -19,6 +19,7 @@
     const newsSubmitBtn = document.querySelector("#newsSubmitBtn");
     const aiBtn = document.querySelector("#aiBtn");
 
+    const filterMemberSubscription = document.querySelector("#filterMemberSubscription");
     const filterMemberGrade = document.querySelector("#filterMemberGrade");
     const filterMemberStatus = document.querySelector("#filterMemberStatus");
 
@@ -115,10 +116,11 @@
         "기타": "etc"
     };
 
-    const memberRoleBadgeMap = {
-        business: { className: "badge-normal", text: "비즈니스" },
-        expert: { className: "badge-expert", text: "전문가" },
-        admin: { className: "badge-proplus", text: "관리자" }
+    const subscriptionTierBadgeMap = {
+        free: { className: "badge-free", text: "free" },
+        pro: { className: "badge-pro", text: "pro" },
+        pro_plus: { className: "badge-proplus", text: "pro+" },
+        expert: { className: "badge-expert", text: "expert" }
     };
 
     const memberStatusBadgeMap = {
@@ -286,11 +288,19 @@
     };
 
     const setAdminFilterOptions = () => {
+        setOptions(filterMemberSubscription, [
+            { value: "all", label: "구독상태 전체" },
+            { value: "subscribed", label: "구독중" },
+            { value: "expired", label: "구독만료" },
+            { value: "none", label: "미구독" }
+        ]);
+
         setOptions(filterMemberGrade, [
             { value: "all", label: "등급 전체" },
-            { value: "business", label: "비즈니스" },
-            { value: "expert", label: "전문가" },
-            { value: "admin", label: "관리자" }
+            { value: "free", label: "free" },
+            { value: "pro", label: "pro" },
+            { value: "pro_plus", label: "pro+" },
+            { value: "expert", label: "expert" }
         ]);
 
         setOptions(filterMemberStatus, [
@@ -345,7 +355,7 @@
                 <div class="div-td">${escapeHtml(member.memberName)}</div>
                 <div class="div-td td-email">${escapeHtml(member.memberEmail)}</div>
                 <div class="div-td">${escapeHtml(member.companyName || "-")}</div>
-                <div class="div-td">${getBadgeMarkup(member.memberRole, memberRoleBadgeMap)}</div>
+                <div class="div-td">${getBadgeMarkup(member.subscriptionTier || "free", subscriptionTierBadgeMap, "badge-free")}</div>
                 <div class="div-td">${getBadgeMarkup(member.memberStatus, memberStatusBadgeMap, "badge-reject")}</div>
                 <div class="div-td">${escapeHtml(member.createdDatetime || "-")}</div>
             </div>
@@ -425,7 +435,8 @@
     const loadMembers = async () => {
         const query = buildQuery({
             keyword: memberSearchInput.value.trim(),
-            memberRole: filterMemberGrade.value,
+            subscriptionTier: filterMemberGrade.value,
+            subscriptionStatus: filterMemberSubscription.value,
             memberStatus: filterMemberStatus.value
         });
 
@@ -743,7 +754,7 @@
         document.querySelector("#company").textContent = member.companyName || "-";
         document.querySelector("#joinDate").textContent = member.createdDatetime || "-";
         document.querySelector("#statusSelect").value = member.memberStatus || "active";
-        memberTypeSelect.textContent = memberRoleBadgeMap[member.memberRole]?.text || member.memberRole || "-";
+        memberTypeSelect.textContent = subscriptionTierBadgeMap[member.subscriptionTier || "free"]?.text || member.subscriptionTier || "free";
 
         modalMemberDetail.classList.remove("off");
     });
@@ -787,6 +798,7 @@
         runAdminSearch(loadMembers)();
     };
 
+    filterMemberSubscription.addEventListener("change", applyMemberFilter);
     filterMemberGrade.addEventListener("change", applyMemberFilter);
     filterMemberStatus.addEventListener("change", applyMemberFilter);
     memberSearchBtn.addEventListener("click", applyMemberFilter);

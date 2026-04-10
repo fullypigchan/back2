@@ -33,9 +33,9 @@ public class AdminService {
     private final CategoryDAO categoryDAO;
     private final S3Service s3Service;
 
-    public AdminMemberWithPagingDTO getAdminMembers(int page, String keyword, String memberRole, String memberStatus) {
-        Criteria criteria = new Criteria(page, adminDAO.findAdminMemberTotal(keyword, memberRole, memberStatus));
-        List<AdminMemberListDTO> members = adminDAO.findAdminMembers(criteria, keyword, memberRole, memberStatus);
+    public AdminMemberWithPagingDTO getAdminMembers(int page, String keyword, String subscriptionTier, String subscriptionStatus, String memberStatus) {
+        Criteria criteria = new Criteria(page, adminDAO.findAdminMemberTotal(keyword, subscriptionTier, subscriptionStatus, memberStatus));
+        List<AdminMemberListDTO> members = adminDAO.findAdminMembers(criteria, keyword, subscriptionTier, subscriptionStatus, memberStatus);
 
         criteria.setHasMore(members.size() > criteria.getRowCount());
         if (criteria.isHasMore()) {

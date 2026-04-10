@@ -5,6 +5,14 @@
         select count(*)
         from tbl_member m
         left join tbl_business_member bm on bm.id = m.id
+        left join lateral (
+            select s.tier,
+                   s.status
+            from tbl_subscription s
+            where s.member_id = m.id
+            order by s.id desc
+            limit 1
+        ) sub on true
         where 1 = 1
         <if test="keyword != null and keyword != ''">
             and (
@@ -13,8 +21,21 @@
                 or lower(coalesce(bm.company_name, '')) like lower(concat('%', #{keyword}, '%'))
             )
         </if>
-        <if test="memberRole != null and memberRole != '' and memberRole != 'all'">
-            and m.member_role = #{memberRole}::member_role
+        <if test="subscriptionTier != null and subscriptionTier != '' and subscriptionTier != 'all'">
+            and coalesce(cast(sub.tier as varchar), 'free') = #{subscriptionTier}
+        </if>
+        <if test="subscriptionStatus != null and subscriptionStatus != '' and subscriptionStatus != 'all'">
+            <choose>
+                <when test="subscriptionStatus == 'subscribed'">
+                    and sub.status = 'active'::subscription_status
+                </when>
+                <when test="subscriptionStatus == 'expired'">
+                    and sub.status in ('inactive'::subscription_status, 'expired'::subscription_status)
+                </when>
+                <when test="subscriptionStatus == 'none'">
+                    and sub.status is null
+                </when>
+            </choose>
         </if>
         <if test="memberStatus != null and memberStatus != '' and memberStatus != 'all'">
             and m.member_status = #{memberStatus}::member_status
@@ -28,10 +49,20 @@
                bm.company_name,
                m.birth_date,
                m.member_role,
+               coalesce(sub.tier, 'free'::subscription_tier) as subscription_tier,
+               sub.status as subscription_status,
                m.member_status,
                to_char(m.created_datetime, 'YYYY-MM-DD HH24:MI:SS') as created_datetime
         from tbl_member m
         left join tbl_business_member bm on bm.id = m.id
+        left join lateral (
+            select s.tier,
+                   s.status
+            from tbl_subscription s
+            where s.member_id = m.id
+            order by s.id desc
+            limit 1
+        ) sub on true
         where 1 = 1
         <if test="keyword != null and keyword != ''">
             and (
@@ -40,8 +71,21 @@
                 or lower(coalesce(bm.company_name, '')) like lower(concat('%', #{keyword}, '%'))
             )
         </if>
-        <if test="memberRole != null and memberRole != '' and memberRole != 'all'">
-            and m.member_role = #{memberRole}::member_role
+        <if test="subscriptionTier != null and subscriptionTier != '' and subscriptionTier != 'all'">
+            and coalesce(cast(sub.tier as varchar), 'free') = #{subscriptionTier}
+        </if>
+        <if test="subscriptionStatus != null and subscriptionStatus != '' and subscriptionStatus != 'all'">
+            <choose>
+                <when test="subscriptionStatus == 'subscribed'">
+                    and sub.status = 'active'::subscription_status
+                </when>
+                <when test="subscriptionStatus == 'expired'">
+                    and sub.status in ('inactive'::subscription_status, 'expired'::subscription_status)
+                </when>
+                <when test="subscriptionStatus == 'none'">
+                    and sub.status is null
+                </when>
+            </choose>
         </if>
         <if test="memberStatus != null and memberStatus != '' and memberStatus != 'all'">
             and m.member_status = #{memberStatus}::member_status

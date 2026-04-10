@@ -1,5 +1,6 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.common.enumeration.NewsType;
 import com.app.globalgates.dto.NewsDTO;
 import com.app.globalgates.repository.AdminNewsDAO;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ public class AdminNewsService {
 
     @Transactional
     public void createAdminNews(NewsDTO newsDTO) {
+        newsDTO.setNewsType(NewsType.EMERGENCY);
         adminNewsDAO.save(newsDTO);
+
     }
 }
