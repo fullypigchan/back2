@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{/common/layout-notification}">
+      layout:decorate="~{/common/layout}">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -80,7 +80,6 @@
 
 <!-- 알림 페이지 본문: 상단 헤더 + 알림 리스트가 들어가는 메인 컬럼 -->
     <th:block layout:fragment="content">
-        <main role="main" class="notif-page">
             <div class="notif-layout">
                 <div class="notif-col" data-testid="primaryColumn">
                     <!-- 상단 고정 헤더 -->
@@ -500,7 +499,6 @@
                 </div><!-- /.notif-col -->
             <!-- 동적 드롭다운 마운트 지점: event.js의 공유/더보기 드롭다운이 여기에 append/remove 된다 -->
             <div id="layers" aria-hidden="true"></div>
-        </main>
     </th:block>
 </div><!-- /.pageLayout -->
 <!-- 모바일 하단 네비게이션 바: event.js가 활성 탭 아이콘 상태만 제어한다 -->

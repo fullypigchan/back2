@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{/common/layout-setting}">
+      layout:decorate="~{/common/layout-left-one}">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -63,7 +63,7 @@
 <body>
 <gmpx-api-loader key="AIzaSyBvskCpZg5-38p-M_xpfRiXYXYeqAF_ZD4" solution-channel="GMP_QB_addressselection_v4_cABC">
 </gmpx-api-loader>
-<main class="settings-page" role="main">
+<main class="Page-Layout" id="mainPage">
     <th:block layout:fragment="content">
     <div class="settings-shell">
         <section
@@ -1196,8 +1196,8 @@
                         </section>
                     </section>
                 </div>
-    </div>
-</th:block>
+        </div>
+    </th:block>
 </main>
 
 <th:block layout:fragment="modals">

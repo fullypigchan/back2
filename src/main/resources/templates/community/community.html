@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/common/layout}">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,8 +13,9 @@
         <script defer src="/js/community/event.js"></script>
     </head>
     <body>
-        <main class="communityPage" th:data-member-id="${memberId}" th:data-profile-image="${profileImageUrl}">
-            <section class="timelinePanel communityTimeline">
+        <main class="communityPage">
+            <th:block layout:fragment="content">
+            <section class="timelinePanel communityTimeline"  th:data-member-id="${memberId}" th:data-profile-image="${profileImageUrl}">
                 <header class="communityTopbar">
                     <button type="button" class="communityIconButton" aria-label="뒤로 가기">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -129,6 +131,7 @@
                     </div>
                 </section>
             </section>
+            </th:block>
         </main>
         <!-- 동적 드롭다운 마운트 지점: event.js의 공유/더보기 드롭다운이 여기에 append/remove 된다 -->
         <div id="layers" aria-hidden="true"></div>

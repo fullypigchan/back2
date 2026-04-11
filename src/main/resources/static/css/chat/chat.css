@@ -34,7 +34,6 @@ body {
 .Chat-Layout {
     margin: 0 auto;
     box-sizing: border-box;
-    width: 1257px;
     max-width: 100%;
     flex-shrink: 1;
     flex-grow: 1;

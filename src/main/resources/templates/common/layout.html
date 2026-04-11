@@ -6,6 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
+<main class="Page-Layout" id="mainPage">
     <header th:replace="/common/header::header"></header>
 
     <th:block layout:fragment="content"></th:block>
@@ -13,5 +14,8 @@
     <th:block layout:fragment="video_ai"></th:block>
 
     <footer th:replace="/common/footer::footer"></footer>
+</main>
+    <th:block layout:fragment="modals"></th:block>
+
 </body>
 </html>

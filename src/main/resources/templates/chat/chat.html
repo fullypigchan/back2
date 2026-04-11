@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{/common/layout-chat}">
+      layout:decorate="~{/common/layout-left-one}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +14,10 @@
     <script src="/js/chat/event.js" th:src="@{/js/chat/event.js?v=20260403a}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
-<body th:attr="data-member-id=${memberId},data-member-name=${memberName},data-member-handle=${memberHandle},data-partner-id=${partnerId},data-partner-name=${partnerName},data-partner-handle=${partnerHandle},data-conversation-id=${conversationId},data-profile-image=${profileImageUrl}">
+<body>
 <main class="Chat-Main">
     <th:block layout:fragment="content">
-    <div class="Chat-Layout">
+    <div class="Chat-Layout" th:attr="data-member-id=${memberId},data-member-name=${memberName},data-member-handle=${memberHandle},data-partner-id=${partnerId},data-partner-name=${partnerName},data-partner-handle=${partnerHandle},data-conversation-id=${conversationId},data-profile-image=${profileImageUrl}">
         <div class="Chat-Wrapper">
             <div class="Chat-Container">
                 <div class="Chat-Contents-Wrapper">
