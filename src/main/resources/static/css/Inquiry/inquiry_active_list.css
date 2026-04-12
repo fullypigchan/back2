@@ -309,7 +309,7 @@ button {
 .activity-toolbar-bottom {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 10px;
     padding: 0 14px 14px;
     border-bottom: 1px solid #eff3f4;
@@ -318,6 +318,7 @@ button {
 .activity-toolbar__chips {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 8px;
     flex-wrap: wrap;
 }
