@@ -114,6 +114,12 @@ public class MypageAPIController implements MypageAPIControllerDocs {
         // 이 변환은 저장 모델을 바꾸는 작업이 아니라, 화면 응답 전용 표현을 만드는 단계다.
         // 따라서 controller에서 처리하는 편이 현재 프로젝트 구조와 가장 잘 맞는다.
         result.getPosts().forEach(post -> {
+            if (post.getMemberProfileFileName() != null && !post.getMemberProfileFileName().isBlank()) {
+                post.setMemberProfileFileName(
+                        toPresignedUrlOrOriginal(post.getMemberProfileFileName())
+                );
+            }
+
             if (post.getPostFiles() == null || post.getPostFiles().isEmpty()) {
                 return;
             }
@@ -136,6 +142,12 @@ public class MypageAPIController implements MypageAPIControllerDocs {
         PostWithPagingDTO result = postService.getMyPosts(page, memberId);
 
         result.getPosts().forEach(post -> {
+            if (post.getMemberProfileFileName() != null && !post.getMemberProfileFileName().isBlank()) {
+                post.setMemberProfileFileName(
+                        toPresignedUrlOrOriginal(post.getMemberProfileFileName())
+                );
+            }
+
             if (post.getPostFiles() == null || post.getPostFiles().isEmpty()) {
                 return;
             }
@@ -162,6 +174,12 @@ public class MypageAPIController implements MypageAPIControllerDocs {
         // 댓글 목록도 게시글 카드와 같은 첨부파일 구조를 가지므로,
         // 브라우저가 직접 쓸 수 있도록 presigned URL로 가공해서 내려준다.
         result.getPosts().forEach(post -> {
+            if (post.getMemberProfileFileName() != null && !post.getMemberProfileFileName().isBlank()) {
+                post.setMemberProfileFileName(
+                        toPresignedUrlOrOriginal(post.getMemberProfileFileName())
+                );
+            }
+
             if (post.getPostFiles() == null || post.getPostFiles().isEmpty()) {
                 return;
             }
@@ -185,6 +203,12 @@ public class MypageAPIController implements MypageAPIControllerDocs {
         PostWithPagingDTO result = postService.getMyReplies(page, memberId);
 
         result.getPosts().forEach(post -> {
+            if (post.getMemberProfileFileName() != null && !post.getMemberProfileFileName().isBlank()) {
+                post.setMemberProfileFileName(
+                        toPresignedUrlOrOriginal(post.getMemberProfileFileName())
+                );
+            }
+
             if (post.getPostFiles() == null || post.getPostFiles().isEmpty()) {
                 return;
             }

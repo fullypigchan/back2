@@ -87,6 +87,36 @@ window.onload = function () {
     const replyMediaAltInput = q("[data-media-alt-input]");
     const replyMediaAltCount = q("[data-media-alt-count]");
 
+    // draftView는 원래 Draft Panel 섹션(아래 line 1600대)에서 선언되지만,
+    // showReplyPanel 헬퍼가 답글 모달 서브 패널 전환에 draftView를 포함하도록
+    // 설계되어 있어 상단으로 끌어올렸다. 실제 DOM 요소 할당은 기존 위치에서 그대로 수행한다.
+    let draftView = null;
+
+    // ===== 답글 모달 서브 패널 전환 헬퍼 =====
+    // 답글 작성 모달은 내부에 여러 개의 서브 뷰(작성/태그/위치/미디어/상품/임시저장)를 가진다.
+    // 한 번에 한 뷰만 보여야 하므로, 매번 각 요소의 hidden 속성을 직접 토글하는 대신
+    // 이 헬퍼를 호출해서 "어떤 패널을 보이게 할지"만 이름으로 지정한다.
+    //
+    // 사용 예:
+    //   showReplyPanel("tag");       // 태그 패널만 보이고 나머지는 숨김
+    //   showReplyPanel("compose");   // 기본 작성 뷰로 복귀
+    //
+    // 요소가 아직 없는 페이지 상태에서도 안전하게 동작하도록 null 체크를 둔다.
+    function showReplyPanel(panelName) {
+        const panels = {
+            compose:  composeView,
+            tag:      replyTagView,
+            media:    replyMediaView,
+            location: replyLocationView,
+            product:  replyProductView,
+            draft:    draftView,
+        };
+        for (const name in panels) {
+            const el = panels[name];
+            if (el) el.hidden = (name !== panelName);
+        }
+    }
+
     // ===== 2. State =====
     let activeReplyTrigger = null,
         savedReplySelection = null,
@@ -115,6 +145,13 @@ window.onload = function () {
         replyMaxLength = 500;
     const emojiRecentsKey = "mypage_reply_recent_emojis";
     const maxRecentEmojis = 18;
+
+    // 모달이 열려 있는 동안 body에 붙이는 CSS 클래스 이름.
+    // mypage.css의 `body.modal-open { overflow: hidden; }` 규칙을 트리거해서
+    // 배경 페이지가 스크롤되지 않도록 막는다.
+    // 파일 전체(여러 모달 열기/닫기 지점)에서 이 클래스를 반복 사용하므로,
+    // 오타 한 번에 스크롤 잠금이 실패하는 일을 막기 위해 상수로 한 곳에서 관리한다.
+    const BODY_MODAL_OPEN_CLASS = "modal-open";
 
     // ===== 3. Config =====
     const emojiCategoryMeta = {
@@ -638,8 +675,8 @@ window.onload = function () {
         if (!composeView || !replyTagView || !isReplyImageSet()) return;
         closeEmojiPicker();
         pendingTaggedUsers = cloneTaggedUsers(selectedTaggedUsers);
-        composeView.hidden = true;
-        replyTagView.hidden = false;
+        // 태그 패널을 보이고 나머지 서브뷰는 숨긴다.
+        showReplyPanel("tag");
         if (replyTagSearchInput) replyTagSearchInput.value = "";
         renderTagChipList();
         renderTagResults([]);
@@ -650,8 +687,8 @@ window.onload = function () {
 
     function closeTagPanel({restoreFocus = true} = {}) {
         if (!composeView || !replyTagView || replyTagView.hidden) return;
-        replyTagView.hidden = true;
-        composeView.hidden = false;
+        // 태그 패널을 닫고 기본 작성 뷰로 돌아간다.
+        showReplyPanel("compose");
         pendingTaggedUsers = cloneTaggedUsers(selectedTaggedUsers);
         if (replyTagSearchInput) replyTagSearchInput.value = "";
         renderTagChipList();
@@ -773,8 +810,8 @@ window.onload = function () {
         closeEmojiPicker();
         pendingReplyMediaEdits = cloneReplyMediaEdits(replyMediaEdits);
         activeReplyMediaIndex = 0;
-        composeView.hidden = true;
-        replyMediaView.hidden = false;
+        // 미디어 편집 패널만 보이고 나머지 서브뷰는 숨긴다.
+        showReplyPanel("media");
         renderMediaEditor();
         window.requestAnimationFrame(() => {
             replyMediaAltInput?.focus();
@@ -788,8 +825,8 @@ window.onload = function () {
         if (!composeView || !replyMediaView || replyMediaView.hidden) return;
         if (discardChanges)
             pendingReplyMediaEdits = cloneReplyMediaEdits(replyMediaEdits);
-        replyMediaView.hidden = true;
-        composeView.hidden = false;
+        // 미디어 패널을 닫고 기본 작성 뷰로 복귀한다.
+        showReplyPanel("compose");
         if (restoreFocus)
             window.requestAnimationFrame(() => {
                 (replyMediaAltTrigger && !replyMediaAltTrigger.hidden
@@ -881,8 +918,8 @@ window.onload = function () {
         if (!composeView || !replyLocationView) return;
         closeEmojiPicker();
         pendingLocation = selectedLocation;
-        composeView.hidden = true;
-        replyLocationView.hidden = false;
+        // 위치 패널만 보이고 나머지 서브뷰는 숨긴다.
+        showReplyPanel("location");
         if (replyLocationSearchInput) replyLocationSearchInput.value = "";
         renderLocationList();
         syncLocationUI();
@@ -894,8 +931,8 @@ window.onload = function () {
     function closeLocationPanel({restoreFocus = true} = {}) {
         if (!composeView || !replyLocationView || replyLocationView.hidden)
             return;
-        replyLocationView.hidden = true;
-        composeView.hidden = false;
+        // 위치 패널을 닫고 기본 작성 뷰로 복귀한다.
+        showReplyPanel("compose");
         if (replyLocationSearchInput) replyLocationSearchInput.value = "";
         pendingLocation = selectedLocation;
         renderLocationList();
@@ -1476,7 +1513,7 @@ window.onload = function () {
         if (!replyModalOverlay || !replyEditor) return;
         activeReplyTrigger = button;
         shouldRestoreReplyEditorAfterEmojiInsert = false;
-        document.body.classList.add("modal-open");
+        document.body.classList.add(BODY_MODAL_OPEN_CLASS);
         replyModalOverlay.hidden = false;
         populateReplyModal(button);
         closeEmojiPicker();
@@ -1498,11 +1535,8 @@ window.onload = function () {
         resetReplyAttachment();
         if (replyEmojiSearchInput) replyEmojiSearchInput.value = "";
         if (replyLocationSearchInput) replyLocationSearchInput.value = "";
-        if (composeView) composeView.hidden = false;
-        if (replyLocationView) replyLocationView.hidden = true;
-        if (replyTagView) replyTagView.hidden = true;
-        if (replyMediaView) replyMediaView.hidden = true;
-        if (replyProductView) replyProductView.hidden = true;
+        // 답글 모달을 초기 상태로 되돌린다: 기본 작성 뷰만 보이고 나머지 서브뷰는 모두 숨긴다.
+        showReplyPanel("compose");
         closeDraftPanel({restoreFocus: false});
         renderDraftPanel();
         renderLocationList();
@@ -1536,12 +1570,15 @@ window.onload = function () {
         if (!skipConfirm && !canCloseReplyModal()) return;
         shouldRestoreReplyEditorAfterEmojiInsert = false;
         replyModalOverlay.hidden = true;
-        document.body.classList.remove("modal-open");
+        document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
         closeEmojiPicker();
         closeLocationPanel({restoreFocus: false});
         closeTagPanel({restoreFocus: false});
         closeMediaEditor({restoreFocus: false, discardChanges: true});
         closeDraftPanel({restoreFocus: false});
+        // 상품 선택 패널은 별도 close 함수가 있지만,
+        // 여기서는 답글 모달 자체를 닫는 상황이라 composeView로 되돌릴 필요 없이
+        // 상품 패널만 숨기면 된다. showReplyPanel을 사용하지 않는 이유.
         if (replyProductView) replyProductView.hidden = true;
         if (replyEditor) replyEditor.textContent = "";
         savedReplySelection = null;
@@ -1597,7 +1634,9 @@ window.onload = function () {
     }
 
     // ===== 6. Draft Panel =====
-    const draftView = q(".tweet-modal__draft-view");
+    // draftView 선언은 파일 상단으로 끌어올렸다(showReplyPanel 헬퍼에서 참조 필요).
+    // 여기서는 할당만 수행한다.
+    draftView = q(".tweet-modal__draft-view");
     const draftButton = q(".tweet-modal__draft");
     const draftBackButton = draftView?.querySelector(".draft-panel__back");
     const draftActionButton = draftView?.querySelector(".draft-panel__action");
@@ -1796,16 +1835,16 @@ window.onload = function () {
     function openDraftPanel() {
         if (!composeView || !draftView) return;
         renderDraftPanel();
-        composeView.hidden = true;
-        draftView.hidden = false;
+        // 임시저장 패널만 보이고 나머지 서브뷰는 숨긴다.
+        showReplyPanel("draft");
     }
 
     function closeDraftPanel({restoreFocus = true} = {}) {
         if (!composeView || !draftView) return;
         resetDraftPanel();
         renderDraftPanel();
-        draftView.hidden = true;
-        composeView.hidden = false;
+        // 임시저장 패널을 닫고 기본 작성 뷰로 복귀한다.
+        showReplyPanel("compose");
         if (restoreFocus) draftButton?.focus();
     }
 
@@ -1860,14 +1899,14 @@ window.onload = function () {
     function openProductSelectPanel() {
         if (!replyProductView) return;
         renderProductList();
-        if (composeView) composeView.hidden = true;
-        replyProductView.hidden = false;
+        // 상품 선택 패널만 보이고 나머지 서브뷰는 숨긴다.
+        showReplyPanel("product");
     }
 
     function closeProductSelectPanel() {
         if (!replyProductView) return;
-        replyProductView.hidden = true;
-        if (composeView) composeView.hidden = false;
+        // 상품 선택 패널을 닫고 기본 작성 뷰로 복귀한다.
+        showReplyPanel("compose");
     }
 
     function renderProductList() {
@@ -2189,6 +2228,39 @@ window.onload = function () {
             }
         });
     }
+
+    // === 견적요청 모달 ===
+    // 이 모달의 열기/닫기/확인창("게시물을 삭제하시겠어요?")은 모두 eventwo.js가 담당한다.
+    // 마이페이지는 두 가지 일만 하면 된다:
+    //   (1) "견적요청" 버튼이 눌리면 eventwo.js가 연결해둔 숨겨진 작성 버튼(#createPostButton)을
+    //       대신 클릭해서 모달을 연다.
+    //   (2) 모달이 열려 있는 동안 배경(body)의 스크롤이 막히도록 body.modal-open 클래스를 붙여준다.
+    //       eventwo.js는 overlay.hidden 속성만 바꾸고 body 클래스는 건드리지 않기 때문에
+    //       여기서 대신 관리한다.
+    //
+    // 이렇게 위임하면:
+    //   - eventwo.js의 "입력 중이면 닫기 전에 확인" 로직이 그대로 동작한다(예전 코드는 이걸 우회했다).
+    //   - 열기/닫기 처리가 한 곳(eventwo.js)에 모여 유지보수가 쉬워진다.
+    const composerOverlay = document.getElementById("composerModalOverlay");
+
+    // overlay.hidden 속성이 바뀔 때마다 body.modal-open 클래스를 맞춰준다.
+    // MutationObserver를 쓰면 어떤 경로(X 버튼/overlay 클릭/확인창 확인)로 닫히더라도
+    // 자동으로 동기화되므로 각 이벤트마다 일일이 연결하지 않아도 된다.
+    if (composerOverlay) {
+        const syncBodyModalClass = () => {
+            document.body.classList.toggle(BODY_MODAL_OPEN_CLASS, !composerOverlay.hidden);
+        };
+        new MutationObserver(syncBodyModalClass).observe(composerOverlay, {
+            attributes: true,
+            attributeFilter: ["hidden"],
+        });
+    }
+
+    // "견적요청" 버튼 클릭 → 숨겨진 작성 버튼을 대신 눌러 eventwo.js의 열기 로직을 실행한다.
+    document.querySelector(".Profile-Edit-Btn.Request")
+        ?.addEventListener("click", () => {
+            document.getElementById("createPostButton")?.click();
+        });
 
     // 사이드바 견적 요청 목록은 탭 전환과 무관한 요약 카드라서
     // 마이페이지 진입 시 한 번만 읽어와서 렌더한다.
@@ -2589,13 +2661,13 @@ window.onload = function () {
     function openModal(el) {
         el?.classList.remove("off");
         modalBackDrop?.classList.remove("off");
-        document.body.classList.add("modal-open");
+        document.body.classList.add(BODY_MODAL_OPEN_CLASS);
     }
 
     function closeModal(el) {
         el?.classList.add("off");
         modalBackDrop?.classList.add("off");
-        document.body.classList.remove("modal-open");
+        document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
     }
 
     modalBackDrop?.addEventListener("click", () => {
@@ -2604,7 +2676,7 @@ window.onload = function () {
         );
         opens.forEach((m) => m.classList.add("off"));
         modalBackDrop.classList.add("off");
-        document.body.classList.remove("modal-open");
+        document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
     });
     document
         .querySelector(".Profile-Edit-Btn.Edit")
@@ -2990,18 +3062,24 @@ window.onload = function () {
     }
 
     // 소모달 열기/닫기 헬퍼
+    // 프로필 수정 모달(openModal/closeModal)과 동일하게 body.modal-open을
+    // 함께 토글해서 모달이 떠 있는 동안 배경 페이지 스크롤이 잠기도록 한다.
+    // 이 일관성이 없으면 삭제/차단 같은 소모달을 열었을 때만 배경이 스크롤되는
+    // 사소한 UX 버그가 생긴다.
     function openSmallModal(sel) {
         closeAllMoreMenus();
         const m = document.querySelector(sel);
         if (m) {
             m.classList.remove("off");
             modalBackDrop?.classList.remove("off");
+            document.body.classList.add(BODY_MODAL_OPEN_CLASS);
         }
     }
 
     function closeSmallModal(sel) {
         document.querySelector(sel)?.classList.add("off");
         modalBackDrop?.classList.add("off");
+        document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
     }
 
     function getProfileHandleText() {
@@ -3704,7 +3782,7 @@ window.onload = function () {
         if (!activeShareModal) return;
         activeShareModal.remove();
         activeShareModal = null;
-        document.body.classList.remove("modal-open");
+        document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
     }
 
     function openShareChatModal() {
@@ -3767,7 +3845,7 @@ window.onload = function () {
             }),
         );
         document.body.appendChild(modal);
-        document.body.classList.add("modal-open");
+        document.body.classList.add(BODY_MODAL_OPEN_CLASS);
         activeShareModal = modal;
     }
 
@@ -3816,7 +3894,7 @@ window.onload = function () {
             }
         });
         document.body.appendChild(modal);
-        document.body.classList.add("modal-open");
+        document.body.classList.add(BODY_MODAL_OPEN_CLASS);
         activeShareModal = modal;
     }
 
@@ -4330,12 +4408,12 @@ window.onload = function () {
         .querySelector(".Post-Media-Preview-Close")
         ?.addEventListener("click", () => {
             mediaPreviewOverlay?.classList.add("off");
-            document.body.classList.remove("modal-open");
+            document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
         });
     mediaPreviewOverlay?.addEventListener("click", (e) => {
         if (e.target === mediaPreviewOverlay) {
             mediaPreviewOverlay.classList.add("off");
-            document.body.classList.remove("modal-open");
+            document.body.classList.remove(BODY_MODAL_OPEN_CLASS);
         }
     });
     document.querySelector(".Primary-Column")?.addEventListener(
@@ -4347,7 +4425,7 @@ window.onload = function () {
                 mediaPreviewImage.src = imgEl.src;
                 mediaPreviewImage.alt = imgEl.alt;
                 mediaPreviewOverlay.classList.remove("off");
-                document.body.classList.add("modal-open");
+                document.body.classList.add(BODY_MODAL_OPEN_CLASS);
             }
         },
         true,

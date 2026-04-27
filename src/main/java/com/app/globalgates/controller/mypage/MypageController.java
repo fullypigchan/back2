@@ -13,6 +13,7 @@ import com.app.globalgates.service.SubscriptionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,9 @@ public class MypageController {
     private final FollowService followService;
     private final PostService postService;
     private final SubscriptionService subscriptionService;
+
+    @Value("${google.maps.api-key:}")
+    private String googleMapsApiKey;
 
     @GetMapping("/mypage")
     public String goToMypage(@RequestParam(required = false) Long memberId, HttpServletRequest request, Model model) {
@@ -67,7 +71,7 @@ public class MypageController {
 
         // 프로필/배너 파일이 없을 때도 화면이 깨지지 않도록 기본 이미지를 먼저 둔다.
         String profileImageUrl = "/images/profile/default_image.png";
-        String bannerImageUrl = "/images/profile/basic-banner.jpg";
+        String bannerImageUrl = "/images/profile/basic-banner.png";
 
         MemberProfileFileDTO profileFile = memberProfileFileDAO.findByMemberId(member.getId());
         MemberProfileFileDTO bannerFile = memberProfileFileDAO.findBannerByMemberId(member.getId());
@@ -138,6 +142,7 @@ public class MypageController {
         model.addAttribute("connectorCount", connectorCount);
         model.addAttribute("myPostCount", myPostCount);
         model.addAttribute("myFollowings", myFollowings);
+        model.addAttribute("googleMapsApiKey", googleMapsApiKey);
         return "mypage/mypage";
     }
 }

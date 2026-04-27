@@ -10,6 +10,7 @@
     />
 </head>
 <body th:attr="data-google-maps-api-key=${googleMapsApiKey}">
+<div th:fragment="estimationModal" th:attr="data-google-maps-api-key=${googleMapsApiKey}">
 <button type="button" id="createPostButton" hidden aria-hidden="true">
     요청하기
 </button>
@@ -929,8 +930,12 @@
         <p class="share-sheet__empty" id="estimationShareChatEmpty" hidden>검색된 전문가가 없습니다.</p>
     </div>
 </div>
+</div>
 </body>
 <!--<script src="/js/main/event.js"></script>-->
 <script src="/js/estimation/estimation-regist/eventwo.js"></script>
+<!-- 폼 내부 로직(유효성, 태그, 상품, 위치, 제출)은 공용 모듈이 담당한다. -->
+<script src="/js/estimation/estimation-form.js"></script>
+<!-- 독립 페이지 전용 모달 제어 + auto-open -->
 <script src="/js/estimation/estimation-regist/event.js"></script>
 </html>

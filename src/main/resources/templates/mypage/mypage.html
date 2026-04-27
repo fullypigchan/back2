@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지</title>
     <link rel="stylesheet" href="/css/mypage/mypage.css">
+    <link rel="stylesheet" th:if="${member.memberRole != null and member.memberRole.name() == 'EXPERT'}"
+          href="/css/estimation/estimation-regist.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <script th:inline="javascript">
         // 목록 탭은 같은 UI를 쓰고 owner/visitor에 따라 API만 다르게 호출하면 되므로
@@ -50,7 +52,7 @@
             <!-- ====== 프로필 섹션 ====== -->
             <div class="Profile-Section">
                 <div class="Profile-Banner">
-                    <img th:src="${bannerImageUrl}" src="/images/main/lown1.jpg" alt="profile-banner">
+                    <img th:src="${bannerImageUrl}" alt="profile-banner">
                 </div>
                 <div class="Profile-Avatar-Row">
                     <div class="Profile-Avatar-Container" data-testid="UserAvatar-Container-JeongSIkLe247">
@@ -1230,6 +1232,15 @@
         <button type="button" class="Small-Button Cancel Delete-Product-Close">취소</button>
     </div>
 </div>
+<!-- 견적요청 모달: 상대가 EXPERT일 때만 삽입.
+     모달 열기/닫기는 mypage/event.js의 openEstimationModal/closeEstimationModal이 담당하고,
+     폼 내부 로직은 estimation-form.js가 담당한다.
+     독립 페이지 전용 auto-open(estimation-regist/event.js)은 여기서 로드하지 않는다. -->
+<th:block th:if="${member.memberRole != null and member.memberRole.name() == 'EXPERT'}">
+    <div th:replace="~{estimation/estimation-regist :: estimationModal}"></div>
+    <script src="/js/estimation/estimation-regist/eventwo.js"></script>
+    <script src="/js/estimation/estimation-form.js"></script>
+</th:block>
 </th:block>
 </body>
 </html>

@@ -62,7 +62,7 @@
             <div class="accountMenuWrap" id="accountMenuWrap">
                 <div class="profile-card" id="accountCard">
                     <div class="profile-avatar" id="accountAvatar">
-                        <img th:src="${member.fileName != null ? member.fileName : '/images/profile/default_image.png'}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+                        <img th:src="${profileImageUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
                     </div>
                     <div class="profile-info">
                         <span class="profile-name" id="accountName" th:text="${member.memberName ?: ''}"></span>

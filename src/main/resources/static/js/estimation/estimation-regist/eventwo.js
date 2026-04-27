@@ -1,7 +1,8 @@
 // 메인 홈 화면의 모든 상호작용을 한 파일 안에서 초기화한다.
-// 현재 구조는 모듈 분리 대신 `window.onload` 내부에 기능별 setup 함수를 두고,
+// 현재 구조는 모듈 분리 대신 load 이벤트 내부에 기능별 setup 함수를 두고,
 // DOMContentLoaded 시점에 필요한 UI만 순서대로 연결하는 방식이다.
-window.onload = () => {
+// NOTE: window.onload 대신 addEventListener를 사용해야 여러 스크립트의 load 핸들러가 공존한다.
+window.addEventListener("load", () => {
     // 게시글 작성 모달 관련 초기화: 상태, 모달 열기/닫기, 태그, 카테고리, 보드 선택, 툴바, 임시저장.
     setupComposerState();
     setupComposerModal();
@@ -21,7 +22,7 @@ window.onload = () => {
     setupConnectButtons();
     setupMoreMenu();
     setupAccountMenu();
-};
+});
 
 function showTimedToast({
     toastElement,
@@ -1494,7 +1495,7 @@ function setupComposerModal() {
 function setupComposerTagInput() {
     const composerSection = document.getElementById("composerSection");
     const tagToggle = document.getElementById("composerTagToggle");
-    const addTag = document.querySelector("#devTags");
+    const addTag = document.querySelector("#productTag");
     const tagEditor = document.getElementById("composerTagEditor");
     const inputTag = document.getElementById("composerTagInput");
     const regExp = /[\{\}\[\]\?.,;:|\)*~`!^\-_+<>@\#$%&\\=\(\'\"]/;

@@ -230,9 +230,13 @@ const mypageLayout = (() => {
           `;
         }
 
+        const avatarHtml = post.memberProfileFileName
+            ? `<div class="Post-Avatar Post-Avatar--Image"><img class="Post-Avatar-Image" src="${post.memberProfileFileName}" alt="프로필 이미지"></div>`
+            : `<div class="Post-Avatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>`;
+
         return `<article class="Post-Card" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}">
               <div class="Post-Avatar-Wrapper">
-                  <div class="Post-Avatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>
+                  ${avatarHtml}
               </div>
               <div class="Post-Body">
                   <header class="Post-Header">
