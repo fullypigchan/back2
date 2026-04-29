@@ -27,14 +27,25 @@ public class PostTempService {
     }
 
 //    임시저장 불러오기 (조회 후 삭제)
-    public PostTempDTO loadPostTemp(Long id) {
-        PostTempDTO postTempDTO = postTempDAO.findById(id).orElseThrow();
+    public PostTempDTO loadPostTemp(Long id, Long requesterId) {
+        // 본인 임시저장만 불러오기 가능 (IDOR 방어)
+        PostTempDTO postTempDTO = postTempDAO.findById(id)
+                .orElseThrow(() -> new IllegalStateException("임시저장을 찾을 수 없습니다."));
+        if (!requesterId.equals(postTempDTO.getMemberId())) {
+            throw new IllegalStateException("본인의 임시저장만 불러올 수 있습니다.");
+        }
         postTempDAO.delete(id);
         return postTempDTO;
     }
 
 //    임시저장 개별 삭제
-    public void deletePostTemp(Long id) {
+    public void deletePostTemp(Long id, Long requesterId) {
+        // 본인 임시저장만 삭제 가능 (IDOR 방어)
+        PostTempDTO postTempDTO = postTempDAO.findById(id)
+                .orElseThrow(() -> new IllegalStateException("임시저장을 찾을 수 없습니다."));
+        if (!requesterId.equals(postTempDTO.getMemberId())) {
+            throw new IllegalStateException("본인의 임시저장만 삭제할 수 있습니다.");
+        }
         postTempDAO.delete(id);
     }
 

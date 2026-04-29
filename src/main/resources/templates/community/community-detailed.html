@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>커뮤니티</title>
+  <link rel="stylesheet" href="/css/common/mobile-nav.css" />
   <link rel="stylesheet" href="/css/community/community-detailed.css" />
   <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
+  <script src="/js/common/mobile-nav.js" defer></script>
   <script src="/js/community/service.js"></script>
   <script src="/js/community/community-detailed-service.js"></script>
   <script src="/js/community/community-detailed-layout.js"></script>
@@ -370,6 +372,10 @@
     </div><!-- /.tweet-modal__product-view -->
   </div><!-- /.tweet-modal -->
 </div><!-- /.tweet-modal-overlay -->
+
+<!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+<div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+<div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 
 </body>
 </html>

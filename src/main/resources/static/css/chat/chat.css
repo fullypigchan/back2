@@ -988,7 +988,7 @@ body {
     align-items: flex-start;
 }
 
-.Right, .MyReply, .Reply {
+.Right {
     flex-direction: column-reverse;
     align-items: flex-end;
 }
@@ -1055,36 +1055,9 @@ body {
     color: inherit;
 }
 
-.MyReply-Wrapper {
-    position: relative;
-    display: flex;
-    padding: 4px 12px;
-    justify-content: flex-end;
-    border-radius: 1rem;
-    border: 1px solid #1e9cf1;
-    background-color: white;
-}
-
 .opponent {
     border: none;
     background-color: #f0f4f5;
-}
-
-.MyReply-Container {
-    display: inline-flex;
-    position: relative;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    color: #0f141a;
-    gap: 8px;
-    overflow: hidden;
-}
-
-.MyReply-Content {
-    font-size: 12px;
-    list-style: 15px;
-    font-weight: 400;
-    color: inherit; 
 }
 
 .Message-SendTime {
@@ -1135,13 +1108,11 @@ body {
     border-color: #93c5fd;
 }
 
-.Each-Main-Content.Left .Message-Reactions,
-.Each-Main-Content.Reply .Message-Reactions {
+.Each-Main-Content.Left .Message-Reactions {
     left: 8px;
 }
 
-.Each-Main-Content.Right .Message-Reactions,
-.Each-Main-Content.MyReply .Message-Reactions {
+.Each-Main-Content.Right .Message-Reactions {
     right: 8px;
 }
 
@@ -1188,38 +1159,6 @@ body {
 
 .Message-Button:hover {
     background-color: #f0f4f5;
-}
-
-.Message-Reply {
-    display: flex;
-    flex-direction: column;
-    margin-top: 8px;
-    align-items: flex-end;
-    gap: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-    cursor: pointer;
-}
-
-.Reply-User-Info {
-    display: flex;
-    align-items: center;
-    padding-left: 8px;
-    padding-right: 8px;
-    text-align: end;
-    gap: 4px;
-}
-
-.Reply-User-Info svg {
-    display: inline-block;
-    color: #52636f;
-}
-
-.Reply-User-Info span {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 16px;
-    color: #52636f;
 }
 
 .CallEnd-Wrapper {
@@ -1274,72 +1213,11 @@ body {
     margin-right: auto;
 }
 
-.ChatPage-Reply-Container {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0px 4px;
-}
-
 .ChatPage-Input-Container {
     display: flex;
     width: 100%;
     align-items: flex-end;
     gap: 8px;
-}
-
-.Reply-Text-Wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.Reply-Text-User {
-    color: #52636f;
-    font-size: 11px;
-    font-weight: 400;
-    line-height: 12px;
-}
-
-.Reply-Text-Content {
-    color: #0f141a;
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 16px;
-}
-
-.Reply-Close-Button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.Reply-Close {
-    display: inline-flex;
-    height: 24px;
-    min-width: 24px;
-    align-items: center;
-    justify-content: center;
-    padding-left: 0px;
-    padding-right: 0px;
-    gap: 4px;
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: 9999px;
-    font-size: 14px;
-    line-height: 16px;
-
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-
-    cursor: pointer;
-}
-
-.Reply-Close:hover {
-    background-color: #f0f4f5;
 }
 
 .ChatPage-Input {
@@ -3058,11 +2936,6 @@ button[name="delete"] {
         font-size: 14px;
     }
 
-    /* 답글 미리보기 폰트 */
-    .MyReply-Content {
-        font-size: 11px;
-    }
-
     /* 채팅 메뉴 버튼 크기 */
     .Chat-Extend-Menu-Container {
         padding: 4px;
@@ -3170,3 +3043,41 @@ button[name="delete"] {
     font-size: 11px;
     color: #9ca3af;
 }
+
+/* 스크린샷 차단 ON: 본문 선택/드래그/우클릭 차단 (이미지 다운로드·텍스트 복사 방지) */
+.ChatPage-Layout.screen-blocked .ChatPage-Main-Container,
+.ChatPage-Layout.screen-blocked .ChatPage-Header,
+.ChatPage-Layout.screen-blocked .ChatPage-Bottom {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+.ChatPage-Layout.screen-blocked img {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+/* 모바일 nav는 /css/common/mobile-nav.css가 담당. 채팅 전용 보정만 유지. */
+@media (max-width: 600px) {
+    /* 사용자 목록 마지막 항목이 하단 nav에 가려지지 않게 */
+    .UserList-Wrapper {
+        padding-bottom: 53px;
+    }
+}
+
+/* 사라진 메시지 윈도우 만료 마커 — 다른 방에 있을 때 알림용 */
+.UserList-EachUser.disappear-expired {
+    position: relative;
+}
+.UserList-EachUser.disappear-expired::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 0 2px #fff;
+}
+

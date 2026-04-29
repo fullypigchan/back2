@@ -1351,7 +1351,7 @@ window.onload = () => {
       const postId = likeBtn.dataset.postId;
       if (postId && memberId) {
         if (on) fetch('/api/main/likes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(err => console.error(err));
-        else fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method:'POST' }).catch(err => console.error(err));
+        else fetch(`/api/main/likes/posts/${postId}/delete`, { method:'POST' }).catch(err => console.error(err));
       }
       return;
     }

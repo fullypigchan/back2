@@ -60,8 +60,7 @@ public class SecurityConfig {
                                 "/static/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/image/**",
-                                "/api/v1/blocks/**").permitAll()
+                                "/image/**").permitAll()
                         .requestMatchers("/admin/**").hasRole(MemberRole.ADMIN.name())
                         .anyRequest().authenticated()
                 )

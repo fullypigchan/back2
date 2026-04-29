@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,11 +26,15 @@ public class BlockAPIController {
     private final MemberDAO memberDAO;
     private final ChatRoomDAO chatRoomDAO;
 
-//    차단 추가
+//    차단 추가 — blockerId는 항상 인증된 사용자에서 추출 (body의 blockerId 무시)
     @PostMapping
-    public ResponseEntity<Void> block(@RequestBody Map<String, Object> body) {
-        Long blockerId = Long.valueOf(body.get("blockerId").toString());
+    public ResponseEntity<Void> block(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, Object> body) {
+        if (userDetails == null) return ResponseEntity.status(401).build();
+        Long blockerId = userDetails.getId();
         Long blockedId = Long.valueOf(body.get("blockedId").toString());
+        if (blockerId.equals(blockedId)) return ResponseEntity.badRequest().build();
         Long conversationId = body.get("conversationId") != null
                 ? Long.valueOf(body.get("conversationId").toString()) : null;
         log.info("차단 추가 - blockerId: {}, blockedId: {}, conversationId: {}", blockerId, blockedId, conversationId);
@@ -47,10 +52,14 @@ public class BlockAPIController {
         return ResponseEntity.ok().build();
     }
 
-//    차단 해제
+//    차단 해제 — blockerId는 항상 인증된 사용자
     @DeleteMapping
-    public ResponseEntity<Void> unblock(@RequestParam Long blockerId, @RequestParam Long blockedId,
-                                         @RequestParam(required = false) Long conversationId) {
+    public ResponseEntity<Void> unblock(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam Long blockedId,
+            @RequestParam(required = false) Long conversationId) {
+        if (userDetails == null) return ResponseEntity.status(401).build();
+        Long blockerId = userDetails.getId();
         log.info("차단 해제 - blockerId: {}, blockedId: {}, conversationId: {}", blockerId, blockedId, conversationId);
         if (conversationId != null) {
             Long lastMessageId = chatRoomDAO.findLastMessageId(conversationId);
@@ -61,20 +70,25 @@ public class BlockAPIController {
         return ResponseEntity.ok().build();
     }
 
-//    차단 여부 조회
+//    차단 여부 조회 — blockerId는 본인. 다른 사람 차단 상태는 알 수 없음.
     @GetMapping("/check")
     public ResponseEntity<Map<String, Boolean>> isBlocked(
-            @RequestParam Long blockerId, @RequestParam Long blockedId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam Long blockedId) {
+        if (userDetails == null) return ResponseEntity.status(401).build();
+        Long blockerId = userDetails.getId();
         boolean blocked = blockService.getBlock(blockerId, blockedId).isPresent();
         return ResponseEntity.ok(Map.of("blocked", blocked));
     }
 
-//    차단 목록 조회
-    @GetMapping("/{blockerId}")
-    public ResponseEntity<List<BlockDTO>> getBlockList(@PathVariable Long blockerId) {
-        log.info("차단 목록 조회 - blockerId: {}", blockerId);
-        List<BlockDTO> blockList = blockService.getBlockList(blockerId);
-        return ResponseEntity.ok(blockList);
+//    내 차단 목록 조회 — 다른 사람 목록은 조회 불가
+    @GetMapping("/me")
+    public ResponseEntity<List<BlockDTO>> getMyBlockList(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(401).build();
+        Long blockerId = userDetails.getId();
+        log.info("내 차단 목록 조회 - blockerId: {}", blockerId);
+        return ResponseEntity.ok(blockService.getBlockList(blockerId));
     }
 
 //    handle 기반 차단 (SecurityContext에서 blockerId 자동 추출)

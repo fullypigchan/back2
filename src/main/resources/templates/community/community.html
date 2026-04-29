@@ -6,8 +6,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>커뮤니티</title>
         <link rel="stylesheet" href="/css/main/main.css" />
+        <link rel="stylesheet" href="/css/common/mobile-nav.css" />
         <link rel="stylesheet" href="/css/community/community.css" />
         <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js" crossorigin="anonymous"></script>
+        <script defer src="/js/common/mobile-nav.js"></script>
         <script defer src="/js/community/service.js"></script>
         <script defer src="/js/community/layout.js"></script>
         <script defer src="/js/community/event.js"></script>
@@ -131,6 +133,10 @@
                     </div>
                 </section>
             </section>
+
+            <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+            <div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+            <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
             </th:block>
         </main>
         <!-- 동적 드롭다운 마운트 지점: event.js의 공유/더보기 드롭다운이 여기에 append/remove 된다 -->

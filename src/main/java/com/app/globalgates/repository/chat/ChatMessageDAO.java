@@ -39,8 +39,15 @@ public class ChatMessageDAO {
         return chatMessageMapper.selectActiveDisappearSettings();
     }
 
-//    만료된 메시지 일괄 soft delete
-    public int softDeleteExpiredMessages(Long conversationId, java.time.LocalDateTime cutoffTime) {
-        return chatMessageMapper.softDeleteExpiredMessages(conversationId, cutoffTime);
+//    윈도우 [activatedAt, expiresAt] 메시지 일괄 soft delete
+    public int softDeleteWindowedMessages(Long conversationId,
+                                          java.time.LocalDateTime activatedAt,
+                                          java.time.LocalDateTime expiresAt) {
+        return chatMessageMapper.softDeleteWindowedMessages(conversationId, activatedAt, expiresAt);
+    }
+
+//    만료된 disappear 설정 자동 비활성화
+    public void resetDisappearSetting(Long conversationId, Long memberId) {
+        chatMessageMapper.resetDisappearSetting(conversationId, memberId);
     }
 }

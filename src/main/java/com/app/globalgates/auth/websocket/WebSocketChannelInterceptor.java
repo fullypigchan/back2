@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 public class WebSocketChannelInterceptor implements ChannelInterceptor {
 
     private static final Pattern ROOM_TOPIC =
-            Pattern.compile("^/topic/room\\.(\\d+)(?:\\.(read|reaction))?$");
+            Pattern.compile("^/topic/room\\.(\\d+)(?:\\.(read|reaction|screenshot-attempt|disappear))?$");
     private static final Pattern USER_RESTORE_TOPIC =
             Pattern.compile("^/topic/user\\.(\\d+)\\.restore$");
     private static final Pattern VIDEO_CALL_TOPIC =

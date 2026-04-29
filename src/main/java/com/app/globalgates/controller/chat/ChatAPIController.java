@@ -347,6 +347,29 @@ public class ChatAPIController {
         return ResponseEntity.ok(Map.of("blocked", blocked));
     }
 
+    // 스크린샷 시도 알림 — 서버는 영속화 없이 실시간으로 양쪽 참여자에게 브로드캐스트
+    @PostMapping("/rooms/{conversationId}/screenshot-attempt")
+    public ResponseEntity<Void> notifyScreenshotAttempt(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long conversationId) {
+        Long memberId = userDetails.getId();
+        if (!chatRoomService.isMember(conversationId, memberId)) {
+            return ResponseEntity.status(403).build();
+        }
+        MemberDTO member = memberDAO.findByMemberId(memberId).orElse(null);
+        String actorName = member != null
+                ? Optional.ofNullable(member.getMemberNickname()).filter(s -> !s.isBlank()).orElse(member.getMemberName())
+                : "알 수 없음";
+        Map<String, Object> payload = Map.of(
+                "type", "SCREENSHOT_ATTEMPT",
+                "actorId", memberId,
+                "actorName", actorName,
+                "timestamp", System.currentTimeMillis()
+        );
+        messagingTemplate.convertAndSend("/topic/room." + conversationId + ".screenshot-attempt", payload);
+        return ResponseEntity.ok().build();
+    }
+
     // 사라진 메시지 설정 변경
     @PostMapping("/rooms/{conversationId}/disappear")
     public ResponseEntity<Map<String, String>> updateDisappearMessage(

@@ -105,7 +105,7 @@ const ChatLayout = {
                             : `<div class="Search-Conv-Avatar-Fallback">${fallback}</div>`
                         }
                         <div class="Search-Conv-Name">${displayName}</div>
-                        <div class="Search-Conv-Handle">@${handle}</div>
+                        <div class="Search-Conv-Handle">${handle.startsWith("@") ? handle : "@" + handle}</div>
                     </div>
                 `;
             })
@@ -138,7 +138,7 @@ const ChatLayout = {
                                 <span class="Search-Conv-Time">${time}</span>
                             </div>
                             <div class="Search-Conv-Row-Preview">
-                                <span class="Search-Conv-Preview-You">@${handle}</span>${preview}
+                                <span class="Search-Conv-Preview-You">${handle.startsWith("@") ? handle : "@" + handle}</span>${preview}
                             </div>
                         </div>
                     </li>
@@ -282,7 +282,7 @@ const ChatLayout = {
                                         </div>
                                     </div>
                                     <div class="Expert-Id-Wrapper">
-                                        <div class="Expert-Id">@${memberHandle}</div>
+                                        <div class="Expert-Id">${memberHandle.startsWith("@") ? memberHandle : "@" + memberHandle}</div>
                                     </div>
                                 </div>
                             </div>

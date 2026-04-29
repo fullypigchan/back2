@@ -14,10 +14,6 @@ public class ChatMessageDTO {
     private String senderName;
     private String senderHandle;
     private String content;
-    private Long replyMessageId;
-    private String replyContent;
-    private Long replySenderId;
-    private String replySenderName;
     private boolean isDeleted;
     private boolean readByPartner;
     private String createdDatetime;
@@ -35,7 +31,6 @@ public class ChatMessageDTO {
                 .conversationId(conversationId)
                 .senderId(senderId)
                 .content(content)
-                .replyMessageId(replyMessageId)
                 .isDeleted(isDeleted)
                 .createdDatetime(createdDatetime)
                 .updatedDatetime(updatedDatetime)

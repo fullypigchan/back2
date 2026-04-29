@@ -1238,7 +1238,7 @@
                             body: JSON.stringify({ memberId: memberId, postId: Number(postId) }),
                         });
                     } else {
-                        fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method: "POST" });
+                        fetch(`/api/main/likes/posts/${postId}/delete`, { method: "POST" });
                     }
                 }
                 return;

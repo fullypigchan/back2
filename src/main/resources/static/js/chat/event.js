@@ -24,7 +24,7 @@ window.onload = () => {
     const leaveModal = document.querySelector(".Small-Modal.Leave");
     const banUserModal = document.querySelector(".Small-Modal.Ban-User");
 
-    // 1-3.반응형 관련 DOM
+    // 1-3.반응형 관련 DOM (모바일 nav 더보기/로그아웃은 /js/common/mobile-nav.js가 처리)
     const userListWrapper = document.querySelector(".Chat-UserList-Wrapper");
     const backBtn = document.getElementById("chat-back-btn");
     const bottomNav = document.querySelector(".mobile-nav");
@@ -429,8 +429,9 @@ window.onload = () => {
         window.history.replaceState({}, "", url.toString());
         chatDiv.classList.add("off");
         newChatDiv.classList.remove("off");
-        bottomNav.style.display = "flex";
+        bottomNav.style.display = "";
         if (isMobile()) userListWrapper.classList.remove("off");
+        applyScreenBlockProtection(false);
     }
 
     // 4-4.채팅방 선택
@@ -469,7 +470,8 @@ window.onload = () => {
     const emoteButton = document.getElementById("emoji-btn");
 
     if (typeof EmojiButton !== "undefined") {
-        picker = new EmojiButton({ position: "top-start", zIndex: 9999 });
+        // position 'top-start'이 일부 레이아웃에서 좌측으로 튀어 'auto' 사용 — 라이브러리 자동 배치
+        picker = new EmojiButton({ position: "auto", zIndex: 9999, autoHide: true });
         picker.on("emoji", (emoji) => {
             const textBox = document.getElementById("chat-input");
             textBox.value += emoji;
@@ -757,12 +759,7 @@ window.onload = () => {
                     closeMenu();
                     if (!messageContent) break;
                     navigator.clipboard.writeText(messageContent)
-                        .then(() => {
-                            toast.classList.remove("show");
-                            void toast.offsetWidth;
-                            toast.classList.add("show");
-                            setTimeout(() => toast.classList.remove("show"), CONFIG.TOAST_DURATION);
-                        })
+                        .then(() => showToast("클립보드로 복사함"))
                         .catch(() => console.error("클립보드 복사 실패"));
                     break;
                 case "delete":
@@ -905,8 +902,7 @@ window.onload = () => {
         if (upperBtn) {
             if (upperBtn.classList.contains("Call")) return alert("추후 업데이트 예정입니다.");
             if (upperBtn.classList.contains("Profile")) {
-                const url = currentPartnerHandle ? `/mypage/${currentPartnerHandle}` : "#";
-                if (url !== "#") window.location.href = url;
+                if (currentPartnerId) window.location.href = `/mypage?memberId=${currentPartnerId}`;
                 return;
             }
             if (upperBtn.classList.contains("More")) {
@@ -1026,7 +1022,7 @@ window.onload = () => {
         const noticeLi = createDisappearNoticeLi(`사라진 메시지 시작 · ${setting} 후 삭제`);
 
         // 메시지 목록에서 activatedAt 이후 첫 메시지 앞에 삽입
-        const allMessages = chatMessageList.querySelectorAll(".Left, .Right, .MyReply, .Reply");
+        const allMessages = chatMessageList.querySelectorAll(".Left, .Right");
         let insertBefore = null;
         for (const msg of allMessages) {
             const timeEl = msg.querySelector(".Message-SendTime span");
@@ -1071,7 +1067,58 @@ window.onload = () => {
     });
 
 
-    // 10-8.스크린샷 차단하기 모달 이벤트
+    // 10-8.토스트 메시지 헬퍼 (텍스트 동적 변경)
+    function showToast(message) {
+        if (!toast) return;
+        const inner = toast.querySelector("div");
+        if (inner) inner.textContent = message;
+        toast.classList.remove("show");
+        void toast.offsetWidth;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), CONFIG.TOAST_DURATION);
+    }
+
+    // 10-8-1.스크린샷 차단 보호 적용/해제
+    //   - 본문 user-select 차단, 우클릭/드래그 차단
+    //   - PrintScreen / Ctrl(Cmd)+Shift+S / Win+Shift+S / Cmd+P 키 가로채고 토스트 안내
+    //   - OS-레벨 캡처(Cmd+Shift+3 등)는 브라우저가 막을 수 없음 — best-effort
+    let screenBlockHandlers = null;
+    function applyScreenBlockProtection(enabled) {
+        if (!chatDiv) return;
+        if (enabled) {
+            chatDiv.classList.add("screen-blocked");
+            if (screenBlockHandlers) return;
+            const onKey = (e) => {
+                const isPrint = e.key === "PrintScreen";
+                const ctrlOrMeta = e.ctrlKey || e.metaKey;
+                const shotCombo =
+                    (ctrlOrMeta && e.shiftKey && (e.key === "S" || e.key === "s")) ||
+                    (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(e.key)) ||
+                    (ctrlOrMeta && (e.key === "p" || e.key === "P"));
+                if (isPrint || shotCombo) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (currentRoomId) ChatService.reportScreenshotAttempt(currentRoomId);
+                }
+            };
+            const onContext = (e) => e.preventDefault();
+            const onDragStart = (e) => e.preventDefault();
+            window.addEventListener("keydown", onKey, true);
+            chatDiv.addEventListener("contextmenu", onContext);
+            chatDiv.addEventListener("dragstart", onDragStart);
+            screenBlockHandlers = { onKey, onContext, onDragStart };
+        } else {
+            chatDiv.classList.remove("screen-blocked");
+            if (!screenBlockHandlers) return;
+            const { onKey, onContext, onDragStart } = screenBlockHandlers;
+            window.removeEventListener("keydown", onKey, true);
+            chatDiv.removeEventListener("contextmenu", onContext);
+            chatDiv.removeEventListener("dragstart", onDragStart);
+            screenBlockHandlers = null;
+        }
+    }
+
+    // 10-8-1.스크린샷 차단하기 모달 이벤트
     const toggleBtn = banScreanShotModal.querySelector(".Toggle-Button");
     const toggleSpan = banScreanShotModal.querySelector(".Toggle-Switch");
     toggleBtn.addEventListener("click", async () => {
@@ -1086,6 +1133,7 @@ window.onload = () => {
                 toggleSpan.classList.remove("moved");
             }
             userInfoModal.querySelector(".Modal-Bottom-Setting.BanScreanShot .Setting-Arrow").textContent = result.blocked ? "켜기" : "끄기";
+            applyScreenBlockProtection(result.blocked);
         } catch (error) {
             console.error("스크린샷 차단 토글 실패", error);
         }
@@ -1198,7 +1246,7 @@ window.onload = () => {
             (roomItem) => Number(roomItem.dataset.conversationId || 0) === Number(currentRoomId),
         );
 
-        const partnerMypageUrl = currentPartnerHandle ? `/mypage/${currentPartnerHandle}` : "#";
+        const partnerMypageUrl = currentPartnerId ? `/mypage?memberId=${currentPartnerId}` : "#";
 
         chatLayoutEl.dataset.partnerId = String(currentPartnerId || "");
         chatLayoutEl.dataset.partnerName = currentPartnerName || "";
@@ -1211,14 +1259,14 @@ window.onload = () => {
 
         if (chatHeaderName) chatHeaderName.textContent = currentPartnerDisplayName;
         if (chatProfileName) chatProfileName.textContent = currentPartnerDisplayName;
-        if (chatProfileHandle) chatProfileHandle.textContent = `@${currentPartnerHandle}`;
+        if (chatProfileHandle) chatProfileHandle.textContent = currentPartnerHandle?.startsWith("@") ? currentPartnerHandle : `@${currentPartnerHandle || ""}`;
         if (chatProfileBtn) chatProfileBtn.href = partnerMypageUrl;
         if (chatProfileAvatar) chatProfileAvatar.href = partnerMypageUrl;
         if (chatProfileImg) chatProfileImg.src = currentPartnerProfileImage;
         if (chatHeaderAvatar) chatHeaderAvatar.href = partnerMypageUrl;
         if (chatHeaderImg) chatHeaderImg.src = currentPartnerProfileImage;
         if (infoModalName) infoModalName.textContent = currentPartnerDisplayName || currentPartnerName;
-        if (infoModalHandle) infoModalHandle.textContent = `@${currentPartnerHandle}`;
+        if (infoModalHandle) infoModalHandle.textContent = currentPartnerHandle?.startsWith("@") ? currentPartnerHandle : `@${currentPartnerHandle || ""}`;
         if (infoModalImageLink) infoModalImageLink.href = partnerMypageUrl;
         if (infoModalImg) infoModalImg.src = currentPartnerProfileImage;
         if (aliasInput) aliasInput.value = currentPartnerAlias || "";
@@ -1260,7 +1308,8 @@ window.onload = () => {
     async function activateStageOneRoom(roomId) {
         currentRoomId = roomId;
         pendingSubscriptionRoomId = roomId;
-        markCurrentStageOneRoom(roomId);
+        const activeRoomEl = markCurrentStageOneRoom(roomId);
+        if (activeRoomEl) activeRoomEl.classList.remove("disappear-expired");
         subscribeStageOneRoom(roomId);
         setStageOneRoomUnreadCount(roomId, 0);
         clearStageOneMessages();
@@ -1297,6 +1346,7 @@ window.onload = () => {
                 sToggleSpan?.classList.remove("moved");
                 if (sArrow) sArrow.textContent = "끄기";
             }
+            applyScreenBlockProtection(!!screenBlock.blocked);
         } catch (e) {
             console.error("스크린샷 차단 상태 조회 실패", e);
         }
@@ -1488,8 +1538,63 @@ window.onload = () => {
                 applyRemoteReaction(payload);
             });
 
-            roomSubscriptions.set(roomId, { msg: msgSub, reaction: reactionSub });
+            const screenshotSub = stompClient.subscribe(`/topic/room.${roomId}.screenshot-attempt`, (message) => {
+                const payload = JSON.parse(message.body);
+                handleScreenshotAttemptNotice(roomId, payload);
+            });
+
+            const disappearSub = stompClient.subscribe(`/topic/room.${roomId}.disappear`, (message) => {
+                const payload = JSON.parse(message.body);
+                handleDisappearAutoDeactivated(roomId, payload);
+            });
+
+            roomSubscriptions.set(roomId, { msg: msgSub, reaction: reactionSub, screenshot: screenshotSub, disappear: disappearSub });
         });
+    }
+
+    // 12-2-2.사라진 메시지 윈도우 만료 처리
+    //   - 현재 방이면: 모달 UI 갱신, 채팅 안내 추가, 메시지 fetch
+    //   - 다른 방/페이지: 채팅 리스트의 해당 방 row에 빨간 점 마커 추가 (사용자가 인지하도록)
+    function handleDisappearAutoDeactivated(roomId, payload) {
+        const targetRoomId = Number(roomId);
+        if (targetRoomId === Number(currentRoomId)) {
+            if (removedMsgModal) {
+                removedMsgModal.querySelectorAll(".Set-Remove-Time").forEach((btn) => {
+                    const txt = btn.querySelector(".Area-Content-Text")?.textContent;
+                    const svg = btn.querySelector("svg");
+                    if (!svg) return;
+                    if (txt === "없음") svg.classList.remove("off");
+                    else svg.classList.add("off");
+                });
+            }
+            const dArrow = userInfoModal?.querySelector(".Modal-Bottom-Setting.RemovedMsg .Setting-Arrow");
+            if (dArrow) dArrow.textContent = "없음";
+            if (chatMessageList) {
+                chatMessageList.appendChild(createDisappearNoticeLi("사라진 메시지 윈도우 만료 — 메시지가 삭제되었습니다"));
+                scrollToBottom();
+            }
+            activateStageOneRoom(currentRoomId);
+        } else {
+            // 다른 방에 있을 때: 리스트에서 해당 방을 시각적으로 마킹
+            const item = getStageOneRoomItems().find(
+                (el) => Number(el.dataset.conversationId || 0) === targetRoomId,
+            );
+            if (item) item.classList.add("disappear-expired");
+        }
+    }
+
+    // 12-2-1.스크린샷 시도 알림 — 현재 방이면 채팅창에 시스템 메시지로 표시
+    function handleScreenshotAttemptNotice(roomId, payload) {
+        const isMine = Number(payload.actorId) === currentMemberId;
+        const text = isMine
+            ? "스크린샷이 차단되었습니다. 상대방에게도 알림이 전송되었습니다."
+            : `${payload.actorName || "상대방"}님이 스크린샷을 시도했습니다.`;
+        if (Number(roomId) === Number(currentRoomId) && chatMessageList) {
+            chatMessageList.appendChild(createDisappearNoticeLi(text));
+            scrollToBottom();
+        } else if (!isMine) {
+            showToast(text);
+        }
     }
 
     // 12-3.현재 방 read receipt 구독
@@ -1758,7 +1863,7 @@ window.onload = () => {
     // 13-3.메시지 목록 초기화
     function clearStageOneMessages() {
         if (!chatMessageList) return;
-        chatMessageList.querySelectorAll(".Left, .Right, .MyReply, .Reply, .Date, .CallEnd, .LoadMore-Wrapper, .DisappearNotice")
+        chatMessageList.querySelectorAll(".Left, .Right, .Date, .CallEnd, .LoadMore-Wrapper, .DisappearNotice")
             .forEach((messageNode) => messageNode.remove());
         lastRenderedDateKey = null;
         hasMoreMessages = false;

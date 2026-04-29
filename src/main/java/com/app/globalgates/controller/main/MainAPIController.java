@@ -2,10 +2,12 @@ package com.app.globalgates.controller.main;
 
 import com.app.globalgates.aop.annotation.LogStatus;
 import com.app.globalgates.aop.annotation.LogStatusWithReturn;
+import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.dto.*;
 import com.app.globalgates.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -123,9 +125,13 @@ public class MainAPIController implements MainAPIControllerDocs {
     @PostMapping("/posts/update/{id}")
     @LogStatus
     public void updatePost(@PathVariable Long id, PostDTO postDTO,
-                           @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
-        log.info("게시글 수정 — postId: {}, memberId: {}", id, postDTO.getMemberId());
-        postService.update(postDTO);
+                           @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
+        // path id를 정본으로 사용 + 인증 사용자로 작성자 검증/덮어쓰기 (IDOR 방어)
+        postDTO.setId(id);
+        postDTO.setMemberId(userDetails.getId());
+        log.info("게시글 수정 — postId: {}, memberId: {}", id, userDetails.getId());
+        postService.update(postDTO, userDetails.getId());
 
         if (files != null && !files.isEmpty()) {
             String todayPath = postService.getTodayPath();
@@ -147,9 +153,10 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    게시글 삭제
     @PostMapping("/posts/delete/{id}")
     @LogStatus
-    public void deletePost(@PathVariable Long id) {
-        log.info("게시글 삭제 — postId: {}", id);
-        postService.delete(id);
+    public void deletePost(@PathVariable Long id,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("게시글 삭제 — postId: {}, memberId: {}", id, userDetails.getId());
+        postService.delete(id, userDetails.getId());
     }
 
 //    댓글 작성
@@ -209,17 +216,22 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    좋아요 추가
     @PostMapping("/likes")
     @LogStatus
-    public void addLike(@RequestBody PostLikeDTO postLikeDTO) {
-        log.info("좋아요 누름~ memberId: {}, postId: {}", postLikeDTO.getMemberId(), postLikeDTO.getPostId());
+    public void addLike(@RequestBody PostLikeDTO postLikeDTO,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        // 클라이언트 전달 memberId 무시 → 인증 사용자로 강제 (인증 우회 방어)
+        postLikeDTO.setMemberId(userDetails.getId());
+        log.info("좋아요 누름~ memberId: {}, postId: {}", userDetails.getId(), postLikeDTO.getPostId());
         postLikeService.addLike(postLikeDTO);
     }
 
-//    좋아요 떼기
-    @PostMapping("/likes/members/{memberId}/posts/{postId}/delete")
+//    좋아요 떼기 (memberId는 인증 정보에서 추출)
+    @PostMapping("/likes/posts/{postId}/delete")
     @LogStatus
-    public void deleteLike(@PathVariable Long memberId, @PathVariable Long postId) {
-        log.info("좋아요 뗌~ memberId: {}, postId: {}", memberId, postId);
-        postLikeService.deleteLike(memberId, postId);
+    public void deleteLike(@PathVariable Long postId,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long requesterId = userDetails.getId();
+        log.info("좋아요 뗌~ memberId: {}, postId: {}", requesterId, postId);
+        postLikeService.deleteLike(requesterId, postId);
     }
 
 
@@ -401,17 +413,19 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    임시저장한것 로드 = 삭제
     @PostMapping("/post-temps/{id}/load")
     @LogStatusWithReturn
-    public PostTempDTO loadPostTemp(@PathVariable Long id) {
-        log.info("임시저장 불러오기 id: {}", id);
-        return postTempService.loadPostTemp(id);
+    public PostTempDTO loadPostTemp(@PathVariable Long id,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("임시저장 불러오기 id: {}, memberId: {}", id, userDetails.getId());
+        return postTempService.loadPostTemp(id, userDetails.getId());
     }
 
 //    임시저장 개별 삭제
     @PostMapping("/post-temps/{id}/delete")
     @LogStatus
-    public void deletePostTemp(@PathVariable Long id) {
-        log.info("임시저장 개별 삭제 id: {}", id);
-        postTempService.deletePostTemp(id);
+    public void deletePostTemp(@PathVariable Long id,
+                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("임시저장 개별 삭제 id: {}, memberId: {}", id, userDetails.getId());
+        postTempService.deletePostTemp(id, userDetails.getId());
     }
 
 //    임시저장 선택 삭제

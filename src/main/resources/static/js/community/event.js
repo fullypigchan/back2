@@ -1347,7 +1347,7 @@ window.onload = () => {
             const loginMemberId = document.querySelector("[data-member-id]")?.dataset.memberId;
             if (postId && loginMemberId) {
                 if (on) fetch("/api/main/likes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memberId: loginMemberId, postId }) }).catch(err => console.error(err));
-                else fetch(`/api/main/likes/members/${loginMemberId}/posts/${postId}/delete`, { method: "POST" }).catch(err => console.error(err));
+                else fetch(`/api/main/likes/posts/${postId}/delete`, { method: "POST" }).catch(err => console.error(err));
             }
             return;
         }

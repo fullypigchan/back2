@@ -254,6 +254,19 @@ window.onload = () => {
         });
     }
 
+    // 11-1. 뉴스 셀 클릭 시 상세 이동
+    if (newsSection) {
+        newsSection.addEventListener("click", (e) => {
+            const trendItem = e.target.closest(".trend[data-news-id]");
+            if (!trendItem) return;
+
+            const newsId = trendItem.dataset.newsId;
+            if (!newsId) return;
+
+            location.href = `/news/detail/${encodeURIComponent(newsId)}`;
+        });
+    }
+
     // 12. Post-Card 인터랙션 (Like / Bookmark / 이미지 프리뷰)
     (function () {
         function showToast(message, extraClass) {

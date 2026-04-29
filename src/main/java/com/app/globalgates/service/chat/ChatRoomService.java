@@ -25,6 +25,11 @@ public class ChatRoomService {
         return chatRoomDAO.findAllByMemberId(memberId);
     }
 
+//    회원이 채팅방 참여자인지 확인
+    public boolean isMember(Long conversationId, Long memberId) {
+        return chatRoomDAO.isMember(conversationId, memberId);
+    }
+
 //    채팅방 생성 또는 기존 방 반환
     @Transactional
     @LogStatusWithReturn

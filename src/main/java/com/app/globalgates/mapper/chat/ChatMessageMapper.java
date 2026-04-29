@@ -21,9 +21,13 @@ public interface ChatMessageMapper {
                                                           @Param("pageSize") int pageSize);
 //    내 계정에서만 메시지 삭제
     void softDeleteForMember(@Param("messageId") Long messageId, @Param("memberId") Long memberId);
-//    사라진 메시지 설정이 활성화된 대화방 조회
+//    사라진 메시지 활성 설정 조회 (member별 row, activated_at 포함)
     List<Map<String, Object>> selectActiveDisappearSettings();
-//    만료된 메시지 일괄 soft delete
-    int softDeleteExpiredMessages(@Param("conversationId") Long conversationId,
-                                  @Param("cutoffTime") java.time.LocalDateTime cutoffTime);
+//    윈도우 [activatedAt, expiresAt] 메시지 일괄 soft delete
+    int softDeleteWindowedMessages(@Param("conversationId") Long conversationId,
+                                   @Param("activatedAt") java.time.LocalDateTime activatedAt,
+                                   @Param("expiresAt") java.time.LocalDateTime expiresAt);
+//    만료된 disappear 설정 자동 비활성화
+    void resetDisappearSetting(@Param("conversationId") Long conversationId,
+                                @Param("memberId") Long memberId);
 }

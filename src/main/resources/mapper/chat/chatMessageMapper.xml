@@ -6,8 +6,8 @@
         <selectKey keyProperty="id" resultType="long" order="AFTER">
             select currval('tbl_message_id_seq')
         </selectKey>
-        insert into tbl_message (conversation_id, sender_id, content, reply_message_id)
-        values (#{conversationId}, #{senderId}, #{content}, #{replyMessageId})
+        insert into tbl_message (conversation_id, sender_id, content)
+        values (#{conversationId}, #{senderId}, #{content})
     </insert>
 
     <select id="selectAllByConversationId">
@@ -19,10 +19,6 @@
             coalesce(m.member_nickname, m.member_name) as sender_name,
             m.member_handle as sender_handle,
             msg.content,
-            msg.reply_message_id,
-            reply_msg.content as reply_content,
-            reply_msg.sender_id as reply_sender_id,
-            coalesce(reply_m.member_nickname, reply_m.member_name) as reply_sender_name,
             msg.is_deleted,
             case
                 when msg.sender_id = #{memberId}
@@ -41,8 +37,6 @@
         join tbl_member m on m.id = msg.sender_id
         join v_my_chat v on v.conversation_id = msg.conversation_id
                         and v.member_id = #{memberId}
-        left join tbl_message reply_msg on reply_msg.id = msg.reply_message_id
-        left join tbl_member reply_m on reply_m.id = reply_msg.sender_id
         left join tbl_message_deletion md on md.message_id = msg.id and md.member_id = #{memberId}
         left join tbl_chat_file cf on cf.message_id = msg.id
         left join tbl_file f on f.id = cf.id
@@ -78,10 +72,6 @@
                 coalesce(m.member_nickname, m.member_name) as sender_name,
                 m.member_handle as sender_handle,
                 msg.content,
-                msg.reply_message_id,
-                reply_msg.content as reply_content,
-                reply_msg.sender_id as reply_sender_id,
-                coalesce(reply_m.member_nickname, reply_m.member_name) as reply_sender_name,
                 msg.is_deleted,
                 case
                     when msg.sender_id = #{memberId}
@@ -100,8 +90,6 @@
             join tbl_member m on m.id = msg.sender_id
             join v_my_chat v on v.conversation_id = msg.conversation_id
                             and v.member_id = #{memberId}
-            left join tbl_message reply_msg on reply_msg.id = msg.reply_message_id
-            left join tbl_member reply_m on reply_m.id = reply_msg.sender_id
             left join tbl_message_deletion md on md.message_id = msg.id and md.member_id = #{memberId}
             left join tbl_chat_file cf on cf.message_id = msg.id
             left join tbl_file f on f.id = cf.id
@@ -140,29 +128,41 @@
     </insert>
 
     <!--
-      활성 disappear 설정 모두 조회 (참여자별로 row 1개).
-      이전엔 DISTINCT ON (conversation_id)로 한 명의 설정만 비결정적으로 골라서
-      A/B가 다른 설정이면 한쪽이 무시됐다. 모든 row를 처리하면 가장 짧은 cutoff가 자연 우선.
+      윈도우 모델: 활성 disappear 설정 + activated_at 함께 조회.
+      태스크는 activated_at + period < now() 인 row만 골라 일괄 삭제 + 비활성화한다.
     -->
     <select id="selectActiveDisappearSettings" resultType="map">
         select cs.conversation_id as conversationId,
-               cs.disappear_message as disappearMessage
+               cs.member_id as memberId,
+               cs.disappear_message as disappearMessage,
+               cs.disappear_activated_at as activatedAt
         from tbl_conversation_setting cs
         where cs.disappear_message not in ('none', '없음')
+          and cs.disappear_activated_at is not null
           and coalesce(cs.is_deleted, false) = false
     </select>
 
     <!--
-      cutoffTime(=now - 설정값) 이전 메시지를 일괄 soft delete.
-      이전엔 settingActivatedAt 이후 메시지만 삭제했는데, 설정 변경 시
-      updated_datetime이 갱신되어 이전 설정 기간 메시지가 사각지대에 빠지는 버그가 있어 제거.
+      윈도우 [activatedAt, expiresAt] 안에 생성된 메시지를 일괄 soft delete.
+      윈도우 끝났을 때 한 번만 호출되며, 윈도우 밖 메시지는 건드리지 않는다.
     -->
-    <update id="softDeleteExpiredMessages">
+    <update id="softDeleteWindowedMessages">
         update tbl_message
         set is_deleted = true, updated_datetime = now()
         where conversation_id = #{conversationId}
           and is_deleted = false
-          and created_datetime &lt; #{cutoffTime}
+          and created_datetime &gt;= #{activatedAt}
+          and created_datetime &lt;= #{expiresAt}
+    </update>
+
+    <!-- 만료된 disappear 설정을 'none'으로 자동 복구 + activated_at 클리어 -->
+    <update id="resetDisappearSetting">
+        update tbl_conversation_setting
+        set disappear_message = 'none',
+            disappear_activated_at = null,
+            updated_datetime = now()
+        where conversation_id = #{conversationId}
+          and member_id = #{memberId}
     </update>
 
 </mapper>

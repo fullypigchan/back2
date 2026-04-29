@@ -60,7 +60,7 @@ const NotificationService = (function () {
     }
 
     async function deleteLike(memberId, postId) {
-        await fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method: 'POST' });
+        await fetch(`/api/main/likes/posts/${postId}/delete`, { method: 'POST' });
     }
 
     async function addBookmark(memberId, postId) {

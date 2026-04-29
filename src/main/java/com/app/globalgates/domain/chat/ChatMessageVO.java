@@ -15,6 +15,5 @@ public class ChatMessageVO extends Period {
     private Long conversationId;
     private Long senderId;
     private String content;
-    private Long replyMessageId;
     private boolean isDeleted;
 }

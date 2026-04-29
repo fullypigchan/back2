@@ -9,7 +9,7 @@ const service = (() => {
     };
 
     const deleteLike = async (memberId, postId) => {
-        await fetch(`/api/main/likes/members/${memberId}/posts/${postId}/delete`, { method: 'POST' });
+        await fetch(`/api/main/likes/posts/${postId}/delete`, { method: 'POST' });
     };
 
     const addBookmark = async (memberId, postId) => {

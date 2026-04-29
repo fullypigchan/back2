@@ -1,9 +1,11 @@
 package com.app.globalgates.controller.main;
 
+import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,14 +53,14 @@ public interface MainAPIControllerDocs {
                             @Parameter(name = "postDTO", description = "수정할 게시글 정보"),
                             @Parameter(name = "files", description = "첨부 파일들")}
     )
-    public void updatePost(@PathVariable Long id, PostDTO postDTO, @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException;
+    public void updatePost(@PathVariable Long id, PostDTO postDTO, @RequestParam(value = "files", required = false) List<MultipartFile> files, @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException;
 
     @Operation(
             summary = "게시글 삭제",
             description = "게시글을 삭제한다.",
             parameters = {@Parameter(name = "id", description = "삭제할 게시글의 id")}
     )
-    public void deletePost(@PathVariable Long id);
+    public void deletePost(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "댓글 작성",
@@ -90,15 +92,14 @@ public interface MainAPIControllerDocs {
             description = "게시글에 좋아요를 추가한다.",
             parameters = {@Parameter(name = "postLikeDTO", description = "좋아요 정보")}
     )
-    public void addLike(@RequestBody PostLikeDTO postLikeDTO);
+    public void addLike(@RequestBody PostLikeDTO postLikeDTO, @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "좋아요 취소",
-            description = "게시글의 좋아요를 취소한다.",
-            parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id"),
-                            @Parameter(name = "postId", description = "게시글의 id")}
+            description = "게시글의 좋아요를 취소한다. (memberId는 인증 정보에서 추출)",
+            parameters = {@Parameter(name = "postId", description = "게시글의 id")}
     )
-    public void deleteLike(@PathVariable Long memberId, @PathVariable Long postId);
+    public void deleteLike(@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "회원 검색",
@@ -233,14 +234,14 @@ public interface MainAPIControllerDocs {
             description = "임시저장한 게시글을 불러오고 삭제한다.",
             parameters = {@Parameter(name = "id", description = "임시저장 id")}
     )
-    public PostTempDTO loadPostTemp(@PathVariable Long id);
+    public PostTempDTO loadPostTemp(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "임시저장 개별 삭제",
             description = "임시저장 게시글을 개별 삭제한다.",
             parameters = {@Parameter(name = "id", description = "임시저장 id")}
     )
-    public void deletePostTemp(@PathVariable Long id);
+    public void deletePostTemp(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "임시저장 선택 삭제",

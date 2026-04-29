@@ -5,10 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global-Gates</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}">
     <link rel="stylesheet" href="/css/chat/chat.css" th:href="@{/css/chat/chat.css}">
     <link rel="shortcut icon" href="/favicon.ico" th:href="@{/favicon.ico}" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
     <script src="/js/chat/service.js" th:src="@{/js/chat/service.js?v=20260429a}"></script>
     <script src="/js/chat/layout.js" th:src="@{/js/chat/layout.js?v=20260429a}"></script>
     <script src="/js/chat/event.js" th:src="@{/js/chat/event.js?v=20260429a}"></script>
@@ -1233,40 +1235,9 @@
         <div>클립보드로 복사함</div>
     </div>
 
-    <!-- 모바일 nav -->
-    <nav class="mobile-nav">
-        <!-- 홈 -->
-        <a href="index.html" class="mob-nav-item">
-            <svg viewBox="0 0 24 24">
-                <path d="M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0L2.409 7.146A1.186 1.186 0 002 8.153V19.82a2.187 2.187 0 002.188 2.188h5.312a.75.75 0 00.75-.75v-6.086h3.5v6.086a.75.75 0 00.75.75h5.312A2.187 2.187 0 0022 19.82V8.153a1.186 1.186 0 00-.409-1.007z"></path>
-            </svg>
-        </a>
-        <!-- 탐색 -->
-        <a href="#" class="mob-nav-item">
-            <svg viewBox="0 0 24 24">
-                <path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z"></path>
-            </svg>
-        </a>
-        <!-- Grok (Ø 아이콘) -->
-        <a href="#" class="mob-nav-item">
-            <svg viewBox="0 0 24 24">
-                <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zM4 12c0-4.418 3.582-8 8-8 1.848 0 3.55.627 4.9 1.672L5.672 16.9A7.965 7.965 0 014 12zm8 8c-1.848 0-3.55-.627-4.9-1.672l11.228-11.228A7.965 7.965 0 0120 12c0 4.418-3.582 8-8 8z"></path>
-            </svg>
-        </a>
-        <!-- 알림 (배지 포함) -->
-        <a href="notification.html" class="mob-nav-item">
-            <svg viewBox="0 0 24 24">
-                <path d="M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958zM12 20c-1.306 0-2.417-.835-2.829-2h5.658c-.412 1.165-1.523 2-2.829 2zm-6.866-4l.847-6.698C6.364 6.272 8.941 4 11.996 4s5.627 2.268 6.013 5.295L18.858 16H5.134z"></path>
-            </svg>
-        </a>
-        <!-- DM/메시지 -->
-        <a href="#" class="mob-nav-item">
-            <svg viewBox="0 0 24 24">
-                <path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5a.5.5 0 00-.5.5v2.764l8 3.638 8-3.636V5.5a.5.5 0 00-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5a.5.5 0 00.5.5h15a.5.5 0 00.5-.5v-8.037z"></path>
-            </svg>
-            <span class="mob-nav-badge Chat-MobMessageBadge off"></span>
-        </a>
-    </nav>
+    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+    <div th:replace="~{common/mobile-nav :: mobileNav('chat')}"></div>
+    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 
     <!-- 화상통화 수신 모달 -->
     <div class="Small-Modal VideoCall-Request off" id="videoCallModal">

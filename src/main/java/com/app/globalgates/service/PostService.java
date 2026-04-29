@@ -70,9 +70,14 @@ public class PostService {
         fileDTO.setFileName(s3Key.substring(s3Key.lastIndexOf("/") + 1));
         fileDTO.setFilePath(s3Key);
         fileDTO.setFileSize(file.getSize());
-        fileDTO.setContentType(file.getContentType().contains("image") ? FileContentType.IMAGE
-                : file.getContentType().contains("video")
-                ? FileContentType.VIDEO : FileContentType.ETC);
+        // Content-Type 헤더가 누락되어도 NPE가 발생하지 않도록 null-safe 처리
+        String contentType = file.getContentType();
+        FileContentType resolved = FileContentType.ETC;
+        if (contentType != null) {
+            if (contentType.contains("image")) resolved = FileContentType.IMAGE;
+            else if (contentType.contains("video")) resolved = FileContentType.VIDEO;
+        }
+        fileDTO.setContentType(resolved);
         fileDAO.save(fileDTO);
 
         PostFileDTO postFileDTO = new PostFileDTO();
@@ -247,7 +252,15 @@ public class PostService {
 
     //    게시글 수정
     @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
-    public void update(PostDTO postDTO) {
+    public void update(PostDTO postDTO, Long requesterId) {
+        // 작성자 본인만 수정 가능 (IDOR 방어)
+        PostDTO existing = postDAO.findById(postDTO.getId(), requesterId)
+                .orElseThrow(PostNotFoundException::new);
+        if (!requesterId.equals(existing.getMemberId())) {
+            throw new IllegalStateException("게시글 작성자만 수정할 수 있습니다.");
+        }
+        // 클라이언트가 보낸 memberId는 신뢰하지 않고 서버에서 덮어쓴다
+        postDTO.setMemberId(requesterId);
         postDAO.setPost(postDTO.toPostVO());
 
         //    태그 수정 (원래 묶인 관계 삭제하고 저장)
@@ -314,7 +327,13 @@ public class PostService {
 
     //    게시글 삭제 = 상태 inactive로.
     @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
-    public void delete(Long id) {
+    public void delete(Long id, Long requesterId) {
+        // 작성자 본인만 삭제 가능 (IDOR 방어)
+        PostDTO existing = postDAO.findById(id, requesterId)
+                .orElseThrow(PostNotFoundException::new);
+        if (!requesterId.equals(existing.getMemberId())) {
+            throw new IllegalStateException("게시글 작성자만 삭제할 수 있습니다.");
+        }
         postDAO.delete(id);
     }
 

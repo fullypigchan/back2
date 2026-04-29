@@ -350,6 +350,7 @@ CREATE TABLE tbl_conversation_setting (
     is_pinned                 boolean      NOT NULL DEFAULT false,
     last_read_message_id      bigint,
     disappear_message         varchar(255) DEFAULT 'none',
+    disappear_activated_at    timestamp    DEFAULT NULL,
     blocked_after_message_id  bigint       DEFAULT NULL,
     block_released_message_id bigint       DEFAULT NULL,
     created_datetime          timestamp    NOT NULL DEFAULT now(),

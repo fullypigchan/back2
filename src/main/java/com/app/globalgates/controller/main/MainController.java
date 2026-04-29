@@ -1,5 +1,6 @@
 package com.app.globalgates.controller.main;
 
+import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.auth.JwtTokenProvider;
 import com.app.globalgates.dto.BlockDTO;
 import com.app.globalgates.dto.MemberDTO;
@@ -15,6 +16,7 @@ import com.app.globalgates.service.S3Service;
 import com.app.globalgates.service.SubscriptionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -100,8 +102,9 @@ public class MainController {
 
 //    상세에서 삭제하면 메인으로
     @PostMapping("/post/detail/delete/{id}")
-    public RedirectView deleteFromDetail(@PathVariable Long id) {
-        postService.delete(id);
+    public RedirectView deleteFromDetail(@PathVariable Long id,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        postService.delete(id, userDetails.getId());
         return new RedirectView("/main/main");
     }
 

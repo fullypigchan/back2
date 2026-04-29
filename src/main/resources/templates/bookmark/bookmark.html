@@ -5,11 +5,13 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>북마크 / X</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css"/>
     <link rel="stylesheet" href="/css/bookmark/bookmark.css"/>
     <script th:inline="javascript">
         const memberId = [[${memberId}]];
         const profileImageUrl = [[${profileImageUrl}]] /*'/images/profile/default_image.png'*/;
     </script>
+    <script src="/js/common/mobile-nav.js" defer></script>
     <script src="/js/bookmark/service.js"></script>
     <script src="/js/bookmark/layout.js"></script>
     <script src="/js/bookmark/event.js" defer></script>
@@ -1164,6 +1166,10 @@
 
     </div><!-- /.tweet-modal -->
 </div><!-- /#bookmarkReplyModal -->
+
+<!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+<div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+<div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </th:block>
 </body>
 </html>

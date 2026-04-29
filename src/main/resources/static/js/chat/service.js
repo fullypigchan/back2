@@ -186,29 +186,29 @@ const ChatService = (() => {
         return data.url;
     };
 
-    // 21.차단 여부 확인
-    const isBlocked = async (blockerId, blockedId) => {
+    // 21.차단 여부 확인 (blockerId는 서버가 인증 컨텍스트에서 추출 — 본인만 조회)
+    const isBlocked = async (_blockerId, blockedId) => {
         const response = await fetch(
-            `/api/v1/blocks/check?blockerId=${blockerId}&blockedId=${blockedId}`
+            `/api/v1/blocks/check?blockedId=${blockedId}`
         );
         if (!response.ok) return false;
         const data = await response.json();
         return data.blocked;
     };
 
-    // 22.사용자 차단
-    const blockUser = async (blockerId, blockedId, conversationId) => {
+    // 22.사용자 차단 (blockerId는 서버가 자동 추출)
+    const blockUser = async (_blockerId, blockedId, conversationId) => {
         const response = await fetch("/api/v1/blocks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ blockerId, blockedId, conversationId }),
+            body: JSON.stringify({ blockedId, conversationId }),
         });
         return handleResponse(response, "차단 실패");
     };
 
-    // 23.사용자 차단 해제
-    const unblockUser = async (blockerId, blockedId, conversationId) => {
-        let url = `/api/v1/blocks?blockerId=${blockerId}&blockedId=${blockedId}`;
+    // 23.사용자 차단 해제 (blockerId는 서버가 자동 추출)
+    const unblockUser = async (_blockerId, blockedId, conversationId) => {
+        let url = `/api/v1/blocks?blockedId=${blockedId}`;
         if (conversationId) url += `&conversationId=${conversationId}`;
         const response = await fetch(url, { method: "DELETE" });
         return handleResponse(response, "차단 해제 실패");
@@ -248,6 +248,16 @@ const ChatService = (() => {
         return await response.json();
     };
 
+    // 28.스크린샷 시도 알림 (서버가 양쪽 참여자에게 브로드캐스트)
+    const reportScreenshotAttempt = async (conversationId) => {
+        try {
+            await fetch(
+                `/api/v1/chat/rooms/${conversationId}/screenshot-attempt`,
+                { method: "POST" }
+            );
+        } catch (e) { /* 캡처 차단 자체 흐름이 망가지면 안 되므로 silent */ }
+    };
+
     return {
         getRooms,
         createRoom,
@@ -275,5 +285,6 @@ const ChatService = (() => {
         getScreenBlock,
         updateDisappearMessage,
         getDisappearMessage,
+        reportScreenshotAttempt,
     };
 })();
