@@ -39,3 +39,23 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### OS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+desktop.ini
+
+### Logs ###
+*.log
+logs/
+
+### IntelliJ extras ###
+.idea/httpRequests/
+.idea/shelf/
+
+### 환경변수 ###
+.env
+.env.*

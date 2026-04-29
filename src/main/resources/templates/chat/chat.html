@@ -9,9 +9,9 @@
     <link rel="shortcut icon" href="/favicon.ico" th:href="@{/favicon.ico}" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="/js/chat/service.js" th:src="@{/js/chat/service.js?v=20260403a}"></script>
-    <script src="/js/chat/layout.js" th:src="@{/js/chat/layout.js?v=20260403a}"></script>
-    <script src="/js/chat/event.js" th:src="@{/js/chat/event.js?v=20260403a}"></script>
+    <script src="/js/chat/service.js" th:src="@{/js/chat/service.js?v=20260429a}"></script>
+    <script src="/js/chat/layout.js" th:src="@{/js/chat/layout.js?v=20260429a}"></script>
+    <script src="/js/chat/event.js" th:src="@{/js/chat/event.js?v=20260429a}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 </head>
 <body>
@@ -282,9 +282,9 @@
                                         </button>
                                         <!-- 누르면 유저 정보 모달 뜨게 하기 -->
                                         <div class="ChatPage-UserInfo">
-                                            <div class="Avatar-Image">
+                                            <a class="Avatar-Image" href="#">
                                                 <img alt="user-avatar" src="" loading="lazy" draggable="false">
-                                            </div>
+                                            </a>
                                             <div class="UserName-Container">
                                                 <!-- 유저 이름 부분 -->
                                                 <div class="UserName-Text">유저 이름</div>

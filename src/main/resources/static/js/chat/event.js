@@ -422,7 +422,7 @@ window.onload = () => {
             currentReadSubscription = null;
         }
         markCurrentStageOneRoom(0);
-        delete document.body.dataset.conversationId;
+        delete chatLayoutEl.dataset.conversationId;
         const url = new URL(window.location.href);
         url.searchParams.delete("conversationId");
         url.searchParams.delete("partnerId");
@@ -1144,16 +1144,18 @@ window.onload = () => {
     // 11.채팅 핵심 로직
 
     // 11-1.현재 유저 정보
-    let currentMemberId = Number(document.body.dataset.memberId || 1);
-    let currentMemberName = document.body.dataset.memberName || "GG Business";
-    let currentMemberHandle = document.body.dataset.memberHandle || "gg_business_member1";
-    let currentProfileImage = document.body.dataset.profileImage || "/images/profile/default_image.png";
-    let currentPartnerId = Number(document.body.dataset.partnerId || 2);
-    let currentPartnerName = document.body.dataset.partnerName || "GG Expert";
-    let currentPartnerHandle = document.body.dataset.partnerHandle || "gg_expert_member2";
+    // data-* 속성은 chat.html의 .Chat-Layout 요소에 렌더링되므로 그곳에서 읽는다.
+    const chatLayoutEl = document.querySelector(".Chat-Layout") || document.body;
+    let currentMemberId = Number(chatLayoutEl.dataset.memberId) || 0;
+    let currentMemberName = chatLayoutEl.dataset.memberName || "";
+    let currentMemberHandle = chatLayoutEl.dataset.memberHandle || "";
+    let currentProfileImage = chatLayoutEl.dataset.profileImage || "/images/profile/default_image.png";
+    let currentPartnerId = Number(chatLayoutEl.dataset.partnerId) || 0;
+    let currentPartnerName = chatLayoutEl.dataset.partnerName || "";
+    let currentPartnerHandle = chatLayoutEl.dataset.partnerHandle || "";
     let currentPartnerAlias = "";
     let currentPartnerDisplayName = currentPartnerName;
-    const defaultConversationId = Number(document.body.dataset.conversationId || 0);
+    const defaultConversationId = Number(chatLayoutEl.dataset.conversationId) || 0;
     const chatMessageList = chatDiv.querySelector(".ChatPage-Main-Content");
     let currentRoomId = defaultConversationId;
     let lastRenderedDateKey = null;
@@ -1198,13 +1200,13 @@ window.onload = () => {
 
         const partnerMypageUrl = currentPartnerHandle ? `/mypage/${currentPartnerHandle}` : "#";
 
-        document.body.dataset.partnerId = String(currentPartnerId || "");
-        document.body.dataset.partnerName = currentPartnerName || "";
-        document.body.dataset.partnerHandle = currentPartnerHandle || "";
+        chatLayoutEl.dataset.partnerId = String(currentPartnerId || "");
+        chatLayoutEl.dataset.partnerName = currentPartnerName || "";
+        chatLayoutEl.dataset.partnerHandle = currentPartnerHandle || "";
         if (currentRoomId) {
-            document.body.dataset.conversationId = String(currentRoomId);
+            chatLayoutEl.dataset.conversationId = String(currentRoomId);
         } else {
-            delete document.body.dataset.conversationId;
+            delete chatLayoutEl.dataset.conversationId;
         }
 
         if (chatHeaderName) chatHeaderName.textContent = currentPartnerDisplayName;
@@ -2045,6 +2047,10 @@ window.onload = () => {
 
     // 13-12.원격 반응 수신시 배지 갱신
     function applyRemoteReaction(reaction) {
+        // 본인이 보낸 반응은 addReaction()에서 이미 낙관적으로 반영했으므로
+        // 서버 에코는 무시한다 (중복 카운트 방지).
+        if (Number(reaction.memberId) === currentMemberId) return;
+
         const messageId = reaction.messageId;
         const emoji = reaction.emoji;
         const isRemoved = reaction.removed === true;
@@ -2181,7 +2187,7 @@ window.onload = () => {
     async function initializeStageOneChat() {
         await loadStageOneRoomList();
 
-        const initialRoomId = Number(document.body.dataset.conversationId || defaultConversationId || 0);
+        const initialRoomId = Number(chatLayoutEl.dataset.conversationId || defaultConversationId || 0);
         const hasInitialConversationId = initialRoomId > 0;
         const canAutoOpenRoom = hasInitialConversationId &&
             stageOneRooms.some((room) => room.conversationId === initialRoomId);

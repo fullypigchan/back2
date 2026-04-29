@@ -26,7 +26,7 @@
                             </span>
                 <span>알림</span>
             </a>
-            <a class="nav-item" href="/friends">
+            <a class="nav-item" hrㅌef="/friends">
                 <svg viewBox="0 0 24 24" class="nav-icon"><path d="M16.697 5.5c1.813 0 3.303 1.46 3.303 3.25 0 .967-.426 1.885-1.17 2.668L12 18.01l-6.83-6.592A3.74 3.74 0 014 8.75C4 6.96 5.49 5.5 7.303 5.5c.967 0 1.89.414 2.546 1.14L12 8.89l2.151-2.25A3.55 3.55 0 0116.697 5.5zm0-2C15.09 3.5 13.55 4.14 12 5.76 10.45 4.14 8.91 3.5 7.303 3.5 4.386 3.5 2 5.82 2 8.75c0 1.49.62 2.91 1.72 3.97l7.53 7.26a1 1 0 001.39 0l7.53-7.26A5.62 5.62 0 0022 8.75c0-2.93-2.386-5.25-5.303-5.25z"></path></svg>
                 <span>친구</span>
             </a>
@@ -62,11 +62,11 @@
         <div class="accountMenuWrap" id="accountMenuWrap">
             <div class="profile-card" id="accountCard">
                 <div class="profile-avatar" id="accountAvatar">
-                    <img th:src="${member.fileName != null ? member.fileName : '/images/profile/default_image.png'}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+                    <img th:src="${member?.fileName != null ? member.fileName : '/images/profile/default_image.png'}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
                 </div>
                 <div class="profile-info">
-                    <span class="profile-name" id="accountName" th:text="${member.memberName ?: ''}"></span>
-                    <span class="profile-handle" id="accountHandle" th:text="${member.memberHandle ?: ''}"></span>
+                    <span class="profile-name" id="accountName" th:text="${member?.memberName ?: ''}"></span>
+                    <span class="profile-handle" id="accountHandle" th:text="${member?.memberHandle ?: ''}"></span>
                 </div>
                 <button class="profile-more">···</button>
             </div>
