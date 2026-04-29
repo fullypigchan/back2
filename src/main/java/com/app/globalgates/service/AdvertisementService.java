@@ -38,7 +38,7 @@ public class AdvertisementService {
     // 광고 등록
     @Transactional
     @LogStatus
-    @CacheEvict(value = {"ad:list", "ad:detail"}, allEntries = true)
+    @CacheEvict(value = {"ad:list", "ad:detail", "post:list"}, allEntries = true)
     public void save(AdvertisementDTO advertisementDTO) {
         advertisementDAO.save(advertisementDTO);
     }
@@ -153,6 +153,7 @@ public class AdvertisementService {
                                         .collect(Collectors.toList())
                         );
                     }
+                    adDTO.setCreatedDatetime(DateUtils.toRelativeTime(adDTO.getCreatedDatetime()));
                     return adDTO;
                 }).collect(Collectors.toList());
     }

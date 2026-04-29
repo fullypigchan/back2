@@ -166,6 +166,7 @@ window.onload = () => {
         try {
             const response = await Bootpay.requestPayment({
                 application_id: "69604bf2b6279cebf60ad115",
+                // application_id: "69604bf2b6279cebf60ad118",
                 price: plan.amountValue,
                 order_name: plan.orderName,
                 order_id: plan.orderId,

@@ -312,6 +312,13 @@ body {
     padding-right: 28px;
 }
 
+.sub-plan__header svg {
+    width: 18px;
+    height: 18px;
+    vertical-align: -3px;
+    flex-shrink: 0;
+}
+
 .sub-plan__name {
     font-size: 17px;
     font-weight: 600;

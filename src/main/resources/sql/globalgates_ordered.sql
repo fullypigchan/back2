@@ -151,6 +151,7 @@ create table tbl_post (
     content          text        not null,
     location         varchar(255),
     reply_post_id    bigint,
+    product_id bigint,
     created_datetime timestamp   not null default now(),
     updated_datetime timestamp   not null default now(),
     constraint fk_post_member foreign key(member_id) references tbl_member(id),
@@ -445,9 +446,13 @@ create table tbl_news (
     news_category    news_category_type not null default 'etc',
     news_type        news_type          not null default 'general',
     published_at     timestamp,
+    post_id          bigint,
     created_datetime timestamp          not null default now(),
     updated_datetime timestamp          not null default now(),
-    constraint fk_news_admin foreign key(admin_id) references tbl_member(id)
+    constraint fk_news_admin foreign key(admin_id)
+    references tbl_member(id),
+    constraint fk_news_post foreign key (post_id)
+    references tbl_post(id)
 );
 
 -- ============ 화상 / 커뮤니티 / 트렌딩 / 설정 / 차단 / 뮤트 / 검색 ============

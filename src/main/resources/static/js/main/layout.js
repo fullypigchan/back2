@@ -19,8 +19,44 @@ const layout = (() => {
         return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
     }
 
+    const createNewsCard = (post) => {
+        return `
+            <div class="postCard" data-post-id="${post.id}">
+                <div class="postBody postCard--news">
+                    <div class="newsHeaderWrap">
+                        <h3 class="postNewsTitle">${post.newsTitle || ""}</h3>
+                        <span class="postTime">${post.createdDatetime || ""}</span>
+                    </div>
+                    <p class="postText">${post.newsContent || ""}</p>
+                    <footer class="postMetrics postCard--news">
+                        <div class="tweet-action-bar">
+                            <button class="tweet-action-btn" data-action="reply">
+                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></g></svg>
+                                <span class="tweet-action-count">${post.replyCount || 0}</span>
+                            </button>
+                            <button class="tweet-action-btn tweet-action-btn--like ${post.liked ? 'active' : ''}" data-post-id="${post.id}">
+                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>
+                                <span class="tweet-action-count">${post.likeCount || 0}</span>
+                            </button>
+                            <button class="tweet-action-btn tweet-action-btn--views">
+                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path></g></svg>
+                                <span class="tweet-action-count">${post.postReadCount || 0}</span>
+                            </button>
+                            <div class="tweet-action-right">
+                                <button class="tweet-action-btn tweet-action-btn--bookmark ${post.bookmarked ? 'active' : ''}" data-post-id="${post.id}">
+                                    <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>
+                                </button>
+                                <button class="tweet-action-btn tweet-action-btn--share">
+                                    <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path></g></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </div>`;
+    };
+
     const createPostCard = (post) => {
-        const avatarInitial = (post.memberNickname || post.memberHandle || "?").charAt(0);
         const avatarHtml = post.memberProfileFileName
             ? `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="${post.memberProfileFileName}"></div>`
             : `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="/images/profile/default_image.png"></div>`;
@@ -137,13 +173,12 @@ const layout = (() => {
     };
 
     const createExpertCard = (expert) => {
-        const avatarInitial = (expert.memberNickname || expert.memberHandle || "?").charAt(0);
         const avatarHtml = expert.memberProfileFileName
             ? `<div class="user-avatar user-avatar--image"><img class="user-avatar-img" src="${expert.memberProfileFileName}"></div>`
             : `<div class="user-avatar user-avatar--image"><img class="user-avatar-img" src="/images/profile/default_image.png"></div>`;
 
         const handle = expert.memberHandle ? expert.memberHandle : "";
-        const nickname = expert.memberNickname || expert.memberHandle || "";
+        const nickname = expert.memberName || expert.memberHandle || "";
         const bio = expert.memberBio || "";
         const followerIntro = expert.followerIntro
             ? `<div class="user-followed-by">${expert.followerIntro}</div>`
@@ -174,35 +209,92 @@ const layout = (() => {
     };
 
     const createAdCard = (ad) => {
-        let imageHtml = "";
-        if (ad.adImageList && ad.adImageList.length > 0) {
-            const images = ad.adImageList.map(filePath =>
-                `<img class="postMediaImage" src="${filePath}">`
+        const profileImg = ad.advertiserProfileFileName || '/images/profile/default_image.png';
+        const advertiserName = ad.advertiserName || "";
+        const advertiserHandle = ad.advertiserHandle || "";
+        const landingUrl = ad.landingUrl || "#";
+        let source = "";
+        try { source = new URL(landingUrl).hostname; } catch(e) { source = landingUrl; }
+
+        let mediaHtml = "";
+        if (ad.imgUrls && ad.imgUrls.length > 0) {
+            const images = ad.imgUrls.map(url =>
+                `<img class="postMediaImage" src="${url}">`
             ).join("");
-            imageHtml = `<div class="postMedia">${images}</div>`;
+            mediaHtml = `
+                <div class="postMedia">
+                    ${images}
+                    <div class="adHeadlineWrap">
+                        <span class="adHeadline">${ad.headline || ""}</span>
+                    </div>
+                    <div class="AdCreativePreviewSourceRow">
+                        <button class="AdCreativePreviewSourceButton AdCreativePreviewSource" type="button">출처:
+                            <span data-preview-field="landingUrl">${source}</span>
+                        </button>
+                    </div>
+                </div>`;
         }
 
         return `
-            <div class="postCard postCard--ad">
-                <div class="postAvatar">G</div>
+            <div class="postCard postCard--ad" data-post-id="${ad.id}" data-member-id="${ad.advertiserId}">
+                <div class="postAvatar postAvatar--image">
+                    <img class="postAvatarImage" src="${profileImg}" onerror="this.src='/images/profile/default_image.png'">
+                </div>
                 <div class="postBody">
                     <header class="postHeader">
                         <div class="postIdentity">
-                            <strong class="postName">${ad.title || ""}</strong>
+                            <strong class="postName">${advertiserName}</strong>
+                            <span class="postHandle">${advertiserHandle}</span>
                             <span class="postTime">${ad.createdDatetime || ""}</span>
                         </div>
                         <span class="postAdBadge">광고</span>
+                        ${ad.advertiserId !== loginMemberId ? `
                         <button class="postMoreButton">
                             <svg class="postMoreIcon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></g></svg>
                         </button>
+                        ` : ''}
                     </header>
-                    <a href="${ad.landingUrl || '#'}" target="_blank" style="text-decoration:none;color:inherit;">
-                        <p class="postText">${ad.headline || ""}</p>
+                    <a href="${landingUrl}" target="_blank" style="text-decoration:none;color:inherit;">
                         <p class="postText" style="color:#71767b;">${ad.description || ""}</p>
-                        ${imageHtml}
+                        ${mediaHtml}
                     </a>
                 </div>
             </div>`;
+        // return `<div class="postCard postCard--ad">
+        //             <div class="postAvatar postAvatar--image">
+        //                 <img class="postAvatarImage" src="https://bucket-kmj.s3.ap-northeast-2.amazonaws.com/2026/03/31/dd67be06-547a-4ef7-bf2d-8e61bef69cb6.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Date=20260409T073801Z&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Credential=AKIASN5ULY25H74YS35V%2F20260409%2Fap-northeast-2%2Fs3%2Faws4_request&amp;X-Amz-Expires=600&amp;X-Amz-Signature=ef13fc11b58c57885647d313844750cca0bbacb84523738d9902fe79e6e43c81">
+        //             </div>
+        //
+        //             <div class="postBody">
+        //                 <header class="postHeader">
+        //                     <div class="postIdentity">
+        //                         <strong class="postName">김민중</strong>
+        //                         <span class="postHandle">sokkomang</span>
+        //                         <span class="postTime">2026-04-09 16:12:13.998669</span>
+        //                     </div>
+        //                     <span class="postAdBadge">광고</span>
+        //                     <button class="postMoreButton">
+        //                         <svg class="postMoreIcon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></g></svg>
+        //                     </button>
+        //                 </header>
+        //                 <a href="광고URL" target="_blank" style="text-decoration:none;color:inherit;">
+        //
+        //                     <p class="postText" style="color:#71767b;">광고 내용 입니다.</p>
+        //                     <div class="postMedia">
+        //                         <img class="postMediaImage" src="https://bucket-kmj.s3.ap-northeast-2.amazonaws.com/2026/04/09/002ba3b6-51b5-46ee-b5b5-07a871f97c58.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Date=20260409T074351Z&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Credential=AKIASN5ULY25H74YS35V%2F20260409%2Fap-northeast-2%2Fs3%2Faws4_request&amp;X-Amz-Expires=600&amp;X-Amz-Signature=b8759d6e93490193587213f91fc8451e8b262f4a8cc8bc3bfa24ecd379d43986">
+        //
+        //                         <div class="adHeadlineWrap">
+        //                             <span class="adHeadline">광고헤드라인</span>
+        //                         </div>
+        //                         <div class="AdCreativePreviewSourceRow">
+        //                             <button class="AdCreativePreviewSourceButton AdCreativePreviewSource" type="button">출처:
+        //                                 <span data-preview-field="landingUrl">globalgates.com</span>
+        //                             </button>
+        //                         </div>
+        //                     </div>
+        //                 </a>
+        //              </div>
+        //           </div>`;
     };
 
     let adList = [];
@@ -224,7 +316,7 @@ const layout = (() => {
         const feedSection = document.getElementById("feedSection");
         let html = "";
         posts.forEach((post, i) => {
-            html += createPostCard(post);
+            html += post.newsType === 'emergency' ? createNewsCard(post) : createPostCard(post);
             if (adInterval > 0 && (i + 1) % adInterval === 0) {
                 const ad = getNextAd();
                 if (ad) {

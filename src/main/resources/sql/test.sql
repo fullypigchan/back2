@@ -15,13 +15,16 @@ delete from tbl_report where reporter_id = 41;
 
 select * from tbl_mention;
 
+select * from tbl_notification;
+
 select * from tbl_report;
 
 select * from tbl_post_product;
 
 select * from tbl_news;
 
-select * from tbl_member;
+select * from tbl_member where member_role='expert';
+select * from tbl_member where member_role='admin';
 
 select * from tbl_member_category_rel;
 
@@ -30,6 +33,8 @@ select * from tbl_category;
 select * from tbl_follow;
 
 select * from tbl_advertisement;
+
+select * from tbl_ad_file;
 
 select * from tbl_payment_advertisement;
 
@@ -81,4 +86,3 @@ delete from tbl_badge where member_id = 41;
 update tbl_member set member_role = 'business' where id = 41;
 delete from tbl_payment_subscribe where member_id = 41;
 delete from tbl_subscription where member_id = 41;
-

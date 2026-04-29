@@ -41,7 +41,16 @@ public class MainAPIController implements MainAPIControllerDocs {
     public List<AdvertisementDTO> getAds() {
         log.info("광고 조회");
         List<AdvertisementDTO> ads = advertisementService.getAdsInMain();
-        ads.forEach(ad -> ad.setImgUrls(convertToPresignedUrl(ad.getImgUrls())));
+        ads.forEach(ad -> {
+            ad.setImgUrls(convertToPresignedUrl(ad.getImgUrls()));
+            if (ad.getAdvertiserProfileFileName() != null) {
+                try {
+                    ad.setAdvertiserProfileFileName(s3Service.getPresignedUrl(ad.getAdvertiserProfileFileName(), Duration.ofMinutes(10)));
+                } catch (IOException e) {
+                    throw new RuntimeException("Presigned URL 생성 실패", e);
+                }
+            }
+        });
         return ads;
     }
 
@@ -183,7 +192,17 @@ public class MainAPIController implements MainAPIControllerDocs {
     @LogStatusWithReturn
     public ExpertWithPagingDTO getExpertList(@PathVariable int page, @RequestParam Long memberId) {
         log.info("전문가 목록 조회하기 page: {}, memberId: {}", page, memberId);
-        return expertService.getList(page, memberId);
+        ExpertWithPagingDTO result = expertService.getList(page, memberId);
+        result.getExperts().forEach(expert -> {
+            if (expert.getMemberProfileFileName() != null) {
+                try {
+                    expert.setMemberProfileFileName(s3Service.getPresignedUrl(expert.getMemberProfileFileName(), Duration.ofMinutes(10)));
+                } catch (IOException e) {
+                    throw new RuntimeException("Presigned URL 생성 실패", e);
+                }
+            }
+        });
+        return result;
     }
 
 

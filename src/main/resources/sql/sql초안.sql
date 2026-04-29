@@ -212,7 +212,8 @@ create type post_status as enum (
 
 
 alter table tbl_post
-    alter column title drop not null;
+alter column title drop not null;
+ALTER TABLE tbl_post ADD COLUMN IF NOT EXISTS product_id bigint;
 -- 게시글 (게시물 + 댓글 대댓글 : reply_post_id)
 create table tbl_post (
 id             bigint          generated always as identity primary key,  -- pk | 게시글 고유 id (자동 증가)
@@ -222,6 +223,7 @@ title          varchar(255),                            -- 게시글 제목 (상
 content        text            not null,                         -- 게시글 본문 내용
 location       varchar(255),                                     -- 위치 태그 (post-detailed 페이지 표시)
 reply_post_id  bigint,
+product_id bigint,
 created_datetime     timestamp       not null default now(),
 updated_datetime     timestamp       not null default now(),
 constraint fk_post_member foreign key(member_id)
@@ -234,16 +236,19 @@ select * from tbl_post_product;
 -- [13] tbl_post_product -- 게시물 (상품)
 alter table tbl_post_product
 add column product_category_id bigint not null;
+
 create table tbl_post_product (
 id         bigint    primary key,                -- pk | 댓글 고유 id (자동 증가)
 product_price int   not null,
 product_stock int not null,
+product_category_id bigint not null,
 created_datetime timestamp not null default now(),
 updated_datetime timestamp not null default now(),
 constraint fk_post_comment_post foreign key(id)
 references tbl_post(id)
 );
 
+select * from tbl_post_product;
 
 -- [14] tbl_post_hashtag  ─ 해시태그 목록
 create table tbl_post_hashtag (
@@ -636,6 +641,11 @@ create type news_category_type as enum (
 'etc'           -- 기타
 );
 
+
+alter table tbl_news add column post_id bigint not null;
+alter table tbl_news ADD constraint fk_news_post
+foreign key (post_id) references tbl_post(id);
+
 create table tbl_news (
 id            bigint             generated always as identity primary key,  -- pk | 뉴스 고유 id (자동 증가)
 admin_id      bigint,  -- fk → tbl_member.id | 뉴스 등록 관리자 (탈퇴 시 null)
@@ -643,12 +653,15 @@ news_title         varchar(255)       not null,                -- 뉴스 제목
 news_content       text               not null,                -- 뉴스 본문 내용
 news_source_url    varchar(255),                               -- 원문 기사 출처 url
 news_category news_category_type not null default 'etc', -- 뉴스 카테고리 (enum)
-news_type        news_type        not null default 'general', -- 게시 상태 (enum)
+news_type       news_type        not null default 'general', -- 게시 상태 (enum)
 published_at  timestamp,                                  -- 실제 게시(발행) 일시 (draft 상태에서는 null)
+post_id       bigint,
 created_datetime    timestamp          not null default now(),
 updated_datetime    timestamp          not null default now(),
 constraint fk_news_admin foreign key(admin_id)
-references tbl_member(id)
+references tbl_member(id),
+constraint fk_news_post foreign key (post_id)
+references tbl_post(id)
 );
 
 

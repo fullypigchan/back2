@@ -4,10 +4,10 @@
 
     <select id="selectAll">
         select m.id,
-               m.member_name as member_nickname,
+               m.member_name,
                m.member_handle,
                m.member_bio,
-               (select f.file_path from tbl_member_profile_file mpf
+               (select f.file_name from tbl_member_profile_file mpf
                    join tbl_file f on mpf.id = f.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,
@@ -41,7 +41,7 @@
                m.member_nickname as member_nickname,
                m.member_handle as member_handle,
                m.member_bio as member_bio,
-               (select f.file_path from tbl_member_profile_file mpf
+               (select f.file_name from tbl_member_profile_file mpf
                    join tbl_file f on mpf.id = f.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
                 limit 1) as member_profile_file_name,

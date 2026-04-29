@@ -831,8 +831,8 @@ a.menu-item:visited {
 
 .accountMenuWrap {
     position: relative;
-    margin-top: auto;
     overflow: visible;
+    margin-top: auto;
 }
 
 .accountCard,
@@ -922,7 +922,7 @@ a.menu-item:visited {
 .account-menu-popup {
     position: fixed;
     z-index: 1200;
-    bottom: 80px;
+    bottom: 150px;
     left: 260px;
     width: min(216px, calc(100vw - 32px));
     padding: 6px;
@@ -3780,7 +3780,6 @@ input.tweet-modal__location-display-text-inner {
     height: 40px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: #cfe8fc;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3794,6 +3793,7 @@ input.tweet-modal__location-display-text-inner {
     height: 100%;
     object-fit: cover;
     display: block;
+    border-radius: 50%;
 }
 
 .user-info {
@@ -3930,6 +3930,7 @@ input.tweet-modal__location-display-text-inner {
 .postTime {
     color: #536471;
     font-size: 14px;
+    align-content: center;
 }
 
 .postBadge {
@@ -3942,11 +3943,46 @@ input.tweet-modal__location-display-text-inner {
 .postText {
     margin: 8px 0 12px;
     font-size: 15px;
-    line-height: 20px;
+    line-height: 24px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.newsHeaderWrap {
+    display: flex;
+    gap: 8px;
+    margin: 6px 0px 6px;
+}
+
+/*.postBody.postCard--news {*/
+/*    margin-left: 40px;*/
+/*}*/
+
+.postNewsTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f1419;
+    line-height: 28px;
+}
+
+h3.postNewsTitle {
+    margin: 0;
+}
+
+.postNewsText {
+    margin: 8px 0 12px;
+    font-size: 15px;
+    line-height: 24px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.postCard--news.postMetrics {
+    margin-left: 50px;
 }
 
 .postLocation {
@@ -4012,6 +4048,7 @@ div.postHashtags {
 
 .postMedia {
     margin-bottom: 12px;
+    position: relative;
 }
 
 .postMetrics {
@@ -4154,6 +4191,7 @@ div.postHashtags {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 18px;
 }
 
 img.postMediaImage {
@@ -4853,6 +4891,7 @@ img.postMediaImage {
     .sidebar-inner {
         width: 275px;
         padding: 8px 16px;
+        padding-bottom: 32px;
     }
 
     .nav-logo {
@@ -4896,10 +4935,7 @@ img.postMediaImage {
     }
 }
 
-/* ══════════════════════════════════════════════════
-   북마크 폴더 모달 (bookmark.css에서 복사)
-   share-menu-item--bookmark 클릭 시 나오는 모달용
-   ══════════════════════════════════════════════════ */
+/* share-menu-item--bookmark 클릭 시 나오는 북마크 폴더 모달 */
 
 .bookmark-share-sheet {
     position: fixed;
@@ -5258,4 +5294,130 @@ img.postMediaImage {
     .bookmark-modal-field {
         min-height: 64px;
     }
+}
+
+.Post-Card {
+    display: flex;
+    gap: 12px;
+    padding: 0px 16px;
+    padding-top: 10px;
+    border-bottom: 1px solid #eff3f4;
+    cursor: pointer;
+}
+
+.Post-Body {
+    flex: 1;
+    min-width: 0;
+}
+
+.Post-Header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.Post-Identity {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    align-items: center;
+    min-width: 0;
+}
+
+.Post-Title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.Post-Category {
+    color: #536471;
+    font-size: 13px;
+}
+
+.Post-Product-Info {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    gap: 5px;
+}
+
+.Post-Product-Image {
+    width: 100px;
+    height: 100px;
+    border-radius: 0.75rem;
+    border: 0.5px solid #eff3f4;
+}
+
+.Post-Product-Image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.Post-Product-Detail {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.Detail-Category-Tags {
+    display: flex;
+    gap: 5px;
+}
+
+.Detail-Value {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+.Post-Text {
+    margin: 8px 0 12px;
+    font-size: 15px;
+    line-height: 20px;
+}
+
+
+/* 광고카드 css */
+
+.adHeadlineWrap {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    padding: 4px 8px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: rgba(15, 20, 25, 0.85);
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    position: absolute;
+    z-index: 10;
+    bottom: 35px;
+    left: 15px;
+}
+
+.adHeadline {
+    font-size: 12px;
+    line-height: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    z-index: 10;
+}
+
+button.AdCreativePreviewSourceButton.AdCreativePreviewSource {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 2px 4px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: rgb(83, 100, 113);
+    font-size: 14px;
+    line-height: 1.4;
 }

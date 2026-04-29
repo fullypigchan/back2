@@ -7,7 +7,7 @@ const friendsLayout = (() => {
             : `<div class="user-avatar user-avatar--image"><img class="user-avatar-img" src="/images/profile/default_image.png" alt=""></div>`;
 
         const handle = friend.memberHandle ? friend.memberHandle : "";
-        const nickname = friend.memberNickname || friend.memberHandle || "";
+        const name = friend.memberName || friend.memberNickname || "";
         const bio = friend.memberBio || "";
         const followerIntro = friend.followerIntro
             ? `<div class="user-followed-by">${friend.followerIntro}</div>`
@@ -19,7 +19,7 @@ const friendsLayout = (() => {
                 <div class="user-info">
                     <div class="user-top">
                         <div class="user-name-group">
-                            <div class="user-name">${nickname}</div>
+                            <div class="user-name">${name}</div>
                             <div class="user-handle">${handle}</div>
                             ${followerIntro}
                         </div>

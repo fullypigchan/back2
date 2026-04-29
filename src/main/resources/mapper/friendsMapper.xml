@@ -13,7 +13,7 @@
 
     <select id="selectAll">
         select m.id,
-               m.member_nickname,
+               m.member_name,
                m.member_handle,
                m.member_bio,
                (select f.file_name from tbl_member_profile_file mpf

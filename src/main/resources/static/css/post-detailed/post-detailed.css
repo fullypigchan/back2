@@ -256,11 +256,8 @@ a {
 .post-detail-reply-text {
     margin: 0;
     font-size: 15px;
-    line-height: 20px;
+    line-height: 24px;
     white-space: pre-line;
-}
-
-.post-detail-body-text + .post-detail-body-text {
     margin-top: 16px;
 }
 
@@ -303,9 +300,6 @@ div.postHashtags {
     margin-bottom: 8px;
 }
 
-.post-detail-body-text + .post-detail-body-text {
-    margin-top: 16px;
-}
 
 .post-detail-link,
 .post-detail-link-button {

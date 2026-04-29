@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 public class FriendsDTO {
     private Long id;
+    private String memberName;
     private String memberNickname;
     private String memberHandle;
     private String memberBio;

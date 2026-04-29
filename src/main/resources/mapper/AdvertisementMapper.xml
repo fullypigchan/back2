@@ -30,20 +30,28 @@
     </insert>
 
     <select id="selectAll">
-        select id,
-               advertiser_id,
-               title,
-               headline,
-               description,
-               landing_url,
-               budget,
-               impression_estimate,
-               receipt_id,
-               status,
-               started_at,
-               created_datetime,
-               updated_datetime
-        from tbl_advertisement
+        select a.id,
+               a.advertiser_id,
+               a.title,
+               a.headline,
+               a.description,
+               a.landing_url,
+               a.budget,
+               a.impression_estimate,
+               a.receipt_id,
+               a.status,
+               a.started_at,
+               a.created_datetime,
+               a.updated_datetime,
+               m.member_name as advertiser_name,
+               m.member_handle as advertiser_handle,
+               (select f.file_name from tbl_member_profile_file mpf
+                   join tbl_file f on mpf.id = f.id
+                where mpf.member_id = a.advertiser_id and mpf.profile_image_type = 'profile'
+                limit 1) as advertiser_profile_file_name
+        from tbl_advertisement a
+        join tbl_member m on a.advertiser_id = m.id
+        order by a.created_datetime desc
     </select>
 
     <select id="selectBySearch">

@@ -97,6 +97,7 @@ public class PostService {
                     .map(PostFileDTO::getFilePath)
                     .collect(Collectors.toList());
             postDTO.setFileUrls(fileUrls);
+            postDTO.setCreatedDatetime(DateUtils.toRelativeTime(postDTO.getCreatedDatetime()));
         });
 
         PostWithPagingDTO postWithPagingDTO = new PostWithPagingDTO();
@@ -240,6 +241,7 @@ public class PostService {
 
         postDTO.setHashtags(postHashtagDAO.findAllByPostId(id));
         postDTO.setPostFiles(postFileDAO.findAllByPostId(id));
+        postDTO.setCreatedDatetime(DateUtils.toRelativeTime(postDTO.getCreatedDatetime()));
         return postDTO;
     }
 
@@ -368,7 +370,11 @@ public class PostService {
         Map<Long, List<PostDTO>> subMap = subReplies.stream()
                 .collect(Collectors.groupingBy(PostDTO::getReplyPostId));
 
-        comments.forEach(c -> c.setSubReplies(subMap.getOrDefault(c.getId(), List.of())));
+        comments.forEach(c -> {
+            c.setCreatedDatetime(DateUtils.toRelativeTime(c.getCreatedDatetime()));
+            c.setSubReplies(subMap.getOrDefault(c.getId(), List.of()));
+        });
+        subReplies.forEach(sub -> sub.setCreatedDatetime(DateUtils.toRelativeTime(sub.getCreatedDatetime())));
         log.info("getReplies 들어옴2 댓글수: {}", comments.size());
         return comments;
     }
@@ -414,7 +420,7 @@ public class PostService {
             noti.setTargetId(postId);
             noti.setTargetType("post");
             notificationService.createNotification(noti);
-            log.info("멘션알림 들어옴4 발송완료 recipientId: {}", taggedId);
+            log.info("멘션알림 들어옴4 발송완료 멘션된녀석: {}", taggedId);
         }
     }
 }

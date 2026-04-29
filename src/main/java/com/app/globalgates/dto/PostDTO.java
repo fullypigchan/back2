@@ -54,6 +54,11 @@ public class PostDTO {
     private String communityName;
     private String categoryName;
 
+    // 속보타입 뉴스
+    private String newsTitle;
+    private String newsContent;
+    private String newsType;
+
     // 대댓글 (댓글의 댓글)
     private List<PostDTO> subReplies;
 

@@ -10,6 +10,7 @@ import lombok.*;
 public class ExpertDTO {
     private Long id;
     private String memberNickname;
+    private String memberName;
     private String memberHandle;
     private String memberBio;
     private String memberProfileFileName;

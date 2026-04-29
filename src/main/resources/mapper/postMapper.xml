@@ -73,6 +73,9 @@
     <!-- 게시글 목록 조회 (메인 피드) -->
     <select id="selectAll">
         select v.*,
+               n.news_title,
+               n.news_content as news_content,
+               n.news_type,
                case when exists (
                    select 1 from tbl_post_like pl2
                    where pl2.post_id = v.id and pl2.member_id = #{memberId}
@@ -86,10 +89,12 @@
                    where f.follower_id = #{memberId} and f.following_id = v.member_id
                ) then true else false end as is_followed
         from view_post_feed v
+        left join tbl_news n on n.post_id = v.id and n.news_type = 'emergency'
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
           and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{memberId})
           and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
           and v.id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'post')
+          and not exists (select 1 from tbl_news gn where gn.post_id = v.id and gn.news_type = 'general')
         order by v.created_datetime desc
         limit #{criteria.count}
         offset #{criteria.offset}

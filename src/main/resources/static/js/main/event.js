@@ -631,7 +631,7 @@ window.onload = () => {
         if (!card || card.classList.contains("postCard--ad")) return;
         const postId = card.dataset.postId;
         if (postId) {
-            window.location.href = `/main/post/detail/${postId}?memberId=${memberId}`;
+            window.location.href = `/main/post/detail/${postId}`;
         }
     });
 
