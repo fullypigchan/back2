@@ -1,65 +1,143 @@
 package com.app.globalgates.controller;
 
+import com.app.globalgates.aop.annotation.LogStatus;
+import com.app.globalgates.aop.annotation.LogStatusWithReturn;
+import com.app.globalgates.auth.CustomUserDetails;
+import com.app.globalgates.dto.NewsBookmarkDTO;
+import com.app.globalgates.dto.NewsLikeDTO;
+import com.app.globalgates.dto.NewsReplyDTO;
+import com.app.globalgates.dto.NewsReplyLikeDTO;
+import com.app.globalgates.service.NewsBookmarkService;
+import com.app.globalgates.service.NewsLikeService;
+import com.app.globalgates.service.NewsReplyService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-// import com.app.globalgates.dto.NewsDTO;          // [n8n 연동용] 주석 해제
-// import com.app.globalgates.service.NewsService;  // [n8n 연동용] 주석 해제
-// import lombok.RequiredArgsConstructor;            // [n8n 연동용] 주석 해제
-// import lombok.extern.slf4j.Slf4j;                // [n8n 연동용] 주석 해제
-// import org.springframework.web.bind.annotation.*; // [n8n 연동용] 주석 해제
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/news")
-// @RequiredArgsConstructor  // [n8n 연동용] 주석 해제
-// @Slf4j                    // [n8n 연동용] 주석 해제
+@RequiredArgsConstructor
+@Slf4j
 public class NewsAPIController {
-    // ═══════════════════════════════════════════════════════════════
-    // [n8n 연동용] 뉴스 CRUD API
-    //
-    // n8n 워크플로우에서 HTTP Request 노드로 호출하는 엔드포인트
-    // - POST   /api/news        → 뉴스 등록 (n8n AI 요약 결과 자동 등록)
-    // - PUT    /api/news/{id}   → 뉴스 수정
-    // - DELETE /api/news/{id}   → 뉴스 삭제
-    //
-    // n8n에서 보내는 JSON 형식 예시:
-    // {
-    //   "adminId": 900005,
-    //   "newsTitle": "제목",
-    //   "newsContent": "AI 요약 내용",
-    //   "newsSourceUrl": "https://원문URL",
-    //   "newsCategory": "trade",        ← enum: trade, market, policy, technology, etc
-    //   "newsType": "general"           ← enum: general(일반), emergency(속보)
-    // }
-    //
-    // 활성화 순서:
-    // 1) 이 파일 상단 import 주석 해제
-    // 2) @RequiredArgsConstructor, @Slf4j 주석 해제
-    // 3) newsService 필드 주석 해제
-    // 4) 아래 엔드포인트 메서드 주석 해제
-    // 5) NewsService/NewsDAO/NewsMapper 의 CUD 메서드도 주석 해제
-    // ═══════════════════════════════════════════════════════════════
 
-//    private final NewsService newsService;
+    private final NewsLikeService newsLikeService;
+    private final NewsBookmarkService newsBookmarkService;
+    private final NewsReplyService newsReplyService;
 
-    // 뉴스 등록 — n8n HTTP Request 노드에서 POST /api/news 로 호출
-//    @PostMapping
-//    public void saveNews(@RequestBody NewsDTO newsDTO) {
-//        log.info("뉴스 등록 — title: {}, type: {}", newsDTO.getNewsTitle(), newsDTO.getNewsType());
-//        newsService.saveNews(newsDTO);
-//    }
+    //    좋아요 토글
+    @LogStatus
+    @PostMapping("/{newsId}/likes")
+    public ResponseEntity<?> toggleLike(@PathVariable Long newsId,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getId();
+        Optional<NewsLikeDTO> existing = newsLikeService.getLike(memberId, newsId);
 
-    // 뉴스 수정 — 관리자 페이지에서 호출
-//    @PutMapping("/{id}")
-//    public void updateNews(@PathVariable Long id, @RequestBody NewsDTO newsDTO) {
-//        log.info("뉴스 수정 — id: {}", id);
-//        newsDTO.setId(id);
-//        newsService.updateNews(newsDTO);
-//    }
+        boolean liked;
+        if (existing.isPresent()) {
+            newsLikeService.deleteLike(memberId, newsId);
+            liked = false;
+        } else {
+            NewsLikeDTO dto = new NewsLikeDTO();
+            dto.setMemberId(memberId);
+            dto.setNewsId(newsId);
+            newsLikeService.addLike(dto);
+            liked = true;
+        }
+        int likeCount = newsLikeService.getLikeCount(newsId);
+        return ResponseEntity.ok(Map.of("liked", liked, "likeCount", likeCount));
+    }
 
-    // 뉴스 삭제 — 관리자 페이지에서 호출
-//    @DeleteMapping("/{id}")
-//    public void deleteNews(@PathVariable Long id) {
-//        log.info("뉴스 삭제 — id: {}", id);
-//        newsService.deleteNews(id);
-//    }
+    //    북마크 토글
+    @LogStatus
+    @PostMapping("/{newsId}/bookmarks")
+    public ResponseEntity<?> toggleBookmark(@PathVariable Long newsId,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getId();
+        Optional<NewsBookmarkDTO> existing = newsBookmarkService.getBookmark(memberId, newsId);
+
+        boolean bookmarked;
+        if (existing.isPresent()) {
+            newsBookmarkService.deleteBookmark(memberId, newsId);
+            bookmarked = false;
+        } else {
+            NewsBookmarkDTO dto = new NewsBookmarkDTO();
+            dto.setMemberId(memberId);
+            dto.setNewsId(newsId);
+            newsBookmarkService.addBookmark(dto);
+            bookmarked = true;
+        }
+        int bookmarkCount = newsBookmarkService.getBookmarkCount(newsId);
+        return ResponseEntity.ok(Map.of("bookmarked", bookmarked, "bookmarkCount", bookmarkCount));
+    }
+
+    //    댓글 등록
+    @LogStatusWithReturn
+    @PostMapping("/{newsId}/replies")
+    public ResponseEntity<?> writeReply(@PathVariable Long newsId,
+                                        @RequestBody NewsReplyDTO newsReplyDTO,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (newsReplyDTO.getContent() == null || newsReplyDTO.getContent().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "내용을 입력해주세요."));
+        }
+        newsReplyDTO.setNewsId(newsId);
+        newsReplyDTO.setMemberId(userDetails.getId());
+        newsReplyService.writeReply(newsReplyDTO);
+        int replyCount = newsReplyService.getReplyCount(newsId);
+        return ResponseEntity.ok(Map.of("id", newsReplyDTO.getId(), "replyCount", replyCount));
+    }
+
+    //    댓글 목록
+    @LogStatusWithReturn
+    @GetMapping("/{newsId}/replies")
+    public ResponseEntity<?> getReplies(@PathVariable Long newsId,
+                                        @RequestParam(value = "sort", required = false) String sort,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long currentMemberId = userDetails != null ? userDetails.getId() : null;
+        List<NewsReplyDTO> replies = newsReplyService.getReplies(newsId, currentMemberId, sort);
+        return ResponseEntity.ok(replies);
+    }
+
+    //    댓글 삭제 (작성자만)
+    @LogStatus
+    @DeleteMapping("/replies/{replyId}")
+    public ResponseEntity<?> deleteReply(@PathVariable Long replyId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        newsReplyService.deleteReply(replyId, userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    //    댓글 좋아요 토글
+    @LogStatus
+    @PostMapping("/replies/{replyId}/likes")
+    public ResponseEntity<?> toggleReplyLike(@PathVariable Long replyId,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getId();
+        Optional<NewsReplyLikeDTO> existing = newsReplyService.getReplyLike(memberId, replyId);
+
+        boolean liked;
+        if (existing.isPresent()) {
+            newsReplyService.deleteReplyLike(memberId, replyId);
+            liked = false;
+        } else {
+            NewsReplyLikeDTO dto = new NewsReplyLikeDTO();
+            dto.setMemberId(memberId);
+            dto.setReplyId(replyId);
+            newsReplyService.addReplyLike(dto);
+            liked = true;
+        }
+        return ResponseEntity.ok(Map.of("liked", liked));
+    }
 }

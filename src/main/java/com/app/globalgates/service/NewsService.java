@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -16,12 +17,14 @@ public class NewsService {
     private final NewsDAO newsDAO;
 
     //    뉴스 전체 조회
+    @LogStatusWithReturn
     @Cacheable(value = "news:list", key = "'all'")
     public List<NewsDTO> getNewsList() {
         return newsDAO.findAll();
     }
 
     //    뉴스 단건 조회
+    @LogStatusWithReturn
     @Cacheable(value = "news", key = "#id")
     public Optional<NewsDTO> getNews(Long id) {
         return newsDAO.findById(id);
