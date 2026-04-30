@@ -1459,10 +1459,12 @@
     <script src="/js/member/join-modal-submit.js"></script>
     <script src="/js/member/login.js"></script>
     <script>
-        // 모바일(≤600px) 진입 스플래시 — 시작하기 누르면 위로 빠지면서 로그인/회원가입 화면 노출
+        // 모바일(≤600px) 진입 스플래시 — 시작하기 누르면 패널이 모달처럼 올라오고
+        // 패널 바깥(스플래시 배경)을 누르면 다시 시작하기 화면으로 돌아온다.
         (() => {
             const splash = document.getElementById('joinSplash');
             const btn = document.getElementById('btn-start');
+            const panel = document.querySelector('.join-panel');
             if (!splash || !btn) return;
 
             const mq = window.matchMedia('(max-width: 600px)');
@@ -1473,28 +1475,35 @@
 
             document.body.classList.add('has-splash');
 
-            const cleanup = () => {
-                splash.classList.add('is-gone');
-                document.body.classList.remove('has-splash');
-            };
-
-            btn.addEventListener('click', () => {
+            const openPanel = () => {
                 if (splash.dataset.leaving === '1') return;
                 splash.dataset.leaving = '1';
 
-                // 1) 버튼 임팩트 (눌림 + 화이트 링)
                 btn.classList.add('is-pressing');
 
-                // 2) 잠깐 후 컨테이너가 위로 빠지면서 패널이 모달처럼 올라옴
                 setTimeout(() => {
                     splash.classList.add('is-leaving');
                     document.body.classList.add('panel-revealed');
                 }, 220);
+            };
 
-                // 3) 트랜지션 끝나면 DOM 정리
-                splash.addEventListener('transitionend', cleanup, { once: true });
-                setTimeout(cleanup, 1300); // safety
-            }, { once: true });
+            const closePanel = () => {
+                if (splash.dataset.leaving !== '1') return;
+                document.body.classList.remove('panel-revealed');
+                splash.classList.remove('is-leaving');
+                btn.classList.remove('is-pressing');
+                splash.dataset.leaving = '0';
+            };
+
+            btn.addEventListener('click', openPanel);
+
+            // 패널 밖(스플래시 영역)을 클릭하면 시작하기 화면으로 복귀
+            document.addEventListener('click', (e) => {
+                if (splash.dataset.leaving !== '1') return;
+                if (panel && panel.contains(e.target)) return;
+                if (btn.contains(e.target)) return;
+                closePanel();
+            });
         })();
     </script>
 </body>
