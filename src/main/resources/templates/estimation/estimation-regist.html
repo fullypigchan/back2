@@ -875,6 +875,20 @@
             </button>
         </header>
         <div class="productSelectModal__content">
+            <div class="productSelectModal__owner-search">
+                <label class="productSelectModal__owner-search-label" for="productOwnerSearch">
+                    상품 주인 검색
+                </label>
+                <input
+                        type="search"
+                        class="productSelectModal__owner-search-input"
+                        id="productOwnerSearch"
+                        placeholder="상품을 가진 상대방을 검색하세요"
+                        autocomplete="off"
+                />
+            </div>
+            <div class="productSelectModal__owner-list" id="productOwnerList"></div>
+            <div class="productSelectModal__owner-selected" id="productOwnerSelected" hidden></div>
             <div class="productSelectModal__list" id="productSelectList"></div>
             <div class="productSelectModal__empty" id="productSelectEmpty" hidden>
                 <p class="productSelectModal__empty-title">등록된 상품이 없습니다</p>

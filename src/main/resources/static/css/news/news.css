@@ -443,6 +443,30 @@ svg {
     flex-direction: column;
 }
 
+.post-detail-replies-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: rgb(83, 100, 113);
+    font-size: 15px;
+}
+
+.post-detail-reply-more-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 140px;
+    z-index: 30;
+}
+
+.post-detail-reply-more-menu[hidden] {
+    display: none !important;
+}
+
+.post-detail-reply-more-delete {
+    color: rgb(244, 33, 46);
+    font-weight: 700;
+}
+
 .post-detail-reply-card {
     display: flex;
     gap: 12px;

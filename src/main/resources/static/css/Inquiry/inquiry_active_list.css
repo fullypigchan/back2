@@ -100,6 +100,7 @@ button {
     font-weight: 500;
     transition: background-color 0.2s;
     white-space: nowrap;
+    text-decoration: none;
 }
 
 .inquiry-tab:hover {
@@ -781,6 +782,10 @@ button {
    postAvatar: 프로필 이미지 또는 이니셜 원형
    postBody: 헤더(작성자 정보 + 더보기 버튼) + 본문 텍스트 + 미디어 + 액션 바
    postMedia / postMediaGrid: 단일 이미지, 2/3/4장 그리드 레이아웃 */
+.inquiry-panel--activity > .postCard {
+    display: none;
+}
+
 .postCard {
     display: flex;
     gap: 12px;

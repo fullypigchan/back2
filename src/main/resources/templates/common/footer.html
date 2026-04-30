@@ -30,6 +30,22 @@
             </form>
             <section class="suggestionCard sidebarCard">
                 <h2 class="suggestionTitle" id="suggestionTitle">팔로우 추천</h2>
+                <th:block th:if="${#lists.isEmpty(myFollowings)}">
+                    <div class="Sidebar-User-Cell">
+                        <div class="Sidebar-User-Info">
+                            <span class="Sidebar-User-Name">아직 팔로우한 사업자가 없습니다.</span>
+                            <span class="Sidebar-User-Handle">새로운 사업자를 연결해보세요.</span>
+                            <!-- 빈 상태에서 다음 행동으로 바로 이어질 수 있도록
+                                 탐색 화면으로 이동하는 CTA를 같은 카드 안에 둔다.
+                                 기존 사이드바 버튼 스타일을 재사용해서 다른 카드와 시각적 톤을 맞춘다. -->
+                            <button type="button"
+                                    class="Sidebar-Follow-Btn Sidebar-Follow-Btn--Discover"
+                                    th:onclick="|window.location.href='@{/explore}'|">
+                                <span class="Sidebar-Follow-Btn-Text">사업가 찾기</span>
+                            </button>
+                        </div>
+                    </div>
+                </th:block>
                 <a class="suggestionLink sidebarMoreLink" href="/friends">더 보기</a>
             </section>
             <section class="exchangeRateFeedCard sidebarCard" id="exchangeRateFeedCard">
