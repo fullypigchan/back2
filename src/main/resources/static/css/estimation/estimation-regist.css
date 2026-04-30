@@ -621,6 +621,111 @@ body.modal-open {
     overflow-y: auto;
 }
 
+.productSelectModal__owner-search {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #eff3f4;
+    background: #fff;
+}
+
+.productSelectModal__owner-search-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #536471;
+}
+
+.productSelectModal__owner-search-input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid #cfd9de;
+    border-radius: 9999px;
+    outline: none;
+    font: inherit;
+    color: #0f1419;
+    background: #f7f9f9;
+}
+
+.productSelectModal__owner-search-input:focus {
+    border-color: #1d9bf0;
+    background: #fff;
+    box-shadow: 0 0 0 1px #1d9bf0;
+}
+
+.productSelectModal__owner-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 178px;
+    overflow-y: auto;
+    border-bottom: 1px solid #eff3f4;
+}
+
+.productSelectModal__owner-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    background: #fff;
+    text-align: left;
+}
+
+.productSelectModal__owner-item:hover,
+.productSelectModal__owner-item.is-selected {
+    background: rgba(29, 155, 240, 0.08);
+}
+
+.productSelectModal__owner-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: #eff3f4;
+}
+
+.productSelectModal__owner-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.productSelectModal__owner-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.productSelectModal__owner-name {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    color: #0f1419;
+}
+
+.productSelectModal__owner-handle {
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 18px;
+    color: #536471;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.productSelectModal__owner-selected {
+    padding: 10px 20px;
+    border-bottom: 1px solid #eff3f4;
+    background: #f7f9f9;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f1419;
+}
+
 .productSelectModal__list {
     display: flex;
     flex-direction: column;

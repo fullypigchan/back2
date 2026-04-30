@@ -41,7 +41,11 @@ window.addEventListener("load", function () {
     const productSelectBackdrop = document.getElementById("productSelectBackdrop");
     const productSelectClose = document.getElementById("productSelectClose");
     const productSelectConfirm = document.getElementById("productSelectConfirm");
+    const productSelectTitle = document.getElementById("productSelectTitle");
     const productSelectList = document.getElementById("productSelectList");
+    const productOwnerSearch = document.getElementById("productOwnerSearch");
+    const productOwnerList = document.getElementById("productOwnerList");
+    const productOwnerSelected = document.getElementById("productOwnerSelected");
     const selectedProductPreview = document.getElementById("selectedProductPreview");
     const selectedProductImage = document.getElementById("selectedProductImage");
     const selectedProductName = document.getElementById("selectedProductName");
@@ -82,11 +86,12 @@ window.addEventListener("load", function () {
     // ╚══════════════════════════════════════════════════╝
     const state = {
         selectedProductId: "",
-        // 견적 받는 회원의 ID. 마이페이지에서는 페이지 주인이 default,
-        // share-sheet에서 다른 회원을 고르면 그 ID로 갱신된다.
+        // 상품 주인 회원 ID. 상대 프로필에서 견적 요청 시 pageMemberId가 상품 조회 기준이다.
         selectedMemberId: window.mypageContext?.pageMemberId
             ? String(window.mypageContext.pageMemberId)
             : "",
+        // 견적 요청을 받을 전문가 정보. 상단 사용자 찾기에서 선택한다.
+        selectedReceiverId: "",
         selectedReceiverEmail: "",
         selectedLocation: "",
         pendingLocation: "",
@@ -95,6 +100,9 @@ window.addEventListener("load", function () {
         expertSearchPage: 1,
         isLoadingExperts: false,
         hasMoreExperts: true,
+        lastProductOwnerSearchKeyword: "",
+        isLoadingProductOwners: false,
+        selectedProductOwnerName: "",
         mapInstance: null,
         mapMarker: null,
         geocoder: null,
@@ -113,7 +121,7 @@ window.addEventListener("load", function () {
     const syncSubmitState = () => {
         if (!submitButton) return;
         const hasRequired = requiredFields.every((f) => f.value.trim());
-        submitButton.disabled = !hasRequired || !state.selectedProductId;
+        submitButton.disabled = !hasRequired || !state.selectedProductId || !state.selectedReceiverId;
     };
 
     // 태그 hidden input + 태그 영역 hidden 토글 + 토글 버튼 라벨 갱신.
@@ -221,6 +229,45 @@ window.addEventListener("load", function () {
         productSelectConfirm.disabled = !state.selectedProductId;
     };
 
+    const setProductSelectEmpty = (title, body) => {
+        const empty = document.getElementById("productSelectEmpty");
+        if (!empty) return;
+
+        const titleElement = empty.querySelector(".productSelectModal__empty-title");
+        const bodyElement = empty.querySelector(".productSelectModal__empty-body");
+
+        if (titleElement) {
+            titleElement.textContent = title;
+        }
+        if (bodyElement) {
+            bodyElement.textContent = body;
+        }
+    };
+
+    const syncProductOwnerSelection = () => {
+        const ownerItems = Array.from(
+            productOwnerList?.querySelectorAll(".productSelectModal__owner-item") ?? []
+        );
+
+        ownerItems.forEach((item) => {
+            item.classList.toggle(
+                "is-selected",
+                item.dataset.productOwnerId === state.selectedMemberId
+            );
+        });
+
+        if (!productOwnerSelected) return;
+        if (!state.selectedMemberId) {
+            productOwnerSelected.hidden = true;
+            productOwnerSelected.textContent = "";
+            return;
+        }
+
+        const ownerName = state.selectedProductOwnerName || "선택한 상대";
+        productOwnerSelected.hidden = false;
+        productOwnerSelected.textContent = `${ownerName}님의 상품 목록`;
+    };
+
     // ╔══════════════════════════════════════════════════╗
     // ║ 4. subPanel 팩토리                                 ║
     // ║   상품 모달, 전문가 시트, 위치 패널 공통 흐름           ║
@@ -309,7 +356,7 @@ window.addEventListener("load", function () {
             ].filter(Boolean);
             return {
                 requesterId: 1,
-                receiverId: state.selectedMemberId ? Number(state.selectedMemberId) : null,
+                receiverId: state.selectedReceiverId ? Number(state.selectedReceiverId) : null,
                 productId: state.selectedProductId ? Number(state.selectedProductId) : null,
                 title: safeText(titleInput?.value),
                 content: descriptionParts.join("\n"),
@@ -330,6 +377,8 @@ window.addEventListener("load", function () {
             state.selectedMemberId = window.mypageContext?.pageMemberId
                 ? String(window.mypageContext.pageMemberId)
                 : "";
+            state.selectedProductOwnerName = "";
+            state.selectedReceiverId = "";
             state.selectedReceiverEmail = "";
             state.selectedLocation = "";
             state.pendingLocation = "";
@@ -354,6 +403,10 @@ window.addEventListener("load", function () {
             event.preventDefault();
 
             const payload = buildPayload();
+            if (!payload.receiverId) {
+                alert("견적 요청을 보낼 전문가를 먼저 선택해 주세요.");
+                return;
+            }
             if (!payload.title || !payload.content || !payload.productId) {
                 alert("제목, 내용, 상품을 먼저 입력해 주세요.");
                 return;
@@ -482,31 +535,76 @@ window.addEventListener("load", function () {
     const setupProductSelect = () => {
         if (!productSelectButton || !productSelectModal) return;
 
+        const fetchAndShowProductOwners = async () => {
+            if (!productOwnerList) return;
+
+            const keyword = productOwnerSearch?.value.trim() || "";
+            state.lastProductOwnerSearchKeyword = keyword;
+            state.isLoadingProductOwners = true;
+
+            try {
+                const owners = await estimationService.getProductOwners(keyword, 1);
+                if (keyword !== state.lastProductOwnerSearchKeyword) return;
+                estimationLayout.showProductOwnerList(owners);
+                syncProductOwnerSelection();
+            } catch (error) {
+                if (keyword !== state.lastProductOwnerSearchKeyword) return;
+                console.error(error);
+                estimationLayout.showProductOwnerList([]);
+            } finally {
+                state.isLoadingProductOwners = false;
+            }
+        };
+
+        const fetchProductsForSelectedOwner = async ({ clearProduct = false } = {}) => {
+            if (clearProduct) {
+                state.selectedProductId = "";
+                if (selectedProductPreview) selectedProductPreview.hidden = true;
+            }
+
+            if (!state.selectedMemberId) {
+                setProductSelectEmpty(
+                    "상품을 가져올 상대를 검색해 주세요",
+                    "검색 결과에서 상대를 선택하면 해당 상대의 상품 목록이 표시됩니다."
+                );
+                estimationLayout.showProductList([]);
+                state.productItems = [];
+                syncProductSelection();
+                return;
+            }
+
+            try {
+                setProductSelectEmpty(
+                    "등록된 상품이 없습니다",
+                    "선택한 상대에게 등록된 상품이 없습니다."
+                );
+                const products = await estimationService.getProducts(state.selectedMemberId);
+                estimationLayout.showProductList(products);
+                state.productItems = Array.from(
+                    productSelectList?.querySelectorAll(".productSelectModal__item") ?? []
+                );
+            } catch (error) {
+                console.error(error);
+                setProductSelectEmpty(
+                    "상품 목록을 불러오지 못했습니다",
+                    "잠시 후 다시 시도해 주세요."
+                );
+                estimationLayout.showProductList([]);
+                state.productItems = [];
+            }
+            syncProductSelection();
+        };
+
         const panel = subPanel({
             panel: productSelectModal,
             onOpen: async () => {
-                // 회원이 아직 선택되지 않았으면 안내 후 빈 목록 노출.
-                if (!state.selectedMemberId) {
-                    estimationLayout.showProductList([]);
-                    state.productItems = [];
-                    const empty = document.getElementById("productSelectEmpty");
-                    if (empty) empty.textContent = "먼저 회원을 선택해 주세요";
-                    syncProductSelection();
-                    return;
+                if (productSelectTitle) {
+                    productSelectTitle.textContent = "상대 상품 선택하기";
                 }
-                try {
-                    const products = await estimationService.getProducts(state.selectedMemberId);
-                    estimationLayout.showProductList(products);
-                    state.productItems = Array.from(
-                        productSelectList?.querySelectorAll(".productSelectModal__item") ?? []
-                    );
-                } catch (error) {
-                    console.error(error);
-                    // 실패 시 빈 목록으로 처리 → layout이 #productSelectEmpty 자동 표시
-                    estimationLayout.showProductList([]);
-                    state.productItems = [];
-                }
-                syncProductSelection();
+                if (productOwnerSearch) productOwnerSearch.value = "";
+                await fetchAndShowProductOwners();
+                await fetchProductsForSelectedOwner();
+                syncProductOwnerSelection();
             },
         });
 
@@ -523,6 +621,19 @@ window.addEventListener("load", function () {
             if (!item) return;
             state.selectedProductId = item.dataset.productId || "";
             syncProductSelection();
+        });
+
+        productOwnerSearch?.addEventListener("input", () => void fetchAndShowProductOwners());
+        productOwnerSearch?.addEventListener("change", () => void fetchAndShowProductOwners());
+
+        productOwnerList?.addEventListener("click", (event) => {
+            const item = event.target.closest(".productSelectModal__owner-item");
+            if (!item) return;
+
+            state.selectedMemberId = item.dataset.productOwnerId || "";
+            state.selectedProductOwnerName = item.dataset.productOwnerName || "";
+            syncProductOwnerSelection();
+            void fetchProductsForSelectedOwner({ clearProduct: true });
         });
 
         // 확인 버튼 → 미리보기 갱신 + 모달 닫기
@@ -620,14 +731,7 @@ window.addEventListener("load", function () {
             const button = event.target.closest(".share-sheet__user");
             if (!button) return;
 
-            // 다른 회원으로 바뀌면 이전에 고른 상품도 무효화 — 그 회원의 상품이 아닐 수 있다.
-            const newMemberId = button.dataset.shareUserId || "";
-            if (newMemberId !== state.selectedMemberId) {
-                state.selectedProductId = "";
-                state.productItems = [];
-                if (selectedProductPreview) selectedProductPreview.hidden = true;
-            }
-            state.selectedMemberId = newMemberId;
+            state.selectedReceiverId = button.dataset.shareUserId || "";
             state.selectedReceiverEmail = button.dataset.shareUserEmail || "";
             if (linkedProfile) {
                 linkedProfile.hidden = false;
@@ -640,6 +744,7 @@ window.addEventListener("load", function () {
             if (linkedProfileEmail) {
                 linkedProfileEmail.textContent = state.selectedReceiverEmail || "unknown";
             }
+            syncSubmitState();
             panel.close();
         });
     };

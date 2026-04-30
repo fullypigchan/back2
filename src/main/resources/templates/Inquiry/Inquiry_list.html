@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Inquiry List / Global Gates</title>
+    <title>거래처 등록 목록</title>
     <link rel="stylesheet" href="/css/Inquiry/Inquiry_list.css"/>
     <script src="/js/Inquiry_list/event.js"></script>
     <script src="/js/Inquiry_list/service.js"></script>
@@ -40,64 +40,32 @@
             </button>
         </div>
 
-        <nav
-                class="inquiry-tabnav"
-                aria-label="거래처 활동 탭"
-                role="navigation"
-        >
+        <nav class="inquiry-tabnav" aria-label="거래처 활동 탭" role="navigation">
             <div class="inquiry-tabnav__inner">
-                <div
-                        role="tablist"
-                        class="inquiry-tabnav__list"
-                        data-testid="ScrollSnap-List"
-                >
+                <div role="tablist" class="inquiry-tabnav__list" data-testid="ScrollSnap-List">
                     <div role="presentation" class="inquiry-tabnav__item">
-                        <button
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                                class="inquiry-tab"
-                                data-inquiry-tab="summary"
-                        >
+                        <a href="/inquiry/chart" role="tab" aria-selected="false" class="inquiry-tab" data-inquiry-tab="summary">
                             <span class="inquiry-tab__label">요약</span>
                             <span class="inquiry-tab__indicator"></span>
-                        </button>
+                        </a>
                     </div>
                     <div role="presentation" class="inquiry-tabnav__item">
-                        <button
-                                type="button"
-                                role="tab"
-                                aria-selected="true"
-                                class="inquiry-tab inquiry-tab--active"
-                                data-inquiry-tab="partners"
-                        >
+                        <a href="/inquiry/member-list" role="tab" aria-selected="true" class="inquiry-tab inquiry-tab--active" data-inquiry-tab="partners">
                             <span class="inquiry-tab__label">거래처 등록 목록</span>
                             <span class="inquiry-tab__indicator"></span>
-                        </button>
+                        </a>
                     </div>
                     <div role="presentation" class="inquiry-tabnav__item">
-                        <button
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                                class="inquiry-tab"
-                                data-inquiry-tab="activity"
-                        >
+                        <a href="/inquiry/activity/list" role="tab" aria-selected="false" class="inquiry-tab" data-inquiry-tab="activity">
                             <span class="inquiry-tab__label">거래처 활동 목록</span>
                             <span class="inquiry-tab__indicator"></span>
-                        </button>
+                        </a>
                     </div>
                     <div role="presentation" class="inquiry-tabnav__item">
-                        <button
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                                class="inquiry-tab"
-                                data-inquiry-tab="quotes"
-                        >
+                        <a href="/estimation/list" role="tab" aria-selected="false" class="inquiry-tab" data-inquiry-tab="quotes">
                             <span class="inquiry-tab__label">견적 요청 목록</span>
                             <span class="inquiry-tab__indicator"></span>
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -118,38 +86,17 @@
                 </button>
                 <div class="category-scroll" id="categoryScroll">
                     <button class="cat-chip active" data-cat="전체">전체</button>
-                    <button class="cat-chip has-subs" data-cat="수출"
-                            data-subs="미주,유럽,동남아,중국,일본,중동">
-                        수출 ›
-                    </button>
-                    <button class="cat-chip has-subs" data-cat="수입"
-                            data-subs="원자재,완제품,식품(수입),전자부품">
-                        수입 ›
-                    </button>
-                    <button class="cat-chip has-subs" data-cat="물류"
-                            data-subs="해운,항공,육상,창고">
-                        물류 ›
-                    </button>
-                    <button class="cat-chip has-subs" data-cat="관세"
-                            data-subs="FTA,HS코드,통관,환급">
-                        관세 ›
-                    </button>
-                    <button class="cat-chip has-subs" data-cat="금융"
-                            data-subs="무역금융,환율,보험,LC">
-                        금융 ›
-                    </button>
-                    <button class="cat-chip has-subs" data-cat="IT"
-                            data-subs="플랫폼,자동화,블록체인">
-                        IT ›
-                    </button>
-                    <button class="cat-chip has-subs" data-cat="식품"
-                            data-subs="농산물,수산물,가공식품,건강식품">
-                        식품 ›
-                    </button>
+                    <button class="cat-chip has-subs" data-cat="수출" data-subs="미주,유럽,동남아,중국,일본,중동">수출 ›</button>
+                    <button class="cat-chip has-subs" data-cat="수입" data-subs="원자재,전자부품,완제품,설비">수입 ›</button>
+                    <button class="cat-chip has-subs" data-cat="물류" data-subs="해운,항공,육상,창고">물류 ›</button>
+                    <button class="cat-chip has-subs" data-cat="관세" data-subs="FTA,HS코드,통관,환급">관세 ›</button>
+                    <button class="cat-chip has-subs" data-cat="금융" data-subs="무역금융,환율,보험,LC">금융 ›</button>
+                    <button class="cat-chip has-subs" data-cat="IT" data-subs="플랫폼,자동화,블록체인">IT ›</button>
+                    <button class="cat-chip has-subs" data-cat="식품" data-subs="농산물,수산물,가공식품,건강식품">식품 ›</button>
                     <button class="cat-chip" data-cat="화장품">화장품</button>
                     <button class="cat-chip" data-cat="자동차">자동차</button>
                     <button class="cat-chip" data-cat="섬유/의류">섬유/의류</button>
-                    <button class="cat-chip" data-cat="기계/장비">기계/장비</button>
+                    <button class="cat-chip" data-cat="기계/설비">기계/설비</button>
                     <button class="cat-chip" data-cat="에너지">에너지</button>
                 </div>
                 <button
@@ -181,7 +128,7 @@
 <div class="bottombar-fixed">
     <div class="bottombar-slide">
         <div class="bottombar" data-testid="BottomBar">
-            <nav class="bottombar-nav" aria-label="기본" role="navigation">
+            <nav class="bottombar-nav" aria-label="기본 메뉴" role="navigation">
                 <a href="" class="tab-link" data-tab="home" aria-label="홈">
                     <div class="tab-icon-wrap">
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="tab-icon">
@@ -263,9 +210,8 @@
             이 거래처를 Disapproved 처리하시겠습니까?
         </h1>
         <p class="modal-desc">
-            Disapproved 처리하면 이 거래처는 현재 관리 중인 거래처 등록
-            요청 목록에서 제외됩니다. 필요하면 다시 approve로 전환해
-            재검토할 수 있습니다.
+            Disapproved 처리하면 현재 관리 중인 거래처 등록 요청 목록에서 제외됩니다.
+            필요하면 다시 Approved 상태로 전환할 수 있습니다.
         </p>
         <div class="modal-actions">
             <button class="modal-btn-confirm" id="modalConfirm" type="button">

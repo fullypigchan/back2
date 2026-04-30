@@ -347,6 +347,7 @@ button {
     font-size: 15px;
     font-weight: 500;
     white-space: nowrap;
+    text-decoration: none;
     transition: background-color 0.2s;
 }
 
