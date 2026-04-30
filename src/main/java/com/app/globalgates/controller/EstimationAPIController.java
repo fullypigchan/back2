@@ -60,21 +60,34 @@ public class EstimationAPIController {
     public List<EstimationExpertDTO> getExperts(@RequestParam(defaultValue = "1") int page,
                                                 @RequestParam(required = false) String keyword,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<EstimationExpertDTO> experts = estimationService.getExpertsForRequest(
+        return getRequestMembers(page, keyword, userDetails);
+    }
+
+    @GetMapping("product-owners")
+    public List<EstimationExpertDTO> getProductOwners(@RequestParam(defaultValue = "1") int page,
+                                                      @RequestParam(required = false) String keyword,
+                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return getRequestMembers(page, keyword, userDetails);
+    }
+
+    private List<EstimationExpertDTO> getRequestMembers(int page,
+                                                        String keyword,
+                                                        CustomUserDetails userDetails) {
+        List<EstimationExpertDTO> members = estimationService.getExpertsForRequest(
                 page,
                 userDetails != null ? userDetails.getId() : null,
                 keyword);
 
         // DB의 raw S3 key를 브라우저가 직접 쓸 수 있는 presigned URL로 변환.
         // mypage가 게시글 프로필 이미지를 변환하는 흐름과 동일한 패턴이다.
-        experts.forEach(expert -> {
-            if (expert.getMemberProfileFileName() != null && !expert.getMemberProfileFileName().isBlank()) {
-                expert.setMemberProfileFileName(
-                        toPresignedUrlOrOriginal(expert.getMemberProfileFileName())
+        members.forEach(member -> {
+            if (member.getMemberProfileFileName() != null && !member.getMemberProfileFileName().isBlank()) {
+                member.setMemberProfileFileName(
+                        toPresignedUrlOrOriginal(member.getMemberProfileFileName())
                 );
             }
         });
-        return experts;
+        return members;
     }
 
     @GetMapping("products")

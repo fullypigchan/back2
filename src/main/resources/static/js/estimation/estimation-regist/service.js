@@ -1,6 +1,6 @@
 const estimationService = (() => {
 
-    // 선택한 회원의 등록 상품 목록 조회 (견적 요청 대상 회원의 상품)
+    // 선택한 상품 주인 회원의 등록 상품 목록 조회
     const getProducts = async (memberId, callback) => {
         const response = await fetch(`/api/estimations/products?memberId=${memberId}`);
 
@@ -32,6 +32,23 @@ const estimationService = (() => {
         return data;
     };
 
+    const getProductOwners = async (keyword, page, callback) => {
+        const params = new URLSearchParams();
+        if (keyword) params.append("keyword", keyword);
+        if (page) params.append("page", page);
+        const query = params.toString() ? `?${params.toString()}` : "";
+        const response = await fetch(`/api/estimations/product-owners${query}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Fetch error");
+        }
+
+        const data = await response.json();
+        if (callback) return callback(data);
+        return data;
+    };
+
     // 견적 요청 작성
     const writeEstimation = async (payload) => {
         const response = await fetch("/api/estimations/write", {
@@ -45,12 +62,14 @@ const estimationService = (() => {
             throw new Error(errorText || "Fetch error");
         }
 
-        return await response.json();
+        const text = await response.text();
+        return text ? JSON.parse(text) : true;
     };
 
     return {
         getProducts: getProducts,
         getExperts: getExperts,
+        getProductOwners: getProductOwners,
         writeEstimation: writeEstimation
     };
 })();

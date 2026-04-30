@@ -4,7 +4,9 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>요약</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
     <link rel="stylesheet" href="/css/inquiry/inquiry-chart.css"/>
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="/js/inquiry-chart/service.js"></script>
     <script src="/js/inquiry-chart/layout.js"></script>
@@ -22,28 +24,28 @@
                     <div class="Inquiry-Tabnav-Inner">
                         <div role="tablist" class="Inquiry-Tabnav-List" data-testid="ScrollSnap-List">
                             <div role="presentation" class="Inquiry-Tabnav-Item">
-                                <button type="button" role="tab" aria-selected="true" class="Inquiry-Tab Inquiry-Tab--Active" data-inquiry-tab="summary">
+                                <a href="/inquiry/chart" role="tab" aria-selected="true" class="Inquiry-Tab Inquiry-Tab--Active" data-inquiry-tab="summary">
                                     <span class="Inquiry-Tab-Label">요약</span>
                                     <span class="Inquiry-Tab-Indicator"></span>
-                                </button>
+                                </a>
                             </div>
                             <div role="presentation" class="Inquiry-Tabnav-Item">
-                                <button type="button" role="tab" aria-selected="false" class="Inquiry-Tab" data-inquiry-tab="partners">
+                                <a href="/inquiry/member-list" role="tab" aria-selected="false" class="Inquiry-Tab" data-inquiry-tab="partners">
                                     <span class="Inquiry-Tab-Label">거래처 등록 목록</span>
                                     <span class="Inquiry-Tab-Indicator"></span>
-                                </button>
+                                </a>
                             </div>
                             <div role="presentation" class="Inquiry-Tabnav-Item">
-                                <button type="button" role="tab" aria-selected="false" class="Inquiry-Tab" data-inquiry-tab="activity">
+                                <a href="/inquiry/activity/list" role="tab" aria-selected="false" class="Inquiry-Tab" data-inquiry-tab="activity">
                                     <span class="Inquiry-Tab-Label">거래처 활동 목록</span>
                                     <span class="Inquiry-Tab-Indicator"></span>
-                                </button>
+                                </a>
                             </div>
                             <div role="presentation" class="Inquiry-Tabnav-Item">
-                                <button type="button" role="tab" aria-selected="false" class="Inquiry-Tab" data-inquiry-tab="quotes">
+                                <a href="/estimation/list" role="tab" aria-selected="false" class="Inquiry-Tab" data-inquiry-tab="quotes">
                                     <span class="Inquiry-Tab-Label">견적 요청 목록</span>
                                     <span class="Inquiry-Tab-Indicator"></span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -146,5 +148,9 @@
         </div>
     </div>
 </main>
+
+<!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+<div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+<div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </body>
 </html>

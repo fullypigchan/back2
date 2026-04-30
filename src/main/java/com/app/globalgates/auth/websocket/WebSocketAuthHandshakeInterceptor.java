@@ -27,7 +27,7 @@ import java.util.Optional;
 public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
 
     public static final String ATTR_MEMBER_ID = "memberId";
-    public static final String ATTR_MEMBER_EMAIL = "memberEmail";
+    public static final String ATTR_MEMBER_LOGIN_INFO = "loginId";
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberDAO memberDAO;
@@ -46,14 +46,14 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
             log.warn("[WS Handshake] 거부: 유효한 accessToken 쿠키 없음");
             return false;
         }
-        String email = jwtTokenProvider.getUsername(token);
-        Optional<MemberDTO> member = memberDAO.findMemberByMemberEmail(email);
+        String loginInfo = jwtTokenProvider.getUsername(token);
+        Optional<MemberDTO> member = memberDAO.findMemberByLoginId(loginInfo);
         if (member.isEmpty()) {
-            log.warn("[WS Handshake] 거부: email={} 회원 미존재", email);
+            log.warn("[WS Handshake] 거부: loginInfo={} 회원 미존재", loginInfo);
             return false;
         }
         attributes.put(ATTR_MEMBER_ID, member.get().getId());
-        attributes.put(ATTR_MEMBER_EMAIL, email);
+        attributes.put(ATTR_MEMBER_LOGIN_INFO, loginInfo);
         return true;
     }
 

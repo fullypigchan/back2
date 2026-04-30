@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}">
     <link rel="stylesheet" href="/css/mypage/mypage.css">
     <link rel="stylesheet" th:if="${member.memberRole != null and member.memberRole.name() == 'EXPERT'}"
           href="/css/estimation/estimation-regist.css">
@@ -18,6 +19,7 @@
             pageMemberId: [[${member.id}]]
         };
     </script>
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
     <script src="/js/mypage/service.js"></script>
     <script src="/js/mypage/layout.js"></script>
     <script src="/js/mypage/event.js"></script>
@@ -1241,6 +1243,10 @@
     <script src="/js/estimation/estimation-regist/layout.js"></script>
     <script src="/js/estimation/estimation-regist/event.js"></script>
 </th:block>
+
+    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+    <div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </th:block>
 </body>
 </html>

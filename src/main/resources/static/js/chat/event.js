@@ -716,6 +716,9 @@ window.onload = () => {
                 }
                 menu.classList.remove("off");
                 activeBtn = moreBtn;
+                const targetMsgId = c.dataset.messageId || "";
+                if (targetMsgId) chatMenu.dataset.targetMessageId = targetMsgId;
+                else delete chatMenu.dataset.targetMessageId;
                 chatMenu.classList.remove("off");
                 chatMenu.classList.add("on");
                 updateMenuVisibility();
@@ -764,9 +767,15 @@ window.onload = () => {
                     break;
                 case "delete":
                     const deleteTarget = activeBtn?.closest(".Each-Main-Content");
-                    const deleteMessageId = deleteTarget?.dataset.messageId || null;
+                    const deleteMessageId = deleteTarget?.dataset.messageId
+                        || chatMenu.dataset.targetMessageId
+                        || null;
                     closeMenu();
-                    if (deleteMessageId) deleteChatModal.dataset.targetMessageId = deleteMessageId;
+                    if (!deleteMessageId) {
+                        showErrorToast("메시지를 찾을 수 없습니다");
+                        break;
+                    }
+                    deleteChatModal.dataset.targetMessageId = deleteMessageId;
                     openModal(deleteChatModal);
                     break;
             }
@@ -1013,28 +1022,36 @@ window.onload = () => {
         if (!chatMessageList) return;
         chatMessageList.querySelectorAll(".DisappearNotice").forEach((el) => el.remove());
         if (!setting || setting === "none" || setting === "없음") return;
+
+        const noticeLi = createDisappearNoticeLi(`사라진 메시지 시작 · ${setting} 후 삭제`);
         if (!activatedAt) {
-            chatMessageList.appendChild(createDisappearNoticeLi(`사라진 메시지 시작 · ${setting} 후 삭제`));
+            chatMessageList.appendChild(noticeLi);
             return;
         }
 
         const activatedTime = new Date(activatedAt).getTime();
-        const noticeLi = createDisappearNoticeLi(`사라진 메시지 시작 · ${setting} 후 삭제`);
-
-        // 메시지 목록에서 activatedAt 이후 첫 메시지 앞에 삽입
-        const allMessages = chatMessageList.querySelectorAll(".Left, .Right");
-        let insertBefore = null;
-        for (const msg of allMessages) {
-            const timeEl = msg.querySelector(".Message-SendTime span");
-            if (!timeEl) continue;
-            // data-message-id 기준으로 시간 비교가 어려우니, 메시지 순서(DOM 순서)와 activatedAt 비교
-            // 메시지의 created_datetime은 DOM에 없으므로, 모든 메시지를 순회하며 마지막 메시지 뒤에 삽입
+        if (Number.isNaN(activatedTime)) {
+            chatMessageList.appendChild(noticeLi);
+            return;
         }
 
-        // 간단한 방법: activatedAt 이전 메시지 중 마지막 것 다음에 삽입
-        // 메시지에 시간 정보가 DOM에 부족하므로, 메시지 목록 끝에 삽입
-        // (설정 시점 이후 메시지는 스케줄러가 삭제하므로, 남아있는 마지막 메시지 뒤가 맞음)
-        chatMessageList.appendChild(noticeLi);
+        // activatedAt 이후 생성된 첫 메시지 앞에 삽입 (data-created-at 기준)
+        const allMessages = chatMessageList.querySelectorAll(".Left[data-created-at], .Right[data-created-at]");
+        let insertBefore = null;
+        for (const msg of allMessages) {
+            const ts = new Date(msg.dataset.createdAt).getTime();
+            if (Number.isNaN(ts)) continue;
+            if (ts >= activatedTime) {
+                insertBefore = msg;
+                break;
+            }
+        }
+
+        if (insertBefore) {
+            chatMessageList.insertBefore(noticeLi, insertBefore);
+        } else {
+            chatMessageList.appendChild(noticeLi);
+        }
     }
 
     // 설정 변경 시: 기존 알림 제거 후 새 알림 (항상 맨 아래)
@@ -1707,6 +1724,7 @@ window.onload = () => {
         messageItem.dataset.chatId = `msg-${messageId}`;
         messageItem.dataset.messageId = String(messageId);
         messageItem.dataset.dateKey = dateKey;
+        messageItem.dataset.createdAt = msgTime;
         const hasFile = Boolean(message.fileId);
         const downloadBtnHtml = hasFile ? `
                                 <div class="Message-Button-Wrapper">
@@ -1852,6 +1870,9 @@ window.onload = () => {
                 }
                 menu.classList.remove("off");
                 activeBtn = moreBtn;
+                const targetMsgId = messageNode.dataset.messageId || "";
+                if (targetMsgId) chatMenu.dataset.targetMessageId = targetMsgId;
+                else delete chatMenu.dataset.targetMessageId;
                 chatMenu.classList.remove("off");
                 chatMenu.classList.add("on");
                 updateMenuVisibility();
@@ -1972,6 +1993,7 @@ window.onload = () => {
                     messageItem.dataset.chatId = `msg-${messageId}`;
                     messageItem.dataset.messageId = String(messageId);
                     messageItem.dataset.dateKey = dateKey;
+                    messageItem.dataset.createdAt = msgTime;
 
                     const downloadBtnHtml = hasFile ? `<div class="Message-Button-Wrapper"><button class="Message-Button Download"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" data-icon="icon-arrow-down" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img"><path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path></svg></button></div>` : "";
                     const msgButtonsHtml = `<div class="Message-Buttons off"><div class="Message-Button-Wrapper"><button class="Message-Button Emote"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em"><path d="M17 12v3h-2.998v2h3v3h2v-3h3v-2h-3.001v-3H17zm-5 6.839c-3.871-2.34-6.053-4.639-7.127-6.609-1.112-2.04-1.031-3.7-.479-4.82.561-1.13 1.667-1.84 2.91-1.91 1.222-.06 2.68.51 3.892 2.16l.806 1.09.805-1.09c1.211-1.65 2.668-2.22 3.89-2.16 1.242.07 2.347.78 2.908 1.91.334.677.49 1.554.321 2.59h2.011c.153-1.283-.039-2.469-.539-3.48-.887-1.79-2.647-2.91-4.601-3.01-1.65-.09-3.367.56-4.796 2.01-1.43-1.45-3.147-2.1-4.798-2.01-1.954.1-3.714 1.22-4.601 3.01-.896 1.81-.846 4.17.514 6.67 1.353 2.48 4.003 5.12 8.382 7.67l.502.299v-2.32z"></path></svg></button></div>${downloadBtnHtml}<div class="Message-Button-Wrapper"><button class="Message-Button Menu"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg></button></div></div>`;

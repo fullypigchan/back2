@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>홈 / G</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}">
     <link rel="stylesheet" href="/css/main/main.css">
     <link rel="stylesheet" href="/css/mention/mention.css">
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
     <script th:inline="javascript">
         const loginMember = {
             id: [[${member.id}]],
@@ -840,6 +842,10 @@
             </div>
         </div>
     </div>
+
+    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+    <div th:replace="~{common/mobile-nav :: mobileNav('home')}"></div>
+    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </div>
 </body>
 </html>

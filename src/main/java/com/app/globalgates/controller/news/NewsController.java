@@ -60,6 +60,7 @@ public class NewsController {
         model.addAttribute("likeCount", likeCount);
         model.addAttribute("bookmarkCount", bookmarkCount);
         model.addAttribute("replyCount", replyCount);
+        model.addAttribute("memberId", memberId);
         return "news/news";
     }
 }

@@ -138,6 +138,7 @@ body {
     font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
+    text-decoration: none;
     transition: background-color var(--transition-base);
 }
 
