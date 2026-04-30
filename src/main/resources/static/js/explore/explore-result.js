@@ -127,6 +127,7 @@ window.onload = () => {
 
         try {
             if (tab === "popular") {
+                console.log('인기순');
                 const criteria = await exploreService.searchPosts(
                     state.page,
                     { keyword: currentKeyword, type: "popular" },
