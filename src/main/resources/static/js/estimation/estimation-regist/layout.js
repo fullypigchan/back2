@@ -65,6 +65,38 @@ const estimationLayout = (() => {
         list.innerHTML = items.map(createProductItem).join("");
     };
 
+    const createProductOwnerItem = (owner) => {
+        const displayName = owner.memberNickname ?? owner.memberName ?? "회원";
+        const avatar = owner.memberProfileFileName ?? "/images/profile/default_image.png";
+        const email = owner.memberEmail ?? "";
+        const handle = owner.memberHandle ? `@${owner.memberHandle}` : email;
+
+        return `
+            <button type="button"
+                    class="productSelectModal__owner-item"
+                    data-product-owner-id="${owner.id ?? ""}"
+                    data-product-owner-email="${email}"
+                    data-product-owner-name="${displayName}"
+                    data-product-owner-avatar="${avatar}">
+                <span class="productSelectModal__owner-avatar">
+                    <img src="${avatar}" alt="${displayName}" />
+                </span>
+                <span class="productSelectModal__owner-body">
+                    <span class="productSelectModal__owner-name">${displayName}</span>
+                    <span class="productSelectModal__owner-handle">${handle}</span>
+                </span>
+            </button>
+        `;
+    };
+
+    const showProductOwnerList = (owners) => {
+        const list = document.getElementById("productOwnerList");
+        if (!list) return;
+
+        const items = Array.isArray(owners) ? owners : [];
+        list.innerHTML = items.map(createProductOwnerItem).join("");
+    };
+
     // 전문가 검색 시트의 결과 카드 1개를 만든다.
     // 클릭하면 event.js의 selectLinkedProfile이 data-share-user-* 속성을 읽어
     // 정적 요소(#composerLinkedProfileAvatar, #composerLinkedProfileEmail)를 갱신한다.
@@ -112,6 +144,7 @@ const estimationLayout = (() => {
 
     return {
         showProductList: showProductList,
+        showProductOwnerList: showProductOwnerList,
         showExpertList: showExpertList
     };
 })();

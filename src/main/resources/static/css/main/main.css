@@ -4531,6 +4531,8 @@ img.postMediaImage {
 
 .sidebarMoreLink:hover {
     background: #ebeff2;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
 }
 
 .suggestionTitle {
@@ -4630,6 +4632,12 @@ img.postMediaImage {
 
 .exchangeRateRow:hover {
     background: #ebeff2;
+}
+
+.exchangeRateRow:last-child:hover {
+    background: #ebeff2;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
 }
 
 .exchangeRateMain {
