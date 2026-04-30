@@ -44,9 +44,15 @@
                pp.created_datetime,
                pp.updated_datetime,
                p.title as post_title,
-               p.content as post_content
+               p.content as post_content,
+               (select f.file_name from tbl_member_profile_file mpf
+                    join tbl_file f on mpf.id = f.id
+                where mpf.member_id = m.id
+                  and mpf.profile_image_type = 'profile'
+                limit 1) as file_name
         from tbl_post_product pp
                  join tbl_post p on pp.id = p.id
+        join tbl_member m on m.id = p.member_id
         where p.member_id = #{memberId}
           and p.post_status = 'active'
         order by pp.created_datetime desc

@@ -10,8 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,12 +26,32 @@ public class ExploreAPIController implements ExploreAPIControllerDocs {
     private final BookmarkService bookmarkService;
     private final NewsService newsService;
     private final SearchService searchService;
+    private final S3Service s3Service;
 
 //    추천 상품 목록 조회
     @GetMapping("products/{page}")
     public ResponseEntity<?> getRecommends(@PathVariable int page,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         PostProductWithPagingDTO posts = postProductService.getRecommendProducts(page, userDetails.getId());
+
+        posts.getPosts().forEach(post -> {
+            if (post.getMemberProfile() != null && !post.getMemberProfile().isBlank()) {
+                post.setMemberProfile(
+                        toPresignedUrlOrOriginal(post.getMemberProfile())
+                );
+            }
+
+            if(post.getPostFiles() == null || post.getPostFiles().isEmpty()) {
+                return;
+            }
+            post.setPostFiles(
+                    post.getPostFiles().stream()
+                            .map(this::toPresignedUrlOrOriginal)
+                            .collect(Collectors.toList())
+            );
+
+        });
+
         return ResponseEntity.ok(posts);
     }
 
@@ -96,6 +119,19 @@ public class ExploreAPIController implements ExploreAPIControllerDocs {
         } else {
             bookmarkService.deleteBookmark(exising.get().getId());
             return ResponseEntity.ok("북마크를 제거했습니다.");
+        }
+    }
+
+    private String toPresignedUrlOrOriginal(String filePath) {
+        if (filePath == null || filePath.isBlank()) {
+            return filePath;
+        }
+
+        try {
+            return s3Service.getPresignedUrl(filePath, Duration.ofMinutes(10));
+        } catch (IOException e) {
+            log.warn("mypage presigned URL 생성 실패. 원본 경로를 그대로 반환합니다. filePath={}", filePath, e);
+            return filePath;
         }
     }
 
