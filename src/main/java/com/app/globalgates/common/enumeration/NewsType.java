@@ -18,7 +18,6 @@ public enum NewsType {
     private static final Map<String, NewsType> NEWS_TYPE_MAP =
             Arrays.stream(NewsType.values()).collect(Collectors.toMap(NewsType::getValue, Function.identity()));
 
-    @JsonCreator
     NewsType(String value, String label) {
         this.value = value;
         this.label = label;
@@ -34,6 +33,11 @@ public enum NewsType {
     }
 
     public static NewsType getNewsType(String value) {
+        return NEWS_TYPE_MAP.get(value);
+    }
+
+    @JsonCreator
+    public static NewsType fromValue(String value) {
         return NEWS_TYPE_MAP.get(value);
     }
 }

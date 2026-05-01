@@ -386,6 +386,20 @@ a {
     padding: 2px 0;
 }
 
+.report-member-feed-link {
+    color: #1d9bf0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    word-break: break-all;
+}
+
+.report-member-feed-link:hover {
+    color: #0c7abf;
+}
+
 .modal-email {
     color: #1d9bf0;
     font-size: 15px;
@@ -501,6 +515,10 @@ a {
 
 .div-tr {
     display: table-row;
+}
+
+#memberTbody[data-admin-dynamic-body]:not(.is-rendered) .div-tr {
+    display: none;
 }
 
 .div-th {

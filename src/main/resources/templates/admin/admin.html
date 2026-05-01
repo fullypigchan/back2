@@ -102,12 +102,6 @@
                 <div class="nw-module-header">
                     <div class="nw-module-title">회원 관리</div>
                     <div class="nw-module-header-actions">
-                        <select class="filter-select" id="filterMemberSubscription">
-                            <option value="all">구독상태 전체</option>
-                            <option value="subscribed">구독중</option>
-                            <option value="expired">구독만료</option>
-                            <option value="none">미구독</option>
-                        </select>
                         <select class="filter-select" id="filterMemberGrade">
                             <option value="all">등급 전체</option>
                             <option value="free">free</option>
@@ -137,7 +131,7 @@
                                 <div class="div-th">가입일</div>
                             </div>
                         </div>
-                        <div class="div-tbody" id="memberTbody">
+                        <div class="div-tbody" id="memberTbody" data-admin-dynamic-body>
                             <div class="div-tr">
                                 <div class="div-td">1</div>
                                 <div class="div-td">이정민</div>
@@ -514,11 +508,11 @@
                             <div class="div-tr">
                                 <div class="div-th"><input type="checkbox" id="reportMemberCheckAll"></div>
                                 <div class="div-th">번호</div>
-                                <div class="div-th">신고일</div>
+                                <div class="div-th">신고자</div>
                                 <div class="div-th">신고대상</div>
                                 <div class="div-th">신고사유</div>
                                 <div class="div-th">상태</div>
-                                <div class="div-th">신고자</div>
+                                <div class="div-th">신고일</div>
                             </div>
                         </div>
                         <div class="div-tbody" id="reportMemberTbody">
@@ -922,7 +916,7 @@
 <div class="modal-overlay off" id="modalPostEdit">
     <div class="modal">
         <div class="modal-header">
-            <h3>게시물 수정</h3>
+            <h3>게시물 상세</h3>
             <button class="modal-close" id="modalPostClose">✕</button>
         </div>
         <div class="modal-body">
@@ -946,7 +940,7 @@
                     </div>
                 </div>
                 <div class="modal-field-row">
-                    <div class="modal-field-label">상품종류</div>
+                    <div class="modal-field-label">태그</div>
                     <div class="modal-field-value">
                         <select class="status-select" id="peCategory" disabled>
                             <option>전자재료</option>
@@ -1060,7 +1054,7 @@
                     <div class="modal-field-label">신고 사유</div>
                     <div class="modal-field-value" id="reportReason"></div>
                 </div>
-                <div class="modal-field-row-top">
+                <div class="modal-field-row-top" id="reportAttachmentRow">
                     <div class="modal-field-label">첨부 이미지</div>
                     <div class="modal-field-value">
                         <div class="report-attach-imgs off" id="reportImages"></div>

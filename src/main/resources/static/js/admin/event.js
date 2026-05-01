@@ -19,7 +19,6 @@
     const newsSubmitBtn = document.querySelector("#newsSubmitBtn");
     const aiBtn = document.querySelector("#aiBtn");
 
-    const filterMemberSubscription = document.querySelector("#filterMemberSubscription");
     const filterMemberGrade = document.querySelector("#filterMemberGrade");
     const filterMemberStatus = document.querySelector("#filterMemberStatus");
 
@@ -55,6 +54,7 @@
     const previewDate = document.querySelector("#previewDate");
 
     const modalImageViewer = document.querySelector("#modalImageViewer");
+    const reportAttachmentRow = document.querySelector("#reportAttachmentRow");
     const reportImages = document.querySelector("#reportImages");
     const reportAttachVideo = document.querySelector("#reportAttachVideo");
     const reportAttachNone = document.querySelector("#reportAttachNone");
@@ -212,6 +212,37 @@
         reportAttachNone.classList.remove("off");
     };
 
+    const showReportAttachmentRow = (visible) => {
+        reportAttachmentRow.hidden = !visible;
+    };
+
+    const getMemberFeedRow = () => document.querySelector("#reportMemberFeedRow");
+
+    const renderMemberFeedLink = (report) => {
+        const targetId = report?.targetId;
+        const reportTargetRow = document.querySelector("#reportTarget").closest(".modal-field-row");
+
+        hideMemberFeedLink();
+
+        if (!targetId) {
+            return;
+        }
+
+        const feedUrl = `/mypage/mypage?memberId=${encodeURIComponent(targetId)}`;
+        reportTargetRow.insertAdjacentHTML("afterend", `
+            <div class="modal-field-row" id="reportMemberFeedRow">
+                <div class="modal-field-label">회원 피드 URL</div>
+                <div class="modal-field-value">
+                    <a class="report-member-feed-link" href="${feedUrl}" target="_blank" rel="noopener noreferrer">${feedUrl}</a>
+                </div>
+            </div>
+        `);
+    };
+
+    const hideMemberFeedLink = () => {
+        getMemberFeedRow()?.remove();
+    };
+
     const fetchJson = (url) => requestJson(url);
 
     const buildQuery = (params) => {
@@ -288,13 +319,6 @@
     };
 
     const setAdminFilterOptions = () => {
-        setOptions(filterMemberSubscription, [
-            { value: "all", label: "구독상태 전체" },
-            { value: "subscribed", label: "구독중" },
-            { value: "expired", label: "구독만료" },
-            { value: "none", label: "미구독" }
-        ]);
-
         setOptions(filterMemberGrade, [
             { value: "all", label: "등급 전체" },
             { value: "free", label: "free" },
@@ -343,6 +367,8 @@
     };
 
     const renderMembers = (members) => {
+        memberTbody.classList.add("is-rendered");
+
         if (!members.length) {
             renderEmptyRow(memberTbody, 7);
             return;
@@ -436,7 +462,6 @@
         const query = buildQuery({
             keyword: memberSearchInput.value.trim(),
             subscriptionTier: filterMemberGrade.value,
-            subscriptionStatus: filterMemberSubscription.value,
             memberStatus: filterMemberStatus.value
         });
 
@@ -798,7 +823,6 @@
         runAdminSearch(loadMembers)();
     };
 
-    filterMemberSubscription.addEventListener("change", applyMemberFilter);
     filterMemberGrade.addEventListener("change", applyMemberFilter);
     filterMemberStatus.addEventListener("change", applyMemberFilter);
     memberSearchBtn.addEventListener("click", applyMemberFilter);
@@ -1055,8 +1079,7 @@
                     newsTitle: title,
                     newsContent: content,
                     newsSourceUrl: sourceUrl,
-                    newsCategory: newsCategoryValueMap[category] || "etc",
-                    newsType: "general"
+                    newsCategory: newsCategoryValueMap[category] || "etc"
                 }
             });
             await loadNews();
@@ -1325,6 +1348,8 @@
         document.querySelector("#reportTarget").textContent = report.targetName || "-";
         document.querySelector("#reportReason").textContent = report.reason || "-";
         document.querySelector("#reportStatusBadge").innerHTML = getBadgeMarkup(report.status, reportStatusBadgeMap, "badge-pending");
+        showReportAttachmentRow(false);
+        renderMemberFeedLink(report);
         renderReportAttachments(null);
 
         modalReportDetail.classList.remove("off");
@@ -1346,6 +1371,8 @@
         document.querySelector("#reportTarget").textContent = report.targetName || "-";
         document.querySelector("#reportReason").textContent = report.reason || "-";
         document.querySelector("#reportStatusBadge").innerHTML = getBadgeMarkup(report.status, reportStatusBadgeMap, "badge-pending");
+        showReportAttachmentRow(true);
+        hideMemberFeedLink();
         renderReportAttachments(report);
 
         modalReportDetail.classList.remove("off");

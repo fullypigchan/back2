@@ -24,19 +24,6 @@
         <if test="subscriptionTier != null and subscriptionTier != '' and subscriptionTier != 'all'">
             and coalesce(cast(sub.tier as varchar), 'free') = #{subscriptionTier}
         </if>
-        <if test="subscriptionStatus != null and subscriptionStatus != '' and subscriptionStatus != 'all'">
-            <choose>
-                <when test="subscriptionStatus == 'subscribed'">
-                    and sub.status = 'active'::subscription_status
-                </when>
-                <when test="subscriptionStatus == 'expired'">
-                    and sub.status in ('inactive'::subscription_status, 'expired'::subscription_status)
-                </when>
-                <when test="subscriptionStatus == 'none'">
-                    and sub.status is null
-                </when>
-            </choose>
-        </if>
         <if test="memberStatus != null and memberStatus != '' and memberStatus != 'all'">
             and m.member_status = #{memberStatus}::member_status
         </if>
@@ -73,19 +60,6 @@
         </if>
         <if test="subscriptionTier != null and subscriptionTier != '' and subscriptionTier != 'all'">
             and coalesce(cast(sub.tier as varchar), 'free') = #{subscriptionTier}
-        </if>
-        <if test="subscriptionStatus != null and subscriptionStatus != '' and subscriptionStatus != 'all'">
-            <choose>
-                <when test="subscriptionStatus == 'subscribed'">
-                    and sub.status = 'active'::subscription_status
-                </when>
-                <when test="subscriptionStatus == 'expired'">
-                    and sub.status in ('inactive'::subscription_status, 'expired'::subscription_status)
-                </when>
-                <when test="subscriptionStatus == 'none'">
-                    and sub.status is null
-                </when>
-            </choose>
         </if>
         <if test="memberStatus != null and memberStatus != '' and memberStatus != 'all'">
             and m.member_status = #{memberStatus}::member_status

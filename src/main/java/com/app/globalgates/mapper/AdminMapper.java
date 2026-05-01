@@ -13,13 +13,11 @@ import java.util.List;
 public interface AdminMapper {
     int selectAdminMemberTotal(@Param("keyword") String keyword,
                                @Param("subscriptionTier") String subscriptionTier,
-                               @Param("subscriptionStatus") String subscriptionStatus,
                                @Param("memberStatus") String memberStatus);
 
     List<AdminMemberListDTO> selectAdminMembers(@Param("criteria") Criteria criteria,
                                                 @Param("keyword") String keyword,
                                                 @Param("subscriptionTier") String subscriptionTier,
-                                                @Param("subscriptionStatus") String subscriptionStatus,
                                                 @Param("memberStatus") String memberStatus);
 
     int selectAdminPostTotal(@Param("keyword") String keyword,
