@@ -37,4 +37,20 @@
         )
     </insert>
 
+    <update id="updateAdminNews">
+        update tbl_news
+           set news_title = #{newsTitle},
+               news_content = #{newsContent},
+               news_source_url = #{newsSourceUrl},
+               news_category = #{newsCategory}::news_category_type,
+               news_type = #{newsType}::news_type,
+               updated_datetime = now()
+         where id = #{id}
+    </update>
+
+    <delete id="deleteAdminNews">
+        delete from tbl_news
+         where id = #{id}
+    </delete>
+
 </mapper>

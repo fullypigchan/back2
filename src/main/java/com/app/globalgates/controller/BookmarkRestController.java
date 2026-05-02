@@ -2,6 +2,7 @@ package com.app.globalgates.controller;
 
 import com.app.globalgates.aop.annotation.LogStatus;
 import com.app.globalgates.aop.annotation.LogStatusWithReturn;
+import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.dto.BookmarkDTO;
 import com.app.globalgates.dto.BookmarkFolderDTO;
 import com.app.globalgates.dto.PostFileDTO;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,82 +40,139 @@ public class BookmarkRestController implements BookmarkRestControllerDocs {
 
     @LogStatusWithReturn
     @GetMapping("/folders/{memberId}")
-    public List<BookmarkFolderDTO> getFolders(@PathVariable Long memberId) {
-        return bookmarkService.getFolders(memberId);
+    public ResponseEntity<List<BookmarkFolderDTO>> getFolders(@PathVariable Long memberId,
+                                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long authMemberId = userDetails.getId();
+        if (memberId != null && !memberId.equals(authMemberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(bookmarkService.getFolders(authMemberId));
     }
 
     @LogStatusWithReturn
     @PostMapping("/folders")
-    public Map<String, Long> createFolder(@RequestBody BookmarkFolderDTO bookmarkFolderDTO) {
+    public ResponseEntity<Map<String, Long>> createFolder(@RequestBody BookmarkFolderDTO bookmarkFolderDTO,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        bookmarkFolderDTO.setMemberId(userDetails.getId());
         bookmarkService.createFolder(bookmarkFolderDTO);
-        return Map.of("id", bookmarkFolderDTO.getId());
+        return ResponseEntity.ok(Map.of("id", bookmarkFolderDTO.getId()));
     }
 
     @LogStatus
     @PutMapping("/folders")
-    public void updateFolder(@RequestBody BookmarkFolderDTO bookmarkFolderDTO) {
-        bookmarkService.updateFolder(bookmarkFolderDTO);
+    public ResponseEntity<Void> updateFolder(@RequestBody BookmarkFolderDTO bookmarkFolderDTO,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        bookmarkFolderDTO.setMemberId(userDetails.getId());
+        bookmarkService.updateFolder(bookmarkFolderDTO, userDetails.getId());
+        return ResponseEntity.ok().build();
     }
 
     @LogStatus
     @PostMapping("/folders/{id}/delete")
-    public void deleteFolder(@PathVariable Long id) {
-        bookmarkService.deleteFolder(id);
+    public ResponseEntity<Void> deleteFolder(@PathVariable Long id,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        bookmarkService.deleteFolder(id, userDetails.getId());
+        return ResponseEntity.ok().build();
     }
 
     @LogStatus
     @PostMapping
-    public void addBookmark(@RequestBody BookmarkDTO bookmarkDTO) {
+    public ResponseEntity<Void> addBookmark(@RequestBody BookmarkDTO bookmarkDTO,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        bookmarkDTO.setMemberId(userDetails.getId());
         bookmarkService.addBookmark(bookmarkDTO);
+        return ResponseEntity.ok().build();
     }
 
     @LogStatus
     @PostMapping("/{id}/delete")
-    public void deleteBookmark(@PathVariable Long id) {
-        bookmarkService.deleteBookmark(id);
+    public ResponseEntity<Void> deleteBookmark(@PathVariable Long id,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        bookmarkService.deleteBookmarkChecked(id, userDetails.getId());
+        return ResponseEntity.ok().build();
     }
 
     @LogStatus
     @PostMapping("/members/{memberId}/posts/{postId}/delete")
-    public void deleteBookmarkByMemberIdAndPostId(@PathVariable Long memberId, @PathVariable Long postId) {
-        bookmarkService.deleteBookmark(memberId, postId);
+    public ResponseEntity<Void> deleteBookmarkByMemberIdAndPostId(@PathVariable Long memberId,
+                                                                  @PathVariable Long postId,
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long authMemberId = userDetails.getId();
+        if (memberId != null && !memberId.equals(authMemberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        bookmarkService.deleteBookmark(authMemberId, postId);
+        return ResponseEntity.ok().build();
     }
 
     @LogStatus
     @PutMapping("/{id}/folder")
-    public void updateFolderId(@PathVariable Long id, @RequestBody BookmarkDTO bookmarkDTO) {
+    public ResponseEntity<Void> updateFolderId(@PathVariable Long id,
+                                               @RequestBody BookmarkDTO bookmarkDTO,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         bookmarkDTO.setId(id);
-        bookmarkService.updateFolderId(bookmarkDTO);
+        bookmarkDTO.setMemberId(userDetails.getId());
+        bookmarkService.updateFolderId(bookmarkDTO, userDetails.getId());
+        return ResponseEntity.ok().build();
     }
 
     @LogStatusWithReturn
     @GetMapping("/members/{memberId}")
-    public List<BookmarkDTO> getBookmarks(@PathVariable Long memberId) {
-        List<BookmarkDTO> bookmarks = bookmarkService.getBookmarks(memberId);
+    public ResponseEntity<List<BookmarkDTO>> getBookmarks(@PathVariable Long memberId,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long authMemberId = userDetails.getId();
+        if (memberId != null && !memberId.equals(authMemberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<BookmarkDTO> bookmarks = bookmarkService.getBookmarks(authMemberId);
         applyPostFiles(bookmarks);
-        return bookmarks;
+        return ResponseEntity.ok(bookmarks);
     }
 
     @LogStatusWithReturn
     @GetMapping("/folders/{folderId}/items")
-    public List<BookmarkDTO> getBookmarksByFolder(@PathVariable Long folderId) {
-        List<BookmarkDTO> bookmarks = bookmarkService.getBookmarksByFolder(folderId);
+    public ResponseEntity<List<BookmarkDTO>> getBookmarksByFolder(@PathVariable Long folderId,
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        List<BookmarkDTO> bookmarks = bookmarkService.getBookmarksByFolder(folderId, userDetails.getId());
         applyPostFiles(bookmarks);
-        return bookmarks;
+        return ResponseEntity.ok(bookmarks);
     }
 
     @LogStatusWithReturn
     @GetMapping("/members/{memberId}/uncategorized")
-    public List<BookmarkDTO> getUncategorizedBookmarks(@PathVariable Long memberId) {
-        List<BookmarkDTO> bookmarks = bookmarkService.getUncategorizedBookmarks(memberId);
+    public ResponseEntity<List<BookmarkDTO>> getUncategorizedBookmarks(@PathVariable Long memberId,
+                                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long authMemberId = userDetails.getId();
+        if (memberId != null && !memberId.equals(authMemberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<BookmarkDTO> bookmarks = bookmarkService.getUncategorizedBookmarks(authMemberId);
         applyPostFiles(bookmarks);
-        return bookmarks;
+        return ResponseEntity.ok(bookmarks);
     }
 
     @LogStatusWithReturn
     @GetMapping("/members/{memberId}/posts/{postId}")
-    public ResponseEntity<BookmarkDTO> getBookmarkByMemberAndPost(@PathVariable Long memberId, @PathVariable Long postId) {
-        return bookmarkService.getBookmark(memberId, postId)
+    public ResponseEntity<BookmarkDTO> getBookmarkByMemberAndPost(@PathVariable Long memberId,
+                                                                  @PathVariable Long postId,
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long authMemberId = userDetails.getId();
+        if (memberId != null && !memberId.equals(authMemberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return bookmarkService.getBookmark(authMemberId, postId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
@@ -125,9 +184,15 @@ public class BookmarkRestController implements BookmarkRestControllerDocs {
                 .body(Map.of("error", "이 폴더에 이미 북마크된 게시물입니다."));
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<?> handleForbidden(SecurityException e) {
+        log.warn("권한 없음: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", e.getMessage()));
+    }
+
     private void applyPostFiles(List<BookmarkDTO> bookmarks) {
         bookmarks.forEach(b -> {
-            // 뉴스 북마크는 첨부파일이 없고 postId도 null이므로 스킵
             if (b.getPostId() != null) {
                 List<PostFileDTO> files = postFileDAO.findAllByPostId(b.getPostId());
                 b.setPostFiles(files);

@@ -92,20 +92,76 @@
         }
 
         if (shareBtn) {
-            shareBtn.addEventListener("click", async () => {
-                const url = window.location.href;
-                try {
-                    if (navigator.share) {
-                        await navigator.share({ title: document.title, url });
-                    } else {
-                        await navigator.clipboard.writeText(url);
-                        showToast("링크가 복사되었습니다.");
-                    }
-                } catch (e) {
-                    if (e.name !== "AbortError") showToast("공유에 실패했습니다.");
-                }
-            });
+            initShareDropdown(shareBtn);
         }
+    }
+
+    // ── 공유 드롭다운 (post-detailed 패턴과 동일) ──
+    function initShareDropdown(shareBtn) {
+        let activeDrop = null;
+
+        const close = () => {
+            activeDrop?.remove();
+            activeDrop = null;
+            shareBtn.setAttribute("aria-expanded", "false");
+        };
+
+        shareBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (activeDrop) { close(); return; }
+
+            const rect = shareBtn.getBoundingClientRect();
+            const lc = document.createElement("div");
+            lc.className = "layers-dropdown-container";
+            lc.innerHTML =
+                '<div class="layers-overlay"></div>' +
+                '<div class="layers-dropdown-inner">' +
+                '<div role="menu" class="dropdown-menu" style="top:' + (rect.bottom + 8) + 'px;right:' + (window.innerWidth - rect.right) + 'px;display:flex;">' +
+                '<div><div class="dropdown-inner">' +
+                '<button type="button" class="menu-item share-menu-item--copy">' +
+                '<span class="menu-item__icon"><svg viewBox="0 0 24 24"><path d="M18.36 5.64c-1.95-1.96-5.11-1.96-7.07 0L9.88 7.05 8.46 5.64l1.42-1.42c2.73-2.73 7.16-2.73 9.9 0 2.73 2.74 2.73 7.17 0 9.9l-1.42 1.42-1.41-1.42 1.41-1.41c1.96-1.96 1.96-5.12 0-7.07zm-2.12 3.53l-7.07 7.07-1.41-1.41 7.07-7.07 1.41 1.41zm-12.02.71l1.42-1.42 1.41 1.42-1.41 1.41c-1.96 1.96-1.96 5.12 0 7.07 1.95 1.96 5.11 1.96 7.07 0l1.41-1.41 1.42 1.41-1.42 1.42c-2.73 2.73-7.16 2.73-9.9 0-2.73-2.74-2.73-7.17 0-9.9z"></path></svg></span>' +
+                '<span class="menu-item__label">링크 복사하기</span>' +
+                '</button>' +
+                '</div></div></div></div>';
+
+            lc.addEventListener("click", async (ev) => {
+                const item = ev.target.closest(".menu-item");
+                if (!item) return;
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (item.classList.contains("share-menu-item--copy")) {
+                    if (!navigator.clipboard?.writeText) {
+                        showToast("이 브라우저에서는 링크 복사를 지원하지 않습니다.");
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(window.location.href);
+                            showToast("링크가 복사되었습니다.");
+                        } catch (err) {
+                            showToast("링크 복사에 실패했습니다.");
+                        }
+                    }
+                }
+                close();
+            });
+
+            document.body.appendChild(lc);
+            activeDrop = lc;
+            shareBtn.setAttribute("aria-expanded", "true");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!activeDrop) return;
+            if (e.target === shareBtn || shareBtn.contains(e.target)) return;
+            if (activeDrop.contains(e.target)) return;
+            close();
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") close();
+        });
+
+        window.addEventListener("scroll", () => close(), { passive: true });
     }
 
     // ── 인라인 답글 작성기 ──
@@ -119,8 +175,8 @@
         const updateGauge = () => {
             const text = editor.textContent || "";
             const len = text.length;
+            const trimmedLen = text.trim().length;
             const remaining = MAX_REPLY_LENGTH - len;
-            const ratio = Math.min(1, len / MAX_REPLY_LENGTH);
 
             if (gauge) {
                 gauge.setAttribute("aria-valuenow", String(len));
@@ -132,12 +188,18 @@
             if (gaugeText) {
                 gaugeText.textContent = remaining < 0 ? String(remaining) : (remaining <= 20 ? String(remaining) : "");
             }
-            submit.disabled = len === 0 || len > MAX_REPLY_LENGTH;
+            submit.disabled = trimmedLen === 0 || len > MAX_REPLY_LENGTH;
         };
 
         editor.addEventListener("input", updateGauge);
         editor.addEventListener("blur", updateGauge);
         updateGauge();
+
+        editor.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData)?.getData("text") ?? "";
+            document.execCommand("insertText", false, text);
+        });
 
         submit.addEventListener("click", async () => {
             if (!memberId) { showToast("로그인이 필요합니다."); return; }

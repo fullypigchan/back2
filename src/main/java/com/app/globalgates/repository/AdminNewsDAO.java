@@ -19,4 +19,12 @@ public class AdminNewsDAO {
     public void save(NewsDTO newsDTO) {
         adminNewsMapper.insertAdminNews(newsDTO);
     }
+
+    public int update(NewsDTO newsDTO) {
+        return adminNewsMapper.updateAdminNews(newsDTO);
+    }
+
+    public int delete(Long id) {
+        return adminNewsMapper.deleteAdminNews(id);
+    }
 }

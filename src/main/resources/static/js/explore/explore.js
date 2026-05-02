@@ -256,56 +256,7 @@ window.onload = () => {
 
     // 11-1. 뉴스 셀 클릭 시 상세 이동
     if (newsSection) {
-        newsSection.addEventListener("click", async (e) => {
-            const likeBtn = e.target.closest('[data-action="news-like"]');
-            if (likeBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const newsId = likeBtn.dataset.newsId;
-                if (!newsId) return;
-                try {
-                    const res = await fetch(`/api/news/${encodeURIComponent(newsId)}/likes`, { method: "POST" });
-                    if (!res.ok) throw new Error("like failed");
-                    const data = await res.json();
-                    likeBtn.classList.toggle("active", data.liked);
-                    const path = likeBtn.querySelector("path");
-                    if (path) {
-                        path.setAttribute("d", data.liked
-                            ? path.dataset.pathActive
-                            : path.dataset.pathInactive);
-                    }
-                    const countEl = likeBtn.querySelector(".tweet-action-count");
-                    if (countEl) countEl.textContent = String(data.likeCount ?? 0);
-                    likeBtn.setAttribute("aria-label", `좋아요 ${data.likeCount ?? 0}`);
-                } catch (err) {
-                    console.error("뉴스 좋아요 실패:", err);
-                }
-                return;
-            }
-
-            const bookmarkBtn = e.target.closest('[data-action="news-bookmark"]');
-            if (bookmarkBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const newsId = bookmarkBtn.dataset.newsId;
-                if (!newsId) return;
-                try {
-                    const res = await fetch(`/api/news/${encodeURIComponent(newsId)}/bookmarks`, { method: "POST" });
-                    if (!res.ok) throw new Error("bookmark failed");
-                    const data = await res.json();
-                    bookmarkBtn.classList.toggle("active", data.bookmarked);
-                    const path = bookmarkBtn.querySelector("path");
-                    if (path) {
-                        path.setAttribute("d", data.bookmarked
-                            ? path.dataset.pathActive
-                            : path.dataset.pathInactive);
-                    }
-                } catch (err) {
-                    console.error("뉴스 북마크 실패:", err);
-                }
-                return;
-            }
-
+        newsSection.addEventListener("click", (e) => {
             const trendItem = e.target.closest(".trend[data-news-id]");
             if (!trendItem) return;
 

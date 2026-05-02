@@ -1334,21 +1334,32 @@ window.onload = () => {
         const likeBtn = e.target.closest(".tweet-action-btn--like");
         if (likeBtn && !likeBtn.closest("[data-reply-modal]")) {
             e.stopPropagation();
+            if (likeBtn.dataset.inFlight === "1") return;
+            likeBtn.dataset.inFlight = "1";
+            const LIKE_ON = "M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z";
+            const LIKE_OFF = "M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z";
             const on = likeBtn.classList.toggle("active");
             const cnt = likeBtn.querySelector(".tweet-action-count");
-            if (cnt && /^\d+$/.test(cnt.textContent.trim())) cnt.textContent = Math.max(0, parseInt(cnt.textContent, 10) + (on ? 1 : -1));
+            const prevCount = cnt?.textContent?.trim();
+            if (cnt && /^\d+$/.test(prevCount)) cnt.textContent = Math.max(0, parseInt(prevCount, 10) + (on ? 1 : -1));
             const likePath = likeBtn.querySelector("path");
-            if (likePath) likePath.setAttribute("d", on
-                ? "M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                : "M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-            );
-            // API 호출
+            if (likePath) likePath.setAttribute("d", on ? LIKE_ON : LIKE_OFF);
             const postId = likeBtn.dataset.postId;
             const loginMemberId = document.querySelector("[data-member-id]")?.dataset.memberId;
+            const rollback = () => {
+                likeBtn.classList.toggle("active", !on);
+                if (likePath) likePath.setAttribute("d", !on ? LIKE_ON : LIKE_OFF);
+                if (cnt && prevCount != null) cnt.textContent = prevCount;
+            };
+            const finish = () => { delete likeBtn.dataset.inFlight; };
             if (postId && loginMemberId) {
-                if (on) fetch("/api/main/likes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memberId: loginMemberId, postId }) }).catch(err => console.error(err));
-                else fetch(`/api/main/likes/posts/${postId}/delete`, { method: "POST" }).catch(err => console.error(err));
-            }
+                const req = on
+                    ? fetch("/api/main/likes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memberId: loginMemberId, postId }) })
+                    : fetch(`/api/main/likes/posts/${postId}/delete`, { method: "POST" });
+                req.then(r => { if (!r.ok) { rollback(); showCommunityToast("요청을 처리하지 못했습니다. 다시 시도해 주세요."); console.error("like API failed", r.status); } })
+                   .catch(err => { rollback(); showCommunityToast("요청을 처리하지 못했습니다. 다시 시도해 주세요."); console.error(err); })
+                   .finally(finish);
+            } else { finish(); }
             return;
         }
 
@@ -1356,19 +1367,28 @@ window.onload = () => {
         const bookmarkBtn = e.target.closest(".tweet-action-btn--bookmark");
         if (bookmarkBtn && !bookmarkBtn.closest("[data-reply-modal]")) {
             e.stopPropagation();
+            if (bookmarkBtn.dataset.inFlight === "1") return;
+            bookmarkBtn.dataset.inFlight = "1";
+            const BK_ON = "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z";
+            const BK_OFF = "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z";
             const on = bookmarkBtn.classList.toggle("active");
             const bkPath = bookmarkBtn.querySelector("path");
-            if (bkPath) bkPath.setAttribute("d", on
-                ? "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                : "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-            );
-            // API 호출
+            if (bkPath) bkPath.setAttribute("d", on ? BK_ON : BK_OFF);
             const postId = bookmarkBtn.dataset.postId;
             const loginMemberId = document.querySelector("[data-member-id]")?.dataset.memberId;
+            const rollback = () => {
+                bookmarkBtn.classList.toggle("active", !on);
+                if (bkPath) bkPath.setAttribute("d", !on ? BK_ON : BK_OFF);
+            };
+            const finish = () => { delete bookmarkBtn.dataset.inFlight; };
             if (postId && loginMemberId) {
-                if (on) fetch("/api/main/bookmarks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memberId: loginMemberId, postId }) }).catch(err => console.error(err));
-                else fetch(`/api/main/bookmarks/members/${loginMemberId}/posts/${postId}/delete`, { method: "POST" }).catch(err => console.error(err));
-            }
+                const req = on
+                    ? fetch("/api/main/bookmarks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memberId: loginMemberId, postId }) })
+                    : fetch(`/api/main/bookmarks/members/${loginMemberId}/posts/${postId}/delete`, { method: "POST" });
+                req.then(r => { if (!r.ok) { rollback(); showCommunityToast("요청을 처리하지 못했습니다. 다시 시도해 주세요."); console.error("bookmark API failed", r.status); } })
+                   .catch(err => { rollback(); showCommunityToast("요청을 처리하지 못했습니다. 다시 시도해 주세요."); console.error(err); })
+                   .finally(finish);
+            } else { finish(); }
             return;
         }
 
@@ -1431,7 +1451,10 @@ window.onload = () => {
         button.classList.toggle("active", isActive);
         button.setAttribute("data-testid", isActive ? "removeBookmark" : "bookmark");
         button.setAttribute("aria-label", isActive ? "북마크에 추가됨" : "북마크");
-        path.setAttribute("d", isActive ? (path.dataset.pathActive ?? path.getAttribute("d")) : (path.dataset.pathInactive ?? path.getAttribute("d")));
+        // renderCommunityPostCard SVG에는 data-path-active/-inactive 속성이 없으므로 BK 상수로 직접 swap
+        const activeD = path.dataset.pathActive ?? "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z";
+        const inactiveD = path.dataset.pathInactive ?? "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z";
+        path.setAttribute("d", isActive ? activeD : inactiveD);
     }
 
     function openShareBookmarkModal(button) {
@@ -1444,7 +1467,37 @@ window.onload = () => {
         modal.addEventListener("click", (e) => {
             if (e.target.closest("[data-share-close='true']") || e.target.classList.contains("share-sheet__backdrop")) { e.preventDefault(); closeShareModal(); return; }
             if (e.target.closest(".share-sheet__create-folder")) { e.preventDefault(); showShareToast("새 폴더 만들기는 준비 중입니다"); closeShareModal(); return; }
-            if (e.target.closest("[data-share-folder='all-bookmarks']")) { e.preventDefault(); setBookmarkButtonState(bookmarkButton, !isBookmarked); showShareToast(isBookmarked ? "북마크가 해제되었습니다" : "북마크에 추가되었습니다"); closeShareModal(); }
+            if (e.target.closest("[data-share-folder='all-bookmarks']")) {
+                e.preventDefault();
+                const nextActive = !isBookmarked;
+                setBookmarkButtonState(bookmarkButton, nextActive);
+                // bookmarkCount는 같은 카드의 .tweet-action-btn--views 카운터에 있음
+                const countButton = bookmarkButton?.closest(".tweet-action-bar")?.querySelector(".tweet-action-btn--views");
+                const cnt = countButton?.querySelector(".tweet-action-count");
+                const prevCountText = cnt?.textContent?.trim();
+                const prevAriaLabel = countButton?.getAttribute("aria-label");
+                if (cnt && /^\d+$/.test(prevCountText)) {
+                    const nextCount = Math.max(0, parseInt(prevCountText, 10) + (nextActive ? 1 : -1));
+                    cnt.textContent = nextCount;
+                    countButton?.setAttribute("aria-label", `북마크 ${nextCount}`);
+                }
+                const postId = bookmarkButton?.dataset.postId;
+                const loginMemberId = document.querySelector("[data-member-id]")?.dataset.memberId;
+                const rollbackShareBookmark = () => {
+                    setBookmarkButtonState(bookmarkButton, isBookmarked);
+                    if (cnt && prevCountText != null) cnt.textContent = prevCountText;
+                    if (countButton && prevAriaLabel != null) countButton.setAttribute("aria-label", prevAriaLabel);
+                };
+                if (postId && loginMemberId) {
+                    const req = nextActive
+                        ? fetch("/api/main/bookmarks", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ memberId:loginMemberId, postId }) })
+                        : fetch(`/api/main/bookmarks/members/${loginMemberId}/posts/${postId}/delete`, { method:"POST" });
+                    req.then(r => { if (!r.ok) { rollbackShareBookmark(); showShareToast("요청을 처리하지 못했습니다. 다시 시도해 주세요."); console.error("share-bookmark API failed", r.status); } })
+                       .catch(err => { rollbackShareBookmark(); showShareToast("요청을 처리하지 못했습니다. 다시 시도해 주세요."); console.error(err); });
+                }
+                showShareToast(isBookmarked ? "북마크가 해제되었습니다" : "북마크에 추가되었습니다");
+                closeShareModal();
+            }
         });
         document.body.appendChild(modal); document.body.classList.add("modal-open"); activeShareModal = modal;
     }

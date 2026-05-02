@@ -654,14 +654,35 @@
         checked.forEach(tr => tr.classList.remove("row-hidden"));
     });
 
-    newsDeleteBtn.addEventListener("click", (e) => {
+    newsDeleteBtn.addEventListener("click", async (e) => {
         const checked = getCheckedRows(newsTbody);
         if (!checked.length) {
             alert("선택된 뉴스가 없습니다.");
             return;
         }
         if (!confirm(`선택한 ${checked.length}개의 뉴스를 삭제하시겠습니까?`)) return;
-        checked.forEach(tr => tr.remove());
+
+        const failures = [];
+        for (const tr of checked) {
+            const id = tr.dataset.newsId;
+            if (!id) { failures.push("(id 누락)"); continue; }
+            try {
+                const res = await fetch(`/api/admin/news/${id}`, {
+                    method: "DELETE",
+                    credentials: "same-origin"
+                });
+                if (!res.ok) {
+                    failures.push(`#${id} (HTTP ${res.status})`);
+                    continue;
+                }
+                tr.remove();
+            } catch (err) {
+                failures.push(`#${id} (${err.message})`);
+            }
+        }
+        if (failures.length) {
+            alert(`다음 항목 삭제 실패:\n${failures.join("\n")}`);
+        }
     });
 
     const applyNewsFilter = () => {
@@ -1048,10 +1069,10 @@
         if (!result) return;
 
         try {
+            // adminId 는 서버에서 인증 정보(@AuthenticationPrincipal)로 강제됨 — 클라이언트에서 보낼 필요 없음
             await requestJson("/api/admin/news", {
                 method: "POST",
                 body: {
-                    adminId: null,
                     newsTitle: title,
                     newsContent: content,
                     newsSourceUrl: sourceUrl,

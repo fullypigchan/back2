@@ -208,8 +208,9 @@ const mypageLayout = (() => {
         // 카드의 초기 아이콘 상태는 서버가 내려준 최종 상태를 그대로 따른다.
         // Likes 탭만 예외적으로 "내가 좋아요한 글 목록"이라는 화면 의미가 더 강하므로,
         // 옵션이 켜지면 DTO 값보다 우선해서 채워진 하트를 보여준다.
-        const isLiked = options.forceLiked || !!post.isLiked;
-        const isBookmarked = !!post.isBookmarked;
+        // Java boolean isLiked/isBookmarked → Jackson 직렬화 시 liked/bookmarked 로 떨어짐
+        const isLiked = options.forceLiked || post.liked === true || post.isLiked === true;
+        const isBookmarked = post.bookmarked === true || post.isBookmarked === true;
         const cardType = options.cardType || "mypost";
 
         let mediaHtml = ""; // 이미지나 첨부파일이 있을 때만 채울 영역이다.

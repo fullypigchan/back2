@@ -1443,14 +1443,50 @@ window.onload = () => {
     button.classList.toggle('active', isActive);
     button.setAttribute('data-testid', isActive ? 'removeBookmark' : 'bookmark');
     button.setAttribute('aria-label', isActive ? '북마크에 추가됨' : '북마크');
-    path.setAttribute('d', isActive ? (path.dataset.pathActive ?? path.getAttribute('d')) : (path.dataset.pathInactive ?? path.getAttribute('d')));
+    // renderPostCard SVG에는 data-path-active/-inactive 속성이 없으므로 BK 상수로 직접 swap
+    const activeD = path.dataset.pathActive ?? BK_PATH_ON;
+    const inactiveD = path.dataset.pathInactive ?? BK_PATH_OFF;
+    path.setAttribute('d', isActive ? activeD : inactiveD);
   }
   function openShareBookmarkModal(button) {
     const { bookmarkButton } = getSharePostMeta(button); closeShareDropdown(); closeShareModal();
     const isBookmarked = bookmarkButton?.classList.contains('active') ?? false;
     const modal = document.createElement('div'); modal.className = 'share-sheet';
     modal.innerHTML = `<div class="share-sheet__backdrop" data-share-close="true"></div><div class="share-sheet__card share-sheet__card--bookmark" role="dialog" aria-modal="true" aria-labelledby="share-bookmark-title"><div class="share-sheet__header"><button type="button" class="share-sheet__icon-btn" data-share-close="true" aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button><h2 id="share-bookmark-title" class="share-sheet__title">폴더에 추가</h2><span class="share-sheet__header-spacer"></span></div><button type="button" class="share-sheet__create-folder">새 북마크 폴더 만들기</button><button type="button" class="share-sheet__folder" data-share-folder="all-bookmarks"><span class="share-sheet__folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M2.998 8.5c0-1.38 1.119-2.5 2.5-2.5h9c1.381 0 2.5 1.12 2.5 2.5v14.12l-7-3.5-7 3.5V8.5zM18.5 2H8.998v2H18.5c.275 0 .5.224.5.5V15l2 1.4V4.5c0-1.38-1.119-2.5-2.5-2.5z"></path></g></svg></span><span class="share-sheet__folder-name">모든 북마크</span><span class="share-sheet__folder-check${isBookmarked ? ' share-sheet__folder-check--active' : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg></span></button></div>`;
-    modal.addEventListener('click', (e) => { if (e.target.closest("[data-share-close='true']") || e.target.classList.contains('share-sheet__backdrop')) { e.preventDefault(); closeShareModal(); return; } if (e.target.closest('.share-sheet__create-folder')) { e.preventDefault(); showShareToast('새 폴더 만들기는 준비 중입니다'); closeShareModal(); return; } if (e.target.closest("[data-share-folder='all-bookmarks']")) { e.preventDefault(); setBookmarkButtonState(bookmarkButton, !isBookmarked); showShareToast(isBookmarked ? '북마크가 해제되었습니다' : '북마크에 추가되었습니다'); closeShareModal(); } });
+    modal.addEventListener('click', (e) => {
+      if (e.target.closest("[data-share-close='true']") || e.target.classList.contains('share-sheet__backdrop')) { e.preventDefault(); closeShareModal(); return; }
+      if (e.target.closest('.share-sheet__create-folder')) { e.preventDefault(); showShareToast('새 폴더 만들기는 준비 중입니다'); closeShareModal(); return; }
+      if (e.target.closest("[data-share-folder='all-bookmarks']")) {
+        e.preventDefault();
+        const nextActive = !isBookmarked;
+        setBookmarkButtonState(bookmarkButton, nextActive);
+        // bookmarkCount는 같은 카드의 .tweet-action-btn--views 카운터에 있음
+        const countButton = bookmarkButton?.closest('.tweet-action-bar')?.querySelector('.tweet-action-btn--views');
+        const cnt = countButton?.querySelector('.tweet-action-count');
+        const prevCountText = cnt?.textContent?.trim();
+        const prevAriaLabel = countButton?.getAttribute('aria-label');
+        if (cnt && /^\d+$/.test(prevCountText)) {
+          const nextCount = Math.max(0, parseInt(prevCountText, 10) + (nextActive ? 1 : -1));
+          cnt.textContent = nextCount;
+          countButton?.setAttribute('aria-label', `북마크 ${nextCount}`);
+        }
+        const postId = bookmarkButton?.dataset.postId;
+        const rollbackShareBookmark = () => {
+          setBookmarkButtonState(bookmarkButton, isBookmarked);
+          if (cnt && prevCountText != null) cnt.textContent = prevCountText;
+          if (countButton && prevAriaLabel != null) countButton.setAttribute('aria-label', prevAriaLabel);
+        };
+        if (postId && memberId) {
+          const req = nextActive
+            ? fetch('/api/main/bookmarks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) })
+            : fetch(`/api/main/bookmarks/members/${memberId}/posts/${postId}/delete`, { method:'POST' });
+          req.then(r => { if (!r.ok) { rollbackShareBookmark(); showShareToast('요청을 처리하지 못했습니다. 다시 시도해 주세요.'); console.error('share-bookmark API failed', r.status); } })
+             .catch(err => { rollbackShareBookmark(); showShareToast('요청을 처리하지 못했습니다. 다시 시도해 주세요.'); console.error(err); });
+        }
+        showShareToast(isBookmarked ? '북마크가 해제되었습니다' : '북마크에 추가되었습니다');
+        closeShareModal();
+      }
+    });
     document.body.appendChild(modal); document.body.classList.add('modal-open'); activeShareModal = modal;
   }
   function copyShareLink(button) {
@@ -1563,30 +1599,55 @@ window.onload = () => {
     const likeBtn = e.target.closest('.tweet-action-btn--like');
     if (likeBtn && !likeBtn.closest('[data-reply-modal]')) {
       e.stopPropagation();
+      // in-flight guard: 동일 버튼이 처리 중이면 무시 (rapid click race 방지)
+      if (likeBtn.dataset.inFlight === '1') return;
+      likeBtn.dataset.inFlight = '1';
       const on = likeBtn.classList.toggle('active');
       const cnt = likeBtn.querySelector('.tweet-action-count');
-      if (cnt && /^\d+$/.test(cnt.textContent.trim())) cnt.textContent = Math.max(0, parseInt(cnt.textContent, 10) + (on ? 1 : -1));
+      const prevCount = cnt?.textContent?.trim();
+      if (cnt && /^\d+$/.test(prevCount)) cnt.textContent = Math.max(0, parseInt(prevCount, 10) + (on ? 1 : -1));
       const likePath = likeBtn.querySelector('path');
       if (likePath) likePath.setAttribute('d', on ? LIKE_PATH_ON : LIKE_PATH_OFF);
       const postId = likeBtn.dataset.postId;
+      const rollback = () => {
+        likeBtn.classList.toggle('active', !on);
+        if (likePath) likePath.setAttribute('d', !on ? LIKE_PATH_ON : LIKE_PATH_OFF);
+        if (cnt && prevCount != null) cnt.textContent = prevCount;
+      };
+      const finish = () => { delete likeBtn.dataset.inFlight; };
       if (postId && memberId) {
-        if (on) fetch('/api/main/likes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(err => console.error(err));
-        else fetch(`/api/main/likes/posts/${postId}/delete`, { method:'POST' }).catch(err => console.error(err));
-      }
+        const req = on
+          ? fetch('/api/main/likes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) })
+          : fetch(`/api/main/likes/posts/${postId}/delete`, { method:'POST' });
+        req.then(r => { if (!r.ok) { rollback(); showShareToast('요청을 처리하지 못했습니다. 다시 시도해 주세요.'); console.error('like API failed', r.status); } })
+           .catch(err => { rollback(); showShareToast('요청을 처리하지 못했습니다. 다시 시도해 주세요.'); console.error(err); })
+           .finally(finish);
+      } else { finish(); }
       return;
     }
 
     const bookmarkBtn = e.target.closest('.tweet-action-btn--bookmark');
     if (bookmarkBtn && !bookmarkBtn.closest('[data-reply-modal]')) {
       e.stopPropagation();
+      if (bookmarkBtn.dataset.inFlight === '1') return;
+      bookmarkBtn.dataset.inFlight = '1';
       const on = bookmarkBtn.classList.toggle('active');
       const bkPath = bookmarkBtn.querySelector('path');
       if (bkPath) bkPath.setAttribute('d', on ? BK_PATH_ON : BK_PATH_OFF);
       const postId = bookmarkBtn.dataset.postId;
+      const rollback = () => {
+        bookmarkBtn.classList.toggle('active', !on);
+        if (bkPath) bkPath.setAttribute('d', !on ? BK_PATH_ON : BK_PATH_OFF);
+      };
+      const finish = () => { delete bookmarkBtn.dataset.inFlight; };
       if (postId && memberId) {
-        if (on) fetch('/api/main/bookmarks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) }).catch(err => console.error(err));
-        else fetch(`/api/main/bookmarks/members/${memberId}/posts/${postId}/delete`, { method:'POST' }).catch(err => console.error(err));
-      }
+        const req = on
+          ? fetch('/api/main/bookmarks', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberId, postId}) })
+          : fetch(`/api/main/bookmarks/members/${memberId}/posts/${postId}/delete`, { method:'POST' });
+        req.then(r => { if (!r.ok) { rollback(); showShareToast('요청을 처리하지 못했습니다. 다시 시도해 주세요.'); console.error('bookmark API failed', r.status); } })
+           .catch(err => { rollback(); showShareToast('요청을 처리하지 못했습니다. 다시 시도해 주세요.'); console.error(err); })
+           .finally(finish);
+      } else { finish(); }
       return;
     }
 
