@@ -41,13 +41,24 @@
                e.location,
                e.deadline as deadLine,
                e.status,
-               requester.member_email as requesterEmail,
-               receiver.member_email as receiverEmail,
+               requester.member_email    as requesterEmail,
+               requester.member_name     as requester_name,
+               requester.member_nickname as requester_nickname,
+               requester.member_handle   as requester_handle,
+               receiver.member_email     as receiverEmail,
+               receiver.member_name      as receiver_name,
+               receiver.member_nickname  as receiver_nickname,
+               receiver.member_handle    as receiver_handle,
                e.created_datetime as createdDateTime,
-               e.updated_datetime as updatedDateTime
+               e.updated_datetime as updatedDateTime,
+               p.title as product_title,
+               pp.product_price,
+               pp.product_stock
         from tbl_estimation e
-                 join tbl_member requester on e.requester_id = requester.id
-                 left join tbl_member receiver on e.receiver_id = receiver.id
+                 join      tbl_member requester on e.requester_id = requester.id
+                 left join tbl_member receiver  on e.receiver_id  = receiver.id
+                 left join tbl_post p           on e.product_id   = p.id and p.post_status = 'active'
+                 left join tbl_post_product pp  on pp.id          = p.id
         where e.receiver_id = #{receiverId}
         order by e.created_datetime desc
         limit #{criteria.count}
@@ -70,13 +81,24 @@
                e.location,
                e.deadline as deadLine,
                e.status,
-               requester.member_email as requesterEmail,
-               receiver.member_email as receiverEmail,
+               requester.member_email    as requesterEmail,
+               requester.member_name     as requester_name,
+               requester.member_nickname as requester_nickname,
+               requester.member_handle   as requester_handle,
+               receiver.member_email     as receiverEmail,
+               receiver.member_name      as receiver_name,
+               receiver.member_nickname  as receiver_nickname,
+               receiver.member_handle    as receiver_handle,
                e.created_datetime as createdDateTime,
-               e.updated_datetime as updatedDateTime
+               e.updated_datetime as updatedDateTime,
+               p.title as product_title,
+               pp.product_price,
+               pp.product_stock
         from tbl_estimation e
-                 join tbl_member requester on e.requester_id = requester.id
-                 left join tbl_member receiver on e.receiver_id = receiver.id
+                 join      tbl_member requester on e.requester_id = requester.id
+                 left join tbl_member receiver  on e.receiver_id  = receiver.id
+                 left join tbl_post p           on e.product_id   = p.id and p.post_status = 'active'
+                 left join tbl_post_product pp  on pp.id          = p.id
         where e.requester_id = #{requesterId}
         order by e.created_datetime desc
         limit #{criteria.count}
@@ -93,13 +115,24 @@
                e.location,
                e.deadline as deadLine,
                e.status,
-               requester.member_email as requesterEmail,
-               receiver.member_email as receiverEmail,
+               requester.member_email    as requesterEmail,
+               requester.member_name     as requester_name,
+               requester.member_nickname as requester_nickname,
+               requester.member_handle   as requester_handle,
+               receiver.member_email     as receiverEmail,
+               receiver.member_name      as receiver_name,
+               receiver.member_nickname  as receiver_nickname,
+               receiver.member_handle    as receiver_handle,
                e.created_datetime as createdDateTime,
-               e.updated_datetime as updatedDateTime
+               e.updated_datetime as updatedDateTime,
+               p.title as product_title,
+               pp.product_price,
+               pp.product_stock
         from tbl_estimation e
-                 join tbl_member requester on e.requester_id = requester.id
-                 left join tbl_member receiver on e.receiver_id = receiver.id
+                 join      tbl_member requester on e.requester_id = requester.id
+                 left join tbl_member receiver  on e.receiver_id  = receiver.id
+                 left join tbl_post p           on e.product_id   = p.id and p.post_status = 'active'
+                 left join tbl_post_product pp  on pp.id          = p.id
         where e.id = #{id}
     </select>
 

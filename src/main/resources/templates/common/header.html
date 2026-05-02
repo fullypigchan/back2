@@ -61,14 +61,18 @@
             </button>
         </nav>
         <button class="post-btn" id="createPostButton">게시하기</button>
-        <div class="accountMenuWrap" id="accountMenuWrap">
+        <!-- 프로필 카드는 페이지와 무관하게 항상 "로그인 사용자" 본인을 보여줘야 한다.
+             mypage 처럼 member 가 페이지 오너로 바뀌는 경우엔 loginMember 를 우선 사용하고,
+             loginMember 가 없는 페이지(main/explore 등)에선 기존처럼 member 가 곧 로그인 사용자라 폴백 OK. -->
+        <div class="accountMenuWrap" id="accountMenuWrap"
+             th:with="navMember=${loginMember != null ? loginMember : member}">
             <div class="profile-card" id="accountCard">
                 <div class="profile-avatar" id="accountAvatar">
-                    <img th:src="${member?.fileName != null ? member.fileName : '/images/profile/default_image.png'}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+                    <img th:src="${navMember?.fileName != null ? navMember.fileName : '/images/profile/default_image.png'}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
                 </div>
                 <div class="profile-info">
-                    <span class="profile-name" id="accountName" th:text="${member?.memberName ?: ''}"></span>
-                    <span class="profile-handle" id="accountHandle" th:text="${member?.memberHandle ?: ''}"></span>
+                    <span class="profile-name" id="accountName" th:text="${navMember?.memberName ?: ''}"></span>
+                    <span class="profile-handle" id="accountHandle" th:text="${navMember?.memberHandle ?: ''}"></span>
                 </div>
                 <button class="profile-more">···</button>
             </div>

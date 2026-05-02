@@ -2122,9 +2122,9 @@ window.onload = () => {
                 });
             });
         }
-        document.getElementById("accountLogoutButton").addEventListener("click", (e) => {
+        document.getElementById("accountLogoutButton").addEventListener("click", async (e) => {
             e.preventDefault();
-            service.logout();
+            await service.logout();
             location.href = "/member/join"
         })
     }

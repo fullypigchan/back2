@@ -1,8 +1,18 @@
 const settingService = (() => {
     // 설정 화면의 비밀번호 확인은 현재 로그인한 사용자 기준으로만 검사한다.
     // join의 중복검사 서비스와 같은 형태를 유지해서, event.js는 boolean 결과만 보고 흐름을 결정한다.
+    // 비밀번호를 URL 쿼리에 노출하지 않도록 POST + body로 보낸다.
+    // 서버 응답은 그대로 boolean 텍스트 — 기존 'text === "true"' 비교 흐름은 유지한다.
     const checkPassword = async (password, callback) => {
-        const response = await fetch(`/api/settings/check-password?memberPassword=${password}`);
+        const response = await fetch("/api/settings/check-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                memberPassword: password,
+            }),
+        });
         const text = await response.text();
 
         if (!response.ok) {
@@ -309,9 +319,12 @@ const settingService = (() => {
         return result;
     };
 
-    const unblockMember = async (blockerId, blockedId) => {
+    // blockerId는 서버가 인증 객체에서만 추출하므로 클라이언트는 보내지 않는다.
+    // 보냈더라도 서버가 무시했지만, "클라가 누구를 차단 푸는지 결정한다"는 잘못된 신호를
+    // 코드에 남겨두면 향후 백엔드를 그 모양에 맞춰 잘못 리팩토링할 위험이 있다.
+    const unblockMember = async (blockedId) => {
         const response = await fetch(
-            `/api/v1/blocks?blockerId=${blockerId}&blockedId=${blockedId}`,
+            `/api/v1/blocks?blockedId=${blockedId}`,
             {
                 method: "DELETE",
             },

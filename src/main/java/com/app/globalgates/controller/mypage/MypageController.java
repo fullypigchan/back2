@@ -142,6 +142,8 @@ public class MypageController {
                 // 변환 실패 시 default_image.png 그대로 둠.
             }
         }
+        // 헤더 사이드바가 loginMember.fileName 으로 프로필 이미지를 읽으므로 같이 박아둔다.
+        loginMember.setFileName(loginMemberProfileImageUrl);
 
         // mypage 템플릿에서는 member + 이미지 url 모델을 같이 사용한다.
         model.addAttribute("member", member);
