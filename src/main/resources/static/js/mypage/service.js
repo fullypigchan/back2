@@ -239,6 +239,36 @@ const myPageService = (() => {
         return data;
     };
 
+    // ============================================================
+    // 좋아요 / 북마크 토글용 API
+    // 백엔드 엔드포인트는 main/service.js 와 동일한 /api/main/* 를 재사용.
+    // 서버에서 인증 사용자 기준으로 동작하므로 클라가 보내는 memberId 는 무시되지만,
+    // main 과 시그니처를 맞춰 두 화면이 같은 인터페이스로 호출되게 한다.
+    // ============================================================
+    const addLike = async (memberId, postId) => {
+        await fetch('/api/main/likes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ memberId: memberId, postId: postId })
+        });
+    };
+
+    const deleteLike = async (memberId, postId) => {
+        await fetch(`/api/main/likes/posts/${postId}/delete`, { method: 'POST' });
+    };
+
+    const addBookmark = async (memberId, postId) => {
+        await fetch('/api/main/bookmarks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ memberId: memberId, postId: postId })
+        });
+    };
+
+    const deleteBookmark = async (memberId, postId) => {
+        await fetch(`/api/main/bookmarks/members/${memberId}/posts/${postId}/delete`, { method: 'POST' });
+    };
+
     return {
         writeProduct: writeProduct,
         getMyProducts: getMyProducts,
@@ -258,6 +288,10 @@ const myPageService = (() => {
         block: block,
         report: report,
         getMyEstimationsSummary: getMyEstimationsSummary,
-        getMyRequestedEstimations: getMyRequestedEstimations
+        getMyRequestedEstimations: getMyRequestedEstimations,
+        addLike: addLike,
+        deleteLike: deleteLike,
+        addBookmark: addBookmark,
+        deleteBookmark: deleteBookmark
     };
 })();

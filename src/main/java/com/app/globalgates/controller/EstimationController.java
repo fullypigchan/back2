@@ -50,6 +50,8 @@ public class EstimationController {
                 // 변환 실패 시 default_image.png 그대로 둠.
             }
         }
+        // 헤더 사이드바가 loginMember.fileName 으로 프로필 이미지를 읽으므로 같이 박아둔다.
+        loginMember.setFileName(loginMemberProfileImageUrl);
 
         model.addAttribute("googleMapsApiKey", googleMapsApiKey);
         model.addAttribute("loginMember", loginMember);

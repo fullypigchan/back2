@@ -17,10 +17,11 @@ import java.util.Map;
 public interface SettingAPIControllerDocs {
     @Operation(
             summary = "비밀번호 확인",
-            description = "현재 로그인한 사용자의 비밀번호가 일치하는지 확인한다.",
-            parameters = {@Parameter(name = "memberPassword", description = "확인할 비밀번호")}
+            description = "현재 로그인한 사용자의 비밀번호가 일치하는지 확인한다."
     )
-    public boolean checkPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam String memberPassword);
+    public boolean checkPassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request);
 
     @Operation(
             summary = "비밀번호 변경",

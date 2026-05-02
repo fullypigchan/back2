@@ -2406,7 +2406,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     blockedUnblockConfirmButton.addEventListener("click", async () => {
         try {
-            await settingService.unblockMember(settingMember.id, pendingBlockedId);
+            await settingService.unblockMember(pendingBlockedId);
             closeModal();
             blockedAccountsLoaded = false;
             await loadBlockedAccounts(blockedAccountsPage);
