@@ -1,4 +1,11 @@
 const exploreLayout = (() => {
+    const escapeHtml = (value) => String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+
     // 추천 제품 렌더링 (ProductsPagingDTO)
     const showPostList = (productsPagingDTO) => {
         const section = document.getElementById("productsSection");
@@ -121,16 +128,29 @@ const exploreLayout = (() => {
         newsList.forEach(news => {
             const cell = document.createElement("div");
             cell.className = "cell-inner-div";
+            const content = String(news.newsContent ?? "");
+            const summary = content.length > 120 ? `${content.slice(0, 120)}...` : content;
+            const category = news.newsCategory?.label ?? news.newsCategory ?? "뉴스";
+            const type = news.newsType?.label ?? news.newsType ?? "general";
+            const sourceUrl = news.newsSourceUrl ?? "";
             cell.innerHTML = `
                 <div class="trend" role="link" tabindex="0" data-news-id="${news.id}">
                     <div class="trend-inner">
                         <div class="trend-title-row">
                             <div class="trend-title-wrap">
-                                <span class="trend-title">${news.newsTitle ?? ""}</span>
+                                <span class="trend-title">${escapeHtml(news.newsTitle)}</span>
                             </div>
                         </div>
                         <div class="trend-meta-row">
-                            <span class="trend-meta-text">${news.createdDatetime}</span>
+                            <span class="trend-meta-text">${escapeHtml(category)}</span>
+                            <span class="trend-meta-text">${escapeHtml(type)}</span>
+                            <span class="trend-meta-text">${escapeHtml(news.createdDatetime)}</span>
+                        </div>
+                        <p class="trend-summary">${escapeHtml(summary)}</p>
+                        ${sourceUrl ? `<a class="trend-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : ""}
+                        <div class="trend-meta-row">
+                            <span class="trend-meta-text">좋아요 ${news.likeCount ?? 0}</span>
+                            <span class="trend-meta-text">북마크 ${news.bookmarkCount ?? 0}</span>
                         </div>
                     </div>
                 </div>

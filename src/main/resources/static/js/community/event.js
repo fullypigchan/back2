@@ -1597,11 +1597,20 @@ window.onload = () => {
                 const reportPostId = reportCard?.dataset.postId;
                 const loginMemberId = document.querySelector("[data-member-id]")?.dataset.memberId;
                 if (reportPostId && loginMemberId) {
-                    fetch("/api/main/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memberId: loginMemberId, postId: reportPostId, reason }) }).catch(err => console.error(err));
+                    fetch("/api/main/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reporterId: loginMemberId, targetId: reportPostId, targetType: "post", reason }) })
+                        .then(res => {
+                            if (!res.ok) throw new Error(`report failed: ${res.status}`);
+                            showCommunityToast("신고가 접수되었습니다");
+                            closeCommunityModal();
+                            if (reportCard) reportCard.remove();
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            showCommunityToast("신고 접수에 실패했습니다");
+                        });
+                    return;
                 }
-                showCommunityToast("신고가 접수되었습니다");
-                closeCommunityModal();
-                if (reportCard) reportCard.remove();
+                showCommunityToast("신고 접수에 실패했습니다");
             }
         });
         document.body.appendChild(modal); document.body.classList.add("modal-open"); activeCommunityModal = modal;

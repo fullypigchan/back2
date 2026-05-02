@@ -28,7 +28,7 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "page", description = "화면에 표시할 페이지 번호"),
                             @Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public PostWithPagingDTO getPostList(@PathVariable int page, @RequestParam(required = false) Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public PostWithPagingDTO getPostList(@PathVariable int page, @RequestParam Long memberId);
 
     @Operation(
             summary = "게시글 단건 조회",
@@ -36,7 +36,7 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "id", description = "조회할 게시글의 id"),
                             @Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public PostDTO getPost(@PathVariable Long id, @RequestParam(required = false) Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public PostDTO getPost(@PathVariable Long id, @RequestParam Long memberId);
 
     @Operation(
             summary = "게시글 작성",
@@ -77,7 +77,7 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "postId", description = "조회할 게시글의 id"),
                             @Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<PostDTO> getReplies(@PathVariable Long postId, @RequestParam(required = false) Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<PostDTO> getReplies(@PathVariable Long postId, @RequestParam Long memberId);
 
     @Operation(
             summary = "전문가 목록 조회",
@@ -85,7 +85,7 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "page", description = "화면에 표시할 페이지 번호"),
                             @Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public ExpertWithPagingDTO getExpertList(@PathVariable int page, @RequestParam(required = false) Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public ExpertWithPagingDTO getExpertList(@PathVariable int page, @RequestParam Long memberId);
 
     @Operation(
             summary = "좋아요 추가",
@@ -113,28 +113,28 @@ public interface MainAPIControllerDocs {
             description = "검색 기록을 저장한다.",
             parameters = {@Parameter(name = "searchHistoryDTO", description = "검색 기록 정보")}
     )
-    public void saveSearchHistory(@RequestBody SearchHistoryDTO searchHistoryDTO, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void saveSearchHistory(@RequestBody SearchHistoryDTO searchHistoryDTO);
 
     @Operation(
             summary = "최근 검색 목록 조회",
             description = "회원의 최근 검색 기록을 조회한다.",
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<SearchHistoryDTO> getSearchHistories(@PathVariable Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<SearchHistoryDTO> getSearchHistories(@PathVariable Long memberId);
 
     @Operation(
             summary = "검색 기록 개별 삭제",
             description = "검색 기록을 개별 삭제한다.",
             parameters = {@Parameter(name = "id", description = "삭제할 검색 기록의 id")}
     )
-    public void deleteSearchHistory(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void deleteSearchHistory(@PathVariable Long id);
 
     @Operation(
             summary = "검색 기록 전체 삭제",
             description = "회원의 검색 기록을 전체 삭제한다.",
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public void deleteAllSearchHistories(@PathVariable Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void deleteAllSearchHistories(@PathVariable Long memberId);
 
     @Operation(
             summary = "최신 뉴스 조회",
@@ -147,14 +147,14 @@ public interface MainAPIControllerDocs {
             description = "회원의 판매품목 목록을 조회한다.",
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<PostProductDTO> getMyProducts(@PathVariable Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<PostProductDTO> getMyProducts(@PathVariable Long memberId);
 
     @Operation(
             summary = "북마크 추가",
             description = "게시글을 북마크에 추가한다.",
             parameters = {@Parameter(name = "bookmarkDTO", description = "북마크 정보")}
     )
-    public void addBookmark(@RequestBody BookmarkDTO bookmarkDTO, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void addBookmark(@RequestBody BookmarkDTO bookmarkDTO);
 
     @Operation(
             summary = "북마크 삭제",
@@ -162,14 +162,14 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id"),
                             @Parameter(name = "postId", description = "게시글의 id")}
     )
-    public void deleteBookmark(@PathVariable Long memberId, @PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void deleteBookmark(@PathVariable Long memberId, @PathVariable Long postId);
 
     @Operation(
             summary = "팔로우 추가",
             description = "회원을 팔로우한다.",
             parameters = {@Parameter(name = "followDTO", description = "팔로우 정보")}
     )
-    public void follow(@RequestBody FollowDTO followDTO, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void follow(@RequestBody FollowDTO followDTO);
 
     @Operation(
             summary = "팔로우 해제",
@@ -177,21 +177,21 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "followerId", description = "팔로우 하는 회원의 id"),
                             @Parameter(name = "followingId", description = "팔로우 당하는 회원의 id")}
     )
-    public void unfollow(@PathVariable Long followerId, @PathVariable Long followingId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void unfollow(@PathVariable Long followerId, @PathVariable Long followingId);
 
     @Operation(
             summary = "팔로잉 목록 조회",
             description = "공유 모달에서 팔로잉 목록을 조회한다.",
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<FollowDTO> getFollowings(@PathVariable Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<FollowDTO> getFollowings(@PathVariable Long memberId);
 
     @Operation(
             summary = "팔로우 추천 조회",
             description = "팔로우하지 않은 회원 추천 목록을 조회한다.",
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<MemberDTO> getSuggestions(@PathVariable Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<MemberDTO> getSuggestions(@PathVariable Long memberId);
 
     @Operation(
             summary = "차단 추가",
@@ -213,21 +213,21 @@ public interface MainAPIControllerDocs {
             parameters = {@Parameter(name = "keyword", description = "검색 키워드"),
                             @Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<com.app.globalgates.dto.MentionDTO> searchMentionMembers(@RequestParam String keyword, @RequestParam(required = false) Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<com.app.globalgates.dto.MentionDTO> searchMentionMembers(@RequestParam String keyword, @RequestParam Long memberId);
 
     @Operation(
             summary = "임시저장",
             description = "게시글을 임시저장한다.",
             parameters = {@Parameter(name = "postTempDTO", description = "임시저장할 게시글 정보")}
     )
-    public void savePostTemp(@RequestBody PostTempDTO postTempDTO, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void savePostTemp(@RequestBody PostTempDTO postTempDTO);
 
     @Operation(
             summary = "임시저장 목록 조회",
             description = "회원의 임시저장 목록을 조회한다.",
             parameters = {@Parameter(name = "memberId", description = "로그인한 회원의 id")}
     )
-    public List<PostTempDTO> getPostTemps(@PathVariable Long memberId, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public List<PostTempDTO> getPostTemps(@PathVariable Long memberId);
 
     @Operation(
             summary = "임시저장 불러오기",
@@ -248,5 +248,5 @@ public interface MainAPIControllerDocs {
             description = "선택한 임시저장 게시글들을 삭제한다.",
             parameters = {@Parameter(name = "ids", description = "삭제할 임시저장 id 목록")}
     )
-    public void deletePostTemps(@RequestBody List<Long> ids, @AuthenticationPrincipal CustomUserDetails userDetails);
+    public void deletePostTemps(@RequestBody List<Long> ids);
 }

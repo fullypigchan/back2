@@ -59,22 +59,13 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    게시글 목록 조회
     @GetMapping("/posts/list/{page}")
     @LogStatusWithReturn
-    public PostWithPagingDTO getPostList(@PathVariable int page,
-                                         @RequestParam(required = false) Long memberId,
-                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long authMemberId = userDetails != null ? userDetails.getId() : null;
-        log.info("게시글 목록 조회 — page: {}, memberId: {} (auth: {})", page, memberId, authMemberId);
-        PostWithPagingDTO result = postService.getList(page, authMemberId);
+    public PostWithPagingDTO getPostList(@PathVariable int page, @RequestParam Long memberId) {
+        log.info("게시글 목록 조회 — page: {}, memberId: {}", page, memberId);
+        PostWithPagingDTO result = postService.getList(page, memberId);
         result.getPosts().forEach(post -> {
-                post.getPostFiles().forEach(pf -> {
-                    try {
-                        pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
-                    } catch (IOException e) {
-                        throw new RuntimeException("Presigned URL 생성 실패", e);
-                    }
-                });
-                convertProfileUrl(post);
-                convertProductImageUrl(post);
+            convertPostFilesUrl(post);
+            convertProfileUrl(post);
+            convertProductImageUrl(post);
         });
         return result;
     }
@@ -82,12 +73,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    게시글 단건 조회 (수정용)
     @GetMapping("/posts/{id}")
     @LogStatusWithReturn
-    public PostDTO getPost(@PathVariable Long id,
-                           @RequestParam(required = false) Long memberId,
-                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long authMemberId = userDetails != null ? userDetails.getId() : null;
-        log.info("게시글 단건 조회 — postId: {}, memberId: {} (auth: {})", id, memberId, authMemberId);
-        PostDTO post = postService.getDetail(id, authMemberId);
+    public PostDTO getPost(@PathVariable Long id, @RequestParam Long memberId) {
+        log.info("게시글 단건 조회 — postId: {}, memberId: {}", id, memberId);
+        PostDTO post = postService.getDetail(id, memberId);
         post.getPostFiles().forEach(pf -> {
             try {
                 pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
@@ -190,12 +178,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    댓글 목록
     @GetMapping("/posts/{postId}/replies")
     @LogStatusWithReturn
-    public List<PostDTO> getReplies(@PathVariable Long postId,
-                                    @RequestParam(required = false) Long memberId,
-                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long authMemberId = userDetails != null ? userDetails.getId() : null;
-        log.info("댓글목록조회함 — postId: {}, memberId: {} (auth: {})", postId, memberId, authMemberId);
-        List<PostDTO> replies = postService.getReplies(postId, authMemberId);
+    public List<PostDTO> getReplies(@PathVariable Long postId, @RequestParam Long memberId) {
+        log.info("댓글목록조회함 — postId: {}, memberId: {}", postId, memberId);
+        List<PostDTO> replies = postService.getReplies(postId, memberId);
         replies.forEach(reply -> {
             convertPostFilesUrl(reply);
             convertProfileUrl(reply);
@@ -211,12 +196,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    전문가 목록 조회
     @GetMapping("/experts/list/{page}")
     @LogStatusWithReturn
-    public ExpertWithPagingDTO getExpertList(@PathVariable int page,
-                                             @RequestParam(required = false) Long memberId,
-                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long authMemberId = userDetails != null ? userDetails.getId() : null;
-        log.info("전문가 목록 조회하기 page: {}, memberId: {} (auth: {})", page, memberId, authMemberId);
-        ExpertWithPagingDTO result = expertService.getList(page, authMemberId);
+    public ExpertWithPagingDTO getExpertList(@PathVariable int page, @RequestParam Long memberId) {
+        log.info("전문가 목록 조회하기 page: {}, memberId: {}", page, memberId);
+        ExpertWithPagingDTO result = expertService.getList(page, memberId);
         result.getExperts().forEach(expert -> {
             if (expert.getMemberProfileFileName() != null) {
                 try {
@@ -263,48 +245,33 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    검색 기록 저장
     @PostMapping("/search/histories")
     @LogStatus
-    public void saveSearchHistory(@RequestBody SearchHistoryDTO searchHistoryDTO,
-                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        searchHistoryDTO.setMemberId(userDetails.getId());
-        log.info("검색기록 저장 memberId: {}, keyword: {}", userDetails.getId(), searchHistoryDTO.getSearchKeyword());
+    public void saveSearchHistory(@RequestBody SearchHistoryDTO searchHistoryDTO) {
+        log.info("검색기록 저장 memberId: {}, keyword: {}", searchHistoryDTO.getMemberId(), searchHistoryDTO.getSearchKeyword());
         searchService.saveSearchHistory(searchHistoryDTO);
     }
 
 //    최근 검색 목록 조회
     @GetMapping("/search/histories/{memberId}")
     @LogStatusWithReturn
-    public List<SearchHistoryDTO> getSearchHistories(@PathVariable Long memberId,
-                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 검색 기록은 조회할 수 없습니다.");
-        }
-        log.info("최근검색 조회하기. memberId: {}", userDetails.getId());
-        return searchService.getSearchHistories(userDetails.getId());
+    public List<SearchHistoryDTO> getSearchHistories(@PathVariable Long memberId) {
+        log.info("최근검색 조회하기. memberId: {}", memberId);
+        return searchService.getSearchHistories(memberId);
     }
 
 //    검색 기록 개별 삭제
     @PostMapping("/search/histories/{id}/delete")
     @LogStatus
-    public void deleteSearchHistory(@PathVariable Long id,
-                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        log.info("최근검색 개별삭제 — id: {}, memberId: {}", id, userDetails.getId());
+    public void deleteSearchHistory(@PathVariable Long id) {
+        log.info("최근검색 개별삭제 — id: {}", id);
         searchService.deleteSearchHistory(id);
     }
 
 //    검색 기록 전체 삭제
     @PostMapping("/search/histories/members/{memberId}/delete-all")
     @LogStatus
-    public void deleteAllSearchHistories(@PathVariable Long memberId,
-                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 검색 기록은 삭제할 수 없습니다.");
-        }
-        log.info("최근검색 전체삭제 — memberId: {}", userDetails.getId());
-        searchService.deleteAllSearchHistories(userDetails.getId());
+    public void deleteAllSearchHistories(@PathVariable Long memberId) {
+        log.info("최근검색 전체삭제 — memberId: {}", memberId);
+        searchService.deleteAllSearchHistories(memberId);
     }
 
 
@@ -320,14 +287,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    작성할때 내 판매품목 목록 조회
     @GetMapping("/products/members/{memberId}")
     @LogStatusWithReturn
-    public List<PostProductDTO> getMyProducts(@PathVariable Long memberId,
-                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 판매품목은 조회할 수 없습니다.");
-        }
-        log.info("내 판매품목 조회해요 내아이디(memberId): {}", userDetails.getId());
-        List<PostProductDTO> products = postProductService.getMyProducts(userDetails.getId());
+    public List<PostProductDTO> getMyProducts(@PathVariable Long memberId) {
+        log.info("내 판매품목 조회해요 내아이디(memberId): {}", memberId);
+        List<PostProductDTO> products = postProductService.getMyProducts(memberId);
         products.forEach(product -> {
             List<String> presigned = new ArrayList<>();
             product.getPostFiles().forEach(key -> {
@@ -346,62 +308,41 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    북마크 추가
     @PostMapping("/bookmarks")
     @LogStatus
-    public void addBookmark(@RequestBody BookmarkDTO bookmarkDTO,
-                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        bookmarkDTO.setMemberId(userDetails.getId());
-        log.info("북마크 추가댐 작성자아이디: {}, 게시물아이디: {}", userDetails.getId(), bookmarkDTO.getPostId());
+    public void addBookmark(@RequestBody BookmarkDTO bookmarkDTO) {
+        log.info("북마크 추가댐 작성자아이디: {}, 게시물아이디: {}", bookmarkDTO.getMemberId(), bookmarkDTO.getPostId());
         bookmarkService.addBookmark(bookmarkDTO);
     }
 
 //    북마크 떼기
     @PostMapping("/bookmarks/members/{memberId}/posts/{postId}/delete")
     @LogStatus
-    public void deleteBookmark(@PathVariable Long memberId, @PathVariable Long postId,
-                               @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 북마크는 삭제할 수 없습니다.");
-        }
-        log.info("북마크 뗌 — memberId: {}, postId: {}", userDetails.getId(), postId);
-        bookmarkService.deleteBookmark(userDetails.getId(), postId);
+    public void deleteBookmark(@PathVariable Long memberId, @PathVariable Long postId) {
+        log.info("북마크 뗌 — memberId: {}, postId: {}", memberId, postId);
+        bookmarkService.deleteBookmark(memberId, postId);
     }
 
 //    팔로우 추가
     @PostMapping("/follows")
     @LogStatus
-    public void follow(@RequestBody FollowDTO followDTO,
-                       @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        followDTO.setFollowerId(userDetails.getId());
-        log.info("팔로우 추가 — followerId: {}, followingId: {}", userDetails.getId(), followDTO.getFollowingId());
+    public void follow(@RequestBody FollowDTO followDTO) {
+        log.info("팔로우 추가 — followerId: {}, followingId: {}", followDTO.getFollowerId(), followDTO.getFollowingId());
         followService.follow(followDTO);
     }
 
 //    팔로우 해제
     @PostMapping("/follows/{followerId}/{followingId}/delete")
     @LogStatus
-    public void unfollow(@PathVariable Long followerId, @PathVariable Long followingId,
-                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (followerId != null && !followerId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원을 대신해 언팔로우할 수 없습니다.");
-        }
-        log.info("팔로우 해제 — followerId: {}, followingId: {}", userDetails.getId(), followingId);
-        followService.unfollow(userDetails.getId(), followingId);
+    public void unfollow(@PathVariable Long followerId, @PathVariable Long followingId) {
+        log.info("팔로우 해제 — followerId: {}, followingId: {}", followerId, followingId);
+        followService.unfollow(followerId, followingId);
     }
 
 //    팔로잉 목록 조회(공유모달에서)
     @GetMapping("/follows/{memberId}/followings")
     @LogStatusWithReturn
-    public List<FollowDTO> getFollowings(@PathVariable Long memberId,
-                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 팔로잉 목록은 조회할 수 없습니다.");
-        }
-        log.info("팔로잉 목록 조회 들어옴1 — memberId: {}", userDetails.getId());
-        List<FollowDTO> result = followService.getFollowings(userDetails.getId());
+    public List<FollowDTO> getFollowings(@PathVariable Long memberId) {
+        log.info("팔로잉 목록 조회 들어옴1 — memberId: {}", memberId);
+        List<FollowDTO> result = followService.getFollowings(memberId);
         log.info("팔로잉 목록 조회 들어옴2 — 결과 size: {}", result.size());
         result.forEach(f -> log.info("  following: {}", f));
         return result;
@@ -411,14 +352,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    팔로우 추천탭 - 우선은 2개 조회 (나중에 AI)
     @GetMapping("/follows/{memberId}/suggestions")
     @LogStatusWithReturn
-    public List<MemberDTO> getSuggestions(@PathVariable Long memberId,
-                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 추천 목록은 조회할 수 없습니다.");
-        }
-        log.info("팔로우 추천 조회하기 memberId: {}", userDetails.getId());
-        List<MemberDTO> members = followService.getUnfollowedMembers(userDetails.getId());
+    public List<MemberDTO> getSuggestions(@PathVariable Long memberId) {
+        log.info("팔로우 추천 조회하기");
+        List<MemberDTO> members = followService.getUnfollowedMembers(memberId);
         members.forEach(m -> {
             if (m.getFileName() != null) {
                 try {
@@ -452,12 +388,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    멘션 검색 (handle로 검색, 양방향 차단 제외, 최대 10개)
     @GetMapping("/mentions/search")
     @LogStatusWithReturn
-    public List<com.app.globalgates.dto.MentionDTO> searchMentionMembers(@RequestParam String keyword,
-                                                                         @RequestParam(required = false) Long memberId,
-                                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long authMemberId = userDetails != null ? userDetails.getId() : memberId;
-        log.info("멘션검색 들어옴1 keyword: {}, memberId: {}", keyword, authMemberId);
-        List<com.app.globalgates.dto.MentionDTO> result = mentionDAO.searchForMention(keyword, authMemberId);
+    public List<com.app.globalgates.dto.MentionDTO> searchMentionMembers(@RequestParam String keyword, @RequestParam Long memberId) {
+        log.info("멘션검색 들어옴1 keyword: {}, memberId: {}", keyword, memberId);
+        List<com.app.globalgates.dto.MentionDTO> result = mentionDAO.searchForMention(keyword, memberId);
         log.info("멘션검색 들어옴2 결과수: {}", result.size());
         // 프로필 이미지 presigned URL 변환
         result.forEach(m -> {
@@ -475,25 +408,17 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    임시저장하기
     @PostMapping("/post-temps")
     @LogStatus
-    public void savePostTemp(@RequestBody PostTempDTO postTempDTO,
-                             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        postTempDTO.setMemberId(userDetails.getId());
-        log.info("임시저장 memberId: {}, content: {}", userDetails.getId(), postTempDTO.getPostTempContent());
+    public void savePostTemp(@RequestBody PostTempDTO postTempDTO) {
+        log.info("임시저장 memberId: {}, content: {}", postTempDTO.getMemberId(), postTempDTO.getPostTempContent());
         postTempService.savePostTemp(postTempDTO);
     }
 
 //    임시저장 조회=모달에서목록
     @GetMapping("/post-temps/{memberId}")
     @LogStatusWithReturn
-    public List<PostTempDTO> getPostTemps(@PathVariable Long memberId,
-                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        if (memberId != null && !memberId.equals(userDetails.getId())) {
-            throw new SecurityException("타 회원의 임시저장은 조회할 수 없습니다.");
-        }
-        log.info("임시저장 목록 조회 memberId: {}", userDetails.getId());
-        return postTempService.getPostTemps(userDetails.getId());
+    public List<PostTempDTO> getPostTemps(@PathVariable Long memberId) {
+        log.info("임시저장 목록 조회 memberId: {}", memberId);
+        return postTempService.getPostTemps(memberId);
     }
 
 //    임시저장한것 로드 = 삭제
@@ -517,20 +442,9 @@ public class MainAPIController implements MainAPIControllerDocs {
 //    임시저장 선택 삭제
     @PostMapping("/post-temps/delete")
     @LogStatus
-    public void deletePostTemps(@RequestBody List<Long> ids,
-                                @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) throw new SecurityException("로그인이 필요합니다.");
-        log.info("임시저장 선택 삭제 ids: {}, memberId: {}", ids, userDetails.getId());
+    public void deletePostTemps(@RequestBody List<Long> ids) {
+        log.info("임시저장 선택 삭제 ids: {}", ids);
         postTempService.deletePostTemps(ids);
-    }
-
-    // 권한 검증 실패 시 403
-    @ExceptionHandler(SecurityException.class)
-    public org.springframework.http.ResponseEntity<java.util.Map<String, String>> handleSecurity(SecurityException e) {
-        log.warn("인증/권한 거부: {}", e.getMessage());
-        return org.springframework.http.ResponseEntity
-                .status(org.springframework.http.HttpStatus.FORBIDDEN)
-                .body(java.util.Map.of("error", e.getMessage()));
     }
 
     // ── 댓글/대댓글 파일 URL 변환 (null 안전) ──

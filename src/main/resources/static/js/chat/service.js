@@ -6,7 +6,9 @@ const ChatService = (() => {
             const errorText = await response.text();
             throw new Error(errorText || fallbackMsg);
         }
-        return response.status === 204 ? null : await response.json();
+        if (response.status === 204) return null;
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
     }
 
     // 1.채팅방 목록 조회

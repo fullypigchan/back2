@@ -6,6 +6,7 @@ import com.app.globalgates.dto.BookmarkDTO;
 import com.app.globalgates.dto.BookmarkFolderDTO;
 import com.app.globalgates.repository.BookmarkDAO;
 import com.app.globalgates.repository.BookmarkFolderDAO;
+import com.app.globalgates.repository.NewsBookmarkDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class BookmarkService {
     private final BookmarkDAO bookmarkDAO;
     private final BookmarkFolderDAO bookmarkFolderDAO;
+    private final NewsBookmarkDAO newsBookmarkDAO;
 
     //    폴더 생성
     @CacheEvict(value = "bookmark:folder:list", allEntries = true)
@@ -49,6 +51,7 @@ public class BookmarkService {
     public void deleteFolder(Long id, Long memberId) {
         assertFolderOwnedBy(id, memberId);
         bookmarkDAO.clearFolderId(id);
+        newsBookmarkDAO.clearFolderId(id);
         bookmarkFolderDAO.delete(id);
     }
 
@@ -57,6 +60,7 @@ public class BookmarkService {
     @LogStatus
     public void deleteFolder(Long id) {
         bookmarkDAO.clearFolderId(id);
+        newsBookmarkDAO.clearFolderId(id);
         bookmarkFolderDAO.delete(id);
     }
 

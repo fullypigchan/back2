@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,5 +27,10 @@ public class MessageReactionDAO {
 //    메시지별 반응 조회
     public List<MessageReactionDTO> findAllByMessageId(Long messageId) {
         return messageReactionMapper.selectAllByMessageId(messageId);
+    }
+
+//    메시지가 속한 대화방 조회
+    public Optional<Long> findConversationIdByMessageId(Long messageId) {
+        return messageReactionMapper.selectConversationIdByMessageId(messageId);
     }
 }

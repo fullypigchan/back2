@@ -12,6 +12,7 @@
     <select id="selectLatestInMain">
         select id, news_title, news_content
         from tbl_news
+        where news_type = 'general'
         order by created_datetime desc
         limit 2
     </select>

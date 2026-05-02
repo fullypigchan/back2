@@ -5,9 +5,11 @@ import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.auth.CustomUserDetails;
 import com.app.globalgates.dto.BookmarkDTO;
 import com.app.globalgates.dto.BookmarkFolderDTO;
+import com.app.globalgates.dto.NewsBookmarkDTO;
 import com.app.globalgates.dto.PostFileDTO;
 import com.app.globalgates.repository.PostFileDAO;
 import com.app.globalgates.service.BookmarkService;
+import com.app.globalgates.service.NewsBookmarkService;
 import com.app.globalgates.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,7 @@ import java.util.Map;
 @RequestMapping("/api/bookmarks")
 public class BookmarkRestController implements BookmarkRestControllerDocs {
     private final BookmarkService bookmarkService;
+    private final NewsBookmarkService newsBookmarkService;
     private final PostFileDAO postFileDAO;
     private final S3Service s3Service;
 
@@ -90,6 +93,15 @@ public class BookmarkRestController implements BookmarkRestControllerDocs {
     }
 
     @LogStatus
+    @PostMapping("/news")
+    public ResponseEntity<Void> addNewsBookmark(@RequestBody NewsBookmarkDTO newsBookmarkDTO,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        newsBookmarkService.addBookmark(newsBookmarkDTO, userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @LogStatus
     @PostMapping("/{id}/delete")
     public ResponseEntity<Void> deleteBookmark(@PathVariable Long id,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -121,6 +133,17 @@ public class BookmarkRestController implements BookmarkRestControllerDocs {
         bookmarkDTO.setId(id);
         bookmarkDTO.setMemberId(userDetails.getId());
         bookmarkService.updateFolderId(bookmarkDTO, userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @LogStatus
+    @PutMapping("/news/{id}/folder")
+    public ResponseEntity<Void> updateNewsFolderId(@PathVariable Long id,
+                                                   @RequestBody NewsBookmarkDTO newsBookmarkDTO,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        newsBookmarkDTO.setId(id);
+        newsBookmarkService.updateFolderId(newsBookmarkDTO, userDetails.getId());
         return ResponseEntity.ok().build();
     }
 
@@ -173,6 +196,21 @@ public class BookmarkRestController implements BookmarkRestControllerDocs {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return bookmarkService.getBookmark(authMemberId, postId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @LogStatusWithReturn
+    @GetMapping("/members/{memberId}/news/{newsId}")
+    public ResponseEntity<NewsBookmarkDTO> getNewsBookmarkByMemberAndNews(@PathVariable Long memberId,
+                                                                          @PathVariable Long newsId,
+                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long authMemberId = userDetails.getId();
+        if (memberId != null && !memberId.equals(authMemberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return newsBookmarkService.getBookmark(authMemberId, newsId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }

@@ -135,6 +135,8 @@
     let activeShareModal = null;
     let activeShareBookmarkButton = null;
     let activeShareBookmarkPostId = "";
+    let activeShareBookmarkNewsId = "";
+    let activeShareBookmarkType = "post";
     let activeMorePostMeta = null;
     let toastTimer = null;
     let currentFolderId = null;
@@ -281,6 +283,8 @@
         activeShareBookmarkButton = null;
         if (!pendingShareBookmarkReopen) {
             activeShareBookmarkPostId = "";
+            activeShareBookmarkNewsId = "";
+            activeShareBookmarkType = "post";
         }
         updateBodyScrollLock();
     }
@@ -327,13 +331,17 @@
             postCard?.querySelector(".bookmark-post-handle")?.textContent?.trim() ||
             "@user";
         const postId = postCard?.dataset.postId || "1";
+        const newsId = postCard?.dataset.newsId || "";
+        const bookmarkType = postCard?.dataset.bookmarkType || "post";
         const bookmarkButton =
             postCard?.querySelector("[data-action='bookmark']") ?? null;
         const url = new URL(window.location.href);
-        url.pathname = `/${handle.replace("@", "")}/status/${postId}`;
+        url.pathname = bookmarkType === "news" && newsId
+            ? `/news/detail/${newsId}`
+            : `/${handle.replace("@", "")}/status/${postId}`;
         url.hash = "";
         url.search = "";
-        return {permalink: url.toString(), bookmarkButton, postId};
+        return {permalink: url.toString(), bookmarkButton, postId, newsId, bookmarkType};
     }
 
     function getBookmarkMoreMeta(button) {
@@ -397,12 +405,40 @@
         shareBookmarkFolderList.innerHTML = html;
     }
 
+    async function addActiveShareBookmarkToFolder(folderId) {
+        if (typeof memberId === "undefined" || !memberId) return false;
+
+        if (activeShareBookmarkType === "news") {
+            const newsId = activeShareBookmarkNewsId;
+            if (!newsId) return false;
+            const existing = await BookmarkService.getByMemberAndNews(memberId, newsId);
+            if (existing.ok && existing.data) {
+                await BookmarkService.moveNewsFolder(existing.data.id, folderId);
+            } else {
+                await BookmarkService.addNews(memberId, Number(newsId), folderId);
+            }
+            return true;
+        }
+
+        const postId = activeShareBookmarkPostId;
+        if (!postId) return false;
+        const existing = await BookmarkService.getByMemberAndPost(memberId, postId);
+        if (existing.ok && existing.data) {
+            await BookmarkService.moveFolder(existing.data.id, folderId);
+        } else {
+            await BookmarkService.add(memberId, postId, folderId);
+        }
+        return true;
+    }
+
     function openShareBookmarkModal(button) {
-        const {bookmarkButton, postId} = getSharePostMeta(button);
+        const {bookmarkButton, postId, newsId, bookmarkType} = getSharePostMeta(button);
         closeShareDropdown();
         closeShareModal();
         activeShareBookmarkButton = bookmarkButton;
         activeShareBookmarkPostId = postId;
+        activeShareBookmarkNewsId = newsId;
+        activeShareBookmarkType = bookmarkType;
         if (!shareBookmarkModal) {
             return;
         }
@@ -818,18 +854,15 @@
                 modalSubmitButton.disabled = false;
                 return;
             }
-            const shouldAddPost = pendingShareBookmarkReopen && activeShareBookmarkPostId;
-            const savedPostId = activeShareBookmarkPostId;
+            const shouldAddBookmark = pendingShareBookmarkReopen && (
+                (activeShareBookmarkType === "news" && activeShareBookmarkNewsId) ||
+                (activeShareBookmarkType !== "news" && activeShareBookmarkPostId)
+            );
             const result = await BookmarkService.createFolder(memberId, value);
             if (result.ok) {
                 const newFolderId = result.data?.id;
-                if (shouldAddPost && newFolderId) {
-                    const existing = await BookmarkService.getByMemberAndPost(memberId, Number(savedPostId));
-                    if (existing.ok && existing.data) {
-                        await BookmarkService.moveFolder(existing.data.id, newFolderId);
-                    } else {
-                        await BookmarkService.add(memberId, Number(savedPostId), newFolderId);
-                    }
+                if (shouldAddBookmark && newFolderId) {
+                    await addActiveShareBookmarkToFolder(newFolderId);
                     showToast(`${value} 폴더에 추가했습니다`);
                 } else {
                     showToast(`${value} 폴더를 만들었습니다`);
@@ -840,6 +873,8 @@
             }
             pendingShareBookmarkReopen = false;
             activeShareBookmarkPostId = "";
+            activeShareBookmarkNewsId = "";
+            activeShareBookmarkType = "post";
             closeModal();
         });
     }
@@ -942,16 +977,8 @@
         const folderBtn = event.target.closest("[data-share-folder-id]");
         if (!folderBtn) return;
         const folderId = folderBtn.dataset.shareFolderId || null;
-        const postId = activeShareBookmarkPostId;
-        if (!postId || typeof memberId === "undefined" || !memberId) return;
-
-        const existing = await BookmarkService.getByMemberAndPost(memberId, postId);
-
-        if (existing.ok && existing.data) {
-            await BookmarkService.moveFolder(existing.data.id, folderId);
-        } else {
-            await BookmarkService.add(memberId, postId, folderId);
-        }
+        const saved = await addActiveShareBookmarkToFolder(folderId);
+        if (!saved) return;
 
         if (activeShareBookmarkButton) {
             setBookmarkButtonState(activeShareBookmarkButton, true);

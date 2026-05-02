@@ -63,12 +63,14 @@ public class ChatRoomService {
 //    채팅방 활성화
     @Transactional
     public void activateRoom(Long conversationId, Long memberId) {
+        assertMember(conversationId, memberId);
         chatRoomDAO.saveSetting(conversationId, memberId);
     }
 
 //    읽음 처리 + read receipt 반환 (WebSocket 브로드캐스트용)
     @Transactional
     public Optional<ChatReadReceiptDTO> markConversationAsRead(Long conversationId, Long memberId) {
+        assertMember(conversationId, memberId);
         Long lastMessageId = chatRoomDAO.findLastMessageId(conversationId);
         if (lastMessageId == null) return Optional.empty();
 
@@ -85,6 +87,7 @@ public class ChatRoomService {
 //    조용한 읽음 처리 (DB만 갱신, 브로드캐스트 X)
     @Transactional
     public void markConversationAsReadQuiet(Long conversationId, Long memberId) {
+        assertMember(conversationId, memberId);
         Long lastMessageId = chatRoomDAO.findLastMessageId(conversationId);
         if (lastMessageId != null) {
             chatRoomDAO.saveLastReadMessageId(conversationId, memberId, lastMessageId);
@@ -94,7 +97,14 @@ public class ChatRoomService {
 //    별칭 수정
     @Transactional
     public void updateAlias(Long conversationId, Long memberId, String alias) {
+        assertMember(conversationId, memberId);
         chatRoomDAO.updateAlias(conversationId, memberId, alias);
+    }
+
+    private void assertMember(Long conversationId, Long memberId) {
+        if (!chatRoomDAO.isMember(conversationId, memberId)) {
+            throw new SecurityException("해당 대화방에 접근할 수 없습니다.");
+        }
     }
 
 //    스크린샷 차단 토글

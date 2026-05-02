@@ -15,4 +15,10 @@ public interface NewsBookmarkMapper {
     Optional<NewsBookmarkDTO> selectByMemberIdAndNewsId(@Param("memberId") Long memberId, @Param("newsId") Long newsId);
 
     int selectCountByNewsId(Long newsId);
+
+    Optional<NewsBookmarkDTO> selectById(@Param("id") Long id);
+
+    void updateFolderId(NewsBookmarkDTO newsBookmarkDTO);
+
+    void clearFolderId(@Param("folderId") Long folderId);
 }

@@ -27,4 +27,16 @@ public class NewsBookmarkDAO {
     public int countByNewsId(Long newsId) {
         return newsBookmarkMapper.selectCountByNewsId(newsId);
     }
+
+    public Optional<NewsBookmarkDTO> findById(Long id) {
+        return newsBookmarkMapper.selectById(id);
+    }
+
+    public void updateFolderId(NewsBookmarkDTO newsBookmarkDTO) {
+        newsBookmarkMapper.updateFolderId(newsBookmarkDTO);
+    }
+
+    public void clearFolderId(Long folderId) {
+        newsBookmarkMapper.clearFolderId(folderId);
+    }
 }

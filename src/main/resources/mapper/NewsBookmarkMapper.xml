@@ -27,4 +27,22 @@
         where news_id = #{newsId}
     </select>
 
+    <select id="selectById">
+        select id, member_id, news_id, folder_id, created_datetime
+        from tbl_news_bookmark
+        where id = #{id}
+    </select>
+
+    <update id="updateFolderId">
+        update tbl_news_bookmark
+        set folder_id = #{folderId}
+        where id = #{id}
+    </update>
+
+    <update id="clearFolderId">
+        update tbl_news_bookmark
+        set folder_id = null
+        where folder_id = #{folderId}
+    </update>
+
 </mapper>
