@@ -272,6 +272,19 @@
         return `<span class="badge ${badgeInfo.className}">${escapeHtml(badgeInfo.text)}</span>`;
     };
 
+    const renderPostTags = (hashtags = []) => {
+        const tagBox = document.querySelector("#peTags");
+        if (!tagBox) return;
+
+        const tagNames = hashtags
+            .map((tag) => tag?.tagName)
+            .filter((tagName) => tagName && String(tagName).trim());
+
+        tagBox.innerHTML = tagNames.length
+            ? tagNames.map((tagName) => `<span class="admin-post-tag">#${escapeHtml(tagName)}</span>`).join("")
+            : `<span class="admin-post-tags-empty">-</span>`;
+    };
+
     const renderEmptyRow = (tbody, colSpan) => {
         tbody.innerHTML = `
             <div class="div-tr empty-row">
@@ -961,17 +974,16 @@
         document.querySelector("#peAuthor").textContent = post.authorName || "-";
         document.querySelector("#peContent").value = post.postContent || "";
         document.querySelector("#peType").value = post.postType || "general";
-        document.querySelector("#peCategory").value = post.categoryName || "기타";
+        document.querySelector("#peCategoryText").textContent = post.categoryName || "-";
         document.querySelector("#peDate").textContent = post.createdDatetime || "-";
+        renderPostTags(post.hashtags);
         document.querySelector("#peContent").readOnly = true;
         document.querySelector("#peType").disabled = true;
-        document.querySelector("#peCategory").disabled = true;
 
         postOriginal = {
             id: postId,
             content: document.querySelector("#peContent").value,
-            type: document.querySelector("#peType").value,
-            category: document.querySelector("#peCategory").value
+            type: document.querySelector("#peType").value
         };
         document.querySelector("#modalPostSave").disabled = true;
 
@@ -1036,8 +1048,7 @@
             await requestJson(`/api/admin/posts/${postOriginal.id}`, {
                 method: "PATCH",
                 body: {
-                    postContent: document.querySelector("#peContent").value.trim(),
-                    categoryName: document.querySelector("#peCategory").disabled ? null : document.querySelector("#peCategory").value
+                    postContent: document.querySelector("#peContent").value.trim()
                 }
             });
             await loadPosts();
@@ -1053,7 +1064,6 @@
         document.querySelector("#modalPostSave").disabled = true;
     };
     document.querySelector("#peContent").addEventListener("input", checkPostChanged);
-    document.querySelector("#peCategory").addEventListener("change", checkPostChanged);
 
 
     aiBtn.addEventListener("click", (e) => {

@@ -24,6 +24,7 @@ public class AdminPostListDTO {
     private String categoryName;
     private Status postStatus;
     private String createdDatetime;
+    private List<PostHashtagDTO> hashtags;
     private List<PostFileDTO> postFiles;
     private List<String> fileUrls;
 }

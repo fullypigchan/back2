@@ -110,7 +110,13 @@
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
           and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{memberId})
           and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
-          and v.id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'post')
+          and v.id not in (
+              select r.target_id
+              from tbl_report r
+              where r.reporter_id = #{memberId}
+                and r.target_type = 'post'
+                and r.status in ('pending', 'applied')
+          )
           and not exists (select 1 from tbl_news gn where gn.post_id = v.id and gn.news_type = 'general')
           and not exists (select 1 from tbl_post_product pp where pp.id = v.id)
         order by v.created_datetime desc
@@ -137,7 +143,13 @@
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{postSearch.memberId})
         and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{postSearch.memberId})
         and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{postSearch.memberId} and r.target_type = 'member')
-        and v.id not in (select r.target_id from tbl_report r where r.reporter_id = #{postSearch.memberId} and r.target_type = 'post')
+        and v.id not in (
+        select r.target_id
+        from tbl_report r
+        where r.reporter_id = #{postSearch.memberId}
+        and r.target_type = 'post'
+        and r.status in ('pending', 'applied')
+        )
         <if test="postSearch.keyword != null and postSearch.keyword != ''">
             and (v.post_title like concat('%', #{postSearch.keyword}, '%')
             or v.post_content like concat('%', #{postSearch.keyword}, '%'))
@@ -316,7 +328,10 @@
         ) then true else false end as is_bookmarked,
         case when exists (
             select 1 from tbl_report r
-            where r.target_id = p.id and r.reporter_id = #{memberId} and r.target_type = 'post'
+            where r.target_id = p.id
+              and r.reporter_id = #{memberId}
+              and r.target_type = 'post'
+              and r.status in ('pending', 'applied')
         ) then true else false end as is_reported
     </sql>
 
