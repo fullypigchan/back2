@@ -58,8 +58,8 @@ const layout = (() => {
 
     const createPostCard = (post) => {
         const avatarHtml = post.memberProfileFileName
-            ? `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="${post.memberProfileFileName}"></div>`
-            : `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="/images/profile/default_image.png"></div>`;
+            ? `<div class="postAvatar postAvatar--image" data-profile-id="${post.memberId}"><img class="postAvatarImage" src="${post.memberProfileFileName}"></div>`
+            : `<div class="postAvatar postAvatar--image" data-profile-id="${post.memberId}"><img class="postAvatarImage" src="/images/profile/default_image.png"></div>`;
 
         const handle = post.memberHandle ? post.memberHandle : "";
         const nickname = post.memberNickname || post.memberHandle || "";

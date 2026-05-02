@@ -64,7 +64,7 @@ const CommunityLayout = {
 
         return `
         <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-community-id="${post.communityId}" data-is-followed="${isFollowed ? 'true' : 'false'}">
-            <div class="postAvatar">
+            <div class="postAvatar" data-profile-id="${post.memberId}">
                 <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
             </div>
             <div class="postBody">

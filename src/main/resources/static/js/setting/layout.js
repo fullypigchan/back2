@@ -22,7 +22,7 @@ const SettingLayout = (() => {
                 const memberBio = block.memberBio || "";
 
                 text += `
-                    <article class="blocked-user-card">
+                    <article class="blocked-user-card" data-profile-id="${block.blockedId ?? ""}">
                         <img
                                 class="blocked-user-card__avatar"
                                 src="${profileImageUrl}"
