@@ -340,11 +340,6 @@
                         d="M18.36 5.64c-1.95-1.96-5.11-1.96-7.07 0L9.88 7.05 8.46 5.64l1.42-1.42c2.73-2.73 7.16-2.73 9.9 0 2.73 2.74 2.73 7.17 0 9.9l-1.42 1.42-1.41-1.42 1.41-1.41c1.96-1.96 1.96-5.12 0-7.07zm-2.12 3.53l-7.07 7.07-1.41-1.41 7.07-7.07 1.41 1.41zm-12.02.71l1.42-1.42 1.41 1.42-1.41 1.41c-1.96 1.96-1.96 5.12 0 7.07 1.95 1.96 5.11 1.96 7.07 0l1.41-1.41 1.42 1.41-1.42 1.42c-2.73 2.73-7.16 2.73-9.9 0-2.73-2.74-2.73-7.17 0-9.9z"></path></svg></span>
                 <span class="menu-item__label">링크 복사하기</span>
             </button>
-            <button type="button" class="menu-item share-menu-item share-menu-item--chat" data-share-action="chat">
-                <span class="menu-item__icon share-menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path
-                        d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5a.5.5 0 00-.5.5v2.764l8 3.638 8-3.636V5.5a.5.5 0 00-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5a.5.5 0 00.5.5h15a.5.5 0 00.5-.5v-8.037z"></path></svg></span>
-                <span class="menu-item__label">Chat으로 전송하기</span>
-            </button>
             <button type="button" class="menu-item share-menu-item share-menu-item--bookmark"
                     data-share-action="bookmark">
                 <span class="menu-item__icon share-menu-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path
@@ -355,42 +350,6 @@
     </div>
 </div>
 <div class="bookmark-toast" id="bookmarkToast" role="status" aria-live="polite" hidden></div>
-<div class="bookmark-share-sheet" id="shareChatModal" hidden>
-    <div class="bookmark-share-sheet-backdrop" data-share-close="true"></div>
-    <div
-            class="bookmark-share-sheet-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="shareChatTitle"
-    >
-        <div class="bookmark-share-sheet-header">
-            <button
-                    type="button"
-                    class="bookmark-share-sheet-icon-btn"
-                    data-share-close="true"
-                    aria-label="돌아가기"
-            >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                            d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"
-                    />
-                </svg>
-            </button>
-            <h2 id="shareChatTitle" class="bookmark-share-sheet-title">공유하기</h2>
-            <span class="bookmark-share-sheet-header-spacer"></span>
-        </div>
-        <div class="bookmark-share-sheet-search">
-            <input
-                    type="text"
-                    class="bookmark-share-sheet-search-input"
-                    id="shareChatSearchInput"
-                    placeholder="검색"
-                    aria-label="검색"
-            />
-        </div>
-        <div class="bookmark-share-sheet-list" id="shareChatList"></div>
-    </div>
-</div>
 
 <div class="bookmark-share-sheet" id="shareBookmarkModal" hidden>
     <div class="bookmark-share-sheet-backdrop" data-share-close="true"></div>

@@ -63,14 +63,9 @@ public class MainAPIController implements MainAPIControllerDocs {
         log.info("게시글 목록 조회 — page: {}, memberId: {}", page, memberId);
         PostWithPagingDTO result = postService.getList(page, memberId);
         result.getPosts().forEach(post -> {
-                post.getPostFiles().forEach(pf -> {
-                    try {
-                        pf.setFilePath(s3Service.getPresignedUrl(pf.getFilePath(), Duration.ofMinutes(10)));
-                    } catch (IOException e) {
-                        throw new RuntimeException("Presigned URL 생성 실패", e);
-                    }
-                });
-                convertProfileUrl(post);
+            convertPostFilesUrl(post);
+            convertProfileUrl(post);
+            convertProductImageUrl(post);
         });
         return result;
     }
@@ -189,6 +184,10 @@ public class MainAPIController implements MainAPIControllerDocs {
         replies.forEach(reply -> {
             convertPostFilesUrl(reply);
             convertProfileUrl(reply);
+            convertProductImageUrl(reply);
+            if (reply.getSubReplies() != null) {
+                reply.getSubReplies().forEach(sub -> convertProductImageUrl(sub));
+            }
         });
         return replies;
     }
@@ -290,7 +289,19 @@ public class MainAPIController implements MainAPIControllerDocs {
     @LogStatusWithReturn
     public List<PostProductDTO> getMyProducts(@PathVariable Long memberId) {
         log.info("내 판매품목 조회해요 내아이디(memberId): {}", memberId);
-        return postProductService.getMyProducts(memberId);
+        List<PostProductDTO> products = postProductService.getMyProducts(memberId);
+        products.forEach(product -> {
+            List<String> presigned = new ArrayList<>();
+            product.getPostFiles().forEach(key -> {
+                try {
+                    presigned.add(s3Service.getPresignedUrl(key, Duration.ofMinutes(10)));
+                } catch (IOException e) {
+                    // 변환 실패 키는 생략
+                }
+            });
+            product.setPostFiles(presigned);
+        });
+        return products;
     }
 
 
@@ -449,6 +460,17 @@ public class MainAPIController implements MainAPIControllerDocs {
         }
         if (post.getSubReplies() != null) {
             post.getSubReplies().forEach(sub -> convertPostFilesUrl(sub));
+        }
+    }
+
+    // 첨부 상품 이미지 URL 변환 ──
+    private void convertProductImageUrl(PostDTO post) {
+        if (post.getProductImage() != null) {
+            try {
+                post.setProductImage(s3Service.getPresignedUrl(post.getProductImage(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                throw new RuntimeException("Presigned URL 생성 실패", e);
+            }
         }
     }
 

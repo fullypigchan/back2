@@ -259,9 +259,10 @@ public class ChatAPIController {
 
     // 반응 조회
     @GetMapping("/messages/{messageId}/reactions")
-    public ResponseEntity<List<MessageReactionDTO>> getReactions(@PathVariable Long messageId) {
+    public ResponseEntity<List<MessageReactionDTO>> getReactions(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @PathVariable Long messageId) {
         log.info("반응 조회 - messageId: {}", messageId);
-        List<MessageReactionDTO> reactions = messageReactionService.getReactions(messageId);
+        List<MessageReactionDTO> reactions = messageReactionService.getReactions(messageId, userDetails.getId());
         return ResponseEntity.ok(reactions);
     }
 

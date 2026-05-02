@@ -37,6 +37,7 @@ public class CommunityService {
     private final PostDAO postDAO;
     private final PostFileDAO postFileDAO;
     private final PostHashtagDAO postHashtagDAO;
+    private final ReplyProductRelDAO replyProductRelDAO;
 
     // ──────────────────────────────────────
     // 커뮤니티 CRUD
@@ -325,7 +326,7 @@ public class CommunityService {
     // 커뮤니티 게시글
     // ──────────────────────────────────────
 
-    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list", "community"}, allEntries = true)
     @LogStatus
     public void writeCommunityPost(PostDTO postDTO, List<MultipartFile> files, Long communityId) throws IOException {
         communityMemberDAO.findByIds(communityId, postDTO.getMemberId())
@@ -367,6 +368,14 @@ public class CommunityService {
                 }
                 postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
             });
+        }
+
+        // 판매글 첨부: 클라이언트가 productPostId를 전달한 경우 매핑 저장
+        if (postDTO.getProductPostId() != null) {
+            ReplyProductRelDTO rel = new ReplyProductRelDTO();
+            rel.setReplyPostId(postDTO.getId());
+            rel.setProductPostId(postDTO.getProductPostId());
+            replyProductRelDAO.save(rel);
         }
     }
 

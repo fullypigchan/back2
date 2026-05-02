@@ -13,6 +13,7 @@
         <script defer src="/js/community/service.js"></script>
         <script defer src="/js/community/layout.js"></script>
         <script defer src="/js/community/event.js"></script>
+        <script defer src="/js/utils/exchange.js"></script>
     </head>
     <body>
         <main class="communityPage">
@@ -45,7 +46,7 @@
                     <div class="communityTopbar__actions">
                         <button type="button" class="communityIconButton" aria-label="새 커뮤니티 만들기" data-create-community-btn>
                             <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M20 9V6h-2v3h-3v2h3v3h2v-3h3V9h-3zM9 12c2.21 0 4-1.79 4-4S11.21 4 9 4 5 5.79 5 8s1.79 4 4 4zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 7c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4zm-6 3c.22-1.04 2.91-2 6-2s5.78.96 6 2H3z"></path>
+                                <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"></path>
                             </svg>
                         </button>
                     </div>
@@ -139,6 +140,7 @@
             <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
             </th:block>
         </main>
+        <th:block layout:fragment="modals">
         <!-- 동적 드롭다운 마운트 지점: event.js의 공유/더보기 드롭다운이 여기에 append/remove 된다 -->
         <div id="layers" aria-hidden="true"></div>
 
@@ -467,6 +469,7 @@
                 </div><!-- /.tweet-modal__product-view -->
             </div><!-- /.tweet-modal -->
         </div><!-- /.tweet-modal-overlay -->
+        </th:block>
 
     </body>
 </html>

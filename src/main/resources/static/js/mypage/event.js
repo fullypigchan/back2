@@ -2240,29 +2240,33 @@ window.onload = function () {
             document.getElementById("createPostButton")?.click();
         });
 
-    // 사이드바 견적 요청 목록은 탭 전환과 무관한 요약 카드라서
-    // 마이페이지 진입 시 한 번만 읽어와서 렌더한다.
-    myPageService.getMyEstimationsSummary((data) => {
-        myEstimationSummary = data;
-        mypageLayout.showMyEstimationSummary(data);
-    });
-
-    // non-expert만 마이페이지 안에서 같은 카드 아래에 추가 페이지를 이어 붙인다.
-    document.querySelector("[data-mypage-estimation-more]")?.addEventListener("click", () => {
-        if (myRequestedEstimationOpened) {
-            return;
-        }
-
-        // non-expert는 summary에서 이미 5개를 보고 시작하므로,
-        // 첫 클릭에서는 requester 목록 1페이지를 다시 받아와 6번째 이후만 append 한다.
-        myRequestedEstimationOpened = true;
-        myRequestedEstimationPage = 1;
-
-        myPageService.getMyRequestedEstimations(myRequestedEstimationPage, (data) => {
-            mypageLayout.appendMyRequestedEstimationList(data, myRequestedEstimationPage);
-            myRequestedEstimationHasMore = data.criteria.hasMore;
+    // 사이드바 견적 요약/더보기는 본인 mypage에서만 의미가 있다.
+    // mypage.html에서도 th:if="${isOwner}"로 마크업이 숨겨지지만,
+    // JS에서도 호출 자체를 건너뛰어 불필요한 API 트래픽을 막는다.
+    // expert/non-expert 분기는 서버가 role 기준으로 알아서 처리한다.
+    if (mypageContext.isOwner) {
+        myPageService.getMyEstimationsSummary((data) => {
+            myEstimationSummary = data;
+            mypageLayout.showMyEstimationSummary(data);
         });
-    });
+
+        // non-expert만 마이페이지 안에서 같은 카드 아래에 추가 페이지를 이어 붙인다.
+        document.querySelector("[data-mypage-estimation-more]")?.addEventListener("click", () => {
+            if (myRequestedEstimationOpened) {
+                return;
+            }
+
+            // non-expert는 summary에서 이미 5개를 보고 시작하므로,
+            // 첫 클릭에서는 requester 목록 1페이지를 다시 받아와 6번째 이후만 append 한다.
+            myRequestedEstimationOpened = true;
+            myRequestedEstimationPage = 1;
+
+            myPageService.getMyRequestedEstimations(myRequestedEstimationPage, (data) => {
+                mypageLayout.appendMyRequestedEstimationList(data, myRequestedEstimationPage);
+                myRequestedEstimationHasMore = data.criteria.hasMore;
+            });
+        });
+    }
 
     // 기존 main/event.js의 스크롤 페이징 구조와 같은 방식이다.
     // 현재 활성 탭이 내 상품이고, 다음 페이지가 남아 있을 때만 추가 로드한다.
@@ -3653,7 +3657,7 @@ window.onload = function () {
     // ── 카드 액션 버튼 이벤트 위임 ──
     document.body.addEventListener(
         "click",
-        (e) => {
+        async (e) => {
             // 답글 버튼: 동적 카드도 동일한 경로로 모달을 열 수 있도록 이벤트를 위임한다.
             const replyBtn = e.target.closest('.Post-Action-Btn.Reply, [data-action="reply"]');
             if (replyBtn) {
@@ -3663,21 +3667,65 @@ window.onload = function () {
                 return;
             }
 
-            // 좋아요 버튼: 현재 DOM 상태를 기준으로 아이콘 구조를 보장한 뒤 상태만 토글한다.
+            // 좋아요 버튼: UI 를 즉시 토글한 뒤 서버에 동기화한다.
+            // 서버 호출이 실패하면 토글을 한 번 더 호출해 UI/DB 가 어긋나지 않도록 롤백한다.
             const likeBtn = e.target.closest('.Post-Action-Btn.Like, [data-action="like"]');
             if (likeBtn) {
                 e.preventDefault();
                 e.stopPropagation();
+                const postId = likeBtn.closest('.Post-Card')?.dataset.postId;
+                if (!postId) return;
+
+                const wasLiked = likeBtn.dataset.liked === 'true';
                 toggleLikeButton(likeBtn);
+                try {
+                    if (wasLiked) {
+                        await myPageService.deleteLike(mypageContext.loginMemberId, postId);
+
+                        // Likes 탭은 "내가 좋아요한 글"만 모은 곳이라,
+                        // 좋아요를 풀면 그 카드도 목록에서 빠지는 게 정의와 맞다.
+                        // 다른 탭(Posts/Replies)에서 좋아요 끄는 경우엔 카드를 남겨둔다.
+                        const card = likeBtn.closest('.Post-Card');
+                        if (card?.closest('.Profile-Content.Likes')) {
+                            card.remove();
+                            const likeList = document.querySelector('.Profile-Content.Likes .Profile-Content-List');
+                            if (likeList && !likeList.querySelector('.Post-Card')) {
+                                likeList.innerHTML = `
+                                  <p class="feedEmpty" style="padding: 20px; text-align: center; color: #536471;">
+                                      좋아요한 게시글이 없습니다.
+                                  </p>`;
+                            }
+                        }
+                    } else {
+                        await myPageService.addLike(mypageContext.loginMemberId, postId);
+                    }
+                } catch (error) {
+                    console.error('좋아요 토글 실패', error);
+                    toggleLikeButton(likeBtn);
+                }
                 return;
             }
 
-            // 북마크도 동일한 방식으로 처리해, 렌더링 이후 별도 재바인딩 없이 동작하게 만든다.
+            // 북마크도 같은 패턴 — 낙관적 토글 + 서버 sync + 실패 시 롤백.
             const bookmarkBtn = e.target.closest('.Post-Action-Btn.Bookmark, [data-action="bookmark"]');
             if (bookmarkBtn) {
                 e.preventDefault();
                 e.stopPropagation();
+                const postId = bookmarkBtn.closest('.Post-Card')?.dataset.postId;
+                if (!postId) return;
+
+                const wasBookmarked = bookmarkBtn.dataset.bookmarked === 'true';
                 toggleBookmarkButton(bookmarkBtn);
+                try {
+                    if (wasBookmarked) {
+                        await myPageService.deleteBookmark(mypageContext.loginMemberId, postId);
+                    } else {
+                        await myPageService.addBookmark(mypageContext.loginMemberId, postId);
+                    }
+                } catch (error) {
+                    console.error('북마크 토글 실패', error);
+                    toggleBookmarkButton(bookmarkBtn);
+                }
                 return;
             }
 

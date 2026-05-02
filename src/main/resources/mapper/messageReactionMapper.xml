@@ -29,4 +29,11 @@
         order by created_datetime asc
     </select>
 
+    <select id="selectConversationIdByMessageId" resultType="java.lang.Long">
+        select conversation_id
+        from tbl_message
+        where id = #{messageId}
+          and is_deleted = false
+    </select>
+
 </mapper>

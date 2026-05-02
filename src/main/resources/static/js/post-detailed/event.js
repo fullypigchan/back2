@@ -35,11 +35,12 @@ window.onload = () => {
     const replyBox = document.querySelector(".post-detail-reply-box");
     const composeView = overlay?.querySelector(".post-detail-inline-reply-card");
     const locationView = replyBox?.querySelector(".tweet-modal__location-view");
-    const allSubViews = [locationView];
+    const productView = overlay?.querySelector(".tweet-modal__product-view");
+    const allSubViews = [locationView, productView];
 
     function showSubView(view) {
         if (composeView) composeView.classList.add("off");
-        for (let i = 0; i < allSubViews.length; i++) { if (allSubViews[i]) { allSubViews[i].classList.add("off"); allSubViews[i].removeAttribute("hidden"); } }
+        for (let i = 0; i < allSubViews.length; i++) { if (allSubViews[i]) { allSubViews[i].classList.add("off"); allSubViews[i].setAttribute("hidden", ""); } }
         if (view) { view.classList.remove("off"); view.removeAttribute("hidden"); }
     }
     function backToCompose() {
@@ -209,7 +210,7 @@ window.onload = () => {
         return Array.from(inlineTagInput.querySelectorAll("div"));
     }
 
-    function addInlineTag(rawTag) {
+    function addInlineTag(rawTag, fromProduct) {
         console.log("인라인태그 들어옴1:", rawTag);
         const tag = (rawTag || "").trim();
         if (!tag) return false;
@@ -219,6 +220,7 @@ window.onload = () => {
         for (let i = 0; i < existing.length; i++) { if (existing[i].textContent.replace("#", "").trim() === tag) { if (inlineTagField) inlineTagField.value = ""; return false; } }
         const div = document.createElement("div");
         div.textContent = "#" + tag;
+        if (fromProduct) div.setAttribute("data-from-product", "true");
         div.style.cssText = "display:inline-block;padding:2px 8px;margin:2px 4px;border-radius:12px;background:#1d9bf0;color:#fff;font-size:13px;cursor:pointer;";
         div.addEventListener("click", () => { div.remove(); syncInlineTagUI(); });
         if (inlineTagInput) inlineTagInput.appendChild(div);
@@ -248,30 +250,127 @@ window.onload = () => {
         });
     }
 
-    // ── 인라인 상품 선택 ──
-    const inlineProductBtn = overlay?.querySelector(".tweet-modal__tool-btn--product");
+    // ── 인라인 상품 선택 (메인 setupSubViews 패턴) ──
+    const productBtn = overlay?.querySelector(".tweet-modal__tool-btn--product");
+    const productClose = productView ? productView.querySelector("[data-product-select-close]") : null;
+    const productComplete = productView ? productView.querySelector("[data-product-select-complete]") : null;
+    const productList = productView ? productView.querySelector("[data-product-select-list]") : null;
+    const productEmpty = productView ? productView.querySelector("[data-product-empty]") : null;
     const inlineSelectedProduct = overlay?.querySelector("[data-inline-selected-product]");
     const inlineProductImage = overlay?.querySelector("[data-inline-selected-product-image]");
     const inlineProductName = overlay?.querySelector("[data-inline-selected-product-name]");
     const inlineProductPrice = overlay?.querySelector("[data-inline-selected-product-price]");
     const inlineProductRemove = overlay?.querySelector("[data-inline-product-remove]");
-    let inlineSelectedProductId = null;
+    let selectedProduct = null;
+    let cachedProducts = [];
 
-    if (inlineProductBtn) {
-        inlineProductBtn.addEventListener("click", () => {
-            console.log("인라인상품 들어옴1");
-            // 상품 목록은 답글 모달의 product-select-modal을 재활용
-            const productModal = document.querySelector("[data-product-select-modal]");
-            if (productModal) {
-                productModal.removeAttribute("hidden");
-                productModal._targetContext = "inline";
+    function renderProductList(products) {
+        cachedProducts = products || [];
+        if (!productList) return;
+        if (!products || products.length === 0) {
+            productList.innerHTML = "";
+            if (productEmpty) productEmpty.classList.remove("off");
+            return;
+        }
+        if (productEmpty) productEmpty.classList.add("off");
+        let html = "";
+        for (let i = 0; i < products.length; i++) {
+            const p = products[i];
+            const img = (p.postFiles && p.postFiles.length > 0) ? p.postFiles[0] : "";
+            const tags = (p.hashtags && p.hashtags.length > 0) ? p.hashtags.map(t => "#" + t.tagName).join(" ") : "";
+            html += '<button type="button" class="draft-panel__item draft-panel__item--selectable" data-product-id="' + p.id + '">' +
+                '<span class="draft-panel__checkbox"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9 20c-.264 0-.518-.104-.707-.293l-4.785-4.785 1.414-1.414L9 17.586 19.072 7.5l1.42 1.416L9.708 19.7c-.188.19-.442.3-.708.3z"></path></g></svg></span>' +
+                (img ? '<img class="draft-panel__avatar" src="' + img + '" />' : '') +
+                '<span class="draft-panel__item-body">' +
+                '<span class="draft-panel__text">' + (p.postTitle || "") + '</span>' +
+                '<span class="draft-panel__meta">' + tags + '</span>' +
+                '<span class="draft-panel__date">₩' + (p.productPrice || 0).toLocaleString() + ' · ' + (p.productStock || 0) + '개</span>' +
+                '</span></button>';
+        }
+        productList.innerHTML = html;
+    }
+
+    function renderSelectedProduct() {
+        if (!inlineSelectedProduct) return;
+        if (selectedProduct) {
+            if (inlineProductImage) inlineProductImage.src = selectedProduct.image || '';
+            if (inlineProductName) inlineProductName.textContent = selectedProduct.name;
+            if (inlineProductPrice) inlineProductPrice.textContent = selectedProduct.price;
+            inlineSelectedProduct.removeAttribute("hidden");
+        } else {
+            inlineSelectedProduct.setAttribute("hidden", "");
+        }
+    }
+
+    if (productBtn && productView) {
+        productBtn.addEventListener("click", async () => {
+            const products = await service.getMyProducts(memberId);
+            renderProductList(products);
+            showSubView(productView);
+        });
+    }
+    if (productClose) { productClose.addEventListener("click", () => backToCompose()); }
+    if (productComplete) {
+        productComplete.addEventListener("click", () => {
+            const checked = productList ? productList.querySelector(".draft-panel__item--selected") : null;
+            if (checked) {
+                const productId = checked.getAttribute("data-product-id");
+                const product = cachedProducts.find(p => String(p.id) === String(productId));
+                const productTagCount = product && product.hashtags ? product.hashtags.length : 0;
+
+                // 합산 5개 초과 검증
+                if (getInlineTagDivs().length + productTagCount > 5) {
+                    alert("게시글 태그와 상품 태그를 합쳐 최대 5개까지만 가능해요.\n게시글 태그를 줄이거나 다른 상품을 선택하세요.");
+                    return;
+                }
+
+                selectedProduct = {
+                    name: checked.querySelector(".draft-panel__text").textContent,
+                    price: checked.querySelector(".draft-panel__date").textContent,
+                    image: checked.querySelector(".draft-panel__avatar") ? checked.querySelector(".draft-panel__avatar").src : "",
+                    id: productId
+                };
+                renderSelectedProduct();
+                if (productBtn) productBtn.disabled = true;
+
+                // 상품 태그를 게시글 태그 칩으로 자동 추가 (data-from-product 마킹)
+                if (product && product.hashtags) {
+                    product.hashtags.forEach(h => addInlineTag(h.tagName, true));
+                }
             }
+            backToCompose();
+        });
+    }
+    if (productList) {
+        productList.addEventListener("click", (e) => {
+            const item = e.target.closest(".draft-panel__item");
+            if (!item) return;
+            const wasSelected = item.classList.contains("draft-panel__item--selected");
+            const allItems = productList.querySelectorAll(".draft-panel__item--selected");
+            for (let i = 0; i < allItems.length; i++) {
+                allItems[i].classList.remove("draft-panel__item--selected");
+                const cb = allItems[i].querySelector(".draft-panel__checkbox");
+                if (cb) cb.classList.remove("draft-panel__checkbox--checked");
+            }
+            if (!wasSelected) {
+                item.classList.add("draft-panel__item--selected");
+                const cb = item.querySelector(".draft-panel__checkbox");
+                if (cb) cb.classList.add("draft-panel__checkbox--checked");
+            }
+            if (productComplete) productComplete.disabled = !productList.querySelector(".draft-panel__item--selected");
         });
     }
     if (inlineProductRemove) {
         inlineProductRemove.addEventListener("click", () => {
-            inlineSelectedProductId = null;
-            if (inlineSelectedProduct) inlineSelectedProduct.setAttribute("hidden", "");
+            selectedProduct = null;
+            renderSelectedProduct();
+            if (productBtn) productBtn.disabled = false;
+            // 상품에서 온 태그 칩 제거
+            if (inlineTagInput) {
+                const fromProductTags = inlineTagInput.querySelectorAll('[data-from-product="true"]');
+                for (let i = 0; i < fromProductTags.length; i++) { fromProductTags[i].remove(); }
+                syncInlineTagUI();
+            }
         });
     }
 
@@ -446,6 +545,7 @@ window.onload = () => {
         formData.append("memberId", memberId);
         formData.append("postContent", text);
         if (selectedLocation) { formData.append("location", selectedLocation); }
+        if (selectedProduct) { formData.append("productId", selectedProduct.id); }
         if (attachedFiles.length > 0) { attachedFiles.forEach(f => formData.append("files", f)); }
 
         // 해시태그 전송
@@ -478,8 +578,9 @@ window.onload = () => {
         inlineTagEditorOpen = false;
         syncInlineTagUI();
         // 상품 초기화
-        inlineSelectedProductId = null;
-        if (inlineSelectedProduct) inlineSelectedProduct.setAttribute("hidden", "");
+        selectedProduct = null;
+        renderSelectedProduct();
+        if (productBtn) productBtn.disabled = false;
 
         await refreshReplies();
     });
@@ -1142,11 +1243,9 @@ window.onload = () => {
     if (globalProductComplete) {
         globalProductComplete.addEventListener("click", () => {
             if (globalTempProduct && globalProductView._targetContext === "inline") {
-                inlineSelectedProductId = globalTempProduct.id;
-                if (inlineProductImage) inlineProductImage.src = globalTempProduct.image;
-                if (inlineProductName) inlineProductName.textContent = globalTempProduct.name;
-                if (inlineProductPrice) inlineProductPrice.textContent = globalTempProduct.price;
-                if (inlineSelectedProduct) inlineSelectedProduct.removeAttribute("hidden");
+                selectedProduct = { id: globalTempProduct.id, name: globalTempProduct.name, price: globalTempProduct.price, image: globalTempProduct.image };
+                renderSelectedProduct();
+                if (productBtn) productBtn.disabled = true;
             }
             if (globalProductView) globalProductView.setAttribute("hidden", "");
             globalTempProduct = null;
@@ -1250,6 +1349,18 @@ window.onload = () => {
     // ── 9. 뒤로 가기 ──
     document.getElementById("postDetailBack")?.addEventListener("click", () => {
         window.history.back();
+    });
+
+    // 댓글 카드 안 해시태그(span) 클릭 시 검색 페이지로 이동 (outer <a> 카드 클릭 차단)
+    // 본문의 <a class="postHashtag">는 data-keyword 없으므로 default 동작 그대로 둠
+    document.addEventListener("click", (e) => {
+        const tag = e.target.closest(".postHashtag");
+        if (!tag) return;
+        const keyword = tag.dataset.keyword;
+        if (!keyword) return;
+        e.preventDefault();
+        e.stopPropagation();
+        location.href = `/explore/search?keyword=${encodeURIComponent(keyword)}`;
     });
 
     // ── 10. ESC / 스크롤 시 메뉴 닫기 ──

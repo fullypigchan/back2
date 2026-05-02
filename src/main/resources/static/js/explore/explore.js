@@ -257,6 +257,7 @@ window.onload = () => {
     // 11-1. 뉴스 셀 클릭 시 상세 이동
     if (newsSection) {
         newsSection.addEventListener("click", (e) => {
+            if (e.target.closest("a")) return;
             const trendItem = e.target.closest(".trend[data-news-id]");
             if (!trendItem) return;
 

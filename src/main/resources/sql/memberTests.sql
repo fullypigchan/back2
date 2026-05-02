@@ -62,7 +62,7 @@ select * from tbl_post_product;
 select * from vw_file_member;
 
 alter table tbl_post add post_read_count int default 0;
-
+update tbl_member set member_role = 'expert' where id = 78;
 -- ============================================================
 -- 마이페이지용 더미 데이터
 -- - 게시물 탭에 보일 일반 게시글 2개

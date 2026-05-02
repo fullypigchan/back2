@@ -5,8 +5,10 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>explore</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
     <link rel="stylesheet" href="/css/explore/explore.css"/>
     <link rel="stylesheet" href="/css/explore/explore-result.css"/>
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
     <script src="/js/explore/explore-result.js"></script>
     <script src="/js/explore/service.js"></script>
     <script src="/js/main/service.js"></script>
@@ -111,6 +113,10 @@
         </section>
 
     </main>
+
+    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+    <div th:replace="~{common/mobile-nav :: mobileNav('search')}"></div>
+    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </th:block>
 </div>
 <div class="modal-overlay" id="disconnectModal">

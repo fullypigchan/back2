@@ -490,11 +490,13 @@ body {
                     opacity 0.5s ease 0.2s;
     }
     .join-splash.is-leaving {
-        transform: translateY(-110%);
-        opacity: 0;
         pointer-events: none;
+        z-index: 0;
     }
-    .join-splash.is-gone { display: none; }
+    .join-splash.is-gone {
+        pointer-events: none;
+        z-index: 0;
+    }
 
     /* SVG 4겹 파도 — 화면 하단 */
     .join-splash-waves {
@@ -576,12 +578,13 @@ body {
         background: none;
         color: #0f1419;
         border-radius: 0;
+        font-family: "Helvetica Neue", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-size: clamp(34px, 10vw, 52px);
-        font-weight: 800;
-        letter-spacing: -0.01em;
+        font-weight: 300;
+        letter-spacing: 0.04em;
         line-height: 1;
         white-space: nowrap;
-        text-shadow: 0 1px 2px rgba(15, 20, 25, 0.06);
+        text-shadow: none;
         box-shadow: none;
         animation: splashHeaderIn 0.5s 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
     }
@@ -589,12 +592,7 @@ body {
         0%   { opacity: 0; transform: translateY(-1.2vh) scale(0.92); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    /* 스플래시 떠나갈 때 헤더도 같이 자연스럽게 빠짐 */
-    .join-splash.is-leaving .join-splash-header {
-        opacity: 0;
-        transform: translate(-50%, -1.6vh) scale(0.96);
-        transition: transform 0.4s ease, opacity 0.35s ease;
-    }
+    /* 모달이 올라와도 Global Gates 헤더는 그대로 유지한다. */
 
     /* 시작하기 버튼 — 비디오 위에 깔끔한 흰색 알약 */
     .join-splash-btn {
@@ -672,9 +670,10 @@ body {
         display: none;
     }
 
-    /* 본문 패널 — 스플래시 종료 후 화면 하단에서 모달처럼 슬라이드업 */
+    /* 본문 패널 — 스플래시 종료 후 화면 하단에서 모달처럼 슬라이드업.
+       Global Gates 헤더와 파도/그라데이션 배경은 패널 위쪽으로 그대로 노출된다. */
     .join-page {
-        background: rgba(15, 20, 25, 0.45);
+        background: transparent;
         min-height: 100vh;
     }
     .join-panel {
@@ -684,13 +683,13 @@ body {
         bottom: 0;
         margin: 0;
         width: 100%;
-        max-height: 92vh;
+        max-height: 62vh;
         overflow-y: auto;
         background: #fff;
         border-radius: 22px 22px 0 0;
-        padding: 28px 22px 24px;
+        padding: 24px 22px 24px;
         box-shadow: 0 -16px 48px rgba(15, 23, 42, 0.18);
-        z-index: 50;
+        z-index: 1100;
         transform: translateY(100%);
         transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }

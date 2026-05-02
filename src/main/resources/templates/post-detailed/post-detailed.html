@@ -4,8 +4,12 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>게시물 / X</title>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
     <link rel="stylesheet" href="/css/post-detailed/post-detailed.css"/>
     <link rel="stylesheet" href="/css/mention/mention.css"/>
+    <link rel="stylesheet" href="/css/main/product-in-mainpage.css"/>
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
+    <script src="/js/common/profile-link.js" defer></script>
     <script th:inline="javascript">
         const memberId = [[${memberId}]];
         const postId = [[${post.id}]];
@@ -78,6 +82,19 @@
                            th:text="'#' + ${tag.tagName}"></a>
                     </div>
                 </div>
+
+                <th:block th:if="${post.productId != null}">
+                    <strong class="Post-Title" th:text="${post.productTitle}"></strong>
+                    <div class="Post-Product-Info">
+                        <div class="Post-Product-Image">
+                            <img th:src="${post.productImage != null ? post.productImage : '/images/main/global-gates-logo.png'}">
+                        </div>
+                        <div class="Post-Product-Detail">
+                            <span name="stock" class="Detail-Value" th:text="'수량 ' + ${post.productStock}"></span>
+                            <span name="price" class="Detail-Value" th:text="'개당 ' + ${#numbers.formatInteger(post.productPrice, 0, 'COMMA')} + '원'"></span>
+                        </div>
+                    </div>
+                </th:block>
 
                 <div th:if="${post.postFiles != null and !post.postFiles.isEmpty()}"
                      th:classappend="${#lists.size(post.postFiles) == 1} ? ' post-detail-media-grid--single' : (${#lists.size(post.postFiles) == 3} ? ' post-detail-media-grid--triple' : '')"
@@ -356,6 +373,26 @@
                                                           maxlength="1000"></textarea>
                                             </label>
                                         </section>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 판매글 선택 서브뷰 (인라인 답글) -->
+                            <div class="tweet-modal__product-view off" data-product-select-modal-inline hidden>
+                                <div class="tweet-modal__product-modal">
+                                    <div class="draft-panel__header">
+                                        <button type="button" class="draft-panel__back" data-product-select-close>
+                                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g></svg>
+                                        </button>
+                                        <h2 class="draft-panel__title">판매글 선택하기</h2>
+                                        <button type="button" class="draft-panel__action" data-product-select-complete disabled>완료</button>
+                                    </div>
+                                    <div class="draft-panel__content">
+                                        <div class="draft-panel__list" data-product-select-list></div>
+                                        <div class="draft-panel__empty off" data-product-empty>
+                                            <p class="draft-panel__empty-title">등록된 상품이 없습니다</p>
+                                            <p class="draft-panel__empty-body">마이페이지에서 상품을 먼저 등록해 주세요.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1043,6 +1080,10 @@
         </div>
     </div>
 </div>
+
+<!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+<div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+<div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 
 </body>
 </html>

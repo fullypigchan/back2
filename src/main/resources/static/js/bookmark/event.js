@@ -20,9 +20,6 @@
     const detailFolderEditButton = document.getElementById(
         "detailFolderEditButton",
     );
-    const shareChatModal = document.getElementById("shareChatModal");
-    const shareChatSearchInput = document.getElementById("shareChatSearchInput");
-    const shareChatList = document.getElementById("shareChatList");
     const shareDropdown = document.getElementById("shareDropdown");
     const shareBookmarkModal = document.getElementById("shareBookmarkModal");
     const shareBookmarkCreateFolder = document.getElementById(
@@ -138,6 +135,8 @@
     let activeShareModal = null;
     let activeShareBookmarkButton = null;
     let activeShareBookmarkPostId = "";
+    let activeShareBookmarkNewsId = "";
+    let activeShareBookmarkType = "post";
     let activeMorePostMeta = null;
     let toastTimer = null;
     let currentFolderId = null;
@@ -201,12 +200,6 @@
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#39;");
-    }
-
-    function buildShareAvatarDataUri(label) {
-        const safeLabel = escapeHtml((label || "?").slice(0, 2));
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="20" fill="#1d9bf0"></rect><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">${safeLabel}</text></svg>`;
-        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
     function getBookmarkPostCards() {
@@ -290,9 +283,8 @@
         activeShareBookmarkButton = null;
         if (!pendingShareBookmarkReopen) {
             activeShareBookmarkPostId = "";
-        }
-        if (shareChatSearchInput) {
-            shareChatSearchInput.value = "";
+            activeShareBookmarkNewsId = "";
+            activeShareBookmarkType = "post";
         }
         updateBodyScrollLock();
     }
@@ -333,42 +325,23 @@
         );
     }
 
-    function getShareUsers() {
-        return getBookmarkPostCards().map((postCard) => {
-            const name =
-                postCard.querySelector(".bookmark-post-name")?.textContent?.trim() ||
-                "사용자";
-            const handle =
-                postCard.querySelector(".bookmark-post-handle")?.textContent?.trim() ||
-                "@user";
-            const avatarImage = postCard.querySelector(".bookmark-post-avatar img");
-            const avatarText =
-                postCard.querySelector(".bookmark-post-avatar")?.textContent?.trim() ||
-                name.charAt(0);
-            return {
-                id: `post-${postCard.dataset.postId || ""}`,
-                name,
-                handle,
-                avatar:
-                    avatarImage?.getAttribute("src") ||
-                    buildShareAvatarDataUri(avatarText),
-            };
-        });
-    }
-
     function getSharePostMeta(button) {
         const postCard = button.closest(".bookmark-post");
         const handle =
             postCard?.querySelector(".bookmark-post-handle")?.textContent?.trim() ||
             "@user";
         const postId = postCard?.dataset.postId || "1";
+        const newsId = postCard?.dataset.newsId || "";
+        const bookmarkType = postCard?.dataset.bookmarkType || "post";
         const bookmarkButton =
             postCard?.querySelector("[data-action='bookmark']") ?? null;
         const url = new URL(window.location.href);
-        url.pathname = `/${handle.replace("@", "")}/status/${postId}`;
+        url.pathname = bookmarkType === "news" && newsId
+            ? `/news/detail/${newsId}`
+            : `/${handle.replace("@", "")}/status/${postId}`;
         url.hash = "";
         url.search = "";
-        return {permalink: url.toString(), bookmarkButton, postId};
+        return {permalink: url.toString(), bookmarkButton, postId, newsId, bookmarkType};
     }
 
     function getBookmarkMoreMeta(button) {
@@ -414,46 +387,6 @@
             .catch(() => showToast("링크를 복사하지 못했습니다"));
     }
 
-    function getShareUserRows(users) {
-        if (users.length === 0) {
-            return '<div class="bookmark-share-sheet-empty"><p>전송할 수 있는 사용자가 없습니다.</p></div>';
-        }
-
-        return users
-            .map(
-                (user) => `
-                    <button type="button" class="bookmark-share-sheet-user" data-share-user-name="${escapeHtml(user.name)}">
-                        <span class="bookmark-share-sheet-user-avatar">
-                            <img src="${escapeHtml(user.avatar)}" alt="${escapeHtml(user.name)}" />
-                        </span>
-                        <span class="bookmark-share-sheet-user-body">
-                            <span class="bookmark-share-sheet-user-name">${escapeHtml(user.name)}</span>
-                            <span class="bookmark-share-sheet-user-handle">${escapeHtml(user.handle)}</span>
-                        </span>
-                    </button>
-                `,
-            )
-            .join("");
-    }
-
-    function openShareChatModal() {
-        closeShareDropdown();
-        closeShareModal();
-        const users = getShareUsers();
-        if (shareChatList) {
-            shareChatList.innerHTML = getShareUserRows(users);
-        }
-        if (shareChatSearchInput) {
-            shareChatSearchInput.value = "";
-        }
-        if (!shareChatModal) {
-            return;
-        }
-        toggleHiddenLayer(shareChatModal, true);
-        activeShareModal = shareChatModal;
-        updateBodyScrollLock();
-    }
-
     async function loadShareBookmarkFolders() {
         if (typeof memberId === "undefined" || !memberId || !shareBookmarkFolderList) return;
         const result = await BookmarkService.getFolders(memberId);
@@ -472,12 +405,40 @@
         shareBookmarkFolderList.innerHTML = html;
     }
 
+    async function addActiveShareBookmarkToFolder(folderId) {
+        if (typeof memberId === "undefined" || !memberId) return false;
+
+        if (activeShareBookmarkType === "news") {
+            const newsId = activeShareBookmarkNewsId;
+            if (!newsId) return false;
+            const existing = await BookmarkService.getByMemberAndNews(memberId, newsId);
+            if (existing.ok && existing.data) {
+                await BookmarkService.moveNewsFolder(existing.data.id, folderId);
+            } else {
+                await BookmarkService.addNews(memberId, Number(newsId), folderId);
+            }
+            return true;
+        }
+
+        const postId = activeShareBookmarkPostId;
+        if (!postId) return false;
+        const existing = await BookmarkService.getByMemberAndPost(memberId, postId);
+        if (existing.ok && existing.data) {
+            await BookmarkService.moveFolder(existing.data.id, folderId);
+        } else {
+            await BookmarkService.add(memberId, postId, folderId);
+        }
+        return true;
+    }
+
     function openShareBookmarkModal(button) {
-        const {bookmarkButton, postId} = getSharePostMeta(button);
+        const {bookmarkButton, postId, newsId, bookmarkType} = getSharePostMeta(button);
         closeShareDropdown();
         closeShareModal();
         activeShareBookmarkButton = bookmarkButton;
         activeShareBookmarkPostId = postId;
+        activeShareBookmarkNewsId = newsId;
+        activeShareBookmarkType = bookmarkType;
         if (!shareBookmarkModal) {
             return;
         }
@@ -677,16 +638,24 @@
         }
     }
 
-    async function removeBookmarkedPost(postId) {
-        const postCard = bookmarkPosts?.querySelector(
-            `.bookmark-post[data-post-id="${postId}"]`,
-        );
+    async function removeBookmarkedPost(idOrCard) {
+        const postCard = idOrCard instanceof Element
+            ? idOrCard
+            : bookmarkPosts?.querySelector(`.bookmark-post[data-post-id="${idOrCard}"]`);
         if (!postCard) return false;
-        const bookmarkId = postCard.dataset.bookmarkId;
-        if (bookmarkId) {
-            await BookmarkService.remove(bookmarkId);
-        } else if (typeof memberId !== "undefined" && memberId) {
-            await BookmarkService.removeByPost(memberId, postId);
+        const bookmarkType = postCard.dataset.bookmarkType;
+        const newsId = postCard.dataset.newsId;
+        const postId = postCard.dataset.postId;
+        if (bookmarkType === "news" && newsId) {
+            // 뉴스 북마크 토글 (POST /api/news/{newsId}/bookmarks)
+            await fetch(`/api/news/${newsId}/bookmarks`, { method: "POST" });
+        } else {
+            const bookmarkId = postCard.dataset.bookmarkId;
+            if (bookmarkId) {
+                await BookmarkService.remove(bookmarkId);
+            } else if (postId && typeof memberId !== "undefined" && memberId) {
+                await BookmarkService.removeByPost(memberId, postId);
+            }
         }
         postCard.remove();
         syncBookmarkPostsEmpty();
@@ -754,10 +723,6 @@
 
     if (backButton) {
         backButton.addEventListener("click", () => {
-            if (isDetailViewOpen) {
-                closeBookmarkDetail();
-                return;
-            }
             window.history.back();
         });
     }
@@ -889,18 +854,15 @@
                 modalSubmitButton.disabled = false;
                 return;
             }
-            const shouldAddPost = pendingShareBookmarkReopen && activeShareBookmarkPostId;
-            const savedPostId = activeShareBookmarkPostId;
+            const shouldAddBookmark = pendingShareBookmarkReopen && (
+                (activeShareBookmarkType === "news" && activeShareBookmarkNewsId) ||
+                (activeShareBookmarkType !== "news" && activeShareBookmarkPostId)
+            );
             const result = await BookmarkService.createFolder(memberId, value);
             if (result.ok) {
                 const newFolderId = result.data?.id;
-                if (shouldAddPost && newFolderId) {
-                    const existing = await BookmarkService.getByMemberAndPost(memberId, Number(savedPostId));
-                    if (existing.ok && existing.data) {
-                        await BookmarkService.moveFolder(existing.data.id, newFolderId);
-                    } else {
-                        await BookmarkService.add(memberId, Number(savedPostId), newFolderId);
-                    }
+                if (shouldAddBookmark && newFolderId) {
+                    await addActiveShareBookmarkToFolder(newFolderId);
                     showToast(`${value} 폴더에 추가했습니다`);
                 } else {
                     showToast(`${value} 폴더를 만들었습니다`);
@@ -911,6 +873,8 @@
             }
             pendingShareBookmarkReopen = false;
             activeShareBookmarkPostId = "";
+            activeShareBookmarkNewsId = "";
+            activeShareBookmarkType = "post";
             closeModal();
         });
     }
@@ -993,36 +957,6 @@
         });
     }
 
-    shareChatSearchInput?.addEventListener("input", () => {
-        const query = shareChatSearchInput.value.trim().toLowerCase();
-        const filtered = getShareUsers().filter((user) => {
-            return (
-                user.name.toLowerCase().includes(query) ||
-                user.handle.toLowerCase().includes(query)
-            );
-        });
-        if (shareChatList) {
-            shareChatList.innerHTML = getShareUserRows(filtered);
-        }
-    });
-
-    shareChatModal?.addEventListener("click", (event) => {
-        const userButton = event.target.closest(".bookmark-share-sheet-user");
-        if (
-            event.target.closest("[data-share-close='true']") ||
-            event.target.classList.contains("bookmark-share-sheet-backdrop")
-        ) {
-            closeShareModal();
-            return;
-        }
-        if (userButton) {
-            closeShareModal();
-            showToast(
-                `${userButton.dataset.shareUserName || "선택한 사용자"}에게 전송함`,
-            );
-        }
-    });
-
     shareBookmarkModal?.addEventListener("click", (event) => {
         if (
             event.target.closest("[data-share-close='true']") ||
@@ -1043,16 +977,8 @@
         const folderBtn = event.target.closest("[data-share-folder-id]");
         if (!folderBtn) return;
         const folderId = folderBtn.dataset.shareFolderId || null;
-        const postId = activeShareBookmarkPostId;
-        if (!postId || typeof memberId === "undefined" || !memberId) return;
-
-        const existing = await BookmarkService.getByMemberAndPost(memberId, postId);
-
-        if (existing.ok && existing.data) {
-            await BookmarkService.moveFolder(existing.data.id, folderId);
-        } else {
-            await BookmarkService.add(memberId, postId, folderId);
-        }
+        const saved = await addActiveShareBookmarkToFolder(folderId);
+        if (!saved) return;
 
         if (activeShareBookmarkButton) {
             setBookmarkButtonState(activeShareBookmarkButton, true);
@@ -1070,10 +996,6 @@
         const action = actionButton.dataset.shareAction;
         if (action === "copy") {
             copyShareLink(activeShareButton);
-            return;
-        }
-        if (action === "chat") {
-            openShareChatModal();
             return;
         }
         if (action === "bookmark") {
@@ -1246,9 +1168,8 @@
 
             if (action === "bookmark") {
                 if (actionButton.classList.contains("active")) {
-                    removeBookmarkedPost(
-                        actionButton.closest(".bookmark-post")?.dataset.postId || "",
-                    );
+                    const card = actionButton.closest(".bookmark-post");
+                    if (card) removeBookmarkedPost(card);
                 } else {
                     setBookmarkButtonState(actionButton, true);
                 }
@@ -1271,10 +1192,19 @@
         // 게시글 클릭 시 상세 페이지 이동
         const clickedPost = target.closest(".bookmark-post");
         if (clickedPost && !target.closest(".bookmark-post-action, .bookmark-post-more-wrap, .bookmark-post-more-menu, [data-more-action], [data-media-preview]")) {
-            const postId = clickedPost.dataset.postId;
-            if (postId && typeof memberId !== "undefined" && memberId) {
-                window.location.href = `/main/post/detail/${postId}?memberId=${memberId}`;
-                return;
+            const bookmarkType = clickedPost.dataset.bookmarkType;
+            if (bookmarkType === "news") {
+                const newsId = clickedPost.dataset.newsId;
+                if (newsId) {
+                    window.location.href = `/news/detail/${newsId}`;
+                    return;
+                }
+            } else {
+                const postId = clickedPost.dataset.postId;
+                if (postId && typeof memberId !== "undefined" && memberId) {
+                    window.location.href = `/main/post/detail/${postId}?memberId=${memberId}`;
+                    return;
+                }
             }
         }
 

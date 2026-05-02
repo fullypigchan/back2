@@ -24,8 +24,9 @@ public interface ExploreAPIControllerDocs {
 
     @Operation(
             summary = "뉴스 조회",
-            description = "최근의 뉴스를 목록으로 조회")
-    public ResponseEntity<?> getNews();
+            description = "최근의 뉴스를 목록으로 조회",
+            parameters = {@Parameter(name="userDetails", description = "로그인한 유저의 인증 정보")})
+    public ResponseEntity<?> getNews(@AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "실시간 트랜드 조회",

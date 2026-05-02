@@ -512,6 +512,68 @@ textarea {
     white-space: nowrap;
 }
 
+.trend-source-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #1d9bf0;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.trend-source-link:hover {
+    text-decoration: underline;
+}
+
+.trend-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.trend-actions .tweet-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgb(83, 100, 113);
+    border-radius: 999px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.trend-actions .tweet-action-icon {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.trend-actions .tweet-action-count {
+    font-size: 13px;
+    line-height: 16px;
+}
+
+.trend-actions .tweet-action-btn--like:hover {
+    color: #f91880;
+    background-color: rgba(249, 24, 128, 0.1);
+}
+
+.trend-actions .tweet-action-btn--like.active {
+    color: #f91880;
+}
+
+.trend-actions .tweet-action-btn--bookmark:hover {
+    color: #1d9bf0;
+    background-color: rgba(29, 155, 240, 0.1);
+}
+
+.trend-actions .tweet-action-btn--bookmark.active {
+    color: #1d9bf0;
+}
+
 /* ── Trending Section Sub-tabs ── */
 .trending-subtabs {
     display: flex;

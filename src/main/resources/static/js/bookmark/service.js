@@ -43,6 +43,7 @@ const BookmarkService = (function () {
         // 북마크
         getAll: (memberId) => request(`${BASE}/members/${memberId}`),
         getByMemberAndPost: (memberId, postId) => request(`${BASE}/members/${memberId}/posts/${postId}`),
+        getByMemberAndNews: (memberId, newsId) => request(`${BASE}/members/${memberId}/news/${newsId}`),
         getByFolder: (folderId) => request(`${BASE}/folders/${folderId}/items`),
         getUncategorized: (memberId) => request(`${BASE}/members/${memberId}/uncategorized`),
         add: (memberId, postId, folderId) => {
@@ -50,9 +51,17 @@ const BookmarkService = (function () {
             if (folderId) body.folderId = folderId;
             return request(BASE, { method: "POST", body: JSON.stringify(body) });
         },
+        addNews: (memberId, newsId, folderId) => {
+            const body = { memberId, newsId };
+            if (folderId) body.folderId = folderId;
+            return request(`${BASE}/news`, { method: "POST", body: JSON.stringify(body) });
+        },
         remove: (id) => request(`${BASE}/${id}/delete`, { method: "POST" }),
         removeByPost: (memberId, postId) => request(`${BASE}/members/${memberId}/posts/${postId}/delete`, { method: "POST" }),
         moveFolder: (id, folderId) => request(`${BASE}/${id}/folder`, {
+            method: "PUT", body: JSON.stringify({ folderId }),
+        }),
+        moveNewsFolder: (id, folderId) => request(`${BASE}/news/${id}/folder`, {
             method: "PUT", body: JSON.stringify({ folderId }),
         }),
     };

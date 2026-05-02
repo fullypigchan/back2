@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/community/community-detailed.css" />
   <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
   <script src="/js/common/mobile-nav.js" defer></script>
+  <script src="/js/common/profile-link.js" defer></script>
   <script src="/js/community/service.js"></script>
   <script src="/js/community/community-detailed-service.js"></script>
   <script src="/js/community/community-detailed-layout.js"></script>
@@ -104,6 +105,73 @@
     <path d="M19.828 4.172a2.86 2.86 0 0 0-4.042 0L4.172 15.786 3 21l5.214-1.172L19.828 8.214a2.86 2.86 0 0 0 0-4.042zm-13.2 14.4-2.4.54.54-2.4 9.6-9.6 1.86 1.86-9.6 9.6zm11.04-11.04-1.86-1.86.84-.84a.86.86 0 0 1 1.218 0l.642.642a.86.86 0 0 1 0 1.218l-.84.84z"></path>
   </svg>
 </button>
+
+<!-- 게시글 작성 모달 (메인 페이지와 동일한 tweet-modal 스타일) -->
+<div class="tweet-modal-overlay tweet-modal-overlay--compose off" data-community-compose-modal>
+  <div class="tweet-modal" role="dialog" aria-modal="true" aria-labelledby="communityComposeTitle">
+    <div class="tweet-modal__compose-view">
+      <div class="tweet-modal__header">
+        <button type="button" class="tweet-modal__close" aria-label="닫기" data-community-compose-close>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg>
+        </button>
+        <h2 id="communityComposeTitle" class="tweet-modal__title">게시하기</h2>
+      </div>
+      <div class="tweet-modal__body">
+        <div class="tweet-modal__composer">
+          <img th:src="${profileImageUrl}" src="/images/profile/default_image.png" alt="" class="tweet-modal__avatar-image" onerror="this.src='/images/profile/default_image.png'">
+          <div class="tweet-modal__input-wrap">
+            <div class="tweet-modal__editor" contenteditable="true" role="textbox" aria-label="게시물 작성" aria-multiline="true" data-placeholder="무슨 일이 일어나고 있나요?"></div>
+            <div class="tweet-modal__attachment attachments" data-community-compose-attachment-preview hidden>
+              <div class="tweet-modal__attachment-media media-grid-wrapper" data-community-compose-attachment-media></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tweet-modal__footer">
+        <div class="tweet-modal__footer-bottom">
+          <div class="tweet-modal__toolbar">
+            <div class="tweet-modal__tool-file">
+              <button type="button" class="tweet-modal__tool-btn" aria-label="사진 또는 동영상 추가" data-community-compose-file-btn>
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"></path></g></svg>
+              </button>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime" multiple class="tweet-modal__file-input" data-community-compose-file-input>
+            </div>
+            <button type="button" class="tweet-modal__tool-btn" aria-label="판매글 선택" data-community-compose-product-btn>
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5S3.5 15.135 3.5 11z"></path></g><g><path d="M7 9h10v1.5H7zm0 3h7v1.5H7z"></path></g></svg>
+            </button>
+            <button type="button" class="tweet-modal__tool-btn" aria-label="이모티콘 추가" data-community-compose-emoji-btn>
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm6 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm-8.071 3.971c.307-.298.771-.397 1.188-.253C9.07 16.154 10.52 16.75 12 16.75s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g></svg>
+            </button>
+          </div>
+          <div class="composerActions">
+            <div class="composerGauge" data-community-compose-gauge>
+              <span class="composerGaugeText" data-community-compose-gauge-text>500</span>
+            </div>
+            <button type="button" class="tweet-modal__submit" data-community-compose-submit disabled>게시하기</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.tweet-modal__compose-view -->
+
+    <!-- 판매글 선택 서브뷰 -->
+    <div class="tweet-modal__product-view" data-community-compose-product-view hidden>
+      <div class="draft-panel__header">
+        <button type="button" class="draft-panel__back" aria-label="돌아가기" data-community-compose-product-close>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g></svg>
+        </button>
+        <h2 class="draft-panel__title">판매글 선택하기</h2>
+        <button type="button" class="draft-panel__action" data-community-compose-product-complete disabled>완료</button>
+      </div>
+      <div class="draft-panel__content">
+        <div class="draft-panel__list" data-community-compose-product-list></div>
+        <div class="draft-panel__empty" data-community-compose-product-empty hidden>
+          <p class="draft-panel__empty-title">등록된 상품이 없습니다</p>
+          <p class="draft-panel__empty-body">마이페이지에서 상품을 먼저 등록해 주세요.</p>
+        </div>
+      </div>
+    </div>
+  </div><!-- /.tweet-modal -->
+</div><!-- /.tweet-modal-overlay[data-community-compose-modal] -->
 
 <!-- 답글 모달 -->
 <div class="tweet-modal-overlay" data-reply-modal hidden>

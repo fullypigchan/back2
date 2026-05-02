@@ -1,4 +1,4 @@
-/* ── 멘션 드롭다운 ── */
+
 .mention-dropdown {
     position: fixed;
     max-height: 220px;
@@ -65,7 +65,7 @@
     color: rgb(83, 100, 113);
 }
 
-/* ── 에디터 내 멘션 태그 ── */
+
 .mention-tag {
     color: rgb(29, 155, 240);
     font-weight: 500;

@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface MessageReactionMapper {
@@ -16,4 +17,7 @@ public interface MessageReactionMapper {
                 @Param("emoji") String emoji);
 //    메시지별 반응 조회
     List<MessageReactionDTO> selectAllByMessageId(@Param("messageId") Long messageId);
+
+//    메시지가 속한 대화방 조회
+    Optional<Long> selectConversationIdByMessageId(@Param("messageId") Long messageId);
 }

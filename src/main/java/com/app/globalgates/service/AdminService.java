@@ -12,6 +12,7 @@ import com.app.globalgates.dto.AdminReportWithPagingDTO;
 import com.app.globalgates.dto.PostFileDTO;
 import com.app.globalgates.repository.CategoryDAO;
 import com.app.globalgates.repository.AdminDAO;
+import com.app.globalgates.repository.PostHashtagDAO;
 import com.app.globalgates.repository.PostFileDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +31,13 @@ import java.util.stream.Collectors;
 public class AdminService {
     private final AdminDAO adminDAO;
     private final PostFileDAO postFileDAO;
+    private final PostHashtagDAO postHashtagDAO;
     private final CategoryDAO categoryDAO;
     private final S3Service s3Service;
 
-    public AdminMemberWithPagingDTO getAdminMembers(int page, String keyword, String subscriptionTier, String subscriptionStatus, String memberStatus) {
-        Criteria criteria = new Criteria(page, adminDAO.findAdminMemberTotal(keyword, subscriptionTier, subscriptionStatus, memberStatus));
-        List<AdminMemberListDTO> members = adminDAO.findAdminMembers(criteria, keyword, subscriptionTier, subscriptionStatus, memberStatus);
+    public AdminMemberWithPagingDTO getAdminMembers(int page, String keyword, String subscriptionTier, String memberStatus) {
+        Criteria criteria = new Criteria(page, adminDAO.findAdminMemberTotal(keyword, subscriptionTier, memberStatus));
+        List<AdminMemberListDTO> members = adminDAO.findAdminMembers(criteria, keyword, subscriptionTier, memberStatus);
 
         criteria.setHasMore(members.size() > criteria.getRowCount());
         if (criteria.isHasMore()) {
@@ -57,6 +59,7 @@ public class AdminService {
             files.forEach(file -> file.setFilePath(toPresignedUrlOrOriginal(file.getFilePath())));
             post.setPostFiles(files);
             post.setFileUrls(files.stream().map(PostFileDTO::getFilePath).collect(Collectors.toList()));
+            post.setHashtags(postHashtagDAO.findAllByPostId(post.getId()));
         });
 
         criteria.setHasMore(posts.size() > criteria.getRowCount());

@@ -44,6 +44,8 @@ select * from tbl_video_session;
 
 select * from tbl_video_recoding;
 
+update tbl_member set member_role='admin' where id=41;
+
 select * from tbl_file;
 
 select * from tbl_post_file;

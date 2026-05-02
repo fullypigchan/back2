@@ -181,10 +181,6 @@ a {
     background: #111111;
 }
 
-.post-detail-avatar--dark {
-    background: #101820;
-}
-
 .post-detail-avatar--light {
     background: #d9d9d9;
     color: #444444;
@@ -288,15 +284,21 @@ a {
 }
 
 a.postHashtag {
-    font-size: 11px;
-    color: #1d9bf0;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+span.postHashtag {
+    font-size: 13px;
+    font-weight: 700;
 }
 
 div.postHashtags {
     font-size: 11px;
     color: #1d9bf0;
     display: flex;
-    gap: 3px;
+    gap: 8px;
+    margin-top: 8px;
     margin-bottom: 8px;
 }
 
@@ -1419,6 +1421,7 @@ div.postHashtags {
 a.post-detail-reply-card {
     text-decoration: none;
     color: inherit;
+    border-bottom: solid 1px #eff3f4;
 }
 
 .post-detail-reply-card {
@@ -2020,6 +2023,7 @@ a.post-detail-reply-card {
     inset: 0;
     z-index: 1200;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 16px;
@@ -2244,7 +2248,7 @@ a.post-detail-reply-card {
 .draft-panel__empty {
     max-width: 360px;
     margin: 0 auto;
-    padding: 40px 29px 0;
+    padding: 40px 29px;
 }
 
 .draft-panel__empty-title {
@@ -2261,7 +2265,11 @@ a.post-detail-reply-card {
     color: #536471;
 }
 
-/* ── 선택된 상품 카드 ────────────────────────────────────────── */
+.draft-panel__empty.off {
+    display: none;
+}
+
+/* 선택된 상품 카드 */
 .tweet-modal__selected-product {
     margin: 8px 4px 0;
 }
@@ -3172,6 +3180,7 @@ a.post-detail-reply-card {
 }
 
 .composerTagLabel {
+    min-height: 27px;
     display: inline-flex;
     align-items: center;
     align-self: flex-start;

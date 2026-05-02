@@ -28,10 +28,13 @@ public class SettingAPIController implements SettingAPIControllerDocs {
     private final BlockService blockService;
 
     // loginId를 프론트에서 받지 않고 인증 객체에서만 꺼내서 조회해서 유효성 검사를 한다.
-    @GetMapping("check-password")
+    // 비밀번호는 access log / Referer / 브라우저 history에 남지 않도록 body로 받는다.
+    @PostMapping("check-password")
     @LogStatusWithReturn
-    public boolean checkPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam String memberPassword) {
-        return memberService.checkPassword(userDetails.getLoginId(),memberPassword);
+    public boolean checkPassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request) {
+        return memberService.checkPassword(userDetails.getLoginId(), request.get("memberPassword"));
     }
 
     @PostMapping("password")

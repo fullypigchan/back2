@@ -18,7 +18,7 @@ public class ReportService {
     private final ReportDAO reportDAO;
 
 //    신고하기
-//    @CacheEvict(value = {"post:list", "page:search"}, allEntries = true)
+    @CacheEvict(value = {"post:list", "page:search", "post", "community:post:list", "bookmark:list"}, allEntries = true)
     public void report(ReportDTO reportDTO) {
         log.info("신고 시도 reporterId: {}, targetId: {}, targetType: {}", reportDTO.getReporterId(), reportDTO.getTargetId(), reportDTO.getTargetType());
         if (reportDAO.findByReporterAndTarget(reportDTO.getReporterId(), reportDTO.getTargetId(), reportDTO.getTargetType()).isPresent()) {

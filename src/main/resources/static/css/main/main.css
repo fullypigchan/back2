@@ -4012,15 +4012,15 @@ h3.postNewsTitle {
 }
 
 a.postHashtag {
-    font-size: 11px;
-    color: #1d9bf0;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 div.postHashtags {
     font-size: 11px;
     color: #1d9bf0;
     display: flex;
-    gap: 3px;
+    gap: 8px;
     margin-bottom: 8px;
 }
 

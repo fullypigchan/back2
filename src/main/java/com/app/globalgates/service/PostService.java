@@ -36,6 +36,7 @@ public class PostService {
     private final PostFileDAO postFileDAO;
     private final FileDAO fileDAO;
     private final PostHashtagDAO postHashtagDAO;
+    private final PostProductRelDAO postProductRelDAO;
     private final S3Service s3Service;
     private final MentionDAO mentionDAO;
     private final MemberMapper memberMapper;
@@ -61,6 +62,15 @@ public class PostService {
 
             postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
         });
+
+        //    첨부 상품 관계 저장 (선택 안 했으면 스킵)
+        //    상품 태그는 클라이언트가 hashtags 에 같이 담아 보내므로 별도 복사 불필요
+        if (postDTO.getProductId() != null) {
+            PostProductRelDTO relDTO = new PostProductRelDTO();
+            relDTO.setPostId(postDTO.getId());
+            relDTO.setProductPostId(postDTO.getProductId());
+            postProductRelDAO.save(relDTO);
+        }
     }
 
 //    게시글 파일 저장 (S3 키 기반)
@@ -355,6 +365,26 @@ public class PostService {
                     hashtagDTO.setId(foundHashtag.get().getId());
                 }
                 postHashtagDAO.saveRel(postDTO.getId(), hashtagDTO.getId());
+            });
+        }
+
+        // 댓글 첨부 상품 관계 저장 (선택 안 했으면 스킵)
+        if (postDTO.getProductId() != null) {
+            PostProductRelDTO relDTO = new PostProductRelDTO();
+            relDTO.setPostId(postDTO.getId());
+            relDTO.setProductPostId(postDTO.getProductId());
+            postProductRelDAO.save(relDTO);
+
+            // 답글 모달에는 태그 입력 영역이 없으므로
+            // 상품 태그를 답글 태그로 서버에서 자동 복사 (이미 들어온 태그와 중복되면 스킵)
+            List<Long> existingHashtagIds = new ArrayList<>();
+            if (postDTO.getHashtags() != null) {
+                postDTO.getHashtags().forEach(h -> existingHashtagIds.add(h.getId()));
+            }
+            postHashtagDAO.findAllByPostId(postDTO.getProductId()).forEach(tag -> {
+                if (!existingHashtagIds.contains(tag.getId())) {
+                    postHashtagDAO.saveRel(postDTO.getId(), tag.getId());
+                }
             });
         }
     }

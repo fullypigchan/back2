@@ -11,6 +11,7 @@ import com.app.globalgates.service.EstimationService;
 import com.app.globalgates.service.PostProductService;
 import com.app.globalgates.service.PostService;
 import com.app.globalgates.service.S3Service;
+import com.app.globalgates.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -252,6 +253,13 @@ public class MypageAPIController implements MypageAPIControllerDocs {
                 ? estimationService.getList(1, userDetails.getId())
                 : estimationService.getRequestedList(1, userDetails.getId());
 
+        // 사이드바 카드는 "5분 전 / 2시간 전" 같은 상대 시간 표시가 더 어울려서
+        // raw timestamp 를 컨트롤러에서만 변환해 내려준다.
+        // /estimation/list 페이지는 raw 가 필요해서 service 에서 일괄 변환은 하지 않는다.
+        result.getEstimations().forEach(estimation ->
+                estimation.setCreatedDateTime(DateUtils.toRelativeTime(estimation.getCreatedDateTime()))
+        );
+
         return ResponseEntity.ok(Map.of(
                 "expert", isExpert,
                 "hasMore", result.getCriteria().isHasMore() || result.getEstimations().size() > 5,
@@ -266,7 +274,14 @@ public class MypageAPIController implements MypageAPIControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         // non-expert 더보기는 마이페이지 안에서 requester 기준 목록을 이어 붙인다.
-        return estimationService.getRequestedList(page, userDetails.getId());
+        EstimationWithPagingDTO result = estimationService.getRequestedList(page, userDetails.getId());
+
+        // summary 와 동일한 톤(상대 시간)으로 카드를 이어 붙이도록 변환.
+        result.getEstimations().forEach(estimation ->
+                estimation.setCreatedDateTime(DateUtils.toRelativeTime(estimation.getCreatedDateTime()))
+        );
+
+        return result;
     }
 
     // 회원가입 join 흐름처럼:

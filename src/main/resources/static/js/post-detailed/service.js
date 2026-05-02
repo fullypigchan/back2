@@ -82,6 +82,11 @@ const service = (() => {
         return data;
     };
 
+    const getMyProducts = async (memberId) => {
+        const response = await fetch(`/api/main/products/members/${memberId}`);
+        return await response.json();
+    };
+
     const searchMentionMembers = async (keyword, memberId) => {
         console.log("멘션검색 들어옴1 keyword:", keyword);
         const response = await fetch(`/api/main/mentions/search?keyword=${encodeURIComponent(keyword)}&memberId=${memberId}`);
@@ -98,6 +103,7 @@ const service = (() => {
         writeReply: writeReply, getReplies: getReplies,
         deletePost: deletePost,
         getFollowings: getFollowings,
+        getMyProducts: getMyProducts,
         searchMentionMembers: searchMentionMembers
     };
 })();

@@ -24,4 +24,8 @@ public class NewsDTO {
     private String publishedAt;
     private String createdDatetime;
     private String updatedDatetime;
+    private boolean liked;
+    private boolean bookmarked;
+    private int likeCount;
+    private int bookmarkCount;
 }

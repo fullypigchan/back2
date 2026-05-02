@@ -887,26 +887,6 @@ input {
     height: 36px;
 }
 
-.bookmark-share-sheet-search {
-    padding: 12px 16px;
-    border-bottom: 1px solid #eff3f4;
-}
-
-.bookmark-share-sheet-search-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #cfd9de;
-    border-radius: 999px;
-    background: #fff;
-}
-
-.bookmark-share-sheet-list {
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-}
-
-.bookmark-share-sheet-user,
 .bookmark-share-sheet-folder,
 .bookmark-share-sheet-create-folder {
     display: flex;
@@ -918,47 +898,15 @@ input {
     text-align: left;
 }
 
-.bookmark-share-sheet-user,
 .bookmark-share-sheet-folder {
     gap: 12px;
     padding: 14px 16px;
     border-bottom: 1px solid #eff3f4;
 }
 
-.bookmark-share-sheet-user:hover,
 .bookmark-share-sheet-folder:hover,
 .bookmark-share-sheet-create-folder:hover {
     background: rgba(15, 20, 25, 0.04);
-}
-
-.bookmark-share-sheet-user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 999px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.bookmark-share-sheet-user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.bookmark-share-sheet-user-body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.bookmark-share-sheet-user-name {
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.bookmark-share-sheet-user-handle {
-    color: #536471;
-    font-size: 14px;
 }
 
 .bookmark-share-sheet-create-folder {

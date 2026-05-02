@@ -118,4 +118,35 @@ class BookmarkFolderMapperTest {
         result.forEach(f -> log.info("  folder: id={}, name={}", f.getId(), f.getFolderName()));
         assertThat(result).hasSizeGreaterThanOrEqualTo(2);
     }
+
+    @Test
+    public void selectAllByMemberIdCountsNewsBookmarks() {
+        BookmarkFolderDTO folder = new BookmarkFolderDTO();
+        folder.setMemberId(memberId);
+        folder.setFolderName("뉴스 포함 폴더");
+        bookmarkFolderMapper.insert(folder);
+
+        jdbcTemplate.update(
+                "insert into tbl_news (admin_id, news_title, news_content, news_source_url, news_category, news_type, published_at) " +
+                        "values (?, ?, ?, ?, 'trade'::news_category_type, 'general'::news_type, now())",
+                memberId, "폴더 카운트 뉴스", "뉴스 내용", "https://example.com/news-folder-count"
+        );
+        Long newsId = jdbcTemplate.queryForObject(
+                "select id from tbl_news where news_title = ? order by id desc limit 1",
+                Long.class,
+                "폴더 카운트 뉴스"
+        );
+        jdbcTemplate.update(
+                "insert into tbl_news_bookmark (member_id, news_id, folder_id) values (?, ?, ?)",
+                memberId, newsId, folder.getId()
+        );
+
+        List<BookmarkFolderDTO> result = bookmarkFolderMapper.selectAllByMemberId(memberId);
+
+        BookmarkFolderDTO savedFolder = result.stream()
+                .filter(f -> f.getId().equals(folder.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(savedFolder.getBookmarkCount()).isEqualTo(1);
+    }
 }

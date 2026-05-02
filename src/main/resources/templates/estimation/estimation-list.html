@@ -4,7 +4,13 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>견적 요청 목록</title>
-    <link rel="stylesheet" href="/css/estimation/estimation-list.css"/>
+    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
+    <link
+            rel="stylesheet"
+            href="/css/estimation/estimation-list.css"
+    />
+    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
+    <script src="/js/common/profile-link.js" defer></script>
 </head>
 <body>
 <main class="activity-page">
@@ -141,5 +147,9 @@
 <script src="/js/estimation/estimaition-list/service.js"></script>
 <script src="/js/estimation/estimaition-list/layout.js"></script>
 <script src="/js/estimation/estimaition-list/event.js"></script>
+
+<!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+<div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+<div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </body>
 </html>

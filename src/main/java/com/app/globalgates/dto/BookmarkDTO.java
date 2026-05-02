@@ -36,6 +36,9 @@ public class BookmarkDTO {
     private boolean liked;
     // 첨부파일
     private List<PostFileDTO> postFiles;
+    // 뉴스 북마크 지원: 'post' | 'news', 그리고 뉴스 ID
+    private String bookmarkType;
+    private Long newsId;
 
     public BookmarkVO toBookmarkVO() {
         return BookmarkVO.builder()

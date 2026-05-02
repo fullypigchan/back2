@@ -29,10 +29,9 @@ public class AdminAPIController {
             @PathVariable int page,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String subscriptionTier,
-            @RequestParam(required = false) String subscriptionStatus,
             @RequestParam(required = false) String memberStatus
     ) {
-        return ResponseEntity.ok(adminService.getAdminMembers(page, keyword, subscriptionTier, subscriptionStatus, memberStatus));
+        return ResponseEntity.ok(adminService.getAdminMembers(page, keyword, subscriptionTier, memberStatus));
     }
 
     @GetMapping("/posts/{page}")

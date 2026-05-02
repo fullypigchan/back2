@@ -36,7 +36,6 @@ public class PostProductDTO {
     private String memberNickname;
     private String memberHandle;
     private String memberProfile;
-
     // tbl_post JOIN 정보
     private String postTitle;
     private String postContent;

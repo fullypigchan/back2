@@ -14,7 +14,7 @@ const friendsLayout = (() => {
             : "";
 
         return `
-            <div class="user-card" data-handle="${handle}" data-member-id="${friend.id}">
+            <div class="user-card" data-handle="${handle}" data-member-id="${friend.id}" data-profile-id="${friend.id}">
                 ${avatarHtml}
                 <div class="user-info">
                     <div class="user-top">

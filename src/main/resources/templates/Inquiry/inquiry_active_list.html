@@ -4,7 +4,10 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>거래처 활동 목록</title>
+        <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
         <link rel="stylesheet" href="/css/Inquiry/inquiry_active_list.css"/>
+        <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
+        <script src="/js/common/profile-link.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
     </head>
     <body>
@@ -2476,6 +2479,10 @@
     <script src="/js/inquiry_active_list/service.js"></script>
     <script src="/js/inquiry_active_list/layout.js"></script>
     <script src="/js/inquiry_active_list/event.js"></script>
+
+    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+    <div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
     </body>
     </html>
 

@@ -2,12 +2,7 @@ package com.app.globalgates.service;
 
 import com.app.globalgates.aop.annotation.LogStatusWithReturn;
 import com.app.globalgates.common.pagination.Criteria;
-import com.app.globalgates.dto.CategoryDTO;
-import com.app.globalgates.dto.PostDTO;
-import com.app.globalgates.dto.PostFileDTO;
-import com.app.globalgates.dto.PostHashtagDTO;
-import com.app.globalgates.dto.PostProductDTO;
-import com.app.globalgates.dto.PostProductWithPagingDTO;
+import com.app.globalgates.dto.*;
 import com.app.globalgates.repository.CategoryDAO;
 import com.app.globalgates.repository.PostDAO;
 import com.app.globalgates.repository.PostFileDAO;
@@ -200,6 +195,7 @@ public class PostProductService {
                                 images.stream()
                                         .map(PostFileDTO::getFilePath)
                                         .collect(Collectors.toList())
+
                         );
                     }
                     return productDTO;

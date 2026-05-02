@@ -89,7 +89,8 @@ public class NewsAPIController {
     public ResponseEntity<?> writeReply(@PathVariable Long newsId,
                                         @RequestBody NewsReplyDTO newsReplyDTO,
                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (newsReplyDTO.getContent() == null || newsReplyDTO.getContent().trim().isEmpty()) {
+        String content = newsReplyDTO.getContent();
+        if (content == null || content.codePoints().allMatch(c -> Character.isWhitespace(c) || Character.isSpaceChar(c))) {
             return ResponseEntity.badRequest().body(Map.of("message", "내용을 입력해주세요."));
         }
         newsReplyDTO.setNewsId(newsId);

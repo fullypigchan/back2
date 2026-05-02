@@ -79,6 +79,7 @@ public class MainController {
         PostDTO postDTO = postService.getDetail(id, memberId);
         convertPostFilesUrl(postDTO);
         convertProfileUrl(postDTO);
+        convertProductImageUrl(postDTO);
 
         model.addAttribute("post", postDTO);
         model.addAttribute("memberId", memberId);
@@ -135,6 +136,17 @@ public class MainController {
                     throw new RuntimeException("Presigned URL 생성 실패", e);
                 }
             });
+        }
+    }
+
+//    첨부 상품 이미지 presigned URL 변환
+    private void convertProductImageUrl(PostDTO post) {
+        if (post.getProductImage() != null) {
+            try {
+                post.setProductImage(s3Service.getPresignedUrl(post.getProductImage(), Duration.ofMinutes(10)));
+            } catch (IOException e) {
+                post.setProductImage(null);
+            }
         }
     }
 

@@ -208,8 +208,9 @@ const mypageLayout = (() => {
         // 카드의 초기 아이콘 상태는 서버가 내려준 최종 상태를 그대로 따른다.
         // Likes 탭만 예외적으로 "내가 좋아요한 글 목록"이라는 화면 의미가 더 강하므로,
         // 옵션이 켜지면 DTO 값보다 우선해서 채워진 하트를 보여준다.
-        const isLiked = options.forceLiked || !!post.isLiked;
-        const isBookmarked = !!post.isBookmarked;
+        // Java boolean isLiked/isBookmarked → Jackson 직렬화 시 liked/bookmarked 로 떨어짐
+        const isLiked = options.forceLiked || post.liked === true || post.isLiked === true;
+        const isBookmarked = post.bookmarked === true || post.isBookmarked === true;
         const cardType = options.cardType || "mypost";
 
         let mediaHtml = ""; // 이미지나 첨부파일이 있을 때만 채울 영역이다.
@@ -362,21 +363,76 @@ const mypageLayout = (() => {
         }
     };
 
+    // 가격/수량 포맷터. 숫자가 아니면 빈 문자열 — 카드에서 자연스럽게 hide 처리된다.
+    const formatEstimationNumber = (value) => {
+        if (typeof value !== "number" || Number.isNaN(value)) return "";
+        return value.toLocaleString("ko-KR");
+    };
+
+    // 상태 라벨. requesting(기본 상태)은 표시 가치가 없어 숨기고,
+    // 승인/거절일 때만 한국어로 띄운다 — estimaition-list/event.js 의 formatStatusLabel 과 같은 톤.
+    const formatEstimationStatusLabel = (status) => {
+        switch (String(status ?? "").toLowerCase()) {
+            case "approve":
+                return "승인됨";
+            case "reject":
+                return "거절됨";
+            default:
+                return "";
+        }
+    };
+
     const createMyEstimationCard = (estimation, isExpert) => {
-        const partner = isExpert
-            ? (estimation.requesterEmail || "요청자 정보 없음")
-            : (estimation.receiverEmail || "공개 요청");
+        // expert는 받은 견적이라 requester(요청자)를, non-expert는 보낸 견적이라 receiver(수신자)를
+        // 카드 상단에 노출한다. 양쪽 모두 닉네임 > 이름 > 이메일 순으로 표시 우선순위를 둔다.
+        const partnerNickname = isExpert ? estimation.requesterNickname : estimation.receiverNickname;
+        const partnerName     = isExpert ? estimation.requesterName     : estimation.receiverName;
+        const partnerHandle   = isExpert ? estimation.requesterHandle   : estimation.receiverHandle;
+        const partnerEmail    = isExpert ? estimation.requesterEmail    : estimation.receiverEmail;
+
+        const partnerDisplay = partnerNickname
+            || partnerName
+            || partnerEmail
+            || (isExpert ? "요청자 정보 없음" : "공개 요청");
+        const partnerHandleText = partnerHandle ? `@${partnerHandle}` : "";
+
         const createdAt = estimation.createdDateTime || "";
+
+        // productTitle이 null이면 상품이 inactive 또는 미선택 — 상품 블록 자체를 그리지 않는다.
+        const productSection = estimation.productTitle
+            ? `
+                <div class="Request-Product">
+                    <strong class="Request-Product-Title">${estimation.productTitle}</strong>
+                    <div class="Request-Product-Meta">
+                        ${estimation.productStock != null
+                            ? `<span class="Request-Product-Stock">수량 ${formatEstimationNumber(estimation.productStock)}</span>`
+                            : ""}
+                        ${estimation.productPrice != null
+                            ? `<span class="Request-Product-Price">${formatEstimationNumber(estimation.productPrice)}원</span>`
+                            : ""}
+                    </div>
+                </div>
+            `
+            : "";
 
         return `
             <div class="Request-Container">
                 <div class="Request-Card">
-                    <div class="Request-Title">${estimation.title ?? ""}</div>
-                    <div class="Request-With">
-                        <span class="With-People">${partner}</span>
-                        <span class="With-People">${estimation.status ?? ""}</span>
+                    <div class="Request-Partner">
+                        <strong class="Request-Partner-Name">${partnerDisplay}</strong>
+                        ${partnerHandleText
+                            ? `<span class="Request-Partner-Handle">${partnerHandleText}</span>`
+                            : ""}
                     </div>
+                    <div class="Request-Title">${estimation.title ?? ""}</div>
+                    ${productSection}
                     <div class="Request-With">
+                        ${(() => {
+                            const statusLabel = formatEstimationStatusLabel(estimation.status);
+                            return statusLabel
+                                ? `<span class="With-People">${statusLabel}</span>`
+                                : "";
+                        })()}
                         <span class="With-People">${createdAt}</span>
                     </div>
                 </div>

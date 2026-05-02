@@ -62,7 +62,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/image/**",
                                 "/video/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole(MemberRole.ADMIN.name())
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole(MemberRole.ADMIN.name())
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions ->

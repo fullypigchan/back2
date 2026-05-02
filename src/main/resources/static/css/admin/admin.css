@@ -386,6 +386,46 @@ a {
     padding: 2px 0;
 }
 
+.report-member-feed-link {
+    color: #1d9bf0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    word-break: break-all;
+}
+
+.report-member-feed-link:hover {
+    color: #0c7abf;
+}
+
+.admin-post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+}
+
+.admin-post-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eff3f4;
+    color: #0f1419;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    word-break: break-all;
+}
+
+.admin-post-tags-empty {
+    color: #536471;
+    font-size: 14px;
+}
+
 .modal-email {
     color: #1d9bf0;
     font-size: 15px;
@@ -501,6 +541,10 @@ a {
 
 .div-tr {
     display: table-row;
+}
+
+#memberTbody[data-admin-dynamic-body]:not(.is-rendered) .div-tr {
+    display: none;
 }
 
 .div-th {

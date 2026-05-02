@@ -371,18 +371,14 @@ button { cursor: pointer; }
 }
 
 .communityPostCard {
-    position: relative;
     gap: 10px;
-    padding-top: 30px;
 }
 
 .communityPostMeta {
-    position: absolute;
-    top: 10px;
-    left: 16px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    margin-bottom: 2px;
     color: #536471;
     font-size: 13px;
     font-weight: 700;
@@ -1064,25 +1060,14 @@ body.modal-open {
 .share-sheet__icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
 .share-sheet__title { margin: 0; flex: 1; color: #0f1419; font-size: 20px; font-weight: 700; text-align: center; }
 .share-sheet__header-spacer { width: 36px; height: 36px; }
-.share-sheet__search { padding: 12px 16px; border-bottom: 1px solid #eff3f4; }
-.share-sheet__search-input { width: 100%; padding: 12px 16px; border: 1px solid #cfd9de; border-radius: 999px; outline: none; font: inherit; box-sizing: border-box; }
-.share-sheet__list { display: flex; flex-direction: column; overflow: auto; }
-.share-sheet__user,
 .share-sheet__folder,
 .share-sheet__create-folder {
     display: flex; align-items: center; width: 100%;
     border: none; background: #ffffff; color: #0f1419; text-align: left; cursor: pointer; font: inherit;
 }
-.share-sheet__user,
 .share-sheet__folder { gap: 12px; padding: 14px 16px; border-bottom: 1px solid #eff3f4; }
-.share-sheet__user:hover,
 .share-sheet__folder:hover,
 .share-sheet__create-folder:hover { background: rgba(15, 20, 25, 0.04); }
-.share-sheet__user-avatar { width: 40px; height: 40px; border-radius: 999px; overflow: hidden; flex-shrink: 0; background: #eff3f4; }
-.share-sheet__user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.share-sheet__user-body { display: flex; flex-direction: column; min-width: 0; }
-.share-sheet__user-name { font-size: 15px; font-weight: 700; color: #0f1419; }
-.share-sheet__user-handle { font-size: 14px; color: #536471; }
 .share-sheet__create-folder { padding: 16px; color: #1d9bf0; font-size: 15px; font-weight: 700; border-bottom: 1px solid #eff3f4; }
 .share-sheet__folder-icon {
     display: inline-flex; align-items: center; justify-content: center;
