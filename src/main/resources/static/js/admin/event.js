@@ -228,7 +228,7 @@
             return;
         }
 
-        const feedUrl = `/mypage/mypage?memberId=${encodeURIComponent(targetId)}`;
+        const feedUrl = `/mypage?memberId=${encodeURIComponent(targetId)}`;
         reportTargetRow.insertAdjacentHTML("afterend", `
             <div class="modal-field-row" id="reportMemberFeedRow">
                 <div class="modal-field-label">회원 피드 URL</div>
