@@ -148,10 +148,6 @@ const exploreLayout = (() => {
                         </div>
                         <p class="trend-summary">${escapeHtml(summary)}</p>
                         ${sourceUrl ? `<a class="trend-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : ""}
-                        <div class="trend-meta-row">
-                            <span class="trend-meta-text">좋아요 ${news.likeCount ?? 0}</span>
-                            <span class="trend-meta-text">북마크 ${news.bookmarkCount ?? 0}</span>
-                        </div>
                     </div>
                 </div>
             `;

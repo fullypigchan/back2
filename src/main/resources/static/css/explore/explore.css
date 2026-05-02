@@ -512,6 +512,18 @@ textarea {
     white-space: nowrap;
 }
 
+.trend-source-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #1d9bf0;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.trend-source-link:hover {
+    text-decoration: underline;
+}
+
 .trend-actions {
     display: flex;
     flex-direction: row;

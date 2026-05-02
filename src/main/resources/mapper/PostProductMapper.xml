@@ -61,7 +61,7 @@
                pp.product_category_id,
                pp.created_datetime,
                pp.updated_datetime,
-               m.member_nickname,
+               coalesce(m.member_nickname, m.member_name) as member_nickname,
                m.member_handle,
                f.file_path as memberProfile,
                p.title as post_title,

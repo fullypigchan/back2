@@ -10,8 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,13 +28,37 @@ public class ExploreAPIController implements ExploreAPIControllerDocs {
     private final NewsLikeService newsLikeService;
     private final NewsBookmarkService newsBookmarkService;
     private final SearchService searchService;
+    private final S3Service s3Service;
 
 //    추천 상품 목록 조회
     @GetMapping("products/{page}")
     public ResponseEntity<?> getRecommends(@PathVariable int page,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         PostProductWithPagingDTO posts = postProductService.getRecommendProducts(page, userDetails.getId());
+        posts.getPosts().forEach(product -> {
+            // 상품 이미지(S3 객체 키 → presigned URL)
+            if (product.getPostFiles() != null) {
+                product.setPostFiles(
+                        product.getPostFiles().stream()
+                                .map(this::toPresigned)
+                                .collect(Collectors.toList())
+                );
+            }
+            // 작성자 프로필
+            if (product.getMemberProfile() != null) {
+                product.setMemberProfile(toPresigned(product.getMemberProfile()));
+            }
+        });
         return ResponseEntity.ok(posts);
+    }
+
+    private String toPresigned(String s3Key) {
+        if (s3Key == null || s3Key.isBlank()) return null;
+        try {
+            return s3Service.getPresignedUrl(s3Key, Duration.ofMinutes(10));
+        } catch (IOException e) {
+            return null;
+        }
     }
 
 //    뉴스 목록 조회
