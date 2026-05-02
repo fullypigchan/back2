@@ -8,19 +8,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/inquiry/**")
+@RequestMapping("/inquiry")
 @RequiredArgsConstructor
 @Slf4j
 public class InquiryController {
 
-    @GetMapping("chart")
+    @GetMapping("/chart")
     public String goToInquiryPage() {
         return "Inquiry/inquiry-chart";
     }
 
-    @GetMapping("member-list")
+    @GetMapping("/member-list")
     public String goToInquiryMemberList() {
         return "Inquiry/Inquiry_list";
     }
 
 }
+
