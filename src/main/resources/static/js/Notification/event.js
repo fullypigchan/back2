@@ -1,4 +1,15 @@
 window.onload = function () {
+    // 사이드바 게시하기 + 공용 답글 모달 활성화. MEMBER_ID는 HTML inline top-level const.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => MEMBER_ID,
+        // 답글 게시 후 알림 카드의 답글 카운트 +1.
+        onReplySubmitSuccess: ({ button }) => {
+            updateReplyCount(button);
+        },
+    });
+
     // ===== 1. DOM =====
     // 탭 네비게이션 링크 목록
     const tabLinks = document.querySelectorAll(".tab-link");
@@ -477,6 +488,7 @@ window.onload = function () {
                 })[c] ?? c,
         );
     }
+
     // 로컬스토리지에서 최근 사용 이모지 목록을 가져온다
     function getRecentEmojis() {
         try {
@@ -510,6 +522,7 @@ window.onload = function () {
             return;
         }
     }
+
     // 이모지 검색 입력값을 소문자로 반환한다
     function getEmojiSearchTerm() {
         return replyEmojiSearchInput?.value.trim().toLowerCase() ?? "";
@@ -542,7 +555,7 @@ window.onload = function () {
     function buildEmojiSection(
         title,
         emojis,
-        { clearable = false, emptyText = "" } = {},
+        {clearable = false, emptyText = ""} = {},
     ) {
         const headerAction = clearable
             ? '<button type="button" class="notification-modal__emoji-clear" data-action="clear-recent">모두 지우기</button>'
@@ -575,13 +588,16 @@ window.onload = function () {
                 const entries = getFilteredEmojiEntries(cat);
                 return entries.length === 0 ? "" : buildEmojiSection(emojiCategoryMeta[cat].sectionTitle, entries.map((e) => e.emoji));
             }).join("");
-            replyEmojiContent.innerHTML = sections || buildEmojiSection("검색 결과", [], { emptyText: "일치하는 이모티콘이 없습니다." });
+            replyEmojiContent.innerHTML = sections || buildEmojiSection("검색 결과", [], {emptyText: "일치하는 이모티콘이 없습니다."});
 
             return;
         }
         if (activeEmojiCategory === "recent") {
             const recent = getRecentEmojis();
-            replyEmojiContent.innerHTML = buildEmojiSection("최근", recent, { clearable: recent.length > 0, emptyText: "최근 사용한 이모티콘이 없습니다." }) + buildEmojiSection(emojiCategoryMeta.smileys.sectionTitle, getEmojiEntriesForCategory("smileys").map((e) => e.emoji));
+            replyEmojiContent.innerHTML = buildEmojiSection("최근", recent, {
+                clearable: recent.length > 0,
+                emptyText: "최근 사용한 이모티콘이 없습니다."
+            }) + buildEmojiSection(emojiCategoryMeta.smileys.sectionTitle, getEmojiEntriesForCategory("smileys").map((e) => e.emoji));
             return;
         }
         replyEmojiContent.innerHTML = buildEmojiSection(emojiCategoryMeta[activeEmojiCategory].sectionTitle, getEmojiEntriesForCategory(activeEmojiCategory).map((e) => e.emoji));
@@ -597,7 +613,7 @@ window.onload = function () {
     // ===== 4-1. User Tags =====
     // 태그된 사용자 배열을 깊은 복사한다
     function cloneTaggedUsers(users) {
-        return users.map((u) => ({ ...u }));
+        return users.map((u) => ({...u}));
     }
 
     // 현재 페이지의 트윗 목록에서 태그 가능한 사용자 목록을 추출한다
@@ -631,6 +647,7 @@ window.onload = function () {
     function isTagModalOpen() {
         return Boolean(replyTagView && !replyTagView.hidden);
     }
+
     // 태그 검색 입력값을 반환한다
     function getTagSearchTerm() {
         return replyTagSearchInput?.value.trim() ?? "";
@@ -653,7 +670,7 @@ window.onload = function () {
             replyUserTagTrigger.setAttribute("aria-label", label);
         }
         if (replyUserTagLabel) replyUserTagLabel.textContent = label;
-        if (!can && isTagModalOpen()) closeTagPanel({ restoreFocus: false });
+        if (!can && isTagModalOpen()) closeTagPanel({restoreFocus: false});
     }
 
     // 태그된 사용자 칩 목록을 렌더링한다
@@ -741,7 +758,7 @@ window.onload = function () {
     }
 
     // 태그 패널을 닫고 변경 사항을 되돌린다
-    function closeTagPanel({ restoreFocus = true } = {}) {
+    function closeTagPanel({restoreFocus = true} = {}) {
         if (!composeView || !replyTagView || replyTagView.hidden) return;
         replyTagView.hidden = true;
         composeView.hidden = false;
@@ -776,16 +793,19 @@ window.onload = function () {
     // ===== 4-2. Media Alt Editor =====
     // 기본 미디어 편집 객체를 생성한다
     function createDefaultReplyMediaEdit() {
-        return { alt: "" };
+        return {alt: ""};
     }
+
     // 미디어 편집 배열을 깊은 복사한다
     function cloneReplyMediaEdits(edits) {
-        return edits.map((e) => ({ alt: e.alt }));
+        return edits.map((e) => ({alt: e.alt}));
     }
+
     // 미디어 편집기가 열려 있는지 확인한다
     function isMediaEditorOpen() {
         return Boolean(replyMediaView && !replyMediaView.hidden);
     }
+
     // 미디어 ALT 트리거 라벨을 반환한다 (설명 추가/수정)
     function getReplyMediaTriggerLabel() {
         return replyMediaEdits.some((e) => e.alt.trim().length > 0)
@@ -804,7 +824,7 @@ window.onload = function () {
         }
         replyMediaEdits = attachedReplyFiles.map((_, i) => {
             const ex = replyMediaEdits[i];
-            return ex ? { alt: ex.alt ?? "" } : createDefaultReplyMediaEdit();
+            return ex ? {alt: ex.alt ?? ""} : createDefaultReplyMediaEdit();
         });
         if (pendingReplyMediaEdits.length !== replyMediaEdits.length)
             pendingReplyMediaEdits = cloneReplyMediaEdits(replyMediaEdits);
@@ -819,10 +839,12 @@ window.onload = function () {
     function getCurrentReplyMediaUrl() {
         return attachedReplyFileUrls[activeReplyMediaIndex] ?? "";
     }
+
     // 특정 인덱스의 미디어 ALT 텍스트를 반환한다
     function getReplyMediaImageAlt(index) {
         return replyMediaEdits[index]?.alt ?? "";
     }
+
     // 현재 선택된 미디어의 임시 편집 객체를 반환한다
     function getCurrentPendingReplyMediaEdit() {
         return (
@@ -830,6 +852,7 @@ window.onload = function () {
             createDefaultReplyMediaEdit()
         );
     }
+
     // 미디어 편집 패널 제목을 반환한다
     function getReplyMediaTitle() {
         return "이미지 설명 수정";
@@ -846,7 +869,7 @@ window.onload = function () {
         }
         if (replyMediaAltLabel) replyMediaAltLabel.textContent = label;
         if (!can && isMediaEditorOpen())
-            closeMediaEditor({ restoreFocus: false, discardChanges: true });
+            closeMediaEditor({restoreFocus: false, discardChanges: true});
     }
 
     // 미디어 편집기 UI를 현재 상태에 맞게 렌더링한다
@@ -887,9 +910,9 @@ window.onload = function () {
 
     // 미디어 편집기를 닫고 선택적으로 변경 사항을 되돌린다
     function closeMediaEditor({
-        restoreFocus = true,
-        discardChanges = true,
-    } = {}) {
+                                  restoreFocus = true,
+                                  discardChanges = true,
+                              } = {}) {
         if (!composeView || !replyMediaView || replyMediaView.hidden) return;
         if (discardChanges)
             pendingReplyMediaEdits = cloneReplyMediaEdits(replyMediaEdits);
@@ -908,7 +931,7 @@ window.onload = function () {
         replyMediaEdits = cloneReplyMediaEdits(pendingReplyMediaEdits);
         renderReplyAttachment();
         syncMediaAltTrigger();
-        closeMediaEditor({ discardChanges: false });
+        closeMediaEditor({discardChanges: false});
     }
 
     // ===== 4-3. Location =====
@@ -916,6 +939,7 @@ window.onload = function () {
     function isLocationModalOpen() {
         return Boolean(replyLocationView && !replyLocationView.hidden);
     }
+
     // 위치 검색 입력값을 반환한다
     function getLocationSearchTerm() {
         return replyLocationSearchInput?.value.trim() ?? "";
@@ -1001,8 +1025,8 @@ window.onload = function () {
         });
     }
 
-    // 기존 HTML 서브뷰 전환: .tweet-modal__location-view 를 숨기고 .tweet-modal__compose-view 로 복귀한다.
-    function closeLocationPanel({ restoreFocus = true } = {}) {
+    // 기존 HTML 서브뷰 전환: .notification-modal__location-view 를 숨기고 .notification-modal__compose-view 로 복귀한다.
+    function closeLocationPanel({restoreFocus = true} = {}) {
         if (!composeView || !replyLocationView || replyLocationView.hidden)
             return;
         replyLocationView.hidden = true;
@@ -1052,6 +1076,7 @@ window.onload = function () {
             attachedReplyFiles.every((f) => f.type.startsWith("image/"))
         );
     }
+
     // 첨부파일이 단일 동영상인지 확인한다
     function isReplyVideoSet() {
         return (
@@ -1164,7 +1189,10 @@ window.onload = function () {
         fn.className = "notification-modal__attachment-file-name";
         fn.textContent = attachedReplyFiles[0]?.name ?? "";
 
-        fg.appendChild(fpath); fi.appendChild(fg); fp.appendChild(fi); fp.appendChild(fn);
+        fg.appendChild(fpath);
+        fi.appendChild(fg);
+        fp.appendChild(fi);
+        fp.appendChild(fn);
         // 일반 파일은 HTML의 [data-attachment-media] 안에 파일 카드 한 장을 직접 추가한다.
 
         replyAttachmentMedia.appendChild(fp);
@@ -1201,7 +1229,7 @@ window.onload = function () {
                     ed.length === 0
                         ? [rep]
                         : ((ed[pendingAttachmentEditIndex] = rep),
-                          ed.slice(0, maxReplyImages));
+                            ed.slice(0, maxReplyImages));
             }
             pendingAttachmentEditIndex = null;
             renderReplyAttachment();
@@ -1294,7 +1322,7 @@ window.onload = function () {
         pre.selectNodeContents(replyEditor);
         pre.setEnd(range.startContainer, range.startOffset);
         const start = pre.toString().length;
-        return { start, end: start + range.toString().length };
+        return {start, end: start + range.toString().length};
     }
 
     // 저장된 텍스트 offset을 실제 DOM 위치로 변환한다
@@ -1309,17 +1337,17 @@ window.onload = function () {
             lastTextNode = node;
             const length = node.textContent?.length ?? 0;
             if (remaining <= length) {
-                return { node, offset: remaining };
+                return {node, offset: remaining};
             }
             remaining -= length;
             node = walker.nextNode();
         }
 
         if (lastTextNode) {
-            return { node: lastTextNode, offset: lastTextNode.textContent?.length ?? 0 };
+            return {node: lastTextNode, offset: lastTextNode.textContent?.length ?? 0};
         }
 
-        return { node: replyEditor, offset: replyEditor.childNodes.length };
+        return {node: replyEditor, offset: replyEditor.childNodes.length};
     }
 
     // 저장된 offset으로 range를 다시 구성한다
@@ -1334,7 +1362,7 @@ window.onload = function () {
         range.setEnd(endPos.node, endPos.offset);
         return range;
 
-      
+
     }
 
     // 저장된 텍스트 선택 영역을 복원한다
@@ -1345,7 +1373,8 @@ window.onload = function () {
 
         const range = buildReplySelectionRangeFromOffsets(savedReplySelectionOffsets) ?? savedReplySelection;
         if (!range) return false;
-        sel.removeAllRanges(); sel.addRange(range);
+        sel.removeAllRanges();
+        sel.addRange(range);
 
         return true;
     }
@@ -1533,7 +1562,10 @@ window.onload = function () {
         }
 
         const sel = window.getSelection();
-        if (!sel) { isInsertingReplyEmoji = false; return; }
+        if (!sel) {
+            isInsertingReplyEmoji = false;
+            return;
+        }
 
         let range;
         if (sel.rangeCount === 0) {
@@ -1663,7 +1695,8 @@ window.onload = function () {
         populateReplyModal(button);
         closeEmojiPicker();
         replyEditor.textContent = "";
-        savedReplySelection = null; savedReplySelectionOffsets = null;
+        savedReplySelection = null;
+        savedReplySelectionOffsets = null;
         pendingReplyFormats = new Set();
         activeEmojiCategory = "recent";
         selectedLocation = null;
@@ -1682,7 +1715,7 @@ window.onload = function () {
         if (replyTagView) replyTagView.hidden = true;
         if (replyMediaView) replyMediaView.hidden = true;
         if (replyProductView) replyProductView.hidden = true;
-        closeDraftPanel({ restoreFocus: false });
+        closeDraftPanel({restoreFocus: false});
         renderDraftPanel();
         renderLocationList();
         syncLocationUI();
@@ -1712,30 +1745,38 @@ window.onload = function () {
 
     // 같은 [data-reply-modal] 오버레이를 다시 hidden 처리한다. DOM을 삭제하지 않고 다음 열기 때 재사용한다.
     function closeReplyModal(options = {}) {
-        const { skipConfirm = false, restoreFocus = true } = options;
+        const {skipConfirm = false, restoreFocus = true} = options;
         if (!replyModalOverlay || replyModalOverlay.hidden) return;
         if (!skipConfirm && !canCloseReplyModal()) return;
         shouldRestoreReplyEditorAfterEmojiInsert = false;
         replyModalOverlay.hidden = true;
         document.body.classList.remove("modal-open");
         closeEmojiPicker();
-        closeLocationPanel({ restoreFocus: false });
-        closeTagPanel({ restoreFocus: false });
-        closeMediaEditor({ restoreFocus: false, discardChanges: true });
-        closeDraftPanel({ restoreFocus: false });
+        closeLocationPanel({restoreFocus: false});
+        closeTagPanel({restoreFocus: false});
+        closeMediaEditor({restoreFocus: false, discardChanges: true});
+        closeDraftPanel({restoreFocus: false});
         if (replyProductView) replyProductView.hidden = true;
         if (replyEditor) replyEditor.textContent = "";
 
-        savedReplySelection = null; savedReplySelectionOffsets = null; pendingReplyFormats = new Set();
-        selectedLocation = null; pendingLocation = null;
-        selectedTaggedUsers = []; pendingTaggedUsers = [];
+        savedReplySelection = null;
+        savedReplySelectionOffsets = null;
+        pendingReplyFormats = new Set();
+        selectedLocation = null;
+        pendingLocation = null;
+        selectedTaggedUsers = [];
+        pendingTaggedUsers = [];
         selectedProduct = null;
         if (replyProductButton) replyProductButton.disabled = false;
         const existingProductCard = replyModalOverlay?.querySelector("[data-selected-product]");
         if (existingProductCard) existingProductCard.remove();
-        resetReplyAttachment(); renderLocationList(); syncLocationUI();
-        syncUserTagTrigger(); syncReplyMediaEditsToAttachments();
-        syncReplySubmitState(); syncReplyFormatButtons();
+        resetReplyAttachment();
+        renderLocationList();
+        syncLocationUI();
+        syncUserTagTrigger();
+        syncReplyMediaEditsToAttachments();
+        syncReplySubmitState();
+        syncReplyFormatButtons();
 
         if (restoreFocus) activeReplyTrigger?.focus();
         activeReplyTrigger = null;
@@ -1806,10 +1847,17 @@ window.onload = function () {
         activeShareToast?.remove();
         const toast = document.createElement("div");
 
-        toast.className = "share-toast"; toast.setAttribute("role", "status"); toast.setAttribute("aria-live", "polite"); toast.textContent = message;
+        toast.className = "share-toast";
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "polite");
+        toast.textContent = message;
         // body 직속으로 붙여서 화면 하단에 띄운 뒤 timeout 에서 remove 한다.
-        document.body.appendChild(toast); activeShareToast = toast;
-        window.setTimeout(() => { if (activeShareToast === toast) activeShareToast = null; toast.remove(); }, 3000);
+        document.body.appendChild(toast);
+        activeShareToast = toast;
+        window.setTimeout(() => {
+            if (activeShareToast === toast) activeShareToast = null;
+            toast.remove();
+        }, 3000);
 
     }
 
@@ -1833,7 +1881,7 @@ window.onload = function () {
     }
 
     // body 에 동적으로 추가했던 공유 바텀시트를 제거하고 경로를 복원한다.
-    function closeShareModal({ restorePath = true } = {}) {
+    function closeShareModal({restorePath = true} = {}) {
         if (!activeShareModal) return;
         activeShareModal.remove();
         activeShareModal = null;
@@ -1843,7 +1891,7 @@ window.onload = function () {
 
     // 게시물 링크를 클립보드에 복사한다
     function copyShareLink(button) {
-        const { permalink } = getSharePostMeta(button);
+        const {permalink} = getSharePostMeta(button);
         closeShareDropdown();
         if (!navigator.clipboard?.writeText) {
             showShareToast("링크를 복사하지 못했습니다");
@@ -1871,7 +1919,7 @@ window.onload = function () {
     // HTML에 없는 공유 바텀시트를 새로 만들고 body 에 붙인다. closeShareModal() 에서 remove 된다.
     function openShareChatModal(button) {
         closeShareDropdown();
-        closeShareModal({ restorePath: false });
+        closeShareModal({restorePath: false});
         pushSharePath("/messages/compose");
         const modal = document.createElement("div");
         modal.className = "share-sheet";
@@ -1894,15 +1942,17 @@ window.onload = function () {
         });
 
         // body 직속으로 추가해 오버레이/시트를 전체 화면 기준으로 표시한다.
-        document.body.appendChild(modal); document.body.classList.add("modal-open"); activeShareModal = modal;
+        document.body.appendChild(modal);
+        document.body.classList.add("modal-open");
+        activeShareModal = modal;
 
     }
 
     // HTML에 없는 북마크 바텀시트를 새로 만들고 body 에 붙인다. closeShareModal() 에서 remove 된다.
     function openShareBookmarkModal(button) {
-        const { bookmarkButton } = getSharePostMeta(button);
+        const {bookmarkButton} = getSharePostMeta(button);
         closeShareDropdown();
-        closeShareModal({ restorePath: false });
+        closeShareModal({restorePath: false});
         pushSharePath("/i/bookmarks/add");
         const modal = document.createElement("div");
         const isBookmarked =
@@ -1933,7 +1983,9 @@ window.onload = function () {
         });
 
         // body 직속으로 추가해 오버레이/시트를 전체 화면 기준으로 표시한다.
-        document.body.appendChild(modal); document.body.classList.add("modal-open"); activeShareModal = modal;
+        document.body.appendChild(modal);
+        document.body.classList.add("modal-open");
+        activeShareModal = modal;
 
     }
 
@@ -2036,7 +2088,7 @@ window.onload = function () {
         const displayName =
             getTextContent(ti?.querySelector(".tweet-displayname")) || "사용자";
         const tweetId = String(Math.max(all.indexOf(ti), 0) + 1);
-        return { tweetItem: ti, handle, displayName, tweetId };
+        return {tweetItem: ti, handle, displayName, tweetId};
     }
 
     // 알림 액션 토스트는 HTML에 없으므로 body 아래에 임시 노드를 추가하고 타이머 후 제거한다.
@@ -2044,10 +2096,17 @@ window.onload = function () {
         activeNotificationToast?.remove();
         const toast = document.createElement("div");
 
-        toast.className = "notification-toast"; toast.setAttribute("role", "status"); toast.setAttribute("aria-live", "polite"); toast.textContent = message;
+        toast.className = "notification-toast";
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "polite");
+        toast.textContent = message;
         // body 직속으로 붙여서 화면 하단 토스트로 사용한다.
-        document.body.appendChild(toast); activeNotificationToast = toast;
-        window.setTimeout(() => { if (activeNotificationToast === toast) activeNotificationToast = null; toast.remove(); }, 3000);
+        document.body.appendChild(toast);
+        activeNotificationToast = toast;
+        window.setTimeout(() => {
+            if (activeNotificationToast === toast) activeNotificationToast = null;
+            toast.remove();
+        }, 3000);
 
     }
 
@@ -2061,7 +2120,7 @@ window.onload = function () {
 
     // HTML에 없는 차단 확인 모달을 새로 만들고 body 에 붙인다. closeNotificationModal() 에서 remove 된다.
     function openNotificationBlockModal(button) {
-        const { handle } = getNotificationUserMeta(button);
+        const {handle} = getNotificationUserMeta(button);
         closeNotificationDropdown();
         closeNotificationModal();
         const modal = document.createElement("div");
@@ -2084,13 +2143,15 @@ window.onload = function () {
         });
 
         // body 직속으로 추가해 전체 화면 오버레이 모달로 표시한다.
-        document.body.appendChild(modal); document.body.classList.add("modal-open"); activeNotificationModal = modal;
+        document.body.appendChild(modal);
+        document.body.classList.add("modal-open");
+        activeNotificationModal = modal;
 
     }
 
     // HTML에 없는 신고 모달을 새로 만들고 body 에 붙인다. closeNotificationModal() 에서 remove 된다.
     function openNotificationReportModal(button) {
-        const { tweetId } = getNotificationUserMeta(button);
+        const {tweetId} = getNotificationUserMeta(button);
         closeNotificationDropdown();
         closeNotificationModal();
         const modal = document.createElement("div");
@@ -2112,13 +2173,15 @@ window.onload = function () {
             }
         });
         // body 직속으로 추가해 전체 화면 오버레이 모달로 표시한다.
-        document.body.appendChild(modal); document.body.classList.add("modal-open"); activeNotificationModal = modal;
+        document.body.appendChild(modal);
+        document.body.classList.add("modal-open");
+        activeNotificationModal = modal;
 
     }
 
     // 알림 드롭다운 메뉴 항목 클릭 시 해당 액션을 처리한다
     function handleNotificationDropdownAction(button, actionClass) {
-        const { handle } = getNotificationUserMeta(button);
+        const {handle} = getNotificationUserMeta(button);
         if (actionClass === "menu-item--follow-toggle") {
             const isF = notificationFollowState.get(handle) ?? false;
             notificationFollowState.set(handle, !isF);
@@ -2241,22 +2304,26 @@ window.onload = function () {
             ? Array.from(draftList.querySelectorAll(".draft-panel__item"))
             : [];
     }
+
     // 임시저장 선택 상태를 초기화한다
     function clearDraftSelection() {
         draftPanelState.selectedItems.clear();
         draftPanelState.confirmOpen = false;
     }
+
     // 임시저장 편집 모드를 종료한다
     function exitDraftEditMode() {
         draftPanelState.isEditMode = false;
         clearDraftSelection();
     }
+
     // 임시저장 편집 모드를 시작한다
     function enterDraftEditMode() {
         if (getDraftItems().length === 0) return;
         draftPanelState.isEditMode = true;
         draftPanelState.confirmOpen = false;
     }
+
     // 해당 요소가 유효한 임시저장 항목인지 확인한다
     function hasDraftItem(item) {
         return item instanceof HTMLElement && getDraftItems().includes(item);
@@ -2295,11 +2362,13 @@ window.onload = function () {
     function hasDraftSelection() {
         return draftPanelState.selectedItems.size > 0;
     }
+
     // 임시저장 삭제 확인 대화상자를 연다
     function openDraftConfirm() {
         if (draftPanelState.isEditMode && hasDraftSelection())
             draftPanelState.confirmOpen = true;
     }
+
     // 임시저장 삭제 확인 대화상자를 닫는다
     function closeDraftConfirm() {
         draftPanelState.confirmOpen = false;
@@ -2319,14 +2388,17 @@ window.onload = function () {
         exitDraftEditMode();
         closeDraftConfirm();
     }
+
     // 임시저장 패널이 열려 있는지 확인한다
     function isDraftPanelOpen() {
         return Boolean(draftView && !draftView.hidden);
     }
+
     // 임시저장 삭제 확인 대화상자가 열려 있는지 확인한다
     function isDraftConfirmOpen() {
         return draftPanelState.confirmOpen;
     }
+
     // 임시저장 비어있음 안내 문구를 반환한다
     function getDraftEmptyCopy() {
         return {
@@ -2334,6 +2406,7 @@ window.onload = function () {
             body: "아직 게시할 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성하세요.",
         };
     }
+
     // 임시저장 삭제 확인 문구를 반환한다
     function getDraftConfirmCopy() {
         return {
@@ -2418,8 +2491,8 @@ window.onload = function () {
         draftView.hidden = false;
     }
 
-    // 기존 HTML 서브뷰 전환: .tweet-modal__draft-view 를 숨기고 .tweet-modal__compose-view 로 복귀한다.
-    function closeDraftPanel({ restoreFocus = true } = {}) {
+    // 기존 HTML 서브뷰 전환: .notification-modal__draft-view 를 숨기고 .notification-modal__compose-view 로 복귀한다.
+    function closeDraftPanel({restoreFocus = true} = {}) {
         if (!composeView || !draftView) return;
         resetDraftPanel();
         renderDraftPanel();
@@ -2439,7 +2512,7 @@ window.onload = function () {
         replyEditor.textContent = getTextContent(
             item.querySelector(".draft-panel__text"),
         );
-        closeDraftPanel({ restoreFocus: false });
+        closeDraftPanel({restoreFocus: false});
         syncReplySubmitState();
         saveReplySelection();
         window.requestAnimationFrame(() => {
@@ -2477,107 +2550,123 @@ window.onload = function () {
                     : "translateY(0)";
             lastScrollY = cy;
         },
-        { passive: true },
+        {passive: true},
     );
 
-    // 알림 탭 클릭 시 해당 탭을 활성화하고 알림 목록을 필터링한다
-    // data-notif-tab="all" → 모든 알림 표시
-    // data-notif-tab="mentions" → data-notif-type="mention" 인 알림만 표시
+    // 알림 탭 클릭 시 해당 탭을 활성화한다 (목록 렌더링은 service.js가 API로 처리)
     notifTabs.forEach((tab) => {
         tab.addEventListener("click", (e) => {
             e.preventDefault();
-            // 모든 탭의 활성 상태를 해제하고 클릭된 탭만 활성화
             notifTabs.forEach((t) => {
                 t.classList.remove("notif-tab--active");
                 t.setAttribute("aria-selected", "false");
             });
             tab.classList.add("notif-tab--active");
             tab.setAttribute("aria-selected", "true");
+        });
+    });
 
-            // 선택된 탭 이름에 따라 알림 목록 필터링
-            const filter = tab.dataset.notifTab; // "all" 또는 "mentions"
-            const notifItems = document.querySelectorAll(".notif-list > [data-notif-type]");
-            notifItems.forEach((item) => {
-                if (filter === "all") {
-                    // 전체 탭: 모든 알림 표시
-                    item.style.display = "";
-                } else if (filter === "mentions") {
-                    // 멘션 탭: data-notif-type="mention" 인 항목만 표시
-                    item.style.display = item.dataset.notifType === "mention" ? "" : "none";
+    // 동적 렌더링된 알림 항목에 이벤트를 바인딩하는 함수
+    // service.js에서 API 렌더링 완료 후 호출한다.
+    window.bindNotificationItemEvents = function () {
+        // 좋아요 버튼 클릭 시 활성/비활성을 토글한다
+        document.querySelectorAll(".tweet-action-btn--like").forEach((button) => {
+            if (button.dataset.bound) return;
+            button.dataset.bound = "true";
+            const path = button.querySelector("path"),
+                count = button.querySelector(".tweet-action-count");
+            button.addEventListener("click", async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const article = button.closest("[data-target-id]");
+                const postId = article?.dataset.targetId;
+                if (!postId || !MEMBER_ID) return;
+                const isActive = button.classList.toggle("active");
+                if (!path || !count) return;
+                button.setAttribute("data-testid", isActive ? "unlike" : "like");
+                button.setAttribute(
+                    "aria-label",
+                    isActive ? "1 마음에 들어요" : "0 마음에 들어요",
+                );
+                path.setAttribute(
+                    "d",
+                    isActive ? path.dataset.pathActive : path.dataset.pathInactive,
+                );
+                count.textContent = isActive ? "1" : "";
+                if (isActive) {
+                    await NotificationService.addLike(MEMBER_ID, postId);
+                } else {
+                    await NotificationService.deleteLike(MEMBER_ID, postId);
                 }
             });
         });
-    });
 
-    // 좋아요 버튼 클릭 시 활성/비활성을 토글한다
-    document.querySelectorAll(".tweet-action-btn--like").forEach((button) => {
-        const path = button.querySelector("path"),
-            count = button.querySelector(".tweet-action-count");
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const isActive = button.classList.toggle("active");
-            if (!path || !count) return;
-            button.setAttribute("data-testid", isActive ? "unlike" : "like");
-            button.setAttribute(
-                "aria-label",
-                isActive ? "1 마음에 들어요" : "0 마음에 들어요",
-            );
-            path.setAttribute(
-                "d",
-                isActive ? path.dataset.pathActive : path.dataset.pathInactive,
-            );
-            count.textContent = isActive ? "1" : "";
-        });
-    });
+        // 북마크 버튼 클릭 시 활성/비활성을 토글한다
+        document
+            .querySelectorAll(".tweet-action-btn--bookmark")
+            .forEach((button) => {
+                if (button.dataset.bound) return;
+                button.dataset.bound = "true";
+                button.addEventListener("click", async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const article = button.closest("[data-target-id]");
+                    const postId = article?.dataset.targetId;
+                    if (!postId || !MEMBER_ID) return;
+                    const willActivate = !button.classList.contains("active");
+                    setBookmarkButtonState(button, willActivate);
+                    if (willActivate) {
+                        await NotificationService.addBookmark(MEMBER_ID, postId);
+                    } else {
+                        await NotificationService.deleteBookmark(MEMBER_ID, postId);
+                    }
+                });
+            });
 
-    // 북마크 버튼 클릭 시 활성/비활성을 토글한다
-    document
-        .querySelectorAll(".tweet-action-btn--bookmark")
-        .forEach((button) => {
+        // 답글 버튼 클릭 시 답글 모달을 연다
+        document.querySelectorAll("[data-testid='reply']").forEach((button) => {
+            if (button.dataset.bound) return;
+            button.dataset.bound = "true";
             button.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setBookmarkButtonState(
-                    button,
-                    !button.classList.contains("active"),
-                );
+                closeShareDropdown();
+                closeNotificationDropdown();
+                // 답글 모달 열기는 공용 답글 모달(post-modal.js setupReply)이 처리한다.
+                // 자체 답글 모달 마크업/CSS/핸들러는 Phase 3 후속 PR에서 통째 제거 예정.
             });
         });
 
-    // 답글 버튼 클릭 시 답글 모달을 연다
-    document.querySelectorAll("[data-testid='reply']").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            closeShareDropdown();
-            closeNotificationDropdown();
-            openReplyModal(button);
+        // 더보기(캐럿) 버튼 클릭 시 드롭다운을 토글한다
+        document.querySelectorAll("[data-testid='caret']").forEach((button) => {
+            if (button.dataset.bound) return;
+            button.dataset.bound = "true";
+            button.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                activeMoreButton === button
+                    ? closeNotificationDropdown()
+                    : openNotificationDropdown(button);
+            });
         });
-    });
 
-    // 더보기(캐럿) 버튼 클릭 시 드롭다운을 토글한다
-    document.querySelectorAll("[data-testid='caret']").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            activeMoreButton === button
-                ? closeNotificationDropdown()
-                : openNotificationDropdown(button);
+        // 공유 버튼 클릭 시 공유 드롭다운을 토글한다
+        document.querySelectorAll(".tweet-action-btn--share").forEach((button) => {
+            if (button.dataset.bound) return;
+            button.dataset.bound = "true";
+            button.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeNotificationDropdown();
+                activeShareButton === button
+                    ? closeShareDropdown()
+                    : openShareDropdown(button);
+            });
         });
-    });
+    };
 
-    // 공유 버튼 클릭 시 공유 드롭다운을 토글한다
-    document.querySelectorAll(".tweet-action-btn--share").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            closeNotificationDropdown();
-            activeShareButton === button
-                ? closeShareDropdown()
-                : openShareDropdown(button);
-        });
-    });
+    // 초기 정적 HTML 요소에도 바인딩
+    window.bindNotificationItemEvents();
 
     // 답글 모달 닫기 버튼 클릭 시 모달을 닫는다
     replyCloseButton?.addEventListener("click", closeReplyModal);
@@ -2701,8 +2790,16 @@ window.onload = function () {
 
     // 이모지 버튼 클릭 시 이모지 피커를 토글한다
 
-    replyEmojiButton?.addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); saveReplySelection(); });
-    replyEmojiButton?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleEmojiPicker(); });
+    replyEmojiButton?.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        saveReplySelection();
+    });
+    replyEmojiButton?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleEmojiPicker();
+    });
 
     // 위치 버튼 클릭 시 위치 선택 패널을 연다
     replyGeoButton?.addEventListener("click", (e) => {
@@ -2860,18 +2957,11 @@ window.onload = function () {
         const uid = ub.getAttribute("data-tag-user-id");
         const user = currentTagResults.find((u) => u.id === uid);
         if (!user || pendingTaggedUsers.some((u) => u.id === user.id)) return;
-        pendingTaggedUsers = [...pendingTaggedUsers, { ...user }];
+        pendingTaggedUsers = [...pendingTaggedUsers, {...user}];
         renderTagChipList();
         if (replyTagSearchInput) replyTagSearchInput.value = "";
         renderTagResults([]);
         replyTagSearchInput?.focus();
-    });
-
-    // 답글 제출 버튼 클릭 시 답글 수를 증가시키고 모달을 닫는다
-    replySubmitButton?.addEventListener("click", () => {
-        if (!activeReplyTrigger || replySubmitButton.disabled) return;
-        updateReplyCount(activeReplyTrigger);
-        closeReplyModal({ skipConfirm: true });
     });
 
     // 문서 클릭 시 열린 피커/드롭다운을 외부 클릭으로 닫는다
@@ -2909,7 +2999,7 @@ window.onload = function () {
             if (replyEmojiPicker && !replyEmojiPicker.hidden)
                 updateEmojiPickerPosition();
         },
-        { passive: true },
+        {passive: true},
     );
     // 스크롤 시 이모지 피커 위치를 재계산한다
     window.addEventListener(
@@ -2918,7 +3008,7 @@ window.onload = function () {
             if (replyEmojiPicker && !replyEmojiPicker.hidden)
                 updateEmojiPickerPosition();
         },
-        { passive: true },
+        {passive: true},
     );
 
     // Draft panel events
@@ -3030,9 +3120,30 @@ window.onload = function () {
         // TODO: REST API - GET /api/products/my 로 실제 데이터 가져오기
         // 현재는 하드코딩된 샘플 데이터 사용
         const sampleProducts = [
-            { id: "1", name: "상품 이름 1", price: "₩50,000", stock: "100개", image: "../../static/images/main/global-gates-logo.png", tags: ["#부품", "#전자"] },
-            { id: "2", name: "상품 이름 2", price: "₩30,000", stock: "50개", image: "../../static/images/main/global-gates-logo.png", tags: ["#부품", "#기계"] },
-            { id: "3", name: "상품 이름 3", price: "₩80,000", stock: "200개", image: "../../static/images/main/global-gates-logo.png", tags: ["#부품", "#소재"] },
+            {
+                id: "1",
+                name: "상품 이름 1",
+                price: "₩50,000",
+                stock: "100개",
+                image: "../../static/images/main/global-gates-logo.png",
+                tags: ["#부품", "#전자"]
+            },
+            {
+                id: "2",
+                name: "상품 이름 2",
+                price: "₩30,000",
+                stock: "50개",
+                image: "../../static/images/main/global-gates-logo.png",
+                tags: ["#부품", "#기계"]
+            },
+            {
+                id: "3",
+                name: "상품 이름 3",
+                price: "₩80,000",
+                stock: "200개",
+                image: "../../static/images/main/global-gates-logo.png",
+                tags: ["#부품", "#소재"]
+            },
         ];
 
         if (sampleProducts.length === 0) {
@@ -3109,6 +3220,157 @@ window.onload = function () {
             if (replyProductButton) replyProductButton.disabled = false;
         });
         replyEditor.parentElement?.appendChild(card);
+    }
+
+    // ===== 9. 멘션 기능 =====
+    // 에디터에서 멘션 핸들(@handle) 목록을 수집한다
+    function collectMentionHandles(editor) {
+        const mentions = editor.querySelectorAll('.mention-tag');
+        const handles = [];
+        mentions.forEach((m) => {
+            const handle = m.dataset.handle;
+            if (handle && !handles.includes(handle)) handles.push(handle);
+        });
+        return handles;
+    }
+
+    // 멘션 드롭다운 셋업: 에디터에서 @ 입력 시 사용자 검색 + 선택
+    function setupMention(editor) {
+        if (!editor) return;
+        let mentionMode = false;
+        let mentionQuery = '';
+        let mentionActiveIndex = 0;
+        let mentionResults = [];
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'mention-dropdown off';
+        document.body.appendChild(dropdown);
+
+        editor.addEventListener('input', async () => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            const textNode = range.startContainer;
+            if (textNode.nodeType !== Node.TEXT_NODE) { closeMentionDropdown(); return; }
+
+            const text = textNode.textContent;
+            const cursorPos = range.startOffset;
+            const beforeCursor = text.substring(0, cursorPos);
+            const atIndex = beforeCursor.lastIndexOf('@');
+
+            if (atIndex === -1 || (atIndex > 0 && beforeCursor[atIndex - 1] !== ' ' && beforeCursor[atIndex - 1] !== '\n')) {
+                closeMentionDropdown(); return;
+            }
+
+            const query = beforeCursor.substring(atIndex + 1);
+            if (query.includes(' ')) { closeMentionDropdown(); return; }
+
+            mentionMode = true;
+            mentionQuery = query;
+
+            if (query.length === 0) { closeMentionDropdown(); return; }
+
+            const members = await NotificationService.searchMentionMembers(query, MEMBER_ID);
+            mentionResults = members;
+            mentionActiveIndex = 0;
+
+            if (members.length === 0) { closeMentionDropdown(); return; }
+
+            dropdown.innerHTML = buildMentionDropdownHTML(members);
+            const cursorRect = range.getBoundingClientRect();
+            const editorRect = editor.getBoundingClientRect();
+            dropdown.style.left = editorRect.left + 'px';
+            dropdown.style.top = (cursorRect.bottom + 4) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.classList.remove('off');
+
+            dropdown.querySelectorAll('.mention-item').forEach((item, idx) => {
+                item.addEventListener('mousedown', (e) => { e.preventDefault(); selectMention(idx); });
+            });
+        });
+
+        editor.addEventListener('keydown', (e) => {
+            if (!mentionMode || dropdown.classList.contains('off')) return;
+            if (e.key === 'ArrowDown') { e.preventDefault(); mentionActiveIndex = Math.min(mentionActiveIndex + 1, mentionResults.length - 1); updateActiveItem(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); mentionActiveIndex = Math.max(mentionActiveIndex - 1, 0); updateActiveItem(); }
+            else if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionActiveIndex); }
+            else if (e.key === 'Escape') { closeMentionDropdown(); }
+        });
+
+        function updateActiveItem() {
+            dropdown.querySelectorAll('.mention-item').forEach((item, idx) => {
+                item.classList.toggle('active', idx === mentionActiveIndex);
+                if (idx === mentionActiveIndex) item.scrollIntoView({ block: 'nearest' });
+            });
+        }
+
+        function selectMention(index) {
+            const member = mentionResults[index];
+            if (!member) return;
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            const textNode = range.startContainer;
+            if (textNode.nodeType !== Node.TEXT_NODE) return;
+
+            const text = textNode.textContent;
+            const cursorPos = range.startOffset;
+            const beforeCursor = text.substring(0, cursorPos);
+            const atIndex = beforeCursor.lastIndexOf('@');
+            const before = text.substring(0, atIndex);
+            const after = text.substring(cursorPos);
+
+            textNode.textContent = before;
+
+            const mentionSpan = document.createElement('span');
+            mentionSpan.className = 'mention-tag';
+            mentionSpan.contentEditable = 'false';
+            mentionSpan.dataset.handle = member.memberHandle;
+            mentionSpan.dataset.memberId = member.id;
+            mentionSpan.textContent = member.memberHandle;
+
+            const afterNode = document.createTextNode('\u00A0' + after);
+            const parent = textNode.parentNode;
+            const nextSibling = textNode.nextSibling;
+            parent.insertBefore(mentionSpan, nextSibling);
+            parent.insertBefore(afterNode, mentionSpan.nextSibling);
+
+            const newRange = document.createRange();
+            newRange.setStart(afterNode, 1);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+
+            closeMentionDropdown();
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        function closeMentionDropdown() {
+            mentionMode = false;
+            mentionQuery = '';
+            mentionResults = [];
+            dropdown.classList.add('off');
+            dropdown.innerHTML = '';
+        }
+    }
+
+    // 멘션 드롭다운 HTML 생성
+    function buildMentionDropdownHTML(members) {
+        return members.map((m, i) => {
+            const profileImg = m.profileFileName || '/images/profile/default_image.png';
+            return `<button type="button" class="mention-item${i === 0 ? ' active' : ''}" data-handle="${m.memberHandle}" data-member-id="${m.id}">
+                <img class="mention-item-avatar" src="${profileImg}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                <div class="mention-item-info">
+                    <span class="mention-item-name">${m.memberName || m.memberHandle}</span>
+                    <span class="mention-item-handle">${m.memberHandle}</span>
+                </div>
+            </button>`;
+        }).join('');
+    }
+
+    // 답글 에디터에 멘션 기능 연결
+    if (replyEditor) {
+        setupMention(replyEditor);
     }
 
 };
