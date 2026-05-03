@@ -216,6 +216,26 @@
         reportAttachmentRow.hidden = !visible;
     };
 
+    const hideReportPostInfo = () => {
+        const card = document.querySelector("#reportPostInfoCard");
+        if (card) {
+            card.hidden = true;
+        }
+    };
+
+    const renderReportPostInfo = (report) => {
+        const card = document.querySelector("#reportPostInfoCard");
+        if (!card) return;
+
+        document.querySelector("#reportPostAuthor").textContent = report.authorName || "-";
+        document.querySelector("#reportPostTitle").textContent = report.postTitle || report.targetName || "-";
+        document.querySelector("#reportPostType").innerHTML = getBadgeMarkup(report.postType, postTypeBadgeMap, "badge-qna");
+        document.querySelector("#reportPostCategory").textContent = report.categoryName || "일반";
+        document.querySelector("#reportPostDate").textContent = report.postCreatedDatetime || "-";
+        document.querySelector("#reportPostContent").textContent = report.postContent || "-";
+        card.hidden = false;
+    };
+
     const getMemberFeedRow = () => document.querySelector("#reportMemberFeedRow");
 
     const renderMemberFeedLink = (report) => {
@@ -1380,6 +1400,7 @@
         document.querySelector("#reportReason").textContent = report.reason || "-";
         document.querySelector("#reportStatusBadge").innerHTML = getBadgeMarkup(report.status, reportStatusBadgeMap, "badge-pending");
         showReportAttachmentRow(false);
+        hideReportPostInfo();
         renderMemberFeedLink(report);
         renderReportAttachments(null);
 
@@ -1404,6 +1425,7 @@
         document.querySelector("#reportStatusBadge").innerHTML = getBadgeMarkup(report.status, reportStatusBadgeMap, "badge-pending");
         showReportAttachmentRow(true);
         hideMemberFeedLink();
+        renderReportPostInfo(report);
         renderReportAttachments(report);
 
         modalReportDetail.classList.remove("off");

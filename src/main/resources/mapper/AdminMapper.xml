@@ -179,11 +179,24 @@
                end as target_name,
                r.reason,
                r.status,
-               to_char(r.created_datetime, 'YYYY-MM-DD HH24:MI:SS') as created_datetime
+               to_char(r.created_datetime, 'YYYY-MM-DD HH24:MI:SS') as created_datetime,
+               target_author.member_name as author_name,
+               target_post.title as post_title,
+               target_post.content as post_content,
+               case
+                   when r.target_type = 'post' and target_product.id is not null then 'product'
+                   when r.target_type = 'post' then 'general'
+                   else null
+               end as post_type,
+               target_category.category_name,
+               to_char(target_post.created_datetime, 'YYYY-MM-DD HH24:MI:SS') as post_created_datetime
         from tbl_report r
         join tbl_member reporter on reporter.id = r.reporter_id
         left join tbl_member target_member on target_member.id = r.target_id and r.target_type = 'member'
         left join tbl_post target_post on target_post.id = r.target_id and r.target_type = 'post'
+        left join tbl_member target_author on target_author.id = target_post.member_id
+        left join tbl_post_product target_product on target_product.id = target_post.id
+        left join tbl_category target_category on target_category.id = target_product.product_category_id
         where 1 = 1
         <if test="keyword != null and keyword != ''">
             and (
@@ -380,6 +393,36 @@
             select distinct r.target_id
             from tbl_report r
             where r.target_type = 'post'
+              and r.id in
+              <foreach item="reportId" collection="reportIds" open="(" separator="," close=")">
+                  #{reportId}
+              </foreach>
+        )
+    </update>
+
+    <update id="updateReportedMemberStatusByReportIds">
+        update tbl_member
+        set member_status = #{memberStatus}::member_status,
+            updated_datetime = now()
+        where id in (
+            select distinct r.target_id
+            from tbl_report r
+            where r.target_type = 'member'
+              and r.id in
+              <foreach item="reportId" collection="reportIds" open="(" separator="," close=")">
+                  #{reportId}
+              </foreach>
+        )
+    </update>
+
+    <update id="updateReportedMemberPostStatusByReportIds">
+        update tbl_post
+        set post_status = #{postStatus}::post_status,
+            updated_datetime = now()
+        where member_id in (
+            select distinct r.target_id
+            from tbl_report r
+            where r.target_type = 'member'
               and r.id in
               <foreach item="reportId" collection="reportIds" open="(" separator="," close=")">
                   #{reportId}
