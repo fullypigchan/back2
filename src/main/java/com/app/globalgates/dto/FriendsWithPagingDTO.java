@@ -14,4 +14,5 @@ import java.util.List;
 public class FriendsWithPagingDTO {
     private List<FriendsDTO> friends;
     private Criteria criteria;
+    private Integer total;
 }

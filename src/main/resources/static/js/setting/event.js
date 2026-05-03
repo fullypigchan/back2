@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // 사이드바 게시하기 모달 활성화. memberId는 setting.html inline의 window.settingMember.id 사용.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => window.settingMember?.id,
+    });
+
     /*
      * 이 파일은 setting.html 안의 설정 페이지 전체 상호작용을 담당한다.
      * 사용 위치:
@@ -1028,7 +1035,7 @@ document.addEventListener("DOMContentLoaded", () => {
             handle.textContent = currentAccountState.handle;
         }
         if (summary instanceof HTMLElement) {
-            summary.textContent = `X 계정 비활성화 과정을 시작합니다. 내 표시 이름, ${currentAccountState.handle}, 공개 프로필이 X.com, iOS용 X, Android용 X에 더 이상 표시되지 않습니다.`;
+            summary.textContent = `GlobalGates 계정 비활성화 과정을 시작합니다. 내 표시 이름, ${currentAccountState.handle}, 공개 프로필이 GlobalGates, iOS용 GlobalGates, Android용 GlobalGates에 더 이상 표시되지 않습니다.`;
         }
     }
 
@@ -1895,6 +1902,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const deactivateLink = target.closest("[data-deactivate-link]");
         if (deactivateLink instanceof HTMLAnchorElement) {
             event.preventDefault();
+            const deactivateTarget = deactivateLink.dataset.deactivateTarget;
+            if (deactivateTarget === "username-edit") {
+                activeDetailRoute = "username-edit";
+                renderDetail();
+            } else if (deactivateTarget === "account-info") {
+                activeDetailRoute = isPasswordlessAccount
+                    ? "account-info-list"
+                    : "account-info-auth";
+                renderDetail();
+            }
             return;
         }
 

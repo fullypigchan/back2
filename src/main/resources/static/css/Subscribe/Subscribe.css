@@ -826,6 +826,15 @@ body {
         padding-bottom: 300px;
     }
 
+    .sub-footer {
+        bottom: 53px;
+        transition: transform 0.18s ease-out;
+    }
+
+    body.mob-more-open .sub-footer {
+        transform: translateY(calc(-1 * var(--mob-more-sheet-h, 0px)));
+    }
+
     .sub-container {
         padding: 0 14px 44px;
     }

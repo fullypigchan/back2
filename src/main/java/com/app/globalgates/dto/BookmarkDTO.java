@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,6 +37,8 @@ public class BookmarkDTO {
     private boolean liked;
     // 첨부파일
     private List<PostFileDTO> postFiles;
+    // 해시태그 (post 북마크에서만 채워짐, 뉴스 북마크는 빈 리스트)
+    private List<PostHashtagDTO> hashtags = new ArrayList<>();
     // 뉴스 북마크 지원: 'post' | 'news', 그리고 뉴스 ID
     private String bookmarkType;
     private Long newsId;

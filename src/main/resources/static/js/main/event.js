@@ -1,9 +1,6 @@
 window.onload = () => {
     let memberId = null;
 
-    // 장소 검색 객체 (검색 시 초기화)
-    var ps = null;
-
     // ── 1. 탭 전환 + 데이터 로드 + 무한스크롤 ──
     let activeTab = "feed";
     let postPage = 1;
@@ -86,6 +83,73 @@ window.onload = () => {
             setTimeout(() => { expertCheckScroll = true; }, 1000);
         }
     });
+
+    // 게시물 상세에서 토글된 좋아요/북마크 상태를 목록 카드에 반영하기 위한 sessionStorage 동기화
+    const POST_STATE_KEY = "postStateChanges";
+
+    function readPostStateChanges() {
+        try { return JSON.parse(sessionStorage.getItem(POST_STATE_KEY) || "{}"); }
+        catch (e) { return {}; }
+    }
+
+    function savePostStateChange(postId, field, value) {
+        if (!postId) return;
+        const changes = readPostStateChanges();
+        changes[postId] = changes[postId] || {};
+        changes[postId][field] = value;
+        sessionStorage.setItem(POST_STATE_KEY, JSON.stringify(changes));
+    }
+
+    function applyPostStateChanges() {
+        const changes = readPostStateChanges();
+        if (!changes || Object.keys(changes).length === 0) return;
+        Object.keys(changes).forEach((postId) => {
+            const card = document.querySelector(`.postCard[data-post-id="${postId}"]`);
+            if (!card) return;
+            const change = changes[postId] || {};
+
+            if (Object.prototype.hasOwnProperty.call(change, "liked")) {
+                const likeBtn = card.querySelector(".tweet-action-btn--like");
+                if (likeBtn) {
+                    const wasActive = likeBtn.classList.contains("active");
+                    if (wasActive !== change.liked) {
+                        const countSpan = likeBtn.querySelector(".tweet-action-count");
+                        const cur = parseInt(countSpan?.textContent || "0") || 0;
+                        if (countSpan) countSpan.textContent = String(Math.max(0, cur + (change.liked ? 1 : -1)));
+                        likeBtn.classList.toggle("active", change.liked);
+                        const p = likeBtn.querySelector("path");
+                        if (p) {
+                            const next = change.liked ? p.dataset.pathActive : p.dataset.pathInactive;
+                            if (next) p.setAttribute("d", next);
+                        }
+                    }
+                }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(change, "bookmarked")) {
+                const bkBtn = card.querySelector(".tweet-action-btn--bookmark");
+                if (bkBtn) {
+                    bkBtn.classList.toggle("active", change.bookmarked);
+                    const p = bkBtn.querySelector("path");
+                    if (p) {
+                        const next = change.bookmarked ? p.dataset.pathActive : p.dataset.pathInactive;
+                        if (next) p.setAttribute("d", next);
+                    }
+                }
+            }
+        });
+    }
+
+    // 피드 카드가 새로 그려진 뒤에 sessionStorage 변경분을 한번 더 입혀준다.
+    const _origShowPostList = layout.showPostList;
+    layout.showPostList = function (posts, page) {
+        const result = _origShowPostList(posts, page);
+        applyPostStateChanges();
+        return result;
+    };
+
+    // bfcache 로 복원되어 showPostList 가 다시 호출되지 않을 때를 대비해 pageshow 에서도 한번 더 적용한다.
+    window.addEventListener("pageshow", () => applyPostStateChanges());
 
     // ── 2. 게시물 버튼 이벤트 (이벤트 위임) ──
     const mainShareDropdown = document.getElementById("mainShareDropdown");
@@ -264,6 +328,9 @@ window.onload = () => {
                 if (postId) {
                     console.log("신고 접수 postId:", postId);
                     await service.report(memberId, postId, 'post', reportItem.dataset.reason);
+                    // 신고된 카드 즉시 제거.
+                    const card = document.querySelector(`.postCard[data-post-id="${postId}"]`);
+                    if (card) { card.remove(); }
                 }
                 showPostMoreToast("신고가 접수되었습니다");
                 closePostMoreModal();
@@ -413,6 +480,14 @@ window.onload = () => {
         }
     });
 
+    // 좋아요/북마크 SVG path 토글 헬퍼
+    function syncActionPath(btn, active) {
+        const p = btn?.querySelector("path");
+        if (!p) return;
+        const next = active ? p.dataset.pathActive : p.dataset.pathInactive;
+        if (next) p.setAttribute("d", next);
+    }
+
     // 좋아요 토글 (이벤트 위임)
     document.addEventListener("click", async (e) => {
         const likeBtn = e.target.closest(".tweet-action-btn--like");
@@ -431,6 +506,8 @@ window.onload = () => {
             likeBtn.classList.add("active");
             countSpan.textContent = count + 1;
         }
+        syncActionPath(likeBtn, !isActive);
+        savePostStateChange(postId, "liked", !isActive);
     });
 
     // 북마크 토글 (이벤트 위임)
@@ -447,6 +524,8 @@ window.onload = () => {
             await service.addBookmark(memberId, postId);
             bookmarkBtn.classList.add("active");
         }
+        syncActionPath(bookmarkBtn, !isActive);
+        savePostStateChange(postId, "bookmarked", !isActive);
     });
 
     // 공유 드롭다운 토글 (이벤트 위임)
@@ -532,8 +611,12 @@ window.onload = () => {
                 const card = document.querySelector(`.postCard[data-post-id="${shareTargetPostId}"]`);
                 if (card) {
                     const btn = card.querySelector(".tweet-action-btn--bookmark");
-                    if (btn) btn.classList.add("active");
+                    if (btn) {
+                        btn.classList.add("active");
+                        syncActionPath(btn, true);
+                    }
                 }
+                savePostStateChange(shareTargetPostId, "bookmarked", true);
                 showShareToast("북마크 폴더에 추가되었습니다.");
             } else if (result.status === 409) {
                 showShareToast("이 폴더에 이미 북마크된 게시물입니다.");
@@ -635,68 +718,8 @@ window.onload = () => {
         }
     });
 
-    // ── 4. 좌측 네비게이션 ──
-    const navItems = document.querySelectorAll(".nav-item");
-
-    navItems.forEach((item) => {
-        item.addEventListener("click", (e) => {
-            navItems.forEach((nav) => { nav.classList.remove("active"); });
-            item.classList.add("active");
-        });
-    });
-
-    const navMore = document.getElementById("navMore");
-    const navMoreLayer = document.getElementById("navMoreLayer");
-
-    navMore.addEventListener("click", (e) => {
-        e.stopPropagation();
-        let isOpen = !navMoreLayer.classList.contains("off");
-        if (isOpen) {
-            navMoreLayer.classList.add("off");
-        } else {
-            let rect = navMore.getBoundingClientRect();
-            let popover = document.getElementById("navMorePopover");
-            popover.style.visibility = "hidden";
-            navMoreLayer.classList.remove("off");
-            popover.style.left = rect.left + "px";
-            popover.style.top = (rect.top - popover.offsetHeight - 8) + "px";
-            popover.style.visibility = "";
-        }
-    });
-
-    navMoreLayer.querySelector(".nav-more-overlay").addEventListener("click", (e) => {
-        navMoreLayer.classList.add("off");
-    });
-
-    const accountCard = document.getElementById("accountCard");
-    const accountMenuPopup = document.getElementById("accountMenuPopup");
-
-    accountCard.addEventListener("click", (e) => {
-        e.stopPropagation();
-        let isOpen = !accountMenuPopup.classList.contains("off");
-        if (isOpen) {
-            accountMenuPopup.classList.add("off");
-        } else {
-            accountMenuPopup.classList.remove("off");
-        }
-    });
-
-    document.getElementById("accountLogoutButton").addEventListener("click", (e) => {
-        let result = confirm("로그아웃 하시겠습니까?");
-        if (result) {
-            alert("로그아웃되었습니다.");
-            accountMenuPopup.classList.add("off");
-        }
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest("#accountMenuPopup") && !e.target.closest("#accountCard")) {
-            accountMenuPopup.classList.add("off");
-        }
-        if (!e.target.closest("#navMoreLayer") && !e.target.closest("#navMore")) {
-            navMoreLayer.classList.add("off");
-        }
-    });
+    // ── 4. 좌측 네비게이션 / 더 보기 / 계정 메뉴 ──
+    // /js/common/header.js 에서 모든 페이지(layout, layout-left-one, main) 공통으로 처리한다.
 
     // ── 5. 검색 ──
     const searchInput = document.getElementById("searchInput");
@@ -878,18 +901,20 @@ window.onload = () => {
 
 
     // 작성/답글 모달 셋업 — 한 번 호출로 양쪽 다 처리 (마크업 없으면 자동 skip).
+    const refreshFeed = () => {
+        postPage = 1;
+        service.getPostList(postPage, memberId, (data) => {
+            const posts = layout.showPostList(data.posts, postPage);
+            initFollowState(posts);
+            postHasMore = data.criteria.hasMore;
+        });
+    };
     postModalApi.bootstrap({
         services: service,
         layout: layout,
         getMemberId: () => memberId,
-        onSubmitSuccess: () => {
-            postPage = 1;
-            service.getPostList(postPage, memberId, (data) => {
-                const posts = layout.showPostList(data.posts, postPage);
-                initFollowState(posts);
-                postHasMore = data.criteria.hasMore;
-            });
-        },
+        onSubmitSuccess: refreshFeed,
+        onReplySubmitSuccess: refreshFeed,
     });
 
     document.addEventListener("click", (e) => {
@@ -1026,11 +1051,7 @@ window.onload = () => {
                 });
             });
         }
-        document.getElementById("accountLogoutButton").addEventListener("click", async (e) => {
-            e.preventDefault();
-            await service.logout();
-            location.href = "/member/join"
-        })
+        // 로그아웃 핸들러는 공통 header.js 에서 바인딩한다 (모든 탭에서 동일 동작).
     }
 
     load();

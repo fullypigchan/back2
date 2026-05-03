@@ -1,6 +1,8 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.common.enumeration.NotificationType;
 import com.app.globalgates.config.RabbitmqConfig;
+import com.app.globalgates.dto.NotificationDTO;
 import com.app.globalgates.dto.chat.ChatMessageDTO;
 import com.app.globalgates.dto.chat.ChatRoomDTO;
 import com.app.globalgates.dto.FileDTO;
@@ -30,6 +32,23 @@ public class ProducerService {
     private final ChatFileService chatFileService;
     private final SimpMessagingTemplate messagingTemplate;
     private final BlockService blockService;
+    private final NotificationService notificationService;
+
+    private void sendMessageNotification(ChatMessageDTO saved) {
+        chatRoomDAO.findPartnerByConversation(saved.getConversationId(), saved.getSenderId())
+                .map(ChatRoomDTO::getInvitedId)
+                .ifPresent(partnerId -> {
+                    NotificationDTO noti = new NotificationDTO();
+                    noti.setRecipientId(partnerId);
+                    noti.setSenderId(saved.getSenderId());
+                    noti.setNotificationType(NotificationType.MESSAGE);
+                    noti.setTitle("메시지");
+                    noti.setContent("새 메시지가 도착했습니다.");
+                    noti.setTargetId(saved.getConversationId());
+                    noti.setTargetType("conversation");
+                    notificationService.createNotification(noti);
+                });
+    }
 
     private void validateNotBlocked(Long conversationId, Long senderId) {
         Optional<ChatRoomDTO> partner = chatRoomDAO.findPartnerByConversation(conversationId, senderId);
@@ -66,6 +85,8 @@ public class ProducerService {
 //        삭제했던 멤버에게 방 복원 알림 (WebSocket 구독이 끊긴 상태이므로 사용자 채널로 전송)
         notifyRestoredMembers(deletedMemberIds, saved.getConversationId());
 
+        sendMessageNotification(saved);
+
         return saved;
     }
 
@@ -99,6 +120,8 @@ public class ProducerService {
 
 //        삭제했던 멤버에게 방 복원 알림
         notifyRestoredMembers(deletedMemberIds, saved.getConversationId());
+
+        sendMessageNotification(saved);
 
         return saved;
     }

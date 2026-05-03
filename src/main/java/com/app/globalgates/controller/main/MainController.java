@@ -84,6 +84,7 @@ public class MainController {
         model.addAttribute("post", postDTO);
         model.addAttribute("memberId", memberId);
         model.addAttribute("loginMember", loginMember);
+        model.addAttribute("member", loginMember);
         return "post-detailed/post-detailed";
     }
 

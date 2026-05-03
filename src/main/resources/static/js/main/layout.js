@@ -19,6 +19,11 @@ const layout = (() => {
         return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
     }
 
+    const SVG_LIKE_OFF = "M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z";
+    const SVG_LIKE_ON = "M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z";
+    const SVG_BOOKMARK_OFF = "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z";
+    const SVG_BOOKMARK_ON = "M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z";
+
     const createNewsCard = (post) => {
         return `
             <div class="postCard" data-post-id="${post.id}">
@@ -35,7 +40,7 @@ const layout = (() => {
                                 <span class="tweet-action-count">${post.replyCount || 0}</span>
                             </button>
                             <button class="tweet-action-btn tweet-action-btn--like ${post.liked ? 'active' : ''}" data-post-id="${post.id}">
-                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>
+                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path data-path-inactive="${SVG_LIKE_OFF}" data-path-active="${SVG_LIKE_ON}" d="${post.liked ? SVG_LIKE_ON : SVG_LIKE_OFF}"></path></g></svg>
                                 <span class="tweet-action-count">${post.likeCount || 0}</span>
                             </button>
                             <button class="tweet-action-btn tweet-action-btn--views">
@@ -44,7 +49,7 @@ const layout = (() => {
                             </button>
                             <div class="tweet-action-right">
                                 <button class="tweet-action-btn tweet-action-btn--bookmark ${post.bookmarked ? 'active' : ''}" data-post-id="${post.id}">
-                                    <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>
+                                    <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path data-path-inactive="${SVG_BOOKMARK_OFF}" data-path-active="${SVG_BOOKMARK_ON}" d="${post.bookmarked ? SVG_BOOKMARK_ON : SVG_BOOKMARK_OFF}"></path></g></svg>
                                 </button>
                                 <button class="tweet-action-btn tweet-action-btn--share">
                                     <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path></g></svg>
@@ -121,15 +126,31 @@ const layout = (() => {
                     `;
         }
 
+        // 커뮤니티 게시글: 커뮤니티명 → 사용자명 → @handle · 작성일자 순으로 사용자명 라인에 맞춰 표시한다.
+        const isCommunityPost = !!post.communityId;
+        const communityMetaHtml = isCommunityPost ? `
+                                <div class="communityPostMeta">
+                                    <a class="communityPostMeta__text" href="/community/${post.communityId}">${post.communityName || ""}</a>
+                                    ${post.categoryName ? `<span class="communityPostMeta__category">${post.categoryName}</span>` : ""}
+                                </div>` : "";
+
         return `
-            <div class="postCard" data-post-id="${post.id}" data-member-id="${post.memberId}">
-                ${avatarHtml}
+            <div class="postCard${isCommunityPost ? ' communityPostCard' : ''}" data-post-id="${post.id}" data-member-id="${post.memberId}"${isCommunityPost ? ` data-community-id="${post.communityId}"` : ''}>
                 <div class="postBody">
                     <header class="postHeader">
                         <div class="postIdentity">
-                            <strong class="postName">${nickname}</strong>${badgeHtml}
-                            <span class="postHandle">${handle}</span>
-                            <span class="postTime">${post.createdDatetime || ""}</span>
+                            ${avatarHtml}
+                            <div class="postIdentity__copy">
+                                ${communityMetaHtml}
+                                <div class="postIdentity__nameRow">
+                                    <strong class="postName">${nickname}</strong>${badgeHtml}
+                                </div>
+                                <div class="postIdentity__metaRow">
+                                    <span class="postHandle">${handle}</span>
+                                    <span class="postIdentity__sep">·</span>
+                                    <span class="postTime">${post.createdDatetime || ""}</span>
+                                </div>
+                            </div>
                         </div>
                         <button class="postMoreButton">
                             <svg class="postMoreIcon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></g></svg>
@@ -176,7 +197,7 @@ const layout = (() => {
                                 <span class="tweet-action-count">${post.replyCount || 0}</span>
                             </button>
                             <button class="tweet-action-btn tweet-action-btn--like ${post.liked ? 'active' : ''}" data-post-id="${post.id}">
-                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></g></svg>
+                                <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path data-path-inactive="${SVG_LIKE_OFF}" data-path-active="${SVG_LIKE_ON}" d="${post.liked ? SVG_LIKE_ON : SVG_LIKE_OFF}"></path></g></svg>
                                 <span class="tweet-action-count">${post.likeCount || 0}</span>
                             </button>
                             <button class="tweet-action-btn tweet-action-btn--views">
@@ -185,7 +206,7 @@ const layout = (() => {
                             </button>
                             <div class="tweet-action-right">
                                 <button class="tweet-action-btn tweet-action-btn--bookmark ${post.bookmarked ? 'active' : ''}" data-post-id="${post.id}">
-                                    <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>
+                                    <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path data-path-inactive="${SVG_BOOKMARK_OFF}" data-path-active="${SVG_BOOKMARK_ON}" d="${post.bookmarked ? SVG_BOOKMARK_ON : SVG_BOOKMARK_OFF}"></path></g></svg>
                                 </button>
                                 <button class="tweet-action-btn tweet-action-btn--share">
                                     <svg class="tweet-action-icon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path></g></svg>
@@ -262,12 +283,12 @@ const layout = (() => {
 
         return `
             <div class="postCard postCard--ad" data-post-id="${ad.id}" data-member-id="${ad.advertiserId}">
-                <div class="postAvatar postAvatar--image">
-                    <img class="postAvatarImage" src="${profileImg}" onerror="this.src='/images/profile/default_image.png'">
-                </div>
                 <div class="postBody">
                     <header class="postHeader">
                         <div class="postIdentity">
+                            <div class="postAvatar postAvatar--image">
+                                <img class="postAvatarImage" src="${profileImg}" onerror="this.src='/images/profile/default_image.png'">
+                            </div>
                             <strong class="postName">${advertiserName}</strong>
                             <span class="postHandle">${advertiserHandle}</span>
                             <span class="postTime">${ad.createdDatetime || ""}</span>

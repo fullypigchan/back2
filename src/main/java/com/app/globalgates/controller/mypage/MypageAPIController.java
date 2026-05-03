@@ -229,6 +229,13 @@ public class MypageAPIController implements MypageAPIControllerDocs {
         // main / mypage Posts 탭과 동일하게, Likes 탭도 이미지 URL을 presigned URL로 가공한다.
         // 이 단계가 없으면 raw S3 key가 그대로 브라우저에 전달되어 이미지가 깨질 수 있다.
         result.getPosts().forEach(post -> {
+            // 작성자 프로필 이미지도 다른 메서드와 동일하게 presigned URL로 가공한다.
+            if (post.getMemberProfileFileName() != null && !post.getMemberProfileFileName().isBlank()) {
+                post.setMemberProfileFileName(
+                        toPresignedUrlOrOriginal(post.getMemberProfileFileName())
+                );
+            }
+
             if (post.getPostFiles() == null || post.getPostFiles().isEmpty()) {
                 return;
             }

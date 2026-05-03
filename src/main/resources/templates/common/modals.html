@@ -338,12 +338,8 @@
         </div>
     </div>
 </div>
-<!-- 전역 레이어 마운트: 더보기/공유 드롭다운과 계정 팝업이 이 루트에 올라온다. -->
+<!-- 전역 레이어 마운트: 더보기/공유 드롭다운이 이 루트에 올라온다. 계정 팝업은 사이드바 wrapper 안으로 이동했다. -->
 <div id="layers">
-    <!-- 계정 메뉴 팝업: 좌측 하단 계정 카드가 열 때 JS가 이 고정 노드를 재사용하고 hidden만 토글한다. -->
-    <div class="account-menu-popup off" id="accountMenuPopup">
-        <button class="account-menu-logout" id="accountLogoutButton">계정에서 로그아웃</button>
-    </div>
     <!-- 커뮤니티 선택 레이어 (게시판 선택 제거) -->
     <div class="boardMenu off" id="boardMenu">
         <div class="boardMenuSection">

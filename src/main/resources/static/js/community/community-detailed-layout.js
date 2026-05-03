@@ -77,17 +77,33 @@ const CommunityDetailLayout = {
             }
         }
 
+        const communityName = this.escapeHtml(post.communityName || '');
+        const categoryName = this.escapeHtml(post.categoryName || '');
+        const communityMetaHtml = communityName ? `
+                            <div class="communityPostMeta">
+                                <a class="communityPostMeta__text" href="/community/${post.communityId}">${communityName}</a>
+                                ${categoryName ? `<span class="communityPostMeta__category">${categoryName}</span>` : ''}
+                            </div>` : '';
+
         return `
         <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-is-followed="${isFollowed ? 'true' : 'false'}">
-            <div class="postAvatar">
-                <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
-            </div>
             <div class="postBody">
                 <header class="postHeader">
                     <div class="postIdentity">
-                        <strong class="postName">${nickname}</strong>
-                        <span class="postHandle">${handle}</span>
-                        <span class="postTime">${post.createdDatetime}</span>
+                        <div class="postAvatar">
+                            <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                        </div>
+                        <div class="postIdentity__copy">
+                            ${communityMetaHtml}
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${nickname}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                <span class="postHandle">${handle}</span>
+                                <span class="postIdentity__sep">·</span>
+                                <span class="postTime">${post.createdDatetime}</span>
+                            </div>
+                        </div>
                     </div>
                     <button class="postMoreButton" type="button" aria-label="게시물 더 보기">
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="postMoreIcon"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg>
@@ -108,9 +124,9 @@ const CommunityDetailLayout = {
                                 : 'M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z'}"></path></g></svg>
                             <span class="tweet-action-count">${post.likeCount ?? 0}</span>
                         </button>
-                        <button class="tweet-action-btn tweet-action-btn--views" aria-label="북마크 ${post.bookmarkCount ?? 0}">
-                            <svg class="tweet-action-icon" viewBox="0 0 24 24"><g><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"></path></g></svg>
-                            <span class="tweet-action-count">${post.bookmarkCount ?? 0}</span>
+                        <button class="tweet-action-btn tweet-action-btn--views" aria-label="조회수 ${post.postReadCount ?? 0}">
+                            <svg class="tweet-action-icon" viewBox="0 0 24 24"><g><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path></g></svg>
+                            <span class="tweet-action-count">${post.postReadCount ?? 0}</span>
                         </button>
                         <div class="tweet-action-right">
                             <button class="tweet-action-btn tweet-action-btn--bookmark ${isBookmarked ? 'active' : ''}" data-post-id="${post.id}">
@@ -147,7 +163,7 @@ const CommunityDetailLayout = {
             const nick = this.escapeHtml(member.memberNickname);
             const handle = this.formatHandle(member.memberHandle);
             return `
-            <article class="about-member-row" data-member-id="${member.memberId}">
+            <article class="about-member-row" data-member-id="${member.memberId}" data-profile-id="${member.memberId}">
                 <div class="about-member-avatar">
                     <img src="${member.memberProfileFilePath || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
                 </div>
@@ -195,7 +211,7 @@ const CommunityDetailLayout = {
         const roleLabel = role === "admin" ? "관리자" : role === "moderator" ? "중재자" : "";
         const canManage = (myRole === "admin" || myRole === "creator") && role !== "admin" && role !== "creator";
         return `
-        <div class="member-item" data-member-id="${member.memberId}">
+        <div class="member-item" data-member-id="${member.memberId}" data-profile-id="${member.memberId}">
             <div class="member-info">
                 <span class="member-nickname">${nick}</span>
                 <span class="member-handle">${handle}</span>
@@ -216,5 +232,26 @@ const CommunityDetailLayout = {
     // ─── 빈 상태 ───
     renderEmptyState(message) {
         return `<div class="communityEmpty"><p>${this.escapeHtml(message)}</p></div>`;
+    },
+
+    // 공용 답글 모달의 source avatar fallback (카드에 avatar 없을 때).
+    buildAvatarDataUri(label) {
+        const safe = String(label || "?").slice(0, 1).replace(/[&<>"']/g, "");
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="20" fill="#cfe8fc"></rect><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#1d9bf0">' + safe + '</text></svg>';
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    },
+
+    // 공용 모달의 @ mention 드롭다운.
+    buildMentionDropdown(members) {
+        return members.map((m, i) => {
+            const profileImg = m.profileFileName ? m.profileFileName : "/images/profile/default_image.png";
+            return `<button type="button" class="mention-item${i === 0 ? " active" : ""}" data-handle="${m.memberHandle}" data-member-id="${m.id}">
+                <img class="mention-item-avatar" src="${profileImg}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                <div class="mention-item-info">
+                    <span class="mention-item-name">${m.memberName || m.memberHandle}</span>
+                    <span class="mention-item-handle">${m.memberHandle}</span>
+                </div>
+            </button>`;
+        }).join("");
     },
 };

@@ -7,6 +7,7 @@ import com.app.globalgates.dto.BookmarkFolderDTO;
 import com.app.globalgates.repository.BookmarkDAO;
 import com.app.globalgates.repository.BookmarkFolderDAO;
 import com.app.globalgates.repository.NewsBookmarkDAO;
+import com.app.globalgates.repository.PostHashtagDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,6 +24,7 @@ public class BookmarkService {
     private final BookmarkDAO bookmarkDAO;
     private final BookmarkFolderDAO bookmarkFolderDAO;
     private final NewsBookmarkDAO newsBookmarkDAO;
+    private final PostHashtagDAO postHashtagDAO;
 
     //    폴더 생성
     @CacheEvict(value = "bookmark:folder:list", allEntries = true)
@@ -135,28 +137,45 @@ public class BookmarkService {
     @Cacheable(value = "bookmark:list", key = "'member:' + #memberId")
     @LogStatusWithReturn
     public List<BookmarkDTO> getBookmarks(Long memberId) {
-        return bookmarkDAO.findAllByMemberId(memberId);
+        List<BookmarkDTO> list = bookmarkDAO.findAllByMemberId(memberId);
+        attachHashtags(list);
+        return list;
     }
 
     //    폴더별 북마크 조회 (소유권 검증 포함)
     @LogStatusWithReturn
     public List<BookmarkDTO> getBookmarksByFolder(Long folderId, Long memberId) {
         assertFolderOwnedBy(folderId, memberId);
-        return bookmarkDAO.findAllByFolderId(folderId);
+        List<BookmarkDTO> list = bookmarkDAO.findAllByFolderId(folderId);
+        attachHashtags(list);
+        return list;
     }
 
     //    폴더별 북마크 조회 (레거시)
     @Cacheable(value = "bookmark:list", key = "'folder:' + #folderId")
     @LogStatusWithReturn
     public List<BookmarkDTO> getBookmarksByFolder(Long folderId) {
-        return bookmarkDAO.findAllByFolderId(folderId);
+        List<BookmarkDTO> list = bookmarkDAO.findAllByFolderId(folderId);
+        attachHashtags(list);
+        return list;
     }
 
     //    미분류 북마크 조회
     @Cacheable(value = "bookmark:list", key = "'uncategorized:' + #memberId")
     @LogStatusWithReturn
     public List<BookmarkDTO> getUncategorizedBookmarks(Long memberId) {
-        return bookmarkDAO.findAllUncategorizedByMemberId(memberId);
+        List<BookmarkDTO> list = bookmarkDAO.findAllUncategorizedByMemberId(memberId);
+        attachHashtags(list);
+        return list;
+    }
+
+    //    post 타입 북마크에 해시태그 채워넣기 (뉴스 북마크는 빈 리스트로 둠)
+    private void attachHashtags(List<BookmarkDTO> list) {
+        list.forEach(b -> {
+            if ("post".equals(b.getBookmarkType()) && b.getPostId() != null) {
+                b.setHashtags(postHashtagDAO.findAllByPostId(b.getPostId()));
+            }
+        });
     }
 
     //    북마크 개수 조회

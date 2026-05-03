@@ -75,12 +75,12 @@ const estimationListLayout = (() => {
                  data-filter-state="${escapeHtml(toFilterState(estimation.status))}"
                  data-created-date="${escapeHtml(normalizeDate(estimation.createdDateTime))}"
                  data-estimation-detail-target="${detailId}">
-                <div class="postAvatar postAvatar--image">
-                    <img src="/images/main/ad.png" alt="" class="postAvatarImage"/>
-                </div>
                 <div class="postBody">
                     <header class="postHeader">
                         <div class="postIdentity">
+                            <div class="postAvatar postAvatar--image">
+                                <img src="/images/main/ad.png" alt="" class="postAvatarImage"/>
+                            </div>
                             <strong class="postName">${escapeHtml(receiverEmail)}</strong>
                             <span class="postHandle">견적 요청</span>
                             <span class="postTime">${escapeHtml(estimation.createdDateTime || "")}</span>

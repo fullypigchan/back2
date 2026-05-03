@@ -12,4 +12,12 @@ public interface FriendsMapper {
     public List<FriendsDTO> selectAll(@Param("criteria") Criteria criteria, @Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
 
     public int selectTotal(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
+
+    public List<FriendsDTO> selectAllFollowers(@Param("criteria") Criteria criteria, @Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
+
+    public int selectTotalFollowers(@Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
+
+    public List<FriendsDTO> selectAllFollowings(@Param("criteria") Criteria criteria, @Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
+
+    public int selectTotalFollowings(@Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
 }

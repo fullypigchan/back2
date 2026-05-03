@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
     <link rel="stylesheet" href="/css/Friends/Friends.css"/>
     <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
+    <script src="/js/main/service.js"></script>
     <script src="/js/Friends/service.js"></script>
     <script src="/js/Friends/layout.js"></script>
     <script src="/js/Friends/event.js"></script>
@@ -18,7 +19,9 @@
 <div class="app-layout">
     <th:block layout:fragment="content">
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content"
+          th:data-page-member-id="${pageMember != null ? pageMember.id : ''}"
+          th:data-is-owner="${isOwner != null ? isOwner : true}">
         <!-- Header -->
         <div class="main-header">
             <button class="header-back" id="headerBack">
@@ -28,12 +31,23 @@
                     />
                 </svg>
             </button>
-            <h1 class="header-title">친구</h1>
+            <h1 class="header-title" th:text="${pageMember != null and pageMember.memberHandle != null ? pageMember.memberHandle : '친구'}">친구</h1>
             <div class="header-spacer"></div>
         </div>
 
-        <!-- Category Banner -->
-        <div class="category-banner">
+        <!-- Pill Tabs (추천 커넥션은 본인 페이지에서만) -->
+        <div class="friends-tabs">
+            <button th:if="${isOwner}" class="friends-tab active" data-tab="recommend">추천 커넥션</button>
+            <button class="friends-tab" th:classappend="${isOwner} ? '' : 'active'" data-tab="followers">
+                커넥터 <span class="friends-tab-count" th:text="${followersCount != null ? followersCount : 0}">0</span>
+            </button>
+            <button class="friends-tab" data-tab="followings">
+                커넥팅 <span class="friends-tab-count" th:text="${followingsCount != null ? followingsCount : 0}">0</span>
+            </button>
+        </div>
+
+        <!-- Category Banner (본인 페이지의 추천 탭일 때만 표시) -->
+        <div th:if="${isOwner}" class="category-banner" id="categoryBanner">
             <p class="category-banner-title">카테고리 태그란</p>
             <div class="category-scroll-wrap">
                 <button

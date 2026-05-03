@@ -10,6 +10,8 @@
   --avatar-icon: #e9edf2;
   position: fixed;
   inset: 0;
+  /* join-flow-modal(1000), 모바일 join-panel(1100) 보다 위에 떠야 가려지지 않는다. */
+  z-index: 1200;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,6 +32,8 @@
   position: relative;
   z-index: 1;
   width: min(590px, 87vw);
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
   background: var(--modal-bg);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
@@ -225,7 +229,8 @@
 
   .join-profile-modal-shell .profile-modal {
     width: 100%;
-    min-height: 100%;
+    max-height: 100vh;
+    min-height: 100vh;
     border-radius: 0;
   }
 

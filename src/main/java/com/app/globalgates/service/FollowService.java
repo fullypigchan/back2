@@ -1,7 +1,9 @@
 package com.app.globalgates.service;
 
+import com.app.globalgates.common.enumeration.NotificationType;
 import com.app.globalgates.dto.FollowDTO;
 import com.app.globalgates.dto.MemberDTO;
+import com.app.globalgates.dto.NotificationDTO;
 import com.app.globalgates.repository.BlockDAO;
 import com.app.globalgates.repository.FollowDAO;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class FollowService {
     private final FollowDAO followDAO;
     private final BlockDAO blockDAO;
+    private final NotificationService notificationService;
 
     //    팔로우 추가
     @CacheEvict(value = {"member", "post", "post:list"}, allEntries = true)
@@ -35,6 +38,16 @@ public class FollowService {
         }
         followDAO.save(followDTO);
         log.info("팔로우 저장 완료");
+
+        NotificationDTO noti = new NotificationDTO();
+        noti.setRecipientId(followDTO.getFollowingId());
+        noti.setSenderId(followDTO.getFollowerId());
+        noti.setNotificationType(NotificationType.CONNECT);
+        noti.setTitle("팔로우");
+        noti.setContent("회원님을 팔로우하기 시작했습니다.");
+        noti.setTargetId(followDTO.getFollowerId());
+        noti.setTargetType("member");
+        notificationService.createNotification(noti);
     }
 
     //    팔로우 해제

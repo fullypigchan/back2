@@ -44,6 +44,11 @@ public class NewsReplyService {
     }
 
     @LogStatus
+    public boolean updateReply(Long replyId, Long memberId, String content) {
+        return newsReplyDAO.updateContentById(replyId, memberId, content) > 0;
+    }
+
+    @LogStatus
     public void addReplyLike(NewsReplyLikeDTO newsReplyLikeDTO) {
         newsReplyLikeDAO.save(newsReplyLikeDTO);
     }
