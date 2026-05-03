@@ -29,3 +29,10 @@ VALUES (
     'active'
 )
 ON CONFLICT (member_email) DO NOTHING;
+
+-- 이미 admin 행이 있는 경우(이전 잘못된 해시로 들어간 케이스) 비밀번호/권한/상태를 보정
+UPDATE tbl_member
+SET member_password = '$2a$10$qBTl1KlLJQ.MuuPGMNqo6.kXpPQ/WjtMeFoPihuTSolrCJ1iIgIqe',
+    member_role     = 'admin',
+    member_status   = 'active'
+WHERE member_email = 'admin@globalgates.com';
