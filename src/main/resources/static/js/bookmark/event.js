@@ -6,6 +6,17 @@
         services: service,
         layout: layout,
         getMemberId: () => memberId,
+        // 답글 게시 후 카드의 답글 카운트 +1 + aria-label 갱신 + 토스트.
+        onReplySubmitSuccess: ({ button }) => {
+            const countSpan = button?.querySelector(".tweet-action-count");
+            if (countSpan) {
+                const count = (parseInt(countSpan.textContent, 10) || 0) + 1;
+                countSpan.textContent = String(count);
+                const ariaLabel = button.getAttribute("aria-label") || "";
+                button.setAttribute("aria-label", ariaLabel.replace(/^\d+/, String(count)));
+            }
+            showToast("답글이 게시되었습니다");
+        },
     });
 
     const headerTitle = document.getElementById("headerTitle");
@@ -1223,10 +1234,6 @@
         ) {
             closeDetailFolderMenu();
         }
-
-        if (!target.closest(".bookmark-post-more-wrap")) {
-            resetPostMoreMenus();
-        }
     });
 
     document.addEventListener("keydown", (event) => {
@@ -2027,35 +2034,6 @@
         closeProductView();
     });
 
-    replySubmitButton?.addEventListener("click", async () => {
-        const text = replyEditor?.textContent?.replace(/\u00a0/g, " ").trim() || "";
-        if (!text && attachedReplyFiles.length === 0) return;
-        const postCard = activeReplyTrigger?.closest(".bookmark-post");
-        const postId = postCard?.dataset.postId;
-        if (postId && typeof memberId !== "undefined" && memberId) {
-            const formData = new FormData();
-            formData.append("memberId", memberId);
-            formData.append("postContent", text);
-            if (attachedReplyFiles.length > 0) {
-                attachedReplyFiles.forEach(f => formData.append("files", f));
-            }
-            await fetch(`/api/main/posts/${postId}/replies`, {
-                method: "POST",
-                body: formData,
-            });
-        }
-        if (activeReplyTrigger) {
-            const countSpan = activeReplyTrigger.querySelector(".tweet-action-count");
-            if (countSpan) {
-                const count = parseInt(countSpan.textContent || "0", 10);
-                countSpan.textContent = String(count + 1);
-                const ariaLabel = activeReplyTrigger.getAttribute("aria-label") || "";
-                activeReplyTrigger.setAttribute("aria-label", ariaLabel.replace(/^\d+/, String(count + 1)));
-            }
-        }
-        closeBookmarkReplyModal({skipConfirm: true});
-        showToast("답글이 게시되었습니다");
-    });
 
     // ── 페이지 초기화: 폴더 목록 로드 ──
     loadFolders();
