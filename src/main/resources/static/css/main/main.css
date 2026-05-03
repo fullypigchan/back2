@@ -944,12 +944,15 @@ a.menu-item:visited {
     display: none;
 }
 
+/* 계정 팝업: .accountMenuWrap 기준 절대 위치로, 점세개(profile-more) 바로 위에 정렬한다.
+   px 대신 % 로 좌표를 잡아 어떤 해상도에서도 같은 비율 위치에 뜨도록 한다. */
 .account-menu-popup {
-    position: fixed;
+    position: absolute;
     z-index: 1200;
-    bottom: 150px;
-    left: 260px;
-    width: min(216px, calc(100vw - 32px));
+    bottom: 102%;
+    right: 0;
+    width: 90%;
+    max-width: 216px;
     padding: 6px;
     border: 1px solid rgba(207, 217, 222, 0.7);
     border-radius: 14px;
@@ -960,7 +963,7 @@ a.menu-item:visited {
 .account-menu-popup::after {
     content: "";
     position: absolute;
-    right: 26px;
+    right: 8%;
     bottom: -7px;
     width: 14px;
     height: 14px;
