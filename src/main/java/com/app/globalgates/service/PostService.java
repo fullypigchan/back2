@@ -41,6 +41,7 @@ public class PostService {
     private final MentionDAO mentionDAO;
     private final MemberMapper memberMapper;
     private final NotificationService notificationService;
+    private final FollowDAO followDAO;
 
 //    게시글 작성
     @CacheEvict(value = {"post:list", "post", "page:search", "community:post:list"}, allEntries = true)
@@ -70,6 +71,20 @@ public class PostService {
             relDTO.setPostId(postDTO.getId());
             relDTO.setProductPostId(postDTO.getProductId());
             postProductRelDAO.save(relDTO);
+        }
+
+        // 새 게시물 알림 — 작성자의 팔로워들에게 발송
+        List<FollowDTO> followers = followDAO.findAllFollowers(postDTO.getMemberId());
+        for (FollowDTO f : followers) {
+            NotificationDTO noti = new NotificationDTO();
+            noti.setRecipientId(f.getFollowerId());
+            noti.setSenderId(postDTO.getMemberId());
+            noti.setNotificationType(NotificationType.POST);
+            noti.setTitle("새 게시물");
+            noti.setContent("새로운 게시물을 작성했습니다.");
+            noti.setTargetId(postDTO.getId());
+            noti.setTargetType("post");
+            notificationService.createNotification(noti);
         }
     }
 
@@ -353,6 +368,24 @@ public class PostService {
         log.info("writeReply 들어옴1 memberId: {}, content: {}", postDTO.getMemberId(), postDTO.getPostContent());
         postDAO.save(postDTO);
         log.info("writeReply 들어옴2 savedId: {}", postDTO.getId());
+
+        // 원글 작성자에게 댓글 알림 (자기 글에 자기가 댓글은 제외)
+        if (postDTO.getReplyPostId() != null) {
+            postDAO.findById(postDTO.getReplyPostId(), postDTO.getMemberId())
+                    .map(PostDTO::getMemberId)
+                    .filter(ownerId -> ownerId != null && !ownerId.equals(postDTO.getMemberId()))
+                    .ifPresent(ownerId -> {
+                        NotificationDTO noti = new NotificationDTO();
+                        noti.setRecipientId(ownerId);
+                        noti.setSenderId(postDTO.getMemberId());
+                        noti.setNotificationType(NotificationType.REPLY);
+                        noti.setTitle("댓글");
+                        noti.setContent("회원님의 게시물에 댓글을 남겼습니다.");
+                        noti.setTargetId(postDTO.getReplyPostId());
+                        noti.setTargetType("post");
+                        notificationService.createNotification(noti);
+                    });
+        }
 
         // 댓글 해시태그 저장
         if (postDTO.getHashtags() != null && !postDTO.getHashtags().isEmpty()) {
