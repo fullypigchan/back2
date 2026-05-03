@@ -2,24 +2,30 @@
    Notification.css — 알림 페이지 스타일
    ============================================================ */
 
-/* ── 클릭 가능한 알림 항목 ── */
-[data-href] {
-    cursor: pointer;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #fff;
+    color: #0f1419;
 }
 
 /* ── 페이지 레이아웃 ──────────────────────────────────────── */
 .notif-page {
-    width: 100%;
-    max-width: 600px;
+    display: flex;
     min-height: 100vh;
-    border-left: 1px solid #eff3f4;
-    border-right: 1px solid #eff3f4;
-    background: #ffffff;
+    width: 100%;
 }
 
 .notif-layout {
     display: flex;
-    width: 48%;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
     flex-direction: column;
 }
 
@@ -27,9 +33,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 600px;
     min-height: 100vh;
-    background: #ffffff;
     border-left: 1px solid #eff3f4;
     border-right: 1px solid #eff3f4;
 }
@@ -74,6 +78,30 @@
 .notif-header__actions {
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.notif-header__mark-all {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: #1d9bf0;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.notif-header__mark-all:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+}
+
+.notif-header__mark-all:disabled {
+    color: #8b98a5;
+    cursor: default;
+    background-color: transparent;
 }
 
 .notif-header__settings-link {
@@ -238,11 +266,39 @@
     color: inherit;
     transition: background-color 0.2s;
     outline: none;
+    position: relative;
+}
+
+/* 안읽은 알림: 좌측 파란 strip + 옅은 파란 배경 */
+.notif-item:not(.notif-item--read),
+.notif-tweet-item:not(.notif-item--read) {
+    background-color: rgba(29, 155, 240, 0.06);
+}
+
+.notif-item:not(.notif-item--read)::before,
+.notif-tweet-item:not(.notif-item--read)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #1d9bf0;
+}
+
+.notif-item.notif-item--read,
+.notif-tweet-item.notif-item--read {
+    background-color: transparent;
 }
 
 .notif-item:hover,
 .notif-tweet-item:hover {
     background-color: rgba(0, 0, 0, 0.03);
+}
+
+.notif-item:not(.notif-item--read):hover,
+.notif-tweet-item:not(.notif-item--read):hover {
+    background-color: rgba(29, 155, 240, 0.12);
 }
 
 .notif-item:focus-visible,
@@ -540,8 +596,9 @@
     flex-direction: column;
     background-color: #ffffff;
     border-radius: 12px;
-    box-shadow: rgba(101, 119, 134, 0.2) 0px 0px 15px 0px,
-    rgba(101, 119, 134, 0.15) 0px 0px 3px 1px;
+    box-shadow:
+        rgba(101, 119, 134, 0.2) 0px 0px 15px 0px,
+        rgba(101, 119, 134, 0.15) 0px 0px 3px 1px;
     overflow: hidden;
     max-width: 400px;
     width: max-content;
@@ -744,8 +801,9 @@ a.menu-item:visited {
     overflow: auto;
     border-radius: 16px;
     background: #ffffff;
-    box-shadow: rgba(101, 119, 134, 0.2) 0px 0px 15px 0px,
-    rgba(101, 119, 134, 0.15) 0px 0px 3px 1px;
+    box-shadow:
+        rgba(101, 119, 134, 0.2) 0px 0px 15px 0px,
+        rgba(101, 119, 134, 0.15) 0px 0px 3px 1px;
 }
 
 .notification-dialog__card--small {
@@ -1137,7 +1195,6 @@ a.menu-item:visited {
 .tweet-action-btn--like.active {
     color: #f91880;
 }
-
 .tweet-action-btn--like.active:hover {
     background-color: rgba(249, 24, 128, 0.1);
 }
@@ -1146,7 +1203,6 @@ a.menu-item:visited {
 .tweet-action-btn--bookmark.active {
     color: #1d9bf0;
 }
-
 .tweet-action-btn--bookmark.active:hover {
     background-color: rgba(29, 155, 240, 0.1);
 }
@@ -2391,8 +2447,7 @@ body.modal-open {
     object-fit: contain;
     background: #000000;
 }
-
-.notification-modal__media-alt-label {
+.tweet-modal__media-alt-label {
     font-size: 14px;
     font-weight: 700;
     color: #0f1419;
@@ -2808,8 +2863,9 @@ body.modal-open {
     overflow: hidden;
     border-radius: 16px;
     background: #ffffff;
-    box-shadow: rgba(101, 119, 134, 0.2) 0px 0px 15px 0px,
-    rgba(101, 119, 134, 0.15) 0px 0px 3px 1px;
+    box-shadow:
+        rgba(101, 119, 134, 0.2) 0px 0px 15px 0px,
+        rgba(101, 119, 134, 0.15) 0px 0px 3px 1px;
     display: flex;
     flex-direction: column;
 }
