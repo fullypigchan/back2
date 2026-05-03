@@ -94,7 +94,7 @@ const CommunityLayout = {
                 ${mediaHtml}
                 <footer class="postMetrics">
                     <div class="tweet-action-bar">
-                        <button class="tweet-action-btn" data-testid="reply" data-post-id="${post.id}">
+                        <button class="tweet-action-btn" data-testid="reply" data-action="reply" data-post-id="${post.id}">
                             <svg class="tweet-action-icon" viewBox="0 0 24 24"><g><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></g></svg>
                             <span class="tweet-action-count">${post.replyCount ?? 0}</span>
                         </button>
@@ -127,5 +127,26 @@ const CommunityLayout = {
     // ─── 빈 상태 ───
     renderEmptyState(message) {
         return `<div class="communityEmpty"><p>${this.escapeHtml(message)}</p></div>`;
+    },
+
+    // 공용 답글 모달의 source avatar fallback (카드에 avatar 없을 때).
+    buildAvatarDataUri(label) {
+        const safe = String(label || "?").slice(0, 1).replace(/[&<>"']/g, "");
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="20" fill="#cfe8fc"></rect><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#1d9bf0">' + safe + '</text></svg>';
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    },
+
+    // 공용 모달의 @ mention 드롭다운.
+    buildMentionDropdown(members) {
+        return members.map((m, i) => {
+            const profileImg = m.profileFileName ? m.profileFileName : "/images/profile/default_image.png";
+            return `<button type="button" class="mention-item${i === 0 ? " active" : ""}" data-handle="${m.memberHandle}" data-member-id="${m.id}">
+                <img class="mention-item-avatar" src="${profileImg}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                <div class="mention-item-info">
+                    <span class="mention-item-name">${m.memberName || m.memberHandle}</span>
+                    <span class="mention-item-handle">${m.memberHandle}</span>
+                </div>
+            </button>`;
+        }).join("");
     },
 };

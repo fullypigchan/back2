@@ -3931,6 +3931,7 @@ input.tweet-modal__location-display-text-inner {
     gap: 12px;
     padding: 16px;
     border-bottom: 1px solid #eff3f4;
+    cursor: pointer;
 }
 
 .postCard:hover {
