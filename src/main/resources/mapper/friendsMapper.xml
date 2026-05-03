@@ -16,6 +16,7 @@
                m.member_name,
                m.member_handle,
                m.member_bio,
+               m.member_role,
                (select f.file_name from tbl_member_profile_file mpf
                    join tbl_file f on mpf.id = f.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
@@ -51,6 +52,7 @@
                m.member_name,
                m.member_handle,
                m.member_bio,
+               m.member_role,
                (select fi.file_name from tbl_member_profile_file mpf
                    join tbl_file fi on mpf.id = fi.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'
@@ -82,6 +84,7 @@
                m.member_name,
                m.member_handle,
                m.member_bio,
+               m.member_role,
                (select fi.file_name from tbl_member_profile_file mpf
                    join tbl_file fi on mpf.id = fi.id
                 where mpf.member_id = m.id and mpf.profile_image_type = 'profile'

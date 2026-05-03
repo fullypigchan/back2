@@ -844,12 +844,18 @@ window.onload = () => {
     const modalCancel = document.getElementById("modalCancel");
     let disconnectTarget = null;
 
+    // expert 탭 카드 여부 — 카드가 #friendsSection 안에 있으면 Follow/Following/Unfollow 텍스트 사용
+    const isExpertButton = (btn) => !!btn.closest("#friendsSection");
+
     function openDisconnectModal(btn) {
         if (!disconnectModal || !modalTitle) { return; }
         disconnectTarget = btn;
         const userCard = btn.closest("[data-handle]");
         const handle = userCard ? (userCard.dataset.handle || "") : "";
-        modalTitle.textContent = handle ? (handle + " 님과의 연결을 끊으시겠습니까?") : "연결을 끊으시겠습니까?";
+        const expert = isExpertButton(btn);
+        const askText = expert ? "님을 Unfollow 하시겠습니까?" : "님과의 연결을 끊으시겠습니까?";
+        const fallback = expert ? "Unfollow 하시겠습니까?" : "연결을 끊으시겠습니까?";
+        modalTitle.textContent = handle ? (handle + " " + askText) : fallback;
         disconnectModal.classList.add("active");
     }
 
@@ -864,24 +870,48 @@ window.onload = () => {
         if (!connectBtn) return;
         e.stopPropagation();
         const targetMemberId = connectBtn.dataset.memberId;
+        const expert = isExpertButton(connectBtn);
         if (connectBtn.classList.contains("default")) {
             await service.follow(memberId, targetMemberId);
             connectBtn.classList.remove("default");
             connectBtn.classList.add("connected");
-            connectBtn.textContent = "Connected";
+            connectBtn.textContent = expert ? "Following" : "Connected";
         } else {
             openDisconnectModal(connectBtn);
         }
+    });
+
+    // expert 카드의 Following 버튼은 hover 시 Unfollow 로 표시
+    document.addEventListener("mouseover", (e) => {
+        const btn = e.target.closest(".connect-btn.connected, .connect-btn-sm.connected");
+        if (!btn || !isExpertButton(btn)) return;
+        btn.textContent = "Unfollow";
+        btn.style.borderColor = "#f4212e";
+        btn.style.color = "#f4212e";
+        btn.style.background = "rgba(244,33,46,.1)";
+    });
+
+    document.addEventListener("mouseout", (e) => {
+        const btn = e.target.closest(".connect-btn.connected, .connect-btn-sm.connected");
+        if (!btn || !isExpertButton(btn)) return;
+        btn.textContent = "Following";
+        btn.style.borderColor = "";
+        btn.style.color = "";
+        btn.style.background = "";
     });
 
     if (modalConfirm) {
         modalConfirm.addEventListener("click", async (e) => {
             if (disconnectTarget) {
                 const targetMemberId = disconnectTarget.dataset.memberId;
+                const expert = isExpertButton(disconnectTarget);
                 await service.unfollow(memberId, targetMemberId);
                 disconnectTarget.classList.remove("connected");
                 disconnectTarget.classList.add("default");
-                disconnectTarget.textContent = "Connect";
+                disconnectTarget.textContent = expert ? "Follow" : "Connect";
+                disconnectTarget.style.borderColor = "";
+                disconnectTarget.style.color = "";
+                disconnectTarget.style.background = "";
             }
             closeDisconnectModal();
         });

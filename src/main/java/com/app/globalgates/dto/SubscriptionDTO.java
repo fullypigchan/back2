@@ -21,8 +21,8 @@ public class SubscriptionDTO {
     private String createdDatetime;
     private String updatedDatetime;
     private boolean quartz;
-    private String nextTier;
-    private String nextBillingCycle;
+    private String billingKey;
+    private int amount;
 
     public SubscriptionVO toVO() {
         return SubscriptionVO.builder()
@@ -36,8 +36,8 @@ public class SubscriptionDTO {
                 .createdDatetime(createdDatetime)
                 .updatedDatetime(updatedDatetime)
                 .quartz(quartz)
-                .nextTier(nextTier)
-                .nextBillingCycle(nextBillingCycle)
+                .billingKey(billingKey)
+                .amount(amount)
                 .build();
     }
 }

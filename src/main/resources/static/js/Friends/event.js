@@ -191,6 +191,10 @@ window.onload = () => {
     }
 
     // ===== 5. Connect/Disconnect =====
+    function isExpertButton(button) {
+        return button.dataset.expert === "true";
+    }
+
     function getHandleFromButton(button) {
         const userCard = button.closest("[data-handle]");
         if (userCard) return userCard.dataset.handle || "";
@@ -207,9 +211,10 @@ window.onload = () => {
         if (!modal || !modalTitle) return;
         pendingDisconnectButton = button;
         const handle = getHandleFromButton(button);
-        modalTitle.textContent = handle
-            ? `${handle} 님과의 연결을 끊으시겠습니까?`
-            : "연결을 끊으시겠습니까?";
+        const expert = isExpertButton(button);
+        const askText = expert ? "님을 Unfollow 하시겠습니까?" : "님과의 연결을 끊으시겠습니까?";
+        const fallback = expert ? "Unfollow 하시겠습니까?" : "연결을 끊으시겠습니까?";
+        modalTitle.textContent = handle ? (handle + " " + askText) : fallback;
         modal.classList.add("active");
     }
 
@@ -222,7 +227,7 @@ window.onload = () => {
     function resetButtonToDefault(button) {
         button.classList.remove("connected");
         button.classList.add("default");
-        button.textContent = "Connect";
+        button.textContent = isExpertButton(button) ? "Follow" : "Connect";
         button.style.borderColor = "";
         button.style.color = "";
         button.style.background = "";
@@ -231,18 +236,19 @@ window.onload = () => {
     function setButtonToConnected(button) {
         button.classList.remove("default");
         button.classList.add("connected");
-        button.textContent = "Connected";
+        button.textContent = isExpertButton(button) ? "Following" : "Connected";
     }
 
     function updateConnectedButtonHoverState(button, isHovering) {
+        const expert = isExpertButton(button);
         if (isHovering) {
-            button.textContent = "Disconnect";
+            button.textContent = expert ? "Unfollow" : "Disconnect";
             button.style.borderColor = "#f4212e";
             button.style.color = "#f4212e";
             button.style.background = "rgba(244,33,46,.1)";
             return;
         }
-        button.textContent = "Connected";
+        button.textContent = expert ? "Following" : "Connected";
         button.style.borderColor = "#cfd9de";
         button.style.color = "#0f1419";
         button.style.background = "transparent";
