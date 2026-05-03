@@ -26,4 +26,22 @@ public interface FriendsAPIControllerDocs {
             description = "전체 카테고리 목록을 조회한다."
     )
     public List<CategoryDTO> getCategories();
+
+    @Operation(
+            summary = "커넥터 목록 조회 (profileId를 팔로우중인 회원들)",
+            description = "페이지별 커넥터 목록을 조회한다. 본인 페이지면 profileId == viewerId.",
+            parameters = {@Parameter(name = "page", description = "화면에 표시할 페이지 번호"),
+                            @Parameter(name = "profileId", description = "친구 페이지 주인의 회원 id"),
+                            @Parameter(name = "viewerId", description = "로그인한 회원의 id (버튼 상태/차단 필터 기준)")}
+    )
+    public FriendsWithPagingDTO getFollowers(@PathVariable int page, @RequestParam Long profileId, @RequestParam Long viewerId);
+
+    @Operation(
+            summary = "커넥팅 목록 조회 (profileId가 팔로우중인 회원들)",
+            description = "페이지별 커넥팅 목록을 조회한다. 본인 페이지면 profileId == viewerId.",
+            parameters = {@Parameter(name = "page", description = "화면에 표시할 페이지 번호"),
+                            @Parameter(name = "profileId", description = "친구 페이지 주인의 회원 id"),
+                            @Parameter(name = "viewerId", description = "로그인한 회원의 id (버튼 상태/차단 필터 기준)")}
+    )
+    public FriendsWithPagingDTO getFollowings(@PathVariable int page, @RequestParam Long profileId, @RequestParam Long viewerId);
 }

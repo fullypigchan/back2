@@ -3,6 +3,7 @@ package com.app.globalgates.controller.friends;
 import com.app.globalgates.auth.JwtTokenProvider;
 import com.app.globalgates.dto.MemberDTO;
 import com.app.globalgates.dto.MemberProfileFileDTO;
+import com.app.globalgates.service.FriendsService;
 import com.app.globalgates.service.MemberService;
 import com.app.globalgates.service.S3Service;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.Duration;
 
@@ -19,23 +21,44 @@ public class FriendsController {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
     private final S3Service s3Service;
+    private final FriendsService friendsService;
 
     @GetMapping("/friends")
-    public String goToFriends(HttpServletRequest request, Model model) {
+    public String goToFriends(@RequestParam(required = false) Long profileId,
+                              HttpServletRequest request,
+                              Model model) {
         try {
             String token = jwtTokenProvider.parseTokenFromHeader(request);
             String loginId = jwtTokenProvider.getUsername(token);
-            MemberDTO member = memberService.getMember(loginId);
+            MemberDTO loginMember = memberService.getMember(loginId);
 
-            MemberProfileFileDTO profileFile = memberService.getProfileFile(member.getId());
+            // profileId 없거나 본인 id면 본인 페이지
+            Long pageMemberId = profileId != null ? profileId : loginMember.getId();
+            boolean isOwner = loginMember.getId().equals(pageMemberId);
+
+            MemberDTO pageMember = isOwner
+                    ? loginMember
+                    : memberService.getMemberById(pageMemberId);
+
+            // 헤더/사이드바용 로그인 사용자 프로필 이미지
+            MemberProfileFileDTO profileFile = memberService.getProfileFile(loginMember.getId());
             if (profileFile != null && profileFile.getFileName() != null) {
                 try {
-                    member.setFileName(s3Service.getPresignedUrl(profileFile.getFileName(), Duration.ofMinutes(10)));
+                    loginMember.setFileName(s3Service.getPresignedUrl(profileFile.getFileName(), Duration.ofMinutes(10)));
                 } catch (Exception e) {
-                    member.setFileName(null);
+                    loginMember.setFileName(null);
                 }
             }
-            model.addAttribute("member", member);
+
+            // 탭에 표시할 카운트 (차단 필터 적용된 viewerId 기준)
+            int followersCount = friendsService.getFollowersCount(pageMember.getId(), loginMember.getId());
+            int followingsCount = friendsService.getFollowingsCount(pageMember.getId(), loginMember.getId());
+
+            model.addAttribute("member", loginMember);     // 공통 헤더/모달 호환
+            model.addAttribute("pageMember", pageMember);  // 친구 페이지 주인
+            model.addAttribute("isOwner", isOwner);
+            model.addAttribute("followersCount", followersCount);
+            model.addAttribute("followingsCount", followingsCount);
         } catch (Exception ignored) {}
 
         return "Friends/Friends";

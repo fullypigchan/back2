@@ -155,14 +155,14 @@
                     </span>
                 </div>
                 <div class="Profile-Follow-Row">
-                    <a href="" class="Profile-Follow-Link">
+                    <a th:href="@{/friends(profileId=${member.id}, tab='followings')}" class="Profile-Follow-Link">
                         <!-- 현재 보고 있는 페이지 주인이 "연결하고 있는" 회원 수를 보여준다.
                              서비스 로직은 기존 followings 개념을 그대로 유지하고,
                              화면 텍스트만 서비스 용어에 맞춰 커넥팅으로 바꿔서 렌더링한다. -->
                         <span class="Profile-Follow-Count" th:text="${connectingCount}">0</span>
                         <span class="Profile-Follow-Label">커넥팅</span>
                     </a>
-                    <a href="" class="Profile-Follow-Link">
+                    <a th:href="@{/friends(profileId=${member.id}, tab='followers')}" class="Profile-Follow-Link">
                         <!-- 현재 보고 있는 페이지 주인을 "연결한" 회원 수를 보여준다.
                              서비스 로직은 기존 followers 개념을 그대로 유지하고,
                              화면 텍스트만 커넥터로 바꿔서 출력한다. -->

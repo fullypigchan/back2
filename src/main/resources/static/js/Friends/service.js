@@ -14,6 +14,20 @@ const friendsService = (() => {
         return data;
     };
 
+    const getFollowersList = async (page, profileId, viewerId, callback) => {
+        const response = await fetch(`/api/friends/followers/${page}?profileId=${profileId}&viewerId=${viewerId}`);
+        const data = await response.json();
+        if (callback) return callback(data);
+        return data;
+    };
+
+    const getFollowingsList = async (page, profileId, viewerId, callback) => {
+        const response = await fetch(`/api/friends/followings/${page}?profileId=${profileId}&viewerId=${viewerId}`);
+        const data = await response.json();
+        if (callback) return callback(data);
+        return data;
+    };
+
     const getCategories = async (callback) => {
         const response = await fetch('/api/friends/categories');
         const data = await response.json();
@@ -33,5 +47,5 @@ const friendsService = (() => {
         await fetch(`/api/main/follows/${followerId}/${followingId}/delete`, { method: 'POST' });
     };
 
-    return { getMyInfo: getMyInfo, getFriendsList: getFriendsList, getCategories: getCategories, follow: follow, unfollow: unfollow };
+    return { getMyInfo: getMyInfo, getFriendsList: getFriendsList, getFollowersList: getFollowersList, getFollowingsList: getFollowingsList, getCategories: getCategories, follow: follow, unfollow: unfollow };
 })();
