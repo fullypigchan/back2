@@ -96,7 +96,7 @@
     <sql id="postColumns">
         p.id, p.member_id, p.title as post_title, p.content as post_content,
         p.created_datetime, p.updated_datetime, p.community_id,
-        m.member_nickname, m.member_handle,
+        m.member_name as member_nickname, m.member_handle,
         (select f.file_path from tbl_member_profile_file mpf
             join tbl_file f on mpf.id = f.id
          where mpf.member_id = p.member_id and mpf.profile_image_type = 'profile'
@@ -163,7 +163,7 @@
           <if test="keyword != null and keyword != ''">
               and (p.title ilike concat('%', #{keyword}, '%')
                    or m.member_handle ilike concat('%', #{keyword}, '%')
-                   or m.member_nickname ilike concat('%', #{keyword}, '%'))
+                   or m.member_name ilike concat('%', #{keyword}, '%'))
           </if>
         <choose>
             <when test="type == 'popular'">order by like_count desc</when>
@@ -181,7 +181,7 @@
           <if test="keyword != null and keyword != ''">
               and (p.title ilike concat('%', #{keyword}, '%')
                    or m.member_handle ilike concat('%', #{keyword}, '%')
-                   or m.member_nickname ilike concat('%', #{keyword}, '%'))
+                   or m.member_name ilike concat('%', #{keyword}, '%'))
           </if>
     </select>
 

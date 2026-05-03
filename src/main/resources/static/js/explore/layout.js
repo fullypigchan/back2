@@ -133,6 +133,8 @@ const exploreLayout = (() => {
             const category = news.newsCategory?.label ?? news.newsCategory ?? "뉴스";
             const type = news.newsType?.label ?? news.newsType ?? "general";
             const sourceUrl = news.newsSourceUrl ?? "";
+            const newsTypeValue = news.newsType?.value ?? news.newsType ?? "";
+            const isEmergency = newsTypeValue === "emergency";
             cell.innerHTML = `
                 <div class="trend" role="link" tabindex="0" data-news-id="${news.id}">
                     <div class="trend-inner">
@@ -147,7 +149,7 @@ const exploreLayout = (() => {
                             <span class="trend-meta-text">${escapeHtml(news.createdDatetime)}</span>
                         </div>
                         <p class="trend-summary">${escapeHtml(summary)}</p>
-                        ${sourceUrl ? `<a class="trend-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : ""}
+                        ${sourceUrl && !isEmergency ? `<a class="trend-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : ""}
                     </div>
                 </div>
             `;
@@ -244,10 +246,10 @@ const exploreLayout = (() => {
             card.className = "postCard";
             card.dataset.postId = post.id;
             card.innerHTML = `
-            ${avatarHtml}
             <div class="postBody">
                 <header class="postHeader">
                     <div class="postIdentity">
+                        ${avatarHtml}
                         <strong class="postName">${post.memberNickname ?? ""}</strong>
                         <span class="postHandle">${post.memberHandle ?? ""}</span>
                         <span class="postTime">${post.createdDatetime}</span>

@@ -56,6 +56,14 @@ a {
     background: #ffffff;
 }
 
+/* main.css postText의 line-clamp:2 무력화 — detail에선 본문 전체 노출 */
+.post-detail-shell .postText {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    white-space: pre-line;
+}
+
 .post-detail-main {
     width: 100%;
     max-width: 600px;
@@ -124,6 +132,34 @@ a {
 .post-detail-hero {
     padding: 12px 16px 0;
     border-bottom: 1px solid #eff3f4;
+}
+
+.post-detail-community-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 16px;
+}
+
+.post-detail-community-link {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.post-detail-community-link:hover {
+    text-decoration: underline;
+}
+
+.post-detail-community-category {
+    background: #eff3f4;
+    color: #536471;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 9999px;
 }
 
 .post-detail-hero-top,
@@ -522,6 +558,7 @@ div.postHashtags {
     gap: 12px;
     align-items: flex-start;
     min-height: 0;
+    height: auto;
     padding: 6px 0 12px;
 }
 

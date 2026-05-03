@@ -77,17 +77,33 @@ const CommunityDetailLayout = {
             }
         }
 
+        const communityName = this.escapeHtml(post.communityName || '');
+        const categoryName = this.escapeHtml(post.categoryName || '');
+        const communityMetaHtml = communityName ? `
+                            <div class="communityPostMeta">
+                                <a class="communityPostMeta__text" href="/community/${post.communityId}">${communityName}</a>
+                                ${categoryName ? `<span class="communityPostMeta__category">${categoryName}</span>` : ''}
+                            </div>` : '';
+
         return `
         <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-is-followed="${isFollowed ? 'true' : 'false'}">
-            <div class="postAvatar">
-                <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
-            </div>
             <div class="postBody">
                 <header class="postHeader">
                     <div class="postIdentity">
-                        <strong class="postName">${nickname}</strong>
-                        <span class="postHandle">${handle}</span>
-                        <span class="postTime">${post.createdDatetime}</span>
+                        <div class="postAvatar">
+                            <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                        </div>
+                        <div class="postIdentity__copy">
+                            ${communityMetaHtml}
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${nickname}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                <span class="postHandle">${handle}</span>
+                                <span class="postIdentity__sep">·</span>
+                                <span class="postTime">${post.createdDatetime}</span>
+                            </div>
+                        </div>
                     </div>
                     <button class="postMoreButton" type="button" aria-label="게시물 더 보기">
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="postMoreIcon"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg>
@@ -147,7 +163,7 @@ const CommunityDetailLayout = {
             const nick = this.escapeHtml(member.memberNickname);
             const handle = this.formatHandle(member.memberHandle);
             return `
-            <article class="about-member-row" data-member-id="${member.memberId}">
+            <article class="about-member-row" data-member-id="${member.memberId}" data-profile-id="${member.memberId}">
                 <div class="about-member-avatar">
                     <img src="${member.memberProfileFilePath || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
                 </div>
@@ -195,7 +211,7 @@ const CommunityDetailLayout = {
         const roleLabel = role === "admin" ? "관리자" : role === "moderator" ? "중재자" : "";
         const canManage = (myRole === "admin" || myRole === "creator") && role !== "admin" && role !== "creator";
         return `
-        <div class="member-item" data-member-id="${member.memberId}">
+        <div class="member-item" data-member-id="${member.memberId}" data-profile-id="${member.memberId}">
             <div class="member-info">
                 <span class="member-nickname">${nick}</span>
                 <span class="member-handle">${handle}</span>

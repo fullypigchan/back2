@@ -13,15 +13,22 @@ window.onload = function () {
         pageMemberId: null,
     };
 
+    // 사이드바 게시하기 + 공용 답글 모달 활성화. memberId는 mypageContext.loginMemberId 사용.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => mypageContext.loginMemberId,
+    });
+
     // ===== 1. DOM =====
-    const replyModalOverlay = document.querySelector("[data-reply-modal]");
+    const replyModalOverlay = document.querySelector("[data-mypage-reply-modal]");
     const q = (sel) => replyModalOverlay?.querySelector(sel);
     const qAll = (sel) => replyModalOverlay?.querySelectorAll(sel) ?? [];
 
-    const replyModal = q(".tweet-modal");
-    const replyCloseButton = q(".tweet-modal__close");
-    const replyEditor = q(".tweet-modal__editor");
-    const replySubmitButton = q(".tweet-modal__submit");
+    const replyModal = q(".mypage-modal");
+    const replyCloseButton = q(".mypage-modal__close");
+    const replyEditor = q(".mypage-modal__editor");
+    const replySubmitButton = q(".mypage-modal__submit");
     const replyGauge = q("#replyGauge");
     const replyGaugeText = q("#replyGaugeText");
     const replyProductButton = q("[data-testid='productSelectButton']");
@@ -38,37 +45,37 @@ window.onload = function () {
     const productSelectEmpty = replyProductView?.querySelector(
         "[data-product-empty]",
     );
-    const replyContextButton = q(".tweet-modal__context-button");
-    const replyFooterMeta = q(".tweet-modal__footer-meta");
-    const replySourceAvatar = q(".tweet-modal__source-avatar");
-    const replySourceName = q(".tweet-modal__source-name");
-    const replySourceHandle = q(".tweet-modal__source-handle");
-    const replySourceTime = q(".tweet-modal__source-time");
-    const replySourceText = q(".tweet-modal__source-text");
+    const replyContextButton = q(".mypage-modal__context-button");
+    const replyFooterMeta = q(".mypage-modal__footer-meta");
+    const replySourceAvatar = q(".mypage-modal__source-avatar");
+    const replySourceName = q(".mypage-modal__source-name");
+    const replySourceHandle = q(".mypage-modal__source-handle");
+    const replySourceTime = q(".mypage-modal__source-time");
+    const replySourceText = q(".mypage-modal__source-text");
     const replyFormatButtons = qAll("[data-format]");
     const replyEmojiButton = q("[data-testid='emojiButton']");
-    const replyEmojiPicker = q(".tweet-modal__emoji-picker");
+    const replyEmojiPicker = q(".mypage-modal__emoji-picker");
     const replyEmojiSearchInput = q("[data-testid='emojiSearchInput']");
-    const replyEmojiTabs = qAll(".tweet-modal__emoji-tab");
+    const replyEmojiTabs = qAll(".mypage-modal__emoji-tab");
     const replyEmojiContent = q("[data-testid='emojiPickerContent']");
     const replyMediaUploadButton = q("[data-testid='mediaUploadButton']");
     const replyFileInput = q("[data-testid='fileInput']");
     const replyAttachmentPreview = q("[data-attachment-preview]");
     const replyAttachmentMedia = q("[data-attachment-media]");
-    const composeView = q(".tweet-modal__compose-view");
+    const composeView = q(".mypage-modal__compose-view");
     const replyGeoButton = q("[data-testid='geoButton']");
     const replyGeoButtonPath = replyGeoButton?.querySelector("path");
     const replyLocationDisplayButton = q("[data-location-display]");
     const replyLocationName = q("[data-location-name]");
-    const replyLocationView = q(".tweet-modal__location-view");
-    const replyLocationCloseButton = q(".tweet-modal__location-close");
+    const replyLocationView = q(".mypage-modal__location-view");
+    const replyLocationCloseButton = q(".mypage-modal__location-close");
     const replyLocationDeleteButton = q("[data-location-delete]");
     const replyLocationCompleteButton = q("[data-location-complete]");
     const replyLocationSearchInput = q("[data-location-search]");
     const replyLocationList = q("[data-location-list]");
     const replyUserTagTrigger = q("[data-user-tag-trigger]");
     const replyUserTagLabel = q("[data-user-tag-label]");
-    const replyTagView = q(".tweet-modal__tag-view");
+    const replyTagView = q(".mypage-modal__tag-view");
     const replyTagCloseButton = q("[data-testid='tag-back']");
     const replyTagCompleteButton = q("[data-tag-complete]");
     const replyTagSearchForm = q("[data-tag-search-form]");
@@ -77,7 +84,7 @@ window.onload = function () {
     const replyTagResults = q("[data-tag-results]");
     const replyMediaAltTrigger = q("[data-media-alt-trigger]");
     const replyMediaAltLabel = q("[data-media-alt-label]");
-    const replyMediaView = q(".tweet-modal__media-view");
+    const replyMediaView = q(".mypage-modal__media-view");
     const replyMediaBackButton = q("[data-testid='media-back']");
     const replyMediaPrevButton = q("[data-media-prev]");
     const replyMediaNextButton = q("[data-media-next]");
@@ -159,47 +166,47 @@ window.onload = function () {
         recent: {
             label: "최근",
             sectionTitle: "최근",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 1.75A10.25 10.25 0 112.75 12 10.26 10.26 0 0112 1.75zm0 1.5A8.75 8.75 0 1020.75 12 8.76 8.76 0 0012 3.25zm.75 3.5v5.19l3.03 1.75-.75 1.3-3.78-2.18V6.75h1.5z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M12 1.75A10.25 10.25 0 112.75 12 10.26 10.26 0 0112 1.75zm0 1.5A8.75 8.75 0 1020.75 12 8.76 8.76 0 0012 3.25zm.75 3.5v5.19l3.03 1.75-.75 1.3-3.78-2.18V6.75h1.5z"></path></g></svg>',
         },
         smileys: {
             label: "스마일리 및 사람",
             sectionTitle: "스마일리 및 사람",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25S8.31 9.25 9 9.25s1.25.56 1.25 1.25S9.69 11.75 9 11.75zm6 0c-.69 0-1.25-.56-1.25-1.25S14.31 9.25 15 9.25s1.25.56 1.25 1.25S15.69 11.75 15 11.75zm-8.071 3.971c.307-.298.771-.397 1.188-.253.953.386 2.403.982 3.883.982s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25S8.31 9.25 9 9.25s1.25.56 1.25 1.25S9.69 11.75 9 11.75zm6 0c-.69 0-1.25-.56-1.25-1.25S14.31 9.25 15 9.25s1.25.56 1.25 1.25S15.69 11.75 15 11.75zm-8.071 3.971c.307-.298.771-.397 1.188-.253.953.386 2.403.982 3.883.982s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g></svg>',
         },
         animals: {
             label: "동물 및 자연",
             sectionTitle: "동물 및 자연",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 3.5c3.77 0 6.75 2.86 6.75 6.41 0 3.17-1.88 4.94-4.15 6.28-.74.44-1.54.9-1.6 1.86-.02.38-.33.68-.71.68h-.6a.71.71 0 01-.71-.67c-.07-.95-.86-1.42-1.6-1.85C7.13 14.85 5.25 13.08 5.25 9.91 5.25 6.36 8.23 3.5 12 3.5z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M12 3.5c3.77 0 6.75 2.86 6.75 6.41 0 3.17-1.88 4.94-4.15 6.28-.74.44-1.54.9-1.6 1.86-.02.38-.33.68-.71.68h-.6a.71.71 0 01-.71-.67c-.07-.95-.86-1.42-1.6-1.85C7.13 14.85 5.25 13.08 5.25 9.91 5.25 6.36 8.23 3.5 12 3.5z"></path></g></svg>',
         },
         food: {
             label: "음식 및 음료",
             sectionTitle: "음식 및 음료",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M5 10.5c0-3.59 3.36-6.5 7.5-6.5s7.5 2.91 7.5 6.5v.58a5.42 5.42 0 01-2.08 4.26L16.5 21H8.5l-1.42-5.66A5.42 5.42 0 015 11.08v-.58z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M5 10.5c0-3.59 3.36-6.5 7.5-6.5s7.5 2.91 7.5 6.5v.58a5.42 5.42 0 01-2.08 4.26L16.5 21H8.5l-1.42-5.66A5.42 5.42 0 015 11.08v-.58z"></path></g></svg>',
         },
         activities: {
             label: "활동",
             sectionTitle: "활동",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 2.25c5.385 0 9.75 4.365 9.75 9.75S17.385 21.75 12 21.75 2.25 17.385 2.25 12 6.615 2.25 12 2.25z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M12 2.25c5.385 0 9.75 4.365 9.75 9.75S17.385 21.75 12 21.75 2.25 17.385 2.25 12 6.615 2.25 12 2.25z"></path></g></svg>',
         },
         travel: {
             label: "여행 및 장소",
             sectionTitle: "여행 및 장소",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 2.25c-4.142 0-7.5 3.245-7.5 7.248 0 5.207 6.46 11.611 6.735 11.881a1.08 1.08 0 001.53 0c.275-.27 6.735-6.674 6.735-11.881 0-4.003-3.358-7.248-7.5-7.248z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M12 2.25c-4.142 0-7.5 3.245-7.5 7.248 0 5.207 6.46 11.611 6.735 11.881a1.08 1.08 0 001.53 0c.275-.27 6.735-6.674 6.735-11.881 0-4.003-3.358-7.248-7.5-7.248z"></path></g></svg>',
         },
         objects: {
             label: "사물",
             sectionTitle: "사물",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 2.5c2.07 0 3.75 1.68 3.75 3.75 0 1.45-.83 2.71-2.04 3.33l-.21.11V11h.5A2.5 2.5 0 0116.5 13.5v1.38c0 1.27-.7 2.43-1.82 3.03l-.93.5V21.5h-3.5v-3.09l-.93-.5A3.44 3.44 0 017.5 14.88V13.5A2.5 2.5 0 0110 11h.5V9.69l-.21-.11A3.75 3.75 0 018.25 6.25 3.75 3.75 0 0112 2.5z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M12 2.5c2.07 0 3.75 1.68 3.75 3.75 0 1.45-.83 2.71-2.04 3.33l-.21.11V11h.5A2.5 2.5 0 0116.5 13.5v1.38c0 1.27-.7 2.43-1.82 3.03l-.93.5V21.5h-3.5v-3.09l-.93-.5A3.44 3.44 0 017.5 14.88V13.5A2.5 2.5 0 0110 11h.5V9.69l-.21-.11A3.75 3.75 0 018.25 6.25 3.75 3.75 0 0112 2.5z"></path></g></svg>',
         },
         symbols: {
             label: "기호",
             sectionTitle: "기호",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M5 4h14v4.5h-2V6H7v2.5H5V4zm2 6h4v4H7v-4zm6 0h4v4h-4v-4zM5 16h6v4H5v-4zm8 0h6v4h-6v-4z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M5 4h14v4.5h-2V6H7v2.5H5V4zm2 6h4v4H7v-4zm6 0h4v4h-4v-4zM5 16h6v4H5v-4zm8 0h6v4h-6v-4z"></path></g></svg>',
         },
         flags: {
             label: "깃발",
             sectionTitle: "깃발",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M6 2.75A.75.75 0 016.75 2h.5a.75.75 0 01.75.75V3h9.38c.97 0 1.45 1.17.76 1.85L16.1 6.9l2.05 2.05c.69.68.21 1.85-.76 1.85H8v10.45a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75V2.75z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__emoji-tab-icon"><g><path d="M6 2.75A.75.75 0 016.75 2h.5a.75.75 0 01.75.75V3h9.38c.97 0 1.45 1.17.76 1.85L16.1 6.9l2.05 2.05c.69.68.21 1.85-.76 1.85H8v10.45a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75V2.75z"></path></g></svg>',
         },
     };
     const emojiCategoryData = {
@@ -488,12 +495,12 @@ window.onload = function () {
         {clearable = false, emptyText = ""} = {},
     ) {
         const headerAction = clearable
-            ? '<button type="button" class="tweet-modal__emoji-clear" data-action="clear-recent">모두 지우기</button>'
+            ? '<button type="button" class="mypage-modal__emoji-clear" data-action="clear-recent">모두 지우기</button>'
             : "";
         const body = emojis.length
-            ? `<div class="tweet-modal__emoji-grid">${emojis.map((e) => `<button type="button" class="tweet-modal__emoji-option" data-emoji="${e}" role="menuitem">${e}</button>`).join("")}</div>`
-            : `<p class="tweet-modal__emoji-empty">${emptyText}</p>`;
-        return `<section class="tweet-modal__emoji-section"><div class="tweet-modal__emoji-section-header"><h3 class="tweet-modal__emoji-section-title">${title}</h3>${headerAction}</div>${body}</section>`;
+            ? `<div class="mypage-modal__emoji-grid">${emojis.map((e) => `<button type="button" class="mypage-modal__emoji-option" data-emoji="${e}" role="menuitem">${e}</button>`).join("")}</div>`
+            : `<p class="mypage-modal__emoji-empty">${emptyText}</p>`;
+        return `<section class="mypage-modal__emoji-section"><div class="mypage-modal__emoji-section-header"><h3 class="mypage-modal__emoji-section-title">${title}</h3>${headerAction}</div>${body}</section>`;
     }
 
     function renderEmojiTabs() {
@@ -501,7 +508,7 @@ window.onload = function () {
             const cat = tab.getAttribute("data-emoji-category");
             const meta = cat ? emojiCategoryMeta[cat] : null;
             const active = cat === activeEmojiCategory;
-            tab.classList.toggle("tweet-modal__emoji-tab--active", active);
+            tab.classList.toggle("mypage-modal__emoji-tab--active", active);
             tab.setAttribute("aria-selected", String(active));
             if (meta) tab.innerHTML = meta.icon;
         });
@@ -619,9 +626,9 @@ window.onload = function () {
         replyTagChipList.innerHTML = pendingTaggedUsers
             .map((u) => {
                 const av = u.avatar
-                    ? `<span class="tweet-modal__tag-chip-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
-                    : '<span class="tweet-modal__tag-chip-avatar"></span>';
-                return `<button type="button" class="tweet-modal__tag-chip" data-tag-remove-id="${escapeHtml(u.id)}">${av}<span class="tweet-modal__tag-chip-name">${escapeHtml(u.name)}</span><svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__tag-chip-icon"><g><path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button>`;
+                    ? `<span class="mypage-modal__tag-chip-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
+                    : '<span class="mypage-modal__tag-chip-avatar"></span>';
+                return `<button type="button" class="mypage-modal__tag-chip" data-tag-remove-id="${escapeHtml(u.id)}">${av}<span class="mypage-modal__tag-chip-name">${escapeHtml(u.name)}</span><svg viewBox="0 0 24 24" aria-hidden="true" class="mypage-modal__tag-chip-icon"><g><path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button>`;
             })
             .join("");
     }
@@ -652,7 +659,7 @@ window.onload = function () {
         replyTagResults.id = "mypage-tag-results";
         if (users.length === 0) {
             replyTagResults.innerHTML =
-                '<p class="tweet-modal__tag-empty">일치하는 사용자를 찾지 못했습니다.</p>';
+                '<p class="mypage-modal__tag-empty">일치하는 사용자를 찾지 못했습니다.</p>';
             return;
         }
         replyTagResults.innerHTML = users
@@ -660,9 +667,9 @@ window.onload = function () {
                 const sel = pendingTaggedUsers.some((t) => t.id === u.id);
                 const sub = sel ? `${u.handle} 이미 태그됨` : u.handle;
                 const av = u.avatar
-                    ? `<span class="tweet-modal__tag-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
-                    : '<span class="tweet-modal__tag-avatar"></span>';
-                return `<div role="option" class="tweet-modal__tag-option" data-testid="typeaheadResult"><div role="checkbox" aria-checked="${sel}" aria-disabled="${sel}" class="tweet-modal__tag-checkbox"><button type="button" class="tweet-modal__tag-user" data-tag-user-id="${escapeHtml(u.id)}" ${sel ? "disabled" : ""}>${av}<span class="tweet-modal__tag-user-body"><span class="tweet-modal__tag-user-name">${escapeHtml(u.name)}</span><span class="tweet-modal__tag-user-handle">${escapeHtml(sub)}</span></span></button></div></div>`;
+                    ? `<span class="mypage-modal__tag-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
+                    : '<span class="mypage-modal__tag-avatar"></span>';
+                return `<div role="option" class="mypage-modal__tag-option" data-testid="typeaheadResult"><div role="checkbox" aria-checked="${sel}" aria-disabled="${sel}" class="mypage-modal__tag-checkbox"><button type="button" class="mypage-modal__tag-user" data-tag-user-id="${escapeHtml(u.id)}" ${sel ? "disabled" : ""}>${av}<span class="mypage-modal__tag-user-body"><span class="mypage-modal__tag-user-name">${escapeHtml(u.name)}</span><span class="mypage-modal__tag-user-handle">${escapeHtml(sub)}</span></span></button></div></div>`;
             })
             .join("");
     }
@@ -858,7 +865,7 @@ window.onload = function () {
         if (cachedLocationNames.length === 0 && replyLocationList) {
             cachedLocationNames = Array.from(
                 replyLocationList.querySelectorAll(
-                    ".tweet-modal__location-item-label",
+                    ".mypage-modal__location-item-label",
                 ),
             )
                 .map((i) => getTextContent(i))
@@ -904,13 +911,13 @@ window.onload = function () {
         const locs = getFilteredLocations();
         if (locs.length === 0) {
             replyLocationList.innerHTML =
-                '<p class="tweet-modal__location-empty">일치하는 위치를 찾지 못했습니다.</p>';
+                '<p class="mypage-modal__location-empty">일치하는 위치를 찾지 못했습니다.</p>';
             return;
         }
         replyLocationList.innerHTML = locs
             .map((loc) => {
                 const sel = pendingLocation === loc;
-                return `<button type="button" class="tweet-modal__location-item" role="menuitem"><span class="tweet-modal__location-item-label">${loc}</span><span class="tweet-modal__location-item-check">${sel ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg>' : ""}</span></button>`;
+                return `<button type="button" class="mypage-modal__location-item" role="menuitem"><span class="mypage-modal__location-item-label">${loc}</span><span class="mypage-modal__location-item-check">${sel ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg>' : ""}</span></button>`;
             })
             .join("");
     }
@@ -1029,7 +1036,7 @@ window.onload = function () {
         if (!replyAttachmentMedia || attachedReplyFiles.length === 0) return;
         const [file] = attachedReplyFiles,
             [fileUrl] = attachedReplyFileUrls;
-        replyAttachmentMedia.innerHTML = `<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container" aria-label="미디어" role="group"><video class="tweet-modal__attachment-video" controls preload="metadata"><source src="${fileUrl}" type="${file.type}"></video></div><div class="media-btn-row"><button type="button" class="media-btn" data-attachment-edit-index="0"><span>수정</span></button></div><button type="button" class="media-btn-delete" aria-label="미디어 삭제하기" data-attachment-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>`;
+        replyAttachmentMedia.innerHTML = `<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container" aria-label="미디어" role="group"><video class="mypage-modal__attachment-video" controls preload="metadata"><source src="${fileUrl}" type="${file.type}"></video></div><div class="media-btn-row"><button type="button" class="media-btn" data-attachment-edit-index="0"><span>수정</span></button></div><button type="button" class="media-btn-delete" aria-label="미디어 삭제하기" data-attachment-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>`;
     }
 
     function renderReplyAttachment() {
@@ -1069,7 +1076,7 @@ window.onload = function () {
             "path",
         );
         const fn = document.createElement("span");
-        fp.className = "tweet-modal__attachment-file";
+        fp.className = "mypage-modal__attachment-file";
         fi.setAttribute("viewBox", "0 0 24 24");
         fi.setAttribute("width", "22");
         fi.setAttribute("height", "22");
@@ -1078,7 +1085,7 @@ window.onload = function () {
             "d",
             "M14 2H7.75C5.68 2 4 3.68 4 5.75v12.5C4 20.32 5.68 22 7.75 22h8.5C18.32 22 20 20.32 20 18.25V8l-6-6zm0 2.12L17.88 8H14V4.12zm2.25 15.88h-8.5c-.97 0-1.75-.78-1.75-1.75V5.75C6 4.78 6.78 4 7.75 4H12v5.25c0 .41.34.75.75.75H18v8.25c0 .97-.78 1.75-1.75 1.75z",
         );
-        fn.className = "tweet-modal__attachment-file-name";
+        fn.className = "mypage-modal__attachment-file-name";
         fn.textContent = attachedReplyFiles[0]?.name ?? "";
         fg.appendChild(fpath);
         fi.appendChild(fg);
@@ -1336,7 +1343,7 @@ window.onload = function () {
                 ? document.queryCommandState(fmt)
                 : pendingReplyFormats.has(fmt);
             const labels = formatButtonLabels[fmt];
-            btn.classList.toggle("tweet-modal__tool-btn--active", active);
+            btn.classList.toggle("mypage-modal__tool-btn--active", active);
             if (labels)
                 btn.setAttribute(
                     "aria-label",
@@ -1637,8 +1644,8 @@ window.onload = function () {
     // ===== 6. Draft Panel =====
     // draftView 선언은 파일 상단으로 끌어올렸다(showReplyPanel 헬퍼에서 참조 필요).
     // 여기서는 할당만 수행한다.
-    draftView = q(".tweet-modal__draft-view");
-    const draftButton = q(".tweet-modal__draft");
+    draftView = q(".mypage-modal__draft-view");
+    const draftButton = q(".mypage-modal__draft");
     const draftBackButton = draftView?.querySelector(".draft-panel__back");
     const draftActionButton = draftView?.querySelector(".draft-panel__action");
     const draftList = draftView?.querySelector(".draft-panel__list");
@@ -1986,7 +1993,7 @@ window.onload = function () {
         if (!selectedProduct || !replyEditor) return;
         const card = document.createElement("div");
         card.setAttribute("data-selected-product", "");
-        card.className = "tweet-modal__selected-product";
+        card.className = "mypage-modal__selected-product";
         card.innerHTML = `<div class="selected-product__card"><img class="selected-product__image" src="${selectedProduct.image}" alt="${selectedProduct.name}"><div class="selected-product__info"><strong class="selected-product__name">${selectedProduct.name}</strong><span class="selected-product__price">${selectedProduct.price}</span></div><button type="button" class="selected-product__remove" aria-label="판매글 제거"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div>`;
         card.querySelector(".selected-product__remove")?.addEventListener(
             "click",
@@ -2230,14 +2237,10 @@ window.onload = function () {
         });
     }
 
-    // === 견적요청 모달 ===
-    // 모달 열기/닫기 + body.modal-open 토글 + 폼 제출 등 모든 흐름은
-    // estimation-regist/event.js가 담당한다. 여기서는 마이페이지의
-    // "견적요청" 버튼이 모달의 숨겨진 작성 버튼(#createPostButton)을
-    // 대신 클릭하도록 다리만 연결해 둔다.
+    // 견적요청 버튼은 estimation-regist 측 hidden 트리거(#createEstimationButton)를 대신 클릭한다.
     document.querySelector(".Profile-Edit-Btn.Request")
         ?.addEventListener("click", () => {
-            document.getElementById("createPostButton")?.click();
+            document.getElementById("createEstimationButton")?.click();
         });
 
     // 사이드바 견적 요약/더보기는 본인 mypage에서만 의미가 있다.
@@ -2529,7 +2532,7 @@ window.onload = function () {
     replyEmojiContent?.addEventListener("mousedown", (e) => {
         if (
             e.target.closest(
-                ".tweet-modal__emoji-option, .tweet-modal__emoji-clear",
+                ".mypage-modal__emoji-option, .mypage-modal__emoji-clear",
             )
         )
             e.preventDefault();
@@ -2541,7 +2544,7 @@ window.onload = function () {
             renderEmojiPicker();
             return;
         }
-        const eb = e.target.closest(".tweet-modal__emoji-option");
+        const eb = e.target.closest(".mypage-modal__emoji-option");
         if (!eb) return;
         const emoji = eb.getAttribute("data-emoji");
         if (emoji) {
@@ -2568,10 +2571,10 @@ window.onload = function () {
         }
     });
     replyLocationList?.addEventListener("click", (e) => {
-        const lb = e.target.closest(".tweet-modal__location-item");
+        const lb = e.target.closest(".mypage-modal__location-item");
         if (!lb) return;
         const loc = getTextContent(
-            lb.querySelector(".tweet-modal__location-item-label"),
+            lb.querySelector(".mypage-modal__location-item-label"),
         );
         if (loc) {
             applyLocation(loc);
@@ -3188,21 +3191,9 @@ window.onload = function () {
         }
 
         if (actionClass === "menu-item--edit") {
-            const post = await myPageService.getPost(meta.postId, mypageContext.loginMemberId);
-            const nextContent = window.prompt("게시물 내용을 수정하세요.", post.postContent || "");
-
-            if (nextContent == null) {
-                closePostMoreDropdown();
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("id", meta.postId);
-            formData.append("postContent", nextContent.trim());
-
-            await myPageService.updatePost(meta.postId, formData);
-            reloadOwnedPostList(meta.cardType);
+            // 공용 작성 모달의 수정 모드를 열어 모든 필드(제목/본문/위치/태그/미디어/상품)를 그대로 편집한다.
             closePostMoreDropdown();
+            postModalApi.openEdit(meta.postId);
             return;
         }
 
@@ -3658,14 +3649,8 @@ window.onload = function () {
     document.body.addEventListener(
         "click",
         async (e) => {
-            // 답글 버튼: 동적 카드도 동일한 경로로 모달을 열 수 있도록 이벤트를 위임한다.
-            const replyBtn = e.target.closest('.Post-Action-Btn.Reply, [data-action="reply"]');
-            if (replyBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                openReplyModal(replyBtn);
-                return;
-            }
+            // 답글 트리거는 공용 답글 모달(post-modal.js setupReply)이 처리한다.
+            // 자체 답글 모달 마크업/CSS/핸들러는 Phase 3 후속 PR에서 통째 제거 예정.
 
             // 좋아요 버튼: UI 를 즉시 토글한 뒤 서버에 동기화한다.
             // 서버 호출이 실패하면 토글을 한 번 더 호출해 UI/DB 가 어긋나지 않도록 롤백한다.

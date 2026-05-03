@@ -49,10 +49,16 @@ svg {
     display: flex;
     justify-content: center;
     min-height: 100vh;
+    /* Page-Layout(flex) 안의 자식이라 콘텐츠 길이에 따라 폭이 줄어드는 것을 방지.
+       일반/속보 상세 둘 다 동일하게 600px 카드를 보장한다. */
+    flex: 0 0 600px;
+    width: 600px;
+    max-width: 100%;
 }
 
 .news-shell {
-    width: min(100%, 600px);
+    width: 600px;
+    max-width: 100%;
     min-height: 100vh;
     background: rgb(255, 255, 255);
     border-left: 1px solid rgb(239, 243, 244);
@@ -114,13 +120,9 @@ svg {
 
 .trend-meta {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    gap: 6px;
     margin-top: 8px;
-}
-
-.trend-meta span {
-    color: rgb(83, 100, 113);
-    font-size: 13px;
 }
 
 .ai-summary {
@@ -422,20 +424,80 @@ svg {
     align-items: center;
     gap: 6px;
     min-height: 48px;
+    padding: 0 10px;
+    margin-left: -10px;
+    border-radius: 9999px;
     color: rgb(15, 20, 25);
     font-size: 15px;
     font-weight: 700;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.post-detail-sort-button:hover {
+    background: rgba(29, 155, 240, 0.08);
+    color: rgb(29, 155, 240);
+}
+
+.post-detail-sort-button.is-open,
+.post-detail-sort-button[aria-expanded="true"] {
+    background: rgba(29, 155, 240, 0.12);
+    color: rgb(29, 155, 240);
+}
+
+.post-detail-sort-button.is-open svg,
+.post-detail-sort-button[aria-expanded="true"] svg {
+    transform: rotate(180deg);
 }
 
 .post-detail-sort-button svg {
     width: 18px;
     height: 18px;
     fill: currentColor;
+    transition: transform 0.18s ease;
+}
+
+/* 정렬 메뉴 항목: 현재 선택된 항목 강조 */
+.post-detail-sort-menu .dropdown-item {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 15px;
+    color: rgb(15, 20, 25);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.post-detail-sort-menu .dropdown-item:hover {
+    background: rgba(15, 20, 25, 0.06);
+}
+
+.post-detail-sort-menu .dropdown-item.active {
+    color: rgb(29, 155, 240);
+    font-weight: 700;
+}
+
+.post-detail-sort-menu .dropdown-item.active::after {
+    content: "✓";
+    margin-left: 8px;
 }
 
 .post-detail-sort-menu {
     top: calc(100% - 4px);
     left: 16px;
+}
+
+/* post-detailed.css 의 .dropdown-menu { display: flex; position: fixed } 가
+   [hidden] 을 덮어 정렬/더보기 메뉴가 항상 펼쳐 보이거나,
+   position:fixed 때문에 뷰포트 밖으로 튕겨나가 클릭이 안 되는 문제를 동시에 차단한다. */
+.dropdown-menu[hidden],
+.post-detail-sort-menu[hidden],
+.post-detail-reply-more-menu[hidden] {
+    display: none !important;
+}
+
+.post-detail-sort-menu,
+.post-detail-reply-more-menu {
+    position: absolute !important;
 }
 
 .post-detail-replies {
@@ -448,6 +510,180 @@ svg {
     text-align: center;
     color: rgb(83, 100, 113);
     font-size: 15px;
+}
+
+/* 답글 카드 액션 행: 답글/좋아요/공유 (small inline action group, right-align) */
+.post-detail-actions--reply {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    padding: 4px 0 0 !important;
+    border-top: 0 !important;
+    margin-top: 6px;
+}
+
+.reply-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    margin: 0 -4px;
+    background: transparent;
+    border: 0;
+    border-radius: 9999px;
+    color: rgb(83, 100, 113);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.reply-action svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    transition: transform 0.15s ease;
+}
+
+.reply-action__label {
+    font-size: 13px;
+}
+
+.reply-action__count {
+    font-variant-numeric: tabular-nums;
+    min-width: 8px;
+}
+
+.reply-edited-flag {
+    color: rgb(83, 100, 113);
+    font-size: 12px;
+    font-weight: 400;
+    margin-left: 4px;
+}
+
+/* 답글 카드 공유 드롭다운: 트리거 우측 정렬, 메뉴는 우측 위로 펼침 */
+.reply-share-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.reply-share-menu {
+    position: absolute !important;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 180px;
+    z-index: 30;
+    flex-direction: column;
+}
+
+.reply-share-item {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: 15px;
+    color: rgb(15, 20, 25);
+}
+
+.reply-share-item:hover {
+    background: rgba(15, 20, 25, 0.06);
+}
+
+.reply-share-item svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+.reply-action--like:hover {
+    background: rgba(249, 24, 128, 0.1);
+    color: rgb(249, 24, 128);
+}
+
+.reply-action--like:hover svg {
+    transform: scale(1.08);
+}
+
+.reply-action--like.is-active {
+    color: rgb(249, 24, 128);
+}
+
+.reply-action--share:hover {
+    background: rgba(29, 155, 240, 0.1);
+    color: rgb(29, 155, 240);
+}
+
+/* 댓글 인라인 수정 폼 */
+.post-detail-reply-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.post-detail-reply-edit-input {
+    width: 100%;
+    min-height: 64px;
+    padding: 8px 10px;
+    border: 1px solid rgb(207, 217, 222);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 15px;
+    line-height: 20px;
+    color: rgb(15, 20, 25);
+    resize: vertical;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.post-detail-reply-edit-input:focus {
+    border-color: rgb(29, 155, 240);
+}
+
+.post-detail-reply-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.post-detail-reply-edit-cancel,
+.post-detail-reply-edit-save {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.post-detail-reply-edit-cancel {
+    background: transparent;
+    border: 1px solid rgb(207, 217, 222);
+    color: rgb(15, 20, 25);
+}
+
+.post-detail-reply-edit-cancel:hover {
+    background: rgba(15, 20, 25, 0.06);
+}
+
+.post-detail-reply-edit-save {
+    background: rgb(15, 20, 25);
+    border: 1px solid rgb(15, 20, 25);
+    color: #ffffff;
+}
+
+.post-detail-reply-edit-save:hover {
+    background: rgb(39, 44, 48);
+}
+
+.post-detail-reply-edit-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .post-detail-reply-more-menu {

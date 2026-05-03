@@ -635,68 +635,8 @@ window.onload = () => {
         }
     });
 
-    // ── 4. 좌측 네비게이션 ──
-    const navItems = document.querySelectorAll(".nav-item");
-
-    navItems.forEach((item) => {
-        item.addEventListener("click", (e) => {
-            navItems.forEach((nav) => { nav.classList.remove("active"); });
-            item.classList.add("active");
-        });
-    });
-
-    const navMore = document.getElementById("navMore");
-    const navMoreLayer = document.getElementById("navMoreLayer");
-
-    navMore.addEventListener("click", (e) => {
-        e.stopPropagation();
-        let isOpen = !navMoreLayer.classList.contains("off");
-        if (isOpen) {
-            navMoreLayer.classList.add("off");
-        } else {
-            let rect = navMore.getBoundingClientRect();
-            let popover = document.getElementById("navMorePopover");
-            popover.style.visibility = "hidden";
-            navMoreLayer.classList.remove("off");
-            popover.style.left = rect.left + "px";
-            popover.style.top = (rect.top - popover.offsetHeight - 8) + "px";
-            popover.style.visibility = "";
-        }
-    });
-
-    navMoreLayer.querySelector(".nav-more-overlay").addEventListener("click", (e) => {
-        navMoreLayer.classList.add("off");
-    });
-
-    const accountCard = document.getElementById("accountCard");
-    const accountMenuPopup = document.getElementById("accountMenuPopup");
-
-    accountCard.addEventListener("click", (e) => {
-        e.stopPropagation();
-        let isOpen = !accountMenuPopup.classList.contains("off");
-        if (isOpen) {
-            accountMenuPopup.classList.add("off");
-        } else {
-            accountMenuPopup.classList.remove("off");
-        }
-    });
-
-    document.getElementById("accountLogoutButton").addEventListener("click", (e) => {
-        let result = confirm("로그아웃 하시겠습니까?");
-        if (result) {
-            alert("로그아웃되었습니다.");
-            accountMenuPopup.classList.add("off");
-        }
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest("#accountMenuPopup") && !e.target.closest("#accountCard")) {
-            accountMenuPopup.classList.add("off");
-        }
-        if (!e.target.closest("#navMoreLayer") && !e.target.closest("#navMore")) {
-            navMoreLayer.classList.add("off");
-        }
-    });
+    // ── 4. 좌측 네비게이션 / 더 보기 / 계정 메뉴 ──
+    // /js/common/header.js 에서 모든 페이지(layout, layout-left-one, main) 공통으로 처리한다.
 
     // ── 5. 검색 ──
     const searchInput = document.getElementById("searchInput");
@@ -1028,11 +968,7 @@ window.onload = () => {
                 });
             });
         }
-        document.getElementById("accountLogoutButton").addEventListener("click", async (e) => {
-            e.preventDefault();
-            await service.logout();
-            location.href = "/member/join"
-        })
+        // 로그아웃 핸들러는 공통 header.js 에서 바인딩한다 (모든 탭에서 동일 동작).
     }
 
     load();

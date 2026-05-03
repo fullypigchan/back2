@@ -16,11 +16,12 @@
         if (!profileEl) return;
 
         // 프로필 요소 자체가 곧 링크/버튼이면 그대로 mypage로 이동시킨다.
-        // 프로필 안쪽 또는 바깥쪽에 별도 인터랙티브 요소가 있으면 그쪽 액션을 우선한다.
+        // 프로필 안쪽에 있는 인터랙티브 요소(팔로우 버튼 등)는 그 액션을 우선한다.
+        // 프로필을 감싸는 외부 a/button(예: post-detailed 댓글 카드 a 태그)은 통과시켜 mypage 이동을 우선한다.
         const inner = target.closest(
             "button, a, input, textarea, label, select, [data-stop-profile-link]"
         );
-        if (inner && inner !== profileEl) return;
+        if (inner && inner !== profileEl && profileEl.contains(inner)) return;
 
         // data-profile-id가 비어있거나 숫자가 아니면 noop. URL 주입 위험 차단.
         const memberId = profileEl.getAttribute("data-profile-id");

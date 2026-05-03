@@ -22,8 +22,8 @@ const layout = (() => {
         console.log("댓글카드 들어옴1:", r.memberNickname, r.memberHandle);
         const initial = (r.memberNickname || r.memberHandle || "?").charAt(0);
         const avatar = r.memberProfileFileName
-            ? `<div class="post-detail-avatar post-detail-avatar--image" data-profile-id="${r.memberId}"><img class="postAvatarImage" src="${esc(r.memberProfileFileName)}" alt="프로필"/></div>`
-            : `<div class="post-detail-avatar post-detail-avatar--image" data-profile-id="${r.memberId}"><img class="postAvatarImage" src="/images/profile/default_image.png" alt="프로필"/></div>`;
+            ? `<div class="post-detail-avatar post-detail-avatar--image" data-profile-id="${r.memberId}"><img src="${esc(r.memberProfileFileName)}" alt="프로필"/></div>`
+            : `<div class="post-detail-avatar post-detail-avatar--image" data-profile-id="${r.memberId}"><img src="/images/profile/default_image.png" alt="프로필"/></div>`;
 
         const threadClass = inThread ? " post-detail-thread-item" : "";
 
@@ -34,13 +34,12 @@ const layout = (() => {
 
         return `
         <div class="post-detail-reply-card postCard${threadClass}" data-post-card data-post-id="${r.id}" data-member-id="${r.memberId}">
-            ${avatar}
             <div class="post-detail-reply-content">
                 <header class="post-detail-reply-header">
                     <div class="post-detail-reply-identity" data-profile-id="${r.memberId}">
+                        ${avatar}
                         <strong class="postName">${esc(r.memberNickname || r.memberHandle)}</strong>
                         <span class="postHandle">${esc(r.memberHandle || "")}</span>
-                        <span>·</span>
                         <span class="postTime">${esc(r.createdDatetime || "")}</span>
                     </div>
                     <div class="post-detail-more-wrap">

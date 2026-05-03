@@ -7,10 +7,12 @@
     <title>Global-Gates</title>
     <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}">
     <link rel="stylesheet" href="/css/chat/chat.css" th:href="@{/css/chat/chat.css}">
-    <link rel="shortcut icon" href="/favicon.ico" th:href="@{/favicon.ico}" type="image/x-icon">
+    <link rel="icon" type="image/png" href="/images/logo/logo.png">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
+    <script src="/js/main/service.js"></script>
+    <script src="/js/main/layout.js"></script>
     <script src="/js/chat/service.js" th:src="@{/js/chat/service.js?v=20260429a}"></script>
     <script src="/js/chat/layout.js" th:src="@{/js/chat/layout.js?v=20260429a}"></script>
     <script src="/js/chat/event.js" th:src="@{/js/chat/event.js?v=20260429a}"></script>
@@ -123,126 +125,17 @@
                                 <div class="UserList-Wrapper"
                                      style="height: 100vh; overflow: hidden auto; overflow-anchor: none; width: 100%;">
                                     <ul class="UserList-Container">
-
-                                        <!-- 유저 정보 하나 -->
-                                        <!-- 클릭 시, current 추가하고 해당 유저  -->
-                                        <!-------------------------------->
-                                        <li class="UserList-EachUser">
-                                            <div class="EachUser-Wrapper" style="opacity: 1;">
-                                                <div class="EachUser-UserInfo">
-                                                    <div class="UserInfo-Avatar">
-                                                        <a class="Avatar-Image">
-                                                            <!-- 유저 프로필 이미지 넣는 곳 -->
-                                                            <img alt="user-avatar" src="" loading="lazy"
-                                                                 draggable="false">
-                                                        </a>
-                                                    </div>
-                                                    <div class="UserInfo-Info">
-                                                        <div class="Info-Upper">
-                                                            <div class="Info-UserName">
-                                                                <!-- 유저 이름 + 구독 여부 뱃지 -->
-                                                                <a href="해당 유저 마이페이지 경로" style="text-decoration: none;">
-                                                                    <div class="UserName-Container">
-                                                                        <!-- 유저 이름 부분 -->
-                                                                        <div class="UserName-Text">유저 이름</div>
-                                                                        <!-- 유저 구독 여부 뱃지 부분 -->
-                                                                        <div class="UserName-Badge">
-                                                                            <div class="Badge-Wrapper">
-                                                                                <div class="Badge-Svg">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                         fill="currentColor"
-                                                                                         data-icon="icon-verified"
-                                                                                         viewBox="0 0 22 22" width="1em"
-                                                                                         height="1em" display="flex"
-                                                                                         role="img" class="text-primary fill-badge">
-                                                                                        <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <!-- 채팅이 올라온 최근 시간 부분 -->
-                                                            <div class="Lastest-ChatTime">
-                                                                <div class="Lastest-ChatTime-Text">2일 전</div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- 최근 올라온 채팅 내용 부분 -->
-                                                        <div class="Info-Bottom">
-                                                            <div class="Talk-Wrapper">
-                                                                <div class="Talk-Container">
-                                                                    <!-- 채팅 내용 span -->
-                                                                    <span class="Talk-Content">
-                                                                            채팅 내용 입력하는 곳
-                                                                        </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <li class="UserList-Empty">
+                                            <div class="UserList-Empty-Icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                     data-icon="icon-messages-stroke" viewBox="0 0 24 24" width="1em"
+                                                     height="1em" display="flex" role="img" class="text-primary">
+                                                    <path d="M20.7 11.7c0-4.48-3.844-8.2-8.699-8.2-4.854 0-8.698 3.72-8.698 8.2v.015l-.001.014c-.02.667.09 1.225.25 1.767.083.28.176.545.276.839.098.285.202.595.288.918.177.663.284 1.401.156 2.271-.086.582-.274 1.191-.582 1.855 1.264.375 2.55.053 4.013-.599l.455-.203.437.242c1.07.594 1.917 1.08 3.406 1.08 4.855 0 8.7-3.72 8.7-8.199zm2 0c0 5.683-4.84 10.2-10.699 10.2-1.784 0-2.96-.555-3.95-1.095-1.876.768-4.02 1.2-6.245-.075l-.885-.505.524-.875c.54-.904.77-1.581.848-2.118.078-.526.02-.98-.11-1.463-.066-.25-.15-.502-.247-.788-.095-.277-.204-.59-.301-.92-.199-.674-.36-1.449-.332-2.39C1.322 6.002 6.154 1.5 12.002 1.5c5.859 0 10.7 4.518 10.7 10.2z"></path>
+                                                </svg>
                                             </div>
+                                            <div class="UserList-Empty-Title">아직 진행 중인 채팅이 없어요</div>
+                                            <div class="UserList-Empty-Subtitle">전문가를 찾아 새로운 채팅을 시작해보세요.</div>
                                         </li>
-                                        <!-------------------------------->
-
-                                        <!-------------------------------->
-                                        <li class="UserList-EachUser">
-                                            <div class="EachUser-Wrapper" style="opacity: 1;">
-                                                <div class="EachUser-UserInfo">
-                                                    <div class="UserInfo-Avatar">
-                                                        <a class="Avatar-Image">
-                                                            <!-- 유저 프로필 이미지 넣는 곳 -->
-                                                            <img alt="user-avatar" src="" loading="lazy"
-                                                                 draggable="false">
-                                                        </a>
-                                                    </div>
-                                                    <div class="UserInfo-Info">
-                                                        <div class="Info-Upper">
-                                                            <div class="Info-UserName">
-                                                                <!-- 유저 이름 + 구독 여부 뱃지 -->
-                                                                <a href="해당 유저 마이페이지 경로" style="text-decoration: none;">
-                                                                    <div class="UserName-Container">
-                                                                        <!-- 유저 이름 부분 -->
-                                                                        <div class="UserName-Text">유저 이름</div>
-                                                                        <!-- 유저 구독 여부 뱃지 부분 -->
-                                                                        <div class="UserName-Badge">
-                                                                            <div class="Badge-Wrapper">
-                                                                                <div class="Badge-Svg">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                         fill="currentColor"
-                                                                                         data-icon="icon-verified"
-                                                                                         viewBox="0 0 22 22" width="1em"
-                                                                                         height="1em" display="flex"
-                                                                                         role="img" class="text-primary fill-badge">
-                                                                                        <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <!-- 채팅이 올라온 최근 시간 부분 -->
-                                                            <div class="Lastest-ChatTime">
-                                                                <div class="Lastest-ChatTime-Text">2일 전</div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- 최근 올라온 채팅 내용 부분 -->
-                                                        <div class="Info-Bottom">
-                                                            <div class="Talk-Wrapper">
-                                                                <div class="Talk-Container">
-                                                                    <!-- 채팅 내용 span -->
-                                                                    <span class="Talk-Content">
-                                                                            채팅 내용 입력하는 곳
-                                                                        </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <!-------------------------------->
                                     </ul>
                                 </div>
                             </div>
@@ -256,7 +149,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                          data-icon="icon-messages-stroke" viewBox="0 0 24 24" width="1em" height="1em"
                                          display="flex" role="img" class="text-primary">
-                                        <path d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"></path>
+                                        <path d="M20.7 11.7c0-4.48-3.844-8.2-8.699-8.2-4.854 0-8.698 3.72-8.698 8.2v.015l-.001.014c-.02.667.09 1.225.25 1.767.083.28.176.545.276.839.098.285.202.595.288.918.177.663.284 1.401.156 2.271-.086.582-.274 1.191-.582 1.855 1.264.375 2.55.053 4.013-.599l.455-.203.437.242c1.07.594 1.917 1.08 3.406 1.08 4.855 0 8.7-3.72 8.7-8.199zm2 0c0 5.683-4.84 10.2-10.699 10.2-1.784 0-2.96-.555-3.95-1.095-1.876.768-4.02 1.2-6.245-.075l-.885-.505.524-.875c.54-.904.77-1.581.848-2.118.078-.526.02-.98-.11-1.463-.066-.25-.15-.502-.247-.788-.095-.277-.204-.59-.301-.92-.199-.674-.36-1.449-.332-2.39C1.322 6.002 6.154 1.5 12.002 1.5c5.859 0 10.7 4.518 10.7 10.2z"></path>
                                     </svg>
                                 </div>
                                 <div class="ChatContent-Texts">
