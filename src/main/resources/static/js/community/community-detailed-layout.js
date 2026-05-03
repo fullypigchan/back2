@@ -233,4 +233,25 @@ const CommunityDetailLayout = {
     renderEmptyState(message) {
         return `<div class="communityEmpty"><p>${this.escapeHtml(message)}</p></div>`;
     },
+
+    // 공용 답글 모달의 source avatar fallback (카드에 avatar 없을 때).
+    buildAvatarDataUri(label) {
+        const safe = String(label || "?").slice(0, 1).replace(/[&<>"']/g, "");
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="20" fill="#cfe8fc"></rect><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#1d9bf0">' + safe + '</text></svg>';
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    },
+
+    // 공용 모달의 @ mention 드롭다운.
+    buildMentionDropdown(members) {
+        return members.map((m, i) => {
+            const profileImg = m.profileFileName ? m.profileFileName : "/images/profile/default_image.png";
+            return `<button type="button" class="mention-item${i === 0 ? " active" : ""}" data-handle="${m.memberHandle}" data-member-id="${m.id}">
+                <img class="mention-item-avatar" src="${profileImg}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                <div class="mention-item-info">
+                    <span class="mention-item-name">${m.memberName || m.memberHandle}</span>
+                    <span class="mention-item-handle">${m.memberHandle}</span>
+                </div>
+            </button>`;
+        }).join("");
+    },
 };

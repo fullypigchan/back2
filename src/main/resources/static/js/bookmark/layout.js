@@ -42,7 +42,7 @@ const BookmarkLayout = (function () {
         const handle = rawHandle.startsWith("@") ? escapeHtml(rawHandle) : (rawHandle ? escapeHtml("@" + rawHandle) : "");
         const avatarInitial = (b.memberNickname || b.memberHandle || "?").charAt(0);
         const profileSrc = b.memberProfileFileName || "/images/profile/default_image.png";
-        const avatarHtml = `<div class="bookmark-post-avatar bookmark-post-avatar--image postAvatar"><img class="postAvatarImage" src="${escapeHtml(profileSrc)}" alt="${nickname} 프로필 이미지"/></div>`;
+        const avatarHtml = `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="${escapeHtml(profileSrc)}" alt="${nickname} 프로필 이미지"/></div>`;
         const likeCount = b.likeCount || 0;
         const replyCount = b.replyCount || 0;
         const bookmarkCount = b.bookmarkCount || 0;
@@ -51,13 +51,24 @@ const BookmarkLayout = (function () {
         const mediaHtml = postFiles.length > 0
             ? `<div class="bookmark-post-media bookmark-post-media--${Math.min(postFiles.length, 4)}">${postFiles.slice(0, 4).map(pf => `<img src="${escapeHtml(pf.filePath)}" alt="${escapeHtml(pf.originalName || '')}" class="bookmark-post-media-img" data-media-preview="true"/>`).join("")}</div>`
             : "";
+        // 해시태그 (post 북마크에서만 데이터 채워짐, 뉴스/삭제 게시글은 빈 배열)
+        const hashtags = b.hashtags || [];
+        const hashtagHtml = hashtags.length > 0
+            ? `<div class="postHashtags">${hashtags.map(tag => `<a class="postHashtag" href="/explore/search?keyword=${encodeURIComponent(tag.tagName)}">#${escapeHtml(tag.tagName)}</a>`).join(" ")}</div>`
+            : "";
         return `<article class="bookmark-post postCard${isDeleted ? " bookmark-post--deleted" : ""}${isNews ? " bookmark-post--news" : ""}" data-post-id="${b.postId || ""}" data-news-id="${b.newsId || ""}" data-bookmark-type="${isNews ? "news" : "post"}" data-bookmark-id="${b.id}" data-post-member-id="${b.postMemberId || ""}">
             <div class="bookmark-post-body">
                 <header class="bookmark-post-header">
                     <div class="bookmark-post-identity">
                         ${avatarHtml}
-                        <strong class="bookmark-post-name postName">${nickname}</strong>
-                        ${handle ? `<span class="bookmark-post-handle postHandle">${handle}</span>` : ""}
+                        <div class="postIdentity__copy">
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${nickname}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                ${handle ? `<span class="postHandle">${handle}</span>` : ""}
+                            </div>
+                        </div>
                     </div>
                     <div class="bookmark-post-more-wrap">
                         <button class="bookmark-post-more" type="button" aria-label="게시물 더 보기" aria-haspopup="menu" aria-expanded="false" data-post-more>
@@ -79,7 +90,8 @@ const BookmarkLayout = (function () {
                         </div>
                     </div>
                 </header>
-                <p class="bookmark-post-text postText">${content}</p>
+                <p class="postText">${content}</p>
+                ${hashtagHtml}
                 ${mediaHtml}
                 <footer class="bookmark-post-metrics">
                     <div class="bookmark-post-actions">

@@ -1445,7 +1445,7 @@ a.post-detail-reply-card {
     padding: 5px 16px;
 }
 
-.post-detail-thread-item .post-detail-avatar {
+.post-detail-thread-item .postAvatar {
     position: relative;
     z-index: 1;
 }

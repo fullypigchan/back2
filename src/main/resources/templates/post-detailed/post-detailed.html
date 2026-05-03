@@ -59,9 +59,16 @@
                             <div class="postAvatar postAvatar--image" th:data-profile-id="${post.memberId}">
                                 <img th:src="${post.memberProfileFileName != null ? post.memberProfileFileName : '/images/profile/default_image.png'}" alt="프로필"/>
                             </div>
-                            <strong class="postName" th:text="${post.memberNickname ?: post.memberHandle}"></strong>
-                            <span class="postHandle" th:text="${post.memberHandle}"></span>
-                            <span class="postTime" th:text="${post.createdDatetime}"></span>
+                            <div class="postIdentity__copy">
+                                <div class="postIdentity__nameRow">
+                                    <strong class="postName" th:text="${post.memberNickname ?: post.memberHandle}"></strong>
+                                </div>
+                                <div class="postIdentity__metaRow">
+                                    <span class="postHandle" th:text="${post.memberHandle}"></span>
+                                    <span class="postIdentity__sep">·</span>
+                                    <span class="postTime" th:text="${post.createdDatetime}"></span>
+                                </div>
+                            </div>
                         </div>
                         <button class="postMoreButton" id="heroMoreButton" type="button" aria-label="게시물 더 보기" aria-haspopup="menu" aria-expanded="false">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
