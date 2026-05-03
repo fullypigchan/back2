@@ -33,8 +33,15 @@
             <div class="header-spacer"></div>
         </div>
 
-        <!-- Category Banner -->
-        <div class="category-banner">
+        <!-- Pill Tabs -->
+        <div class="friends-tabs">
+            <button class="friends-tab active" data-tab="recommend">추천 커넥션</button>
+            <button class="friends-tab" data-tab="followers">커넥터</button>
+            <button class="friends-tab" data-tab="followings">커넥팅</button>
+        </div>
+
+        <!-- Category Banner (추천 탭일 때만 표시) -->
+        <div class="category-banner" id="categoryBanner">
             <p class="category-banner-title">카테고리 태그란</p>
             <div class="category-scroll-wrap">
                 <button

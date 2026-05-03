@@ -261,6 +261,9 @@ window.onload = () => {
                 if (postId) {
                     console.log("신고 접수 postId:", postId);
                     await service.report(memberId, postId, 'post', reportItem.dataset.reason);
+                    // 신고된 카드 즉시 제거.
+                    const card = document.querySelector(`.postCard[data-post-id="${postId}"]`);
+                    if (card) { card.remove(); }
                 }
                 showPostMoreToast("신고가 접수되었습니다");
                 closePostMoreModal();

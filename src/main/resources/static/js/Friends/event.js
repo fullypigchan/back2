@@ -25,6 +25,7 @@ window.onload = () => {
     // ===== 2. 화면 상태 =====
     let pendingDisconnectButton = null;
     let selectedCategoryId = null;
+    let currentTab = "recommend";
 
     // ===== 3. 페이징 + 무한스크롤 =====
     let page = 1;
@@ -35,11 +36,42 @@ window.onload = () => {
     let categories = [];
     let originalChipsHTML = "";
 
-    const loadFriendsList = async () => {
-        await friendsService.getFriendsList(page, memberId, selectedCategoryId, (data) => {
-            friendsLayout.showFriendsList(data.friends, page);
-            hasMore = data.criteria.hasMore;
-        });
+    const loadList = async () => {
+        if (currentTab === "recommend") {
+            await friendsService.getFriendsList(page, memberId, selectedCategoryId, (data) => {
+                if (page === 1 && data.friends.length === 0) {
+                    friendsLayout.showEmptyState("추천할 회원이 없습니다");
+                    hasMore = false;
+                    return;
+                }
+                friendsLayout.showFriendsList(data.friends, page, "recommend");
+                hasMore = data.criteria.hasMore;
+            });
+            return;
+        }
+        if (currentTab === "followers") {
+            await friendsService.getFollowersList(page, memberId, (data) => {
+                if (page === 1 && data.friends.length === 0) {
+                    friendsLayout.showEmptyState("아직 커넥터가 없습니다");
+                    hasMore = false;
+                    return;
+                }
+                friendsLayout.showFriendsList(data.friends, page, "followers");
+                hasMore = data.criteria.hasMore;
+            });
+            return;
+        }
+        if (currentTab === "followings") {
+            await friendsService.getFollowingsList(page, memberId, (data) => {
+                if (page === 1 && data.friends.length === 0) {
+                    friendsLayout.showEmptyState("아직 커넥팅한 회원이 없습니다");
+                    hasMore = false;
+                    return;
+                }
+                friendsLayout.showFriendsList(data.friends, page, "followings");
+                hasMore = data.criteria.hasMore;
+            });
+        }
     };
 
     // 카테고리 칩 렌더링 (대카테고리만)
@@ -70,7 +102,7 @@ window.onload = () => {
             renderCategoryChips();
         });
 
-        await loadFriendsList();
+        await loadList();
     };
 
     loadInitialData();
@@ -83,7 +115,7 @@ window.onload = () => {
         if (scrollY + innerHeight >= documentHeight - 1) {
             checkScroll = false;
             page++;
-            await loadFriendsList();
+            await loadList();
             setTimeout(() => { checkScroll = true; }, 1000);
         }
     });
@@ -121,7 +153,7 @@ window.onload = () => {
         const catId = clickedChip.dataset.catId;
         selectedCategoryId = catId || null;
         page = 1;
-        await loadFriendsList();
+        await loadList();
     }
 
     // ===== 5. Connect/Disconnect =====
@@ -212,6 +244,22 @@ window.onload = () => {
     }
 
     // ===== 6. 이벤트 바인딩 =====
+    const tabs = document.querySelectorAll(".friends-tab");
+    const categoryBanner = document.getElementById("categoryBanner");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", async () => {
+            tabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            currentTab = tab.dataset.tab;
+            page = 1;
+            if (categoryBanner) {
+                categoryBanner.style.display = currentTab === "recommend" ? "" : "none";
+            }
+            await loadList();
+        });
+    });
+
     if (scrollEl) {
         scrollEl.addEventListener("scroll", updateScrollArrowVisibility);
         scrollEl.addEventListener("click", handleCategoryClick);
