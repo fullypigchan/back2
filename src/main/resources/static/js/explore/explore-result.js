@@ -1,4 +1,11 @@
 window.onload = () => {
+    // 사이드바 게시하기 모달 활성화. memberId는 explore-result.html inline top-level const.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => memberId,
+    });
+
     const tabPopular = document.getElementById("tabPopular");
     const tabLatest = document.getElementById("tabLatest");
     const tabMembers = document.getElementById("tabMembers");

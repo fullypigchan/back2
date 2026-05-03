@@ -56,9 +56,12 @@ a {
     background: #ffffff;
 }
 
-/* main.css .postCard {display:flex} 무력화 — hero는 본인 마크업 구조에 맞춰 block 누적 */
-.post-detail-hero.postCard {
+/* main.css postText의 line-clamp:2 무력화 — detail에선 본문 전체 노출 */
+.post-detail-shell .postText {
     display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    white-space: pre-line;
 }
 
 .post-detail-main {

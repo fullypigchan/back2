@@ -113,6 +113,25 @@ window.onload = () => {
     const italicBtn = overlay?.querySelector(".tweet-modal__tool-btn--italic");
     const editorEl = document.querySelector(".post-detail-inline-reply-editor");
 
+    // 인라인 답글 펼침/접힘 토글
+    const inlineContext = overlay?.querySelector(".post-detail-inline-reply-context");
+    const inlineFooterBottom = overlay?.querySelector(".tweet-modal__footer-bottom");
+    const inlineComposerMeta = overlay?.querySelector(".composerMeta");
+
+    composeView?.addEventListener("focusin", () => {
+        inlineContext?.removeAttribute("hidden");
+        inlineFooterBottom?.removeAttribute("hidden");
+        inlineComposerMeta?.removeAttribute("hidden");
+    });
+
+    composeView?.addEventListener("focusout", (e) => {
+        if (e.relatedTarget && composeView.contains(e.relatedTarget)) return;
+        if (editorEl && editorEl.textContent.trim() !== "") return;
+        inlineContext?.setAttribute("hidden", "");
+        inlineFooterBottom?.setAttribute("hidden", "");
+        inlineComposerMeta?.setAttribute("hidden", "");
+    });
+
     function syncFormatButtons() {
         if (boldBtn) { boldBtn.classList.toggle("active", document.queryCommandState("bold")); }
         if (italicBtn) { italicBtn.classList.toggle("active", document.queryCommandState("italic")); }
@@ -886,7 +905,7 @@ window.onload = () => {
     }
 
     document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".post-detail-more-trigger");
+        const btn = e.target.closest(".postMoreButton");
         if (!btn) {
             if (moreDropdown && !moreDropdown.hidden && !moreDropdown.contains(e.target)) closeMoreDrop();
             return;
@@ -1075,10 +1094,10 @@ window.onload = () => {
     }, { passive: true });
 
     // ── 11. 프로필 이미지 없으면 SVG 아바타 동적 생성 ──
-    document.querySelectorAll(".post-detail-avatar:not(.post-detail-avatar--image), .post-detail-inline-reply-avatar").forEach(el => {
+    document.querySelectorAll(".postAvatar:not(.postAvatar--image), .post-detail-inline-reply-avatar").forEach(el => {
         if (el.querySelector("img")) return;
         const initial = (el.textContent.trim() || "?").charAt(0);
-        el.classList.add("post-detail-avatar--image");
+        el.classList.add("postAvatar--image");
         el.innerHTML = `<img src="${layout.buildAvatarDataUri(initial)}" alt="프로필"/>`;
     });
 
