@@ -146,6 +146,10 @@
         loadChatBadge();
     }
 
+    // 다른 스크립트(예: 알림 페이지의 전체 읽음)에서 갱신을 트리거할 수 있도록 노출
+    window.refreshNotificationBadge = loadNotificationBadge;
+    window.refreshChatBadge = loadChatBadge;
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

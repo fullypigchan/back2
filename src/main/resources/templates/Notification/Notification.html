@@ -1,31 +1,26 @@
 <!doctype html>
-<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/common/layout}">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>알림</title>
-    <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
-    <link rel="stylesheet" href="/css/main/main.css"/>
-    <link rel="stylesheet" href="/css/Notification/Notification.css"/>
-    <link rel="stylesheet" href="/css/mention/mention.css"/>
-    <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
-    <script src="/js/utils/exchange.js"></script>
-    <script th:inline="javascript">
-        const MEMBER_ID = /*[[${memberId}]]*/ 0;
-    </script>
-    <script src="/js/main/service.js" defer></script>
-    <script src="/js/main/layout.js" defer></script>
-    <script src="/js/Notification/service.js" defer></script>
-    <script src="/js/Notification/event.js" defer></script>
-</head>
-<body>
-<!-- 외부 이모지 라이브러리: 답글 모달의 기존 emojiButton과 event.js가 연결해서 사용한다 -->
-<script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
-<div class="pageLayout">
-<!-- 알림 페이지 본문: 상단 헤더 + 알layout:fragment="content">
-            <div class="no림 리스트가 들어가는 메인 컬럼 -->
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>알림</title>
+        <link rel="stylesheet" href="/css/Notification/Notification.css" />
+        <link rel="stylesheet" href="/css/mention/mention.css" />
+        <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
+        <script th:inline="javascript">
+            const MEMBER_ID = /*[[${memberId}]]*/ 0;
+        </script>
+        <script src="/js/main/service.js" defer></script>
+        <script src="/js/Notification/service.js" defer></script>
+        <script src="/js/Notification/event.js" defer></script>
+    </head>
+    <body>
     <th:block layout:fragment="content">
+        <!-- 알림 페이지 본문: 상단 헤더 + 알림 리스트가 들어가는 메인 컬럼 -->
+        <main role="main" class="notif-page">
+            <div class="notif-layout">
                 <div class="notif-col" data-testid="primaryColumn">
                     <!-- 상단 고정 헤더 -->
                     <div class="notif-header" aria-label="홈 타임라인" tabindex="0">
@@ -35,12 +30,18 @@
                                     <h2 class="notif-header__title" dir="ltr" aria-level="2" role="heading">알림</h2>
                                 </div>
                                 <div class="notif-header__actions">
+                                    <button
+                                        type="button"
+                                        class="notif-header__mark-all"
+                                        data-notif-mark-all
+                                        aria-label="전체 읽음 처리"
+                                    >전체 읽음</button>
                                     <a
-                                            href="/setting"
-                                            aria-label="설정"
-                                            role="link"
-                                            class="notif-header__settings-link"
-                                            data-testid="settingsAppBar"
+                                        href=""
+                                        aria-label="설정"
+                                        role="link"
+                                        class="notif-header__settings-link"
+                                        data-testid="settingsAppBar"
                                     >
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="notif-header__settings-icon">
                                             <g>
@@ -54,20 +55,20 @@
 
                         <!-- 탭 네비게이션 -->
                         <nav
-                                class="notif-tabnav"
-                                aria-label="알림 타임라인"
-                                aria-live="polite"
-                                role="navigation"
+                            class="notif-tabnav"
+                            aria-label="알림 타임라인"
+                            aria-live="polite"
+                            role="navigation"
                         >
                             <div class="notif-tabnav__inner">
                                 <div role="tablist" class="notif-tabnav__list" data-testid="ScrollSnap-List">
                                     <div role="presentation" class="notif-tabnav__item">
                                         <a
-                                                href=""
-                                                role="tab"
-                                                aria-selected="true"
-                                                class="notif-tab notif-tab--active"
-                                                data-notif-tab="all"
+                                            href=""
+                                            role="tab"
+                                            aria-selected="true"
+                                            class="notif-tab notif-tab--active"
+                                            data-notif-tab="all"
                                         >
                                             <span class="notif-tab__label">전체</span>
                                             <span class="notif-tab__indicator"></span>
@@ -75,11 +76,11 @@
                                     </div>
                                     <div role="presentation" class="notif-tabnav__item">
                                         <a
-                                                href=""
-                                                role="tab"
-                                                aria-selected="false"
-                                                class="notif-tab"
-                                                data-notif-tab="mentions"
+                                            href=""
+                                            role="tab"
+                                            aria-selected="false"
+                                            class="notif-tab"
+                                            data-notif-tab="mentions"
                                         >
                                             <span class="notif-tab__label">멘션</span>
                                             <span class="notif-tab__indicator"></span>
@@ -93,46 +94,29 @@
                     <section class="notif-timeline" aria-labelledby="notif-timeline-label" role="region">
                         <h1 id="notif-timeline-label" class="notif-timeline__title">알림</h1>
                         <div class="notif-list" aria-label="타임라인: 알림" id="notif-list-container">
-                            <!-- JS(service.js)가 API에서 알림을 가져와 동적으로 렌더링한다 -->
-                        </div><!-- /.notif-list -->
-                    </section>
-        <!-- ====== 이하 정적 블록 제거: template 태그로 감싸서 화면에 표시하지 않음 ====== -->
-        <template id="removed-static-notifications">
-                            <article class="notif-item" role="article" tabindex="0" data-testid="notification"
-                                     data-notif-type="follow">
+
+                            <!-- 알림 3: 팔로우 - 밤하늘의 별들 -->
+                            <article class="notif-item" role="article" tabindex="0" data-testid="notification" data-notif-type="follow">
                                 <div class="notif-item__inner">
                                     <div class="notif-item__icon-col">
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="notif-icon notif-icon--follow">
-                                            <g>
-                                                <path d="M17.863 13.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44zM12 2C9.791 2 8 3.79 8 6s1.791 4 4 4 4-1.79 4-4-1.791-4-4-4z"></path>
-                                            </g>
+                                            <g><path d="M17.863 13.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44zM12 2C9.791 2 8 3.79 8 6s1.791 4 4 4 4-1.79 4-4-1.791-4-4-4z"></path></g>
                                         </svg>
                                     </div>
                                     <div class="notif-item__body">
                                         <ul class="notif-avatar-list" role="list">
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/2009234886943789057/MZl5sLdS_bigger.jpg"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/2009234886943789057/MZl5sLdS_bigger.jpg" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                         </ul>
                                         <div class="notif-content">
                                             <p class="notif-message">
-                                                <a href="" role="link" class="notif-username">밤하늘의 별들😍
-                                                    <svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img"
-                                                         class="notif-verified-icon">
-                                                        <g>
-                                                            <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                        </g>
-                                                    </svg>
-                                                </a>
+                                                <a href="" role="link" class="notif-username">밤하늘의 별들😍<svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img" class="notif-verified-icon"><g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g></svg></a>
                                                 님이 나를 팔로우했습니다.
                                                 <span class="notif-sep" aria-hidden="true">·</span>
-                                                <time class="notif-time" datetime="2026-03-09T00:55:56.342Z" aria-label="2시간 전">
-                                                    2시간
-                                                </time>
+                                                <time class="notif-time" datetime="2026-03-09T00:55:56.342Z" aria-label="2시간 전">2시간</time>
                                             </p>
                                         </div>
                                     </div>
@@ -140,41 +124,27 @@
                             </article>
 
                             <!-- 알림 4: 새 게시물 알림 - Andrej Karpathy -->
-                            <article class="notif-item" role="article" tabindex="0" data-testid="notification"
-                                     data-notif-type="post">
+                            <article class="notif-item" role="article" tabindex="0" data-testid="notification" data-notif-type="post">
                                 <div class="notif-item__inner">
                                     <div class="notif-item__icon-col">
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="notif-icon notif-icon--bell">
-                                            <g>
-                                                <path d="M11.996 2c-4.062 0-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958C19.48 5.017 16.054 2 11.996 2zM9.171 18h5.658c-.412 1.165-1.523 2-2.829 2s-2.417-.835-2.829-2z"></path>
-                                            </g>
+                                            <g><path d="M11.996 2c-4.062 0-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958C19.48 5.017 16.054 2 11.996 2zM9.171 18h5.658c-.412 1.165-1.523 2-2.829 2s-2.417-.835-2.829-2z"></path></g>
                                         </svg>
                                     </div>
                                     <div class="notif-item__body">
                                         <ul class="notif-avatar-list" role="list">
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/1296667294148382721/9Pr6XrPB_bigger.jpg"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/1296667294148382721/9Pr6XrPB_bigger.jpg" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                         </ul>
                                         <div class="notif-content">
                                             <p class="notif-message">
-                                                <a href="" role="link" class="notif-username">Andrej Karpathy
-                                                    <svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img"
-                                                         class="notif-verified-icon">
-                                                        <g>
-                                                            <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                        </g>
-                                                    </svg>
-                                                </a>
+                                                <a href="" role="link" class="notif-username">Andrej Karpathy<svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img" class="notif-verified-icon"><g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g></svg></a>
                                                 님의 새 게시물 알림
                                                 <span class="notif-sep" aria-hidden="true">·</span>
-                                                <time class="notif-time" datetime="2026-03-08T18:00:40.310Z" aria-label="9시간 전">
-                                                    9시간
-                                                </time>
+                                                <time class="notif-time" datetime="2026-03-08T18:00:40.310Z" aria-label="9시간 전">9시간</time>
                                             </p>
                                         </div>
                                     </div>
@@ -182,55 +152,37 @@
                             </article>
 
                             <!-- 알림 5: 팔로우 - Mia 외 19명 (다수 아바타) -->
-                            <article class="notif-item" role="article" tabindex="0" data-testid="notification"
-                                     data-notif-type="follow">
+                            <article class="notif-item" role="article" tabindex="0" data-testid="notification" data-notif-type="follow">
                                 <div class="notif-item__inner">
                                     <div class="notif-item__icon-col">
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="notif-icon notif-icon--follow">
-                                            <g>
-                                                <path d="M17.863 13.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44zM12 2C9.791 2 8 3.79 8 6s1.791 4 4 4 4-1.79 4-4-1.791-4-4-4z"></path>
-                                            </g>
+                                            <g><path d="M17.863 13.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44zM12 2C9.791 2 8 3.79 8 6s1.791 4 4 4 4-1.79 4-4-1.791-4-4-4z"></path></g>
                                         </svg>
                                     </div>
                                     <div class="notif-item__body">
                                         <ul class="notif-avatar-list" role="list">
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/1991410605748633600/Tw_iaMuV_bigger.jpg"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/1991410605748633600/Tw_iaMuV_bigger.jpg" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/2020200600798146560/h0iBYb9l_bigger.png"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/2020200600798146560/h0iBYb9l_bigger.png" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/1973621199247958016/7vyLGZnB_bigger.jpg"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/1973621199247958016/7vyLGZnB_bigger.jpg" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                         </ul>
                                         <div class="notif-content">
                                             <p class="notif-message">
-                                                <a href="" role="link" class="notif-username">Mia
-                                                    <svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img"
-                                                         class="notif-verified-icon">
-                                                        <g>
-                                                            <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                                        </g>
-                                                    </svg>
-                                                </a>
+                                                <a href="" role="link" class="notif-username">Mia<svg viewBox="0 0 22 22" aria-label="인증된 계정" role="img" class="notif-verified-icon"><g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g></svg></a>
                                                 님 외 19명이 나를 팔로우했습니다.
                                                 <span class="notif-sep" aria-hidden="true">·</span>
-                                                <time class="notif-time" datetime="2026-03-08T16:56:25.649Z"
-                                                      aria-label="10시간 전">10시간
-                                                </time>
+                                                <time class="notif-time" datetime="2026-03-08T16:56:25.649Z" aria-label="10시간 전">10시간</time>
                                             </p>
                                         </div>
                                     </div>
@@ -238,24 +190,18 @@
                             </article>
 
                             <!-- 알림 14: 파란색 체크마크 획득 -->
-                            <article class="notif-item" role="article" tabindex="0" data-testid="notification"
-                                     data-notif-type="system">
+                            <article class="notif-item" role="article" tabindex="0" data-testid="notification" data-notif-type="system">
                                 <div class="notif-item__inner">
                                     <div class="notif-item__icon-col">
-                                        <svg viewBox="0 0 22 22" aria-hidden="true"
-                                             class="notif-icon notif-icon--verified-badge">
-                                            <g>
-                                                <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path>
-                                            </g>
+                                        <svg viewBox="0 0 22 22" aria-hidden="true" class="notif-icon notif-icon--verified-badge">
+                                            <g><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></g>
                                         </svg>
                                     </div>
                                     <div class="notif-item__body">
                                         <ul class="notif-avatar-list" role="list">
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                         </ul>
@@ -263,9 +209,7 @@
                                             <p class="notif-message">
                                                 파란색 체크마크를 받았습니다!
                                                 <span class="notif-sep" aria-hidden="true">·</span>
-                                                <time class="notif-time" datetime="2026-03-06T20:43:41.092Z" aria-label="3월 7일">
-                                                    3월 7일
-                                                </time>
+                                                <time class="notif-time" datetime="2026-03-06T20:43:41.092Z" aria-label="3월 7일">3월 7일</time>
                                             </p>
                                             <p class="notif-description">이제 계정이 인증되었습니다.</p>
                                         </div>
@@ -274,15 +218,13 @@
                             </article>
 
                             <!-- 알림 15: 댓글(멘션) 알림 - 김민중 (@sokkomann) -->
-                            <article class="notif-tweet-item" role="article" tabindex="0" data-testid="tweet"
-                                     data-notif-type="mention">
+                            <article class="notif-tweet-item" role="article" tabindex="0" data-testid="tweet" data-notif-type="mention">
                                 <div class="notif-item__inner">
                                     <div class="tweet-body">
                                         <!-- 헤더: 아바타 + 메타정보 + 더보기 버튼 -->
                                         <div class="tweet-header">
                                             <a href="" class="tweet-avatar-link" aria-hidden="true" role="link" tabindex="-1">
-                                                <img src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png"
-                                                     alt="" draggable="true" class="tweet-avatar"/>
+                                                <img src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png" alt="" draggable="true" class="tweet-avatar" />
                                             </a>
                                             <div class="tweet-meta">
                                                 <a href="" role="link" class="tweet-displayname">김민중</a>
@@ -290,17 +232,12 @@
                                                 <span class="tweet-sep">·</span>
                                                 <span class="tweet-badge">멤버</span>
                                                 <span class="tweet-sep">·</span>
-                                                <time class="tweet-time" datetime="2026-03-06T01:10:28.795Z" aria-label="3월 6일">
-                                                    3월 6일
-                                                </time>
+                                                <time class="tweet-time" datetime="2026-03-06T01:10:28.795Z" aria-label="3월 6일">3월 6일</time>
                                             </div>
                                             <div class="tweet-actions-top">
-                                                <button type="button" class="tweet-more-btn" aria-label="더보기"
-                                                        aria-haspopup="menu" aria-expanded="false" data-testid="caret">
+                                                  <button type="button" class="tweet-more-btn" aria-label="더보기" aria-haspopup="menu" aria-expanded="false" data-testid="caret">
                                                     <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-more-icon">
-                                                        <g>
-                                                            <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path>
-                                                        </g>
+                                                        <g><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></g>
                                                     </svg>
                                                 </button>
                                             </div>
@@ -315,61 +252,47 @@
                                         <!-- 댓글 내용 -->
                                         <p class="tweet-text">hello</p>
                                         <div class="tweet-action-bar">
-                                            <button type="button" class="tweet-action-btn" data-testid="reply"
-                                                    aria-label="1 답글">
+                                              <button type="button" class="tweet-action-btn" data-testid="reply" aria-label="1 답글">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-action-icon">
-                                                    <g>
-                                                        <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path>
-                                                    </g>
+                                                    <g><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></g>
                                                 </svg>
                                                 <span class="tweet-action-count">1</span>
                                             </button>
-                                            <button type="button" class="tweet-action-btn tweet-action-btn--like"
-                                                    data-testid="like" aria-label="0 마음에 들어요">
+                                              <button type="button" class="tweet-action-btn tweet-action-btn--like" data-testid="like" aria-label="0 마음에 들어요">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-action-icon">
-                                                    <g>
-                                                        <path
-                                                                d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                                                data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                                                data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-                                                        ></path>
-                                                    </g>
+                                                    <g><path
+                                                        d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
+                                                        data-path-inactive="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
+                                                        data-path-active="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
+                                                    ></path></g>
                                                 </svg>
                                                 <span class="tweet-action-count"></span>
                                             </button>
-                                            <button type="button" class="tweet-action-btn tweet-action-btn--views"
-                                                    aria-label="조회수">
+                                              <button type="button" class="tweet-action-btn tweet-action-btn--views" aria-label="조회수">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-action-icon">
-                                                    <g>
-                                                        <path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path>
-                                                    </g>
+                                                    <g><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path></g>
                                                 </svg>
                                                 <span class="tweet-action-count">6</span>
                                             </button>
                                             <div class="tweet-action-right">
-                                                <button type="button" class="tweet-action-btn tweet-action-btn--bookmark"
-                                                        data-testid="bookmark" aria-label="북마크">
+                                                  <button type="button" class="tweet-action-btn tweet-action-btn--bookmark" data-testid="bookmark" aria-label="북마크">
                                                     <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-action-icon">
-                                                        <g>
-                                                            <path
-                                                                    d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                                                    data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
-                                                                    data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
-                                                            ></path>
-                                                        </g>
+                                                        <g><path
+                                                            d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
+                                                            data-path-inactive="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
+                                                            data-path-active="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"
+                                                        ></path></g>
                                                     </svg>
                                                 </button>
-                                                <button
-                                                        type="button"
-                                                        class="tweet-action-btn tweet-action-btn--share"
-                                                        aria-label="게시물 공유하기"
-                                                        aria-haspopup="menu"
-                                                        aria-expanded="false"
-                                                >
+                                                  <button
+                                                      type="button"
+                                                      class="tweet-action-btn tweet-action-btn--share"
+                                                      aria-label="게시물 공유하기"
+                                                      aria-haspopup="menu"
+                                                      aria-expanded="false"
+                                                  >
                                                     <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-action-icon">
-                                                        <g>
-                                                            <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
-                                                        </g>
+                                                        <g><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path></g>
                                                     </svg>
                                                 </button>
                                             </div>
@@ -379,14 +302,11 @@
                             </article>
 
                             <!-- 알림 16: 보안 - 전화번호 추가 -->
-                            <article class="notif-item notif-item--system" role="article" tabindex="0"
-                                     data-testid="notification" data-notif-type="system">
+                            <article class="notif-item notif-item--system" role="article" tabindex="0" data-testid="notification" data-notif-type="system">
                                 <div class="notif-item__inner">
                                     <div class="notif-item__icon-col">
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="notif-icon notif-icon--lock">
-                                            <g>
-                                                <path d="M17.5 7H17v-.25c0-2.76-2.24-5-5-5s-5 2.24-5 5V7h-.5C5.12 7 4 8.12 4 9.5v9C4 19.88 5.12 21 6.5 21h11c1.39 0 2.5-1.12 2.5-2.5v-9C20 8.12 18.89 7 17.5 7zM13 14.73V17h-2v-2.27c-.59-.34-1-.99-1-1.73 0-1.1.9-2 2-2 1.11 0 2 .9 2 2 0 .74-.4 1.39-1 1.73zM15 7H9v-.25c0-1.66 1.35-3 3-3 1.66 0 3 1.34 3 3V7z"></path>
-                                            </g>
+                                            <g><path d="M17.5 7H17v-.25c0-2.76-2.24-5-5-5s-5 2.24-5 5V7h-.5C5.12 7 4 8.12 4 9.5v9C4 19.88 5.12 21 6.5 21h11c1.39 0 2.5-1.12 2.5-2.5v-9C20 8.12 18.89 7 17.5 7zM13 14.73V17h-2v-2.27c-.59-.34-1-.99-1-1.73 0-1.1.9-2 2-2 1.11 0 2 .9 2 2 0 .74-.4 1.39-1 1.73zM15 7H9v-.25c0-1.66 1.35-3 3-3 1.66 0 3 1.34 3 3V7z"></path></g>
                                         </svg>
                                     </div>
                                     <div class="notif-item__body">
@@ -394,34 +314,26 @@
                                             <p class="notif-message">
                                                 내 계정에 전화번호가 추가되었습니다. 이 변경에 따라 계정에 대한 추가 변경이 일시적으로 제한될 수 있다는 점에 유의하시기 바랍니다.
                                                 <span class="notif-sep" aria-hidden="true">·</span>
-                                                <time class="notif-time" datetime="2026-03-06T01:10:28.795Z" aria-label="3월 6일">
-                                                    3월 6일
-                                                </time>
+                                                <time class="notif-time" datetime="2026-03-06T01:10:28.795Z" aria-label="3월 6일">3월 6일</time>
                                             </p>
                                         </div>
                                     </div>
                                 </div>
-                            </article>
+                            </article>                        
 
                             <!-- 알림 20: 녹음 준비 알림 -->
-                            <article class="notif-item" role="article" tabindex="0" data-testid="notification"
-                                     data-notif-type="system">
+                            <article class="notif-item" role="article" tabindex="0" data-testid="notification" data-notif-type="system">
                                 <div class="notif-item__inner">
                                     <div class="notif-item__icon-col">
                                         <svg viewBox="0 0 24 24" aria-hidden="true" class="notif-icon notif-icon--audio">
-                                            <g>
-                                                <path d="M12 22.25c-4.99 0-9.18-3.393-10.39-7.994l1.93-.512c.99 3.746 4.4 6.506 8.46 6.506s7.47-2.76 8.46-6.506l1.93.512c-1.21 4.601-5.4 7.994-10.39 7.994zm0-20.5c-3.87 0-7 3.134-7 7v2.75c0 3.866 3.13 7 7 7s7-3.134 7-7V8.75c0-3.866-3.13-7-7-7zm-2.25 9.5c0 .414-.34.75-.75.75s-.75-.336-.75-.75V9c0-.414.34-.75.75-.75s.75.336.75.75v2.25zm3 1c0 .414-.34.75-.75.75s-.75-.336-.75-.75V8c0-.414.34-.75.75-.75s.75.336.75.75v4.25zm3-1c0 .414-.34.75-.75.75s-.75-.336-.75-.75V9c0-.414.34-.75.75-.75s.75.336.75.75v2.25z"
-                                                      style="fill: rgb(120, 86, 255);"></path>
-                                            </g>
+                                            <g><path d="M12 22.25c-4.99 0-9.18-3.393-10.39-7.994l1.93-.512c.99 3.746 4.4 6.506 8.46 6.506s7.47-2.76 8.46-6.506l1.93.512c-1.21 4.601-5.4 7.994-10.39 7.994zm0-20.5c-3.87 0-7 3.134-7 7v2.75c0 3.866 3.13 7 7 7s7-3.134 7-7V8.75c0-3.866-3.13-7-7-7zm-2.25 9.5c0 .414-.34.75-.75.75s-.75-.336-.75-.75V9c0-.414.34-.75.75-.75s.75.336.75.75v2.25zm3 1c0 .414-.34.75-.75.75s-.75-.336-.75-.75V8c0-.414.34-.75.75-.75s.75.336.75.75v4.25zm3-1c0 .414-.34.75-.75.75s-.75-.336-.75-.75V9c0-.414.34-.75.75-.75s.75.336.75.75v2.25z" style="fill: rgb(120, 86, 255);"></path></g>
                                         </svg>
                                     </div>
                                     <div class="notif-item__body">
                                         <ul class="notif-avatar-list" role="list">
                                             <li class="notif-avatar-item">
-                                                <a href="" aria-hidden="true" role="link" tabindex="-1"
-                                                   class="notif-avatar-link">
-                                                    <img src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg"
-                                                         alt="" draggable="true" class="notif-avatar"/>
+                                                <a href="" aria-hidden="true" role="link" tabindex="-1" class="notif-avatar-link">
+                                                    <img src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg" alt="" draggable="true" class="notif-avatar" />
                                                 </a>
                                             </li>
                                         </ul>
@@ -429,78 +341,146 @@
                                             <p class="notif-message">
                                                 녹음이 준비되었습니다. 녹음을 공유하고 대화를 계속 이어 가세요.
                                                 <span class="notif-sep" aria-hidden="true">·</span>
-                                                <time class="notif-time" datetime="2026-03-05T00:00:00.000Z" aria-label="3월 5일">
-                                                    3월 5일
-                                                </time>
+                                                <time class="notif-time" datetime="2026-03-05T00:00:00.000Z" aria-label="3월 5일">3월 5일</time>
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </article>
-                            </template>
-                        </div>
 
-        <!-- ====== 정적 블록 끝 ====== -->
+                        </div><!-- /.notif-list -->
+                    </section>
                 </div><!-- /.notif-col -->
+            </div><!-- /.notif-layout -->
             <!-- 동적 드롭다운 마운트 지점: event.js의 공유/더보기 드롭다운이 여기에 append/remove 된다 -->
             <div id="layers" aria-hidden="true"></div>
-    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
-    <div th:replace="~{common/mobile-nav :: mobileNav('notification')}"></div>
-    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
-    </th:block>
-</div><!-- /.pageLayout -->
+        </main>
+        <!-- 모바일 하단 네비게이션 바: event.js가 활성 탭 아이콘 상태만 제어한다 -->
+        <div class="bottombar-fixed">
+            <div class="bottombar-slide">
+                <div class="bottombar" data-testid="BottomBar">
+                    <nav class="bottombar-nav" aria-label="기본" role="navigation">
 
-<!-- 답글 모달 전체 레이어: event.js의 openReplyModal()/closeReplyModal()이 이 블록을 열고 닫는다 -->
-<div class="tweet-modal-overlay" data-reply-modal hidden>
-    <div class="tweet-modal" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
-        <!-- 작성 화면: 답글 입력창, 첨부 미리보기, 하단 툴바가 들어가는 기본 화면 -->
-        <div class="tweet-modal__compose-view">
-            <!-- 작성 진행률: 원형 게이지는 footer-bottom의 composerActions에 배치 -->
+                        <!-- 홈 탭 -->
+                        <a href="" class="tab-link" data-tab="home" aria-label="홈">
+                            <div class="tab-icon-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="tab-icon">
+                                    <g><path
+                                        d="M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913h6.638c.511 0 .929-.41.929-.913v-7.075h3.008v7.075c0 .502.418.913.929.913h6.639c.51 0 .928-.41.928-.913V7.904c0-.301-.158-.584-.408-.758zM20 20l-4.5.01.011-7.097c0-.502-.418-.913-.928-.913H9.44c-.511 0-.929.41-.929.913L8.5 20H4V8.773l8.011-5.342L20 8.764z"
+                                        data-inactive="M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913h6.638c.511 0 .929-.41.929-.913v-7.075h3.008v7.075c0 .502.418.913.929.913h6.639c.51 0 .928-.41.928-.913V7.904c0-.301-.158-.584-.408-.758zM20 20l-4.5.01.011-7.097c0-.502-.418-.913-.928-.913H9.44c-.511 0-.929.41-.929.913L8.5 20H4V8.773l8.011-5.342L20 8.764z"
+                                        data-active="M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913H9.14c.51 0 .929-.41.929-.913v-7.075h3.909v7.075c0 .502.417.913.928.913h6.165c.511 0 .929-.41.929-.913V7.904c0-.301-.158-.584-.408-.758z"
+                                    ></path></g>
+                                </svg>
+                                <div class="unread-badge" aria-hidden="true"></div>
+                            </div>
+                        </a>
 
-            <!-- 답글 모달 헤더: 닫기와 임시저장 진입 버튼 -->
-            <div class="tweet-modal__header">
-                <button type="button" class="tweet-modal__close" aria-label="닫기" data-testid="app-bar-close">
-                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                        <g>
-                            <path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
-                        </g>
-                    </svg>
-                </button>
-                <h2 id="reply-modal-title" class="tweet-modal__title">답글</h2>
-                <button type="button" class="tweet-modal__draft" data-testid="unsentButton">임시저장</button>
+                        <!-- 탐색하기 탭 -->
+                        <a href="" class="tab-link" data-tab="explore" aria-label="탐색하기">
+                            <div class="tab-icon-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="tab-icon">
+                                    <g><path
+                                        d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z"
+                                        data-inactive="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z"
+                                        data-active="M10.25 4.25c-3.314 0-6 2.686-6 6s2.686 6 6 6c1.657 0 3.155-.67 4.243-1.757 1.087-1.088 1.757-2.586 1.757-4.243 0-3.314-2.686-6-6-6zm-9 6c0-4.971 4.029-9 9-9s9 4.029 9 9c0 1.943-.617 3.744-1.664 5.215l4.475 4.474-2.122 2.122-4.474-4.475c-1.471 1.047-3.272 1.664-5.215 1.664-4.971 0-9-4.029-9-9z"
+                                    ></path></g>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Grok 탭 -->
+                        <a href="" class="tab-link" data-tab="grok" aria-label="Grok">
+                            <div class="tab-icon-wrap">
+                                <svg viewBox="0 0 42 42" aria-hidden="true" class="tab-icon">
+                                    <g><path
+                                        d="M12.745 20.54l10.97-8.19c.539-.4 1.307-.244 1.564.38 1.349 3.288.746 7.241-1.938 9.955-2.683 2.714-6.417 3.31-9.83 1.954l-3.728 1.745c5.347 3.697 11.84 2.782 15.898-1.324 3.219-3.255 4.216-7.692 3.284-11.693l.008.009c-1.351-5.878.332-8.227 3.782-13.031L33 0l-4.54 4.59v-.014L12.743 20.544m-2.263 1.987c-3.837-3.707-3.175-9.446.1-12.755 2.42-2.449 6.388-3.448 9.852-1.979l3.72-1.737c-.67-.49-1.53-1.017-2.515-1.387-4.455-1.854-9.789-.931-13.41 2.728-3.483 3.523-4.579 8.94-2.697 13.561 1.405 3.454-.899 5.898-3.22 8.364C1.49 30.2.666 31.074 0 32l10.478-9.466"
+                                        data-inactive="M12.745 20.54l10.97-8.19c.539-.4 1.307-.244 1.564.38 1.349 3.288.746 7.241-1.938 9.955-2.683 2.714-6.417 3.31-9.83 1.954l-3.728 1.745c5.347 3.697 11.84 2.782 15.898-1.324 3.219-3.255 4.216-7.692 3.284-11.693l.008.009c-1.351-5.878.332-8.227 3.782-13.031L33 0l-4.54 4.59v-.014L12.743 20.544m-2.263 1.987c-3.837-3.707-3.175-9.446.1-12.755 2.42-2.449 6.388-3.448 9.852-1.979l3.72-1.737c-.67-.49-1.53-1.017-2.515-1.387-4.455-1.854-9.789-.931-13.41 2.728-3.483 3.523-4.579 8.94-2.697 13.561 1.405 3.454-.899 5.898-3.22 8.364C1.49 30.2.666 31.074 0 32l10.478-9.466"
+                                        data-active="M8 0C3.582 0 0 3.582 0 8v26c0 4.418 3.582 8 8 8h26c4.418 0 8-3.582 8-8V8c0-4.418-3.582-8-8-8H8zm19.997 17.35l-11.1 8.19 15.9-15.963v.015L37.391 5c-.082.117-.165.23-.248.345-3.49 4.804-5.194 7.153-3.826 13.03l-.009-.008c.943 4.001-.065 8.438-3.322 11.693-4.106 4.107-10.677 5.02-16.087 1.324l3.772-1.745c3.454 1.355 7.232.76 9.947-1.954 2.716-2.714 3.325-6.666 1.96-9.956-.259-.623-1.037-.78-1.58-.378zm-13.292-2.574c-3.314 3.31-3.983 9.047-.1 12.755l-.003.003L4 37c.663-.913 1.485-1.776 2.306-2.639l.04-.042c2.346-2.464 4.67-4.906 3.25-8.357-1.903-4.622-.795-10.038 2.73-13.56 3.664-3.66 9.06-4.583 13.568-2.729.998.37 1.867.897 2.545 1.387l-3.764 1.737c-3.505-1.47-7.52-.47-9.97 1.98z"
+                                    ></path></g>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- 알림 탭 (현재 페이지 — 초기 활성) -->
+                        <a href="" class="tab-link tab-link--active" data-tab="notifications" aria-label="알림">
+                            <div class="tab-icon-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="tab-icon">
+                                    <g><path
+                                        d="M11.996 2c-4.062 0-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958C19.48 5.017 16.054 2 11.996 2zM9.171 18h5.658c-.412 1.165-1.523 2-2.829 2s-2.417-.835-2.829-2z"
+                                        data-inactive="M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958zM12 20c-1.306 0-2.417-.835-2.829-2h5.658c-.412 1.165-1.523 2-2.829 2zm-6.866-4l.847-6.698C6.364 6.272 8.941 4 11.996 4s5.627 2.268 6.013 5.295L18.864 16H5.134z"
+                                        data-active="M11.996 2c-4.062 0-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958C19.48 5.017 16.054 2 11.996 2zM9.171 18h5.658c-.412 1.165-1.523 2-2.829 2s-2.417-.835-2.829-2z"
+                                    ></path></g>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- 쪽지 탭 (DM — md 파일 기준 active/inactive 반전 적용) -->
+                        <a href="" class="tab-link" data-tab="dm" aria-label="쪽지">
+                            <div class="tab-icon-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="tab-icon">
+                                    <g><path
+                                        d="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"
+                                        data-inactive="M1.998 5.5c0-1.381 1.119-2.5 2.5-2.5h15c1.381 0 2.5 1.119 2.5 2.5v13c0 1.381-1.119 2.5-2.5 2.5h-15c-1.381 0-2.5-1.119-2.5-2.5v-13zm2.5-.5c-.276 0-.5.224-.5.5v2.764l8 3.638 8-3.636V5.5c0-.276-.224-.5-.5-.5h-15zm15.5 5.463l-8 3.636-8-3.638V18.5c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-8.037z"
+                                        data-active="M1.998 4.499c0-.828.671-1.499 1.5-1.499h17c.828 0 1.5.671 1.5 1.499v2.858l-10 4.545-10-4.547V4.499zm0 5.053V19.5c0 .828.671 1.5 1.5 1.5h17c.828 0 1.5-.672 1.5-1.5V9.554l-10 4.545-10-4.547z"
+                                    ></path></g>
+                                </svg>
+                            </div>
+                        </a>
+
+                    </nav>
+                </div>
             </div>
+        </div>
 
-            <!-- 답글 작성 본문: 원본 게시물 + 에디터 + 첨부 미리보기 -->
-            <div class="tweet-modal__body">
-                <button type="button" class="tweet-modal__context-button">
-                    test의 @sokkomann 님과 @tmtsugar 님에게 보내는 답글
-                </button>
+        <!-- 답글 모달 전체 레이어: event.js의 openReplyModal()/closeReplyModal()이 이 블록을 열고 닫는다 -->
+        <div class="tweet-modal-overlay" data-reply-modal hidden>
+            <div class="tweet-modal" role="dialog" aria-modal="true" aria-labelledby="reply-modal-title">
+                <!-- 작성 화면: 답글 입력창, 첨부 미리보기, 하단 툴바가 들어가는 기본 화면 -->
+                <div class="tweet-modal__compose-view">
+                <!-- 작성 진행률: 원형 게이지는 footer-bottom의 composerActions에 배치 -->
 
-                <article class="tweet-modal__source-tweet" data-testid="tweet">
-                    <img
+                <!-- 답글 모달 헤더: 닫기와 임시저장 진입 버튼 -->
+                <div class="tweet-modal__header">
+                    <button type="button" class="tweet-modal__close" aria-label="닫기" data-testid="app-bar-close">
+                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                            <g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g>
+                        </svg>
+                    </button>
+                    <h2 id="reply-modal-title" class="tweet-modal__title">답글</h2>
+                    <button type="button" class="tweet-modal__draft" data-testid="unsentButton">임시저장</button>
+                </div>
+
+                <!-- 답글 작성 본문: 원본 게시물 + 에디터 + 첨부 미리보기 -->
+                <div class="tweet-modal__body">
+                    <button type="button" class="tweet-modal__context-button">
+                        test의 @sokkomann 님과 @tmtsugar 님에게 보내는 답글
+                    </button>
+
+                    <article class="tweet-modal__source-tweet" data-testid="tweet">
+                        <img
                             src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png"
                             alt=""
                             class="tweet-modal__source-avatar"
-                    />
-                    <div class="tweet-modal__source-body">
-                        <div class="tweet-modal__source-meta">
-                            <span class="tweet-modal__source-name">김민중</span>
-                            <span class="tweet-modal__source-handle">@sokkomann</span>
-                            <span class="tweet-sep" aria-hidden="true">·</span>
-                            <span class="tweet-modal__source-time">3월 6일</span>
+                        />
+                        <div class="tweet-modal__source-body">
+                            <div class="tweet-modal__source-meta">
+                                <span class="tweet-modal__source-name">김민중</span>
+                                <span class="tweet-modal__source-handle">@sokkomann</span>
+                                <span class="tweet-sep" aria-hidden="true">·</span>
+                                <span class="tweet-modal__source-time">3월 6일</span>
+                            </div>
+                            <p class="tweet-modal__source-text">hello</p>
                         </div>
-                        <p class="tweet-modal__source-text">hello</p>
-                    </div>
-                </article>
+                    </article>
 
-                <div class="tweet-modal__composer">
-                    <img
+                    <div class="tweet-modal__composer">
+                        <img
                             src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg"
                             alt=""
                             class="tweet-modal__avatar-image"
-                    />
-                    <div class="tweet-modal__input-wrap">
-                        <div
+                        />
+                        <div class="tweet-modal__input-wrap">
+                            <div
                                 class="tweet-modal__editor"
                                 contenteditable="true"
                                 role="textbox"
@@ -509,191 +489,150 @@
                                 tabindex="0"
                                 data-testid="tweetTextarea_0"
                                 data-placeholder="답글 게시하기"
-                        ></div>
-                        <!-- 첨부 미리보기 영역: event.js가 [data-attachment-preview] hidden을 토글하고
-                             [data-attachment-media] 안에 이미지/동영상/파일 카드를 동적으로 채운다 -->
-                        <div class="tweet-modal__attachment attachments" data-attachment-preview
-                             data-testid="attachments" hidden>
-                            <div class="tweet-modal__attachment-media media-grid-wrapper" data-attachment-media></div>
-                            <div class="tweet-modal__attachment-meta media-actions-bar">
-                                <button
+                            ></div>
+                            <!-- 첨부 미리보기 영역: event.js가 [data-attachment-preview] hidden을 토글하고
+                                 [data-attachment-media] 안에 이미지/동영상/파일 카드를 동적으로 채운다 -->
+                            <div class="tweet-modal__attachment attachments" data-attachment-preview data-testid="attachments" hidden>
+                                <div class="tweet-modal__attachment-media media-grid-wrapper" data-attachment-media></div>
+                                <div class="tweet-modal__attachment-meta media-actions-bar">
+                                    <button
                                         type="button"
                                         class="tweet-modal__attachment-meta-btn media-action-link"
                                         data-user-tag-trigger
-                                >
-                                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                                        <g>
-                                            <path d="M5.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C15.318 13.65 13.838 13 12 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46zM12 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM8 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4z"></path>
-                                        </g>
-                                    </svg>
-                                    <span data-user-tag-label>사용자 태그하기</span>
-                                </button>
-                                <button
+                                    >
+                                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                                            <g><path d="M5.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C15.318 13.65 13.838 13 12 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46zM12 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM8 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4z"></path></g>
+                                        </svg>
+                                        <span data-user-tag-label>사용자 태그하기</span>
+                                    </button>
+                                    <button
                                         type="button"
                                         class="tweet-modal__attachment-meta-btn media-action-link"
                                         data-media-alt-trigger
-                                >
-                                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                                        <g>
-                                            <path d="M3 4.5C3 3.12 4.12 2 5.5 2h13C19.88 2 21 3.12 21 4.5v15c0 1.38-1.12 2.5-2.5 2.5h-13C4.12 22 3 20.88 3 19.5v-15zM5.5 4c-.28 0-.5.22-.5.5v15c0 .28.22.5.5.5h13c.28 0 .5-.22.5-.5v-15c0-.28-.22-.5-.5-.5h-13zM16 10H8V8h8v2zm-8 2h8v2H8v-2z"></path>
-                                        </g>
-                                    </svg>
-                                    <span data-media-alt-label>설명 추가</span>
-                                </button>
+                                    >
+                                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                                            <g><path d="M3 4.5C3 3.12 4.12 2 5.5 2h13C19.88 2 21 3.12 21 4.5v15c0 1.38-1.12 2.5-2.5 2.5h-13C4.12 22 3 20.88 3 19.5v-15zM5.5 4c-.28 0-.5.22-.5.5v15c0 .28.22.5.5.5h13c.28 0 .5-.22.5-.5v-15c0-.28-.22-.5-.5-.5h-13zM16 10H8V8h8v2zm-8 2h8v2H8v-2z"></path></g>
+                                        </svg>
+                                        <span data-media-alt-label>설명 추가</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 답글 모달 하단 영역: 위치 표시, 툴바, 이모지 버튼, 제출 버튼 -->
-            <div class="tweet-modal__footer">
-                <div class="tweet-modal__footer-meta">
-                    <div class="tweet-modal__footer-meta-slot tweet-modal__footer-meta-slot--end">
-                        <button type="button" class="tweet-modal__location-display" data-location-display hidden>
-                            <div dir="ltr" class="tweet-modal__location-display-inner">
-                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
-                                     class="tweet-modal__location-display-icon">
-                                    <g>
-                                        <path d="M12 2c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 11.5c-1.65 0-3-1.34-3-3s1.35-3 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3z"></path>
-                                    </g>
-                                </svg>
-                                <div class="tweet-modal__location-display-text-wrap">
+                <!-- 답글 모달 하단 영역: 위치 표시, 툴바, 이모지 버튼, 제출 버튼 -->
+                <div class="tweet-modal__footer">
+                    <div class="tweet-modal__footer-meta">
+                        <div class="tweet-modal__footer-meta-slot tweet-modal__footer-meta-slot--end">
+                            <button type="button" class="tweet-modal__location-display" data-location-display hidden>
+                                <div dir="ltr" class="tweet-modal__location-display-inner">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="tweet-modal__location-display-icon">
+                                        <g><path d="M12 2c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 11.5c-1.65 0-3-1.34-3-3s1.35-3 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3z"></path></g>
+                                    </svg>
+                                    <div class="tweet-modal__location-display-text-wrap">
                                         <span class="tweet-modal__location-display-text-outer">
                                             <span class="tweet-modal__location-display-text-inner" data-location-name>대한민국 강남구</span>
                                         </span>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="tweet-modal__footer-bottom">
-                    <div class="tweet-modal__toolbar" data-testid="toolBar">
-                        <div class="tweet-modal__tool-file">
-                            <button type="button" class="tweet-modal__tool-btn" aria-label="사진 또는 동영상 추가"
-                                    data-testid="mediaUploadButton">
-                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                    <g>
-                                        <path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"></path>
-                                    </g>
-                                </svg>
                             </button>
-                            <input
+                        </div>
+                    </div>
+
+                    <div class="tweet-modal__footer-bottom">
+                        <div class="tweet-modal__toolbar" data-testid="toolBar">
+                            <div class="tweet-modal__tool-file">
+                                <button type="button" class="tweet-modal__tool-btn" aria-label="사진 또는 동영상 추가" data-testid="mediaUploadButton">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                        <g><path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"></path></g>
+                                    </svg>
+                                </button>
+                                <input
                                     type="file"
                                     data-testid="fileInput"
                                     accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime"
                                     multiple
                                     tabindex="-1"
                                     class="tweet-modal__file-input"
-                            />
-                        </div>
-                        <button type="button" class="tweet-modal__tool-btn" aria-label="판매글 선택"
-                                data-testid="productSelectButton">
-                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                <g>
-                                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5S3.5 15.135 3.5 11z"></path>
-                                </g>
-                                <g>
-                                    <path d="M7 9h10v1.5H7zm0 3h7v1.5H7z"></path>
-                                </g>
-                            </svg>
-                        </button>
-                        <button
+                                />
+                            </div>
+                            <button type="button" class="tweet-modal__tool-btn" aria-label="판매글 선택" data-testid="productSelectButton">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                    <g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5S3.5 15.135 3.5 11z"></path></g>
+                                    <g><path d="M7 9h10v1.5H7zm0 3h7v1.5H7z"></path></g>
+                                </svg>
+                            </button>
+                            <button
                                 type="button"
                                 class="tweet-modal__tool-btn"
                                 aria-label="이모티콘 추가하기"
                                 data-testid="emojiButton"
                                 aria-expanded="false"
                                 aria-haspopup="menu"
-                        >
-                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                <g>
-                                    <path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm6 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm-8.071 3.971c.307-.298.771-.397 1.188-.253C9.07 16.154 10.52 16.75 12 16.75s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path>
-                                </g>
-                            </svg>
-                        </button>
-                        <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--geo"
-                                aria-label="위치 태그하기" data-testid="geoButton">
-                            <div dir="ltr" class="tweet-modal__tool-btn-inner">
-                                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
-                                     class="tweet-modal__tool-btn-icon tweet-modal__tool-btn-icon--geo">
-                                    <g>
-                                        <path
+                            >
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                    <g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm6 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm-8.071 3.971c.307-.298.771-.397 1.188-.253C9.07 16.154 10.52 16.75 12 16.75s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g>
+                                </svg>
+                            </button>
+                            <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--geo" aria-label="위치 태그하기" data-testid="geoButton">
+                                <div dir="ltr" class="tweet-modal__tool-btn-inner">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="tweet-modal__tool-btn-icon tweet-modal__tool-btn-icon--geo">
+                                        <g>
+                                            <path
                                                 d="M12 7c-1.93 0-3.5 1.57-3.5 3.5S10.07 14 12 14s3.5-1.57 3.5-3.5S13.93 7 12 7zm0 5c-.827 0-1.5-.673-1.5-1.5S11.173 9 12 9s1.5.673 1.5 1.5S12.827 12 12 12zm0-10c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 17.77c-1.665-1.241-6.5-5.196-6.5-9.27C5.5 6.916 8.416 4 12 4s6.5 2.916 6.5 6.5c0 4.073-4.835 8.028-6.5 9.27z"
                                                 data-path-inactive="M12 7c-1.93 0-3.5 1.57-3.5 3.5S10.07 14 12 14s3.5-1.57 3.5-3.5S13.93 7 12 7zm0 5c-.827 0-1.5-.673-1.5-1.5S11.173 9 12 9s1.5.673 1.5 1.5S12.827 12 12 12zm0-10c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 17.77c-1.665-1.241-6.5-5.196-6.5-9.27C5.5 6.916 8.416 4 12 4s6.5 2.916 6.5 6.5c0 4.073-4.835 8.028-6.5 9.27z"
                                                 data-path-active="M12 2c-4.687 0-8.5 3.813-8.5 8.5 0 5.967 7.621 11.116 7.945 11.332l.555.37.555-.37c.324-.216 7.945-5.365 7.945-11.332C20.5 5.813 16.687 2 12 2zm0 11.5c-1.65 0-3-1.34-3-3s1.35-3 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3z"
-                                        ></path>
-                                    </g>
-                                </svg>
-                                <div class="tweet-modal__tool-btn-text-wrap">
-                                    <span class="tweet-modal__tool-btn-text"></span>
+                                            ></path>
+                                        </g>
+                                    </svg>
+                                    <div class="tweet-modal__tool-btn-text-wrap">
+                                        <span class="tweet-modal__tool-btn-text"></span>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                        <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--format"
-                                aria-label="굵게, (CTRL+B) 님" data-format="bold">
-                            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
-                                 class="tweet-modal__tool-format-icon">
-                                <g>
-                                    <path d="M15.636 11.671c2.079-.583 3.093-2.18 3.093-3.929 0-2.307-1.471-4.741-5.983-4.741H5.623V21h7.579c4.411 0 6.008-2.484 6.008-4.994 0-2.383-1.343-3.955-3.574-4.335zm-3.295-6.287c2.535 0 3.27 1.319 3.27 2.662 0 1.242-.583 2.611-3.27 2.611H8.69V5.384h3.651zM8.69 18.617v-5.628h4.208c2.231 0 3.194 1.166 3.194 2.738 0 1.547-.887 2.89-3.397 2.89H8.69z"></path>
-                                </g>
-                            </svg>
-                        </button>
-                        <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--format"
-                                aria-label="기울임꼴, (CTRL+I) 님" data-format="italic">
-                            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
-                                 class="tweet-modal__tool-format-icon">
-                                <g>
-                                    <path d="M9 6h3.731L9.184 18H5v2h10v-2h-3.731l3.547-12H19V4H9v2z"></path>
-                                </g>
-                            </svg>
-                        </button>
-                    </div>
-                    <!-- 기존 커스텀 이모지 피커 마크업: 외부 라이브러리 실패 시 fallback 용도로 유지 -->
-                    <div class="tweet-modal__emoji-picker" role="dialog" aria-label="이모티콘 선택기" hidden>
-                        <div class="tweet-modal__emoji-search">
-                            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"
-                                 class="tweet-modal__emoji-search-icon">
-                                <g>
-                                    <path d="M10.5 3.75c-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c1.55 0 2.977-.522 4.114-1.4l4.893 4.893 1.06-1.06-4.892-4.893a6.714 6.714 0 001.4-4.114c0-3.728-3.022-6.75-6.75-6.75zm-5.25 6.75c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25-2.35 5.25-5.25 5.25-5.25-2.35-5.25-5.25z"></path>
-                                </g>
-                            </svg>
-                            <input
+                            </button>
+                            <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--format" aria-label="굵게, (CTRL+B) 님" data-format="bold">
+                                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="tweet-modal__tool-format-icon">
+                                    <g><path d="M15.636 11.671c2.079-.583 3.093-2.18 3.093-3.929 0-2.307-1.471-4.741-5.983-4.741H5.623V21h7.579c4.411 0 6.008-2.484 6.008-4.994 0-2.383-1.343-3.955-3.574-4.335zm-3.295-6.287c2.535 0 3.27 1.319 3.27 2.662 0 1.242-.583 2.611-3.27 2.611H8.69V5.384h3.651zM8.69 18.617v-5.628h4.208c2.231 0 3.194 1.166 3.194 2.738 0 1.547-.887 2.89-3.397 2.89H8.69z"></path></g>
+                                </svg>
+                            </button>
+                            <button type="button" class="tweet-modal__tool-btn tweet-modal__tool-btn--format" aria-label="기울임꼴, (CTRL+I) 님" data-format="italic">
+                                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="tweet-modal__tool-format-icon">
+                                    <g><path d="M9 6h3.731L9.184 18H5v2h10v-2h-3.731l3.547-12H19V4H9v2z"></path></g>
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- 기존 커스텀 이모지 피커 마크업: 외부 라이브러리 실패 시 fallback 용도로 유지 -->
+                        <div class="tweet-modal__emoji-picker" role="dialog" aria-label="이모티콘 선택기" hidden>
+                            <div class="tweet-modal__emoji-search">
+                                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="tweet-modal__emoji-search-icon">
+                                    <g><path d="M10.5 3.75c-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c1.55 0 2.977-.522 4.114-1.4l4.893 4.893 1.06-1.06-4.892-4.893a6.714 6.714 0 001.4-4.114c0-3.728-3.022-6.75-6.75-6.75zm-5.25 6.75c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25-2.35 5.25-5.25 5.25-5.25-2.35-5.25-5.25z"></path></g>
+                                </svg>
+                                <input
                                     type="search"
                                     class="tweet-modal__emoji-search-input"
                                     data-testid="emojiSearchInput"
                                     placeholder="이모티콘 검색하기"
                                     aria-label="이모티콘 검색하기"
-                            />
-                        </div>
+                                />
+                            </div>
 
-                        <div class="tweet-modal__emoji-tabs" role="tablist" aria-label="이모지 카테고리">
-                            <button type="button" class="tweet-modal__emoji-tab tweet-modal__emoji-tab--active"
-                                    data-emoji-category="recent" role="tab" aria-selected="true"
-                                    aria-label="최근"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="smileys"
-                                    role="tab" aria-selected="false" aria-label="스마일리 및 사람"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="animals"
-                                    role="tab" aria-selected="false" aria-label="동물 및 자연"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="food" role="tab"
-                                    aria-selected="false" aria-label="음식 및 음료"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="activities"
-                                    role="tab" aria-selected="false" aria-label="활동"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="travel" role="tab"
-                                    aria-selected="false" aria-label="여행 및 장소"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="objects"
-                                    role="tab" aria-selected="false" aria-label="사물"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="symbols"
-                                    role="tab" aria-selected="false" aria-label="기호"></button>
-                            <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="flags" role="tab"
-                                    aria-selected="false" aria-label="깃발"></button>
-                        </div>
+                            <div class="tweet-modal__emoji-tabs" role="tablist" aria-label="이모지 카테고리">
+                                <button type="button" class="tweet-modal__emoji-tab tweet-modal__emoji-tab--active" data-emoji-category="recent" role="tab" aria-selected="true" aria-label="최근"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="smileys" role="tab" aria-selected="false" aria-label="스마일리 및 사람"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="animals" role="tab" aria-selected="false" aria-label="동물 및 자연"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="food" role="tab" aria-selected="false" aria-label="음식 및 음료"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="activities" role="tab" aria-selected="false" aria-label="활동"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="travel" role="tab" aria-selected="false" aria-label="여행 및 장소"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="objects" role="tab" aria-selected="false" aria-label="사물"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="symbols" role="tab" aria-selected="false" aria-label="기호"></button>
+                                <button type="button" class="tweet-modal__emoji-tab" data-emoji-category="flags" role="tab" aria-selected="false" aria-label="깃발"></button>
+                            </div>
 
-                        <div class="tweet-modal__emoji-content" data-testid="emojiPickerContent"></div>
-                    </div>
-                    <div class="composerActions">
-                        <div
+                            <div class="tweet-modal__emoji-content" data-testid="emojiPickerContent"></div>
+                        </div>
+                        <div class="composerActions">
+                            <div
                                 class="composerGauge"
                                 id="replyGauge"
                                 role="progressbar"
@@ -701,300 +640,264 @@
                                 aria-valuemin="0"
                                 aria-valuemax="500"
                                 aria-valuenow="0"
-                        >
-                            <span class="composerGaugeText" id="replyGaugeText">500</span>
-                        </div>
-                        <button type="button" class="tweet-modal__submit" data-testid="tweetButton" disabled>답글</button>
-                    </div>
-                </div>
-            </div>
-        </div><!-- /.tweet-modal__compose-view -->
-
-        <!-- 위치 선택 서브뷰: compose view를 숨기고 이 블록을 대신 표시한다 -->
-        <div class="tweet-modal__location-view" hidden>
-            <div class="tweet-modal__location-modal" role="dialog" aria-modal="true"
-                 aria-labelledby="location-modal-title">
-                <!-- 위치 선택 헤더: 닫기, 삭제, 완료 버튼 -->
-                <div class="tweet-modal__location-header">
-                    <button type="button" class="tweet-modal__location-close" aria-label="닫기"
-                            data-testid="location-back">
-                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <g>
-                                <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
-                            </g>
-                        </svg>
-                    </button>
-                    <h2 id="location-modal-title" class="tweet-modal__location-title">위치 태그하기</h2>
-                    <div class="tweet-modal__location-actions">
-                        <button type="button" class="tweet-modal__location-action tweet-modal__location-action--ghost"
-                                data-location-delete hidden>삭제
-                        </button>
-                        <button type="button" class="tweet-modal__location-action tweet-modal__location-action--solid"
-                                data-location-complete disabled>완료
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 위치 검색 입력 영역 -->
-                <div class="tweet-modal__location-search">
-                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
-                         class="tweet-modal__location-search-icon">
-                        <g>
-                            <path d="M10.5 3.75c-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c1.55 0 2.977-.522 4.114-1.4l4.893 4.893 1.06-1.06-4.892-4.893a6.714 6.714 0 001.4-4.114c0-3.728-3.022-6.75-6.75-6.75zm-5.25 6.75c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25-2.35 5.25-5.25 5.25-5.25-2.35-5.25-5.25z"></path>
-                        </g>
-                    </svg>
-                    <input type="search" class="tweet-modal__location-search-input" data-location-search
-                           placeholder="위치 검색" aria-label="위치 검색"/>
-                </div>
-
-                <!-- 위치 목록: 서버 렌더링 시 같은 구조를 반복해서 넣으면 된다 -->
-                <div class="tweet-modal__location-list" role="menu" data-location-list>
-                    <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">대한민국 서초구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">대한민국 강남구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">대한민국 송파구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">대한민국 광진구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">대한민국 동작구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                    <button type="button" class="tweet-modal__location-item" role="menuitem">
-                        <span class="tweet-modal__location-item-label">대한민국 중구</span>
-                        <span class="tweet-modal__location-item-check"></span>
-                    </button>
-                </div>
-            </div>
-        </div><!-- /.tweet-modal__location-view -->
-
-        <!-- 사용자 태그 서브뷰: 첨부 미디어의 태그 대상을 선택하는 화면 -->
-        <div class="tweet-modal__tag-view" hidden>
-            <div class="tweet-modal__tag-modal" role="dialog" aria-modal="true" aria-labelledby="tag-modal-title">
-                <!-- 태그 모달 헤더: 닫기 / 제목 / 완료 버튼 -->
-                <div class="tweet-modal__tag-header">
-                    <button type="button" class="tweet-modal__tag-close" aria-label="닫기" data-testid="tag-back">
-                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <g>
-                                <path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path>
-                            </g>
-                        </svg>
-                    </button>
-                    <h2 id="tag-modal-title" class="tweet-modal__tag-title">사용자 태그하기</h2>
-                    <div class="tweet-modal__tag-actions">
-                        <button type="button" class="tweet-modal__tag-action" data-tag-complete>완료</button>
-                    </div>
-                </div>
-
-                <!-- 태그 검색 영역: 선택된 사용자 chip + 검색 입력 + 결과 목록 -->
-                <div class="tweet-modal__tag-search">
-                    <form role="search" class="tweet-modal__tag-search-form" data-tag-search-form>
-                        <!-- 검색 입력 셸: 돋보기 아이콘, 선택된 사용자 chip, 검색 input -->
-                        <div class="tweet-modal__tag-search-shell">
-                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
-                                 class="tweet-modal__tag-search-icon" data-testid="searchPeople_label">
-                                <g>
-                                    <path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.814 5.262l4.276 4.276-1.414 1.414-4.276-4.276A8.466 8.466 0 0110.25 18.75c-4.694 0-8.5-3.806-8.5-8.5z"></path>
-                                </g>
-                            </svg>
-                            <div class="tweet-modal__tag-chip-list" data-tag-chip-list></div>
-                            <!-- 검색 기록이 아예 없을 때 사용할 수 있는 예시 UI
-                            <p class="tweet-modal__tag-history-empty">
-                                최근 검색 기록이 없습니다. 이름이나 아이디를 입력하면 아래에 목록이 표시됩니다.
-                            </p>
-                            -->
-                            <input
-                                    type="text"
-                                    class="tweet-modal__tag-search-input"
-                                    data-tag-search
-                                    data-testid="searchPeople"
-                                    placeholder="사용자 검색"
-                                    aria-label="사용자 검색"
-                                    role="combobox"
-                                    aria-expanded="false"
-                                    autocomplete="off"
-                            />
-                        </div>
-
-                        <!-- 검색 결과 목록: 현재 화면에서 읽어온 사용자 중 검색어와 맞는 항목이 표시됨 -->
-                        <div class="tweet-modal__tag-results" data-tag-results></div>
-                    </form>
-                </div>
-            </div>
-        </div><!-- /.tweet-modal__tag-view -->
-
-        <!-- 미디어 설명 서브뷰: 첨부 이미지 ALT 텍스트를 수정하는 화면 -->
-        <div class="tweet-modal__media-view" hidden>
-            <div class="tweet-modal__media-editor" role="dialog" aria-modal="true" aria-labelledby="media-editor-title">
-                <!-- 미디어 설명 헤더: 뒤로가기, 이전/다음, 저장 버튼 -->
-                <div class="tweet-modal__media-header">
-                    <button type="button" class="tweet-modal__media-header-btn tweet-modal__media-header-btn--ghost"
-                            data-testid="media-back" aria-label="돌아가기">
-                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <g>
-                                <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
-                            </g>
-                        </svg>
-                    </button>
-                    <h2 id="media-editor-title" class="tweet-modal__media-title" data-media-title>이미지 설명 수정</h2>
-                    <div class="tweet-modal__media-header-actions">
-                        <button type="button" class="tweet-modal__media-header-btn" data-media-prev aria-label="이전 이미지">
-                            이전
-                        </button>
-                        <button type="button" class="tweet-modal__media-header-btn" data-media-next aria-label="다음 이미지">
-                            다음
-                        </button>
-                        <button type="button" class="tweet-modal__media-header-btn tweet-modal__media-header-btn--solid"
-                                data-testid="endEditingButton" data-media-save>저장
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 미디어 설명 본문: 선택한 이미지 미리보기와 설명 입력창 -->
-                <div class="tweet-modal__media-body">
-                    <section class="tweet-modal__media-panel tweet-modal__media-panel--active">
-                        <div class="tweet-modal__media-alt-preview">
-                            <img src="" alt=""
-                                 class="tweet-modal__media-preview-image tweet-modal__media-preview-image--alt"
-                                 data-media-preview-image/>
-                        </div>
-                        <label class="tweet-modal__media-alt-field" aria-label="대체 텍스트">
-                            <div class="tweet-modal__media-alt-meta">
-                                <span class="tweet-modal__media-alt-label">설명</span>
-                                <span class="tweet-modal__media-alt-count" data-media-alt-count>0 / 1,000</span>
+                            >
+                                <span class="composerGaugeText" id="replyGaugeText">500</span>
                             </div>
-                            <textarea class="tweet-modal__media-alt-input" data-testid="altTextInput"
-                                      data-media-alt-input maxlength="1000"></textarea>
-                        </label>
-                    </section>
+                            <button type="button" class="tweet-modal__submit" data-testid="tweetButton" disabled>답글</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div><!-- /.tweet-modal__media-view -->
+                </div><!-- /.tweet-modal__compose-view -->
 
-        <!-- 임시저장 서브뷰: compose view 대신 표시되며 draft 목록/삭제 확인을 포함한다 -->
-        <div class="tweet-modal__draft-view" hidden>
-            <!-- 임시저장 헤더: 뒤로가기, 제목, 수정 버튼 -->
-            <div class="draft-panel__header">
-                <button type="button" class="draft-panel__back" data-testid="app-bar-back" aria-label="돌아가기">
-                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                        <g>
-                            <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
-                        </g>
-                    </svg>
-                </button>
-                <h2 class="draft-panel__title">임시저장</h2>
-                <button type="button" class="draft-panel__action">수정</button>
-            </div>
+                <!-- 위치 선택 서브뷰: compose view를 숨기고 이 블록을 대신 표시한다 -->
+                <div class="tweet-modal__location-view" hidden>
+                    <div class="tweet-modal__location-modal" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
+                        <!-- 위치 선택 헤더: 닫기, 삭제, 완료 버튼 -->
+                        <div class="tweet-modal__location-header">
+                            <button type="button" class="tweet-modal__location-close" aria-label="닫기" data-testid="location-back">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                    <g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g>
+                                </svg>
+                            </button>
+                            <h2 id="location-modal-title" class="tweet-modal__location-title">위치 태그하기</h2>
+                            <div class="tweet-modal__location-actions">
+                                <button type="button" class="tweet-modal__location-action tweet-modal__location-action--ghost" data-location-delete hidden>삭제</button>
+                                <button type="button" class="tweet-modal__location-action tweet-modal__location-action--solid" data-location-complete disabled>완료</button>
+                            </div>
+                        </div>
 
-            <!-- 임시저장 탭 영역: 현재는 단일 라벨만 사용 -->
-            <div class="draft-panel__tablist" aria-label="초안 탭">
-                <div class="draft-panel__tab draft-panel__tab--active draft-panel__tab--single">
-                    임시저장
-                </div>
-            </div>
+                        <!-- 위치 검색 입력 영역 -->
+                        <div class="tweet-modal__location-search">
+                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="tweet-modal__location-search-icon">
+                                <g><path d="M10.5 3.75c-3.728 0-6.75 3.022-6.75 6.75s3.022 6.75 6.75 6.75c1.55 0 2.977-.522 4.114-1.4l4.893 4.893 1.06-1.06-4.892-4.893a6.714 6.714 0 001.4-4.114c0-3.728-3.022-6.75-6.75-6.75zm-5.25 6.75c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25-2.35 5.25-5.25 5.25-5.25-2.35-5.25-5.25z"></path></g>
+                            </svg>
+                            <input type="search" class="tweet-modal__location-search-input" data-location-search placeholder="위치 검색" aria-label="위치 검색" />
+                        </div>
 
-            <!-- 임시저장 본문: 목록 또는 빈 상태가 들어가는 영역 -->
-            <div class="draft-panel__content">
-                <!-- 임시저장 목록이 아예 없을 때만 쓰는 단순 구조 예시
-                <div class="draft-panel__empty">
-                    <p class="draft-panel__empty-title">잠시 생각을 정리합니다</p>
-                    <p class="draft-panel__empty-body">아직 게시할 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성하세요.</p>
-                </div>
-                -->
-                <!-- 임시저장 목록: 서버 렌더링 시 .draft-panel__item 구조를 반복해서 넣으면 된다 -->
-                <div class="draft-panel__list">
-                    <button type="button" class="draft-panel__item" aria-pressed="false">
-                        <img
-                                class="draft-panel__avatar"
-                                alt=""
-                                src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg"
-                        />
-                        <span class="draft-panel__item-body">
+                        <!-- 위치 목록: 서버 렌더링 시 같은 구조를 반복해서 넣으면 된다 -->
+                        <div class="tweet-modal__location-list" role="menu" data-location-list>
+                            <button type="button" class="tweet-modal__location-item" role="menuitem">
+                                <span class="tweet-modal__location-item-label">대한민국 서초구</span>
+                                <span class="tweet-modal__location-item-check"></span>
+                            </button>
+                            <button type="button" class="tweet-modal__location-item" role="menuitem">
+                                <span class="tweet-modal__location-item-label">대한민국 강남구</span>
+                                <span class="tweet-modal__location-item-check"></span>
+                            </button>
+                            <button type="button" class="tweet-modal__location-item" role="menuitem">
+                                <span class="tweet-modal__location-item-label">대한민국 송파구</span>
+                                <span class="tweet-modal__location-item-check"></span>
+                            </button>
+                            <button type="button" class="tweet-modal__location-item" role="menuitem">
+                                <span class="tweet-modal__location-item-label">대한민국 광진구</span>
+                                <span class="tweet-modal__location-item-check"></span>
+                            </button>
+                            <button type="button" class="tweet-modal__location-item" role="menuitem">
+                                <span class="tweet-modal__location-item-label">대한민국 동작구</span>
+                                <span class="tweet-modal__location-item-check"></span>
+                            </button>
+                            <button type="button" class="tweet-modal__location-item" role="menuitem">
+                                <span class="tweet-modal__location-item-label">대한민국 중구</span>
+                                <span class="tweet-modal__location-item-check"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div><!-- /.tweet-modal__location-view -->
+
+                <!-- 사용자 태그 서브뷰: 첨부 미디어의 태그 대상을 선택하는 화면 -->
+                <div class="tweet-modal__tag-view" hidden>
+                    <div class="tweet-modal__tag-modal" role="dialog" aria-modal="true" aria-labelledby="tag-modal-title">
+                        <!-- 태그 모달 헤더: 닫기 / 제목 / 완료 버튼 -->
+                        <div class="tweet-modal__tag-header">
+                            <button type="button" class="tweet-modal__tag-close" aria-label="닫기" data-testid="tag-back">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                    <g><path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g>
+                                </svg>
+                            </button>
+                            <h2 id="tag-modal-title" class="tweet-modal__tag-title">사용자 태그하기</h2>
+                            <div class="tweet-modal__tag-actions">
+                                <button type="button" class="tweet-modal__tag-action" data-tag-complete>완료</button>
+                            </div>
+                        </div>
+
+                        <!-- 태그 검색 영역: 선택된 사용자 chip + 검색 입력 + 결과 목록 -->
+                        <div class="tweet-modal__tag-search">
+                            <form role="search" class="tweet-modal__tag-search-form" data-tag-search-form>
+                                <!-- 검색 입력 셸: 돋보기 아이콘, 선택된 사용자 chip, 검색 input -->
+                                <div class="tweet-modal__tag-search-shell">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="tweet-modal__tag-search-icon" data-testid="searchPeople_label">
+                                        <g><path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.814 5.262l4.276 4.276-1.414 1.414-4.276-4.276A8.466 8.466 0 0110.25 18.75c-4.694 0-8.5-3.806-8.5-8.5z"></path></g>
+                                    </svg>
+                                    <div class="tweet-modal__tag-chip-list" data-tag-chip-list></div>
+                                    <!-- 검색 기록이 아예 없을 때 사용할 수 있는 예시 UI
+                                    <p class="tweet-modal__tag-history-empty">
+                                        최근 검색 기록이 없습니다. 이름이나 아이디를 입력하면 아래에 목록이 표시됩니다.
+                                    </p>
+                                    -->
+                                    <input
+                                        type="text"
+                                        class="tweet-modal__tag-search-input"
+                                        data-tag-search
+                                        data-testid="searchPeople"
+                                        placeholder="사용자 검색"
+                                        aria-label="사용자 검색"
+                                        role="combobox"
+                                        aria-expanded="false"
+                                        autocomplete="off"
+                                    />
+                                </div>
+
+                                <!-- 검색 결과 목록: 현재 화면에서 읽어온 사용자 중 검색어와 맞는 항목이 표시됨 -->
+                                <div class="tweet-modal__tag-results" data-tag-results></div>
+                            </form>
+                        </div>
+                    </div>
+                </div><!-- /.tweet-modal__tag-view -->
+
+                <!-- 미디어 설명 서브뷰: 첨부 이미지 ALT 텍스트를 수정하는 화면 -->
+                <div class="tweet-modal__media-view" hidden>
+                    <div class="tweet-modal__media-editor" role="dialog" aria-modal="true" aria-labelledby="media-editor-title">
+                        <!-- 미디어 설명 헤더: 뒤로가기, 이전/다음, 저장 버튼 -->
+                        <div class="tweet-modal__media-header">
+                            <button type="button" class="tweet-modal__media-header-btn tweet-modal__media-header-btn--ghost" data-testid="media-back" aria-label="돌아가기">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                    <g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g>
+                                </svg>
+                            </button>
+                            <h2 id="media-editor-title" class="tweet-modal__media-title" data-media-title>이미지 설명 수정</h2>
+                            <div class="tweet-modal__media-header-actions">
+                                <button type="button" class="tweet-modal__media-header-btn" data-media-prev aria-label="이전 이미지">이전</button>
+                                <button type="button" class="tweet-modal__media-header-btn" data-media-next aria-label="다음 이미지">다음</button>
+                                <button type="button" class="tweet-modal__media-header-btn tweet-modal__media-header-btn--solid" data-testid="endEditingButton" data-media-save>저장</button>
+                            </div>
+                        </div>
+
+                        <!-- 미디어 설명 본문: 선택한 이미지 미리보기와 설명 입력창 -->
+                        <div class="tweet-modal__media-body">
+                            <section class="tweet-modal__media-panel tweet-modal__media-panel--active">
+                                <div class="tweet-modal__media-alt-preview">
+                                    <img src="" alt="" class="tweet-modal__media-preview-image tweet-modal__media-preview-image--alt" data-media-preview-image />
+                                </div>
+                                <label class="tweet-modal__media-alt-field" aria-label="대체 텍스트">
+                                    <div class="tweet-modal__media-alt-meta">
+                                        <span class="tweet-modal__media-alt-label">설명</span>
+                                        <span class="tweet-modal__media-alt-count" data-media-alt-count>0 / 1,000</span>
+                                    </div>
+                                    <textarea class="tweet-modal__media-alt-input" data-testid="altTextInput" data-media-alt-input maxlength="1000"></textarea>
+                                </label>
+                            </section>
+                        </div>
+                    </div>
+                </div><!-- /.tweet-modal__media-view -->
+
+                <!-- 임시저장 서브뷰: compose view 대신 표시되며 draft 목록/삭제 확인을 포함한다 -->
+                <div class="tweet-modal__draft-view" hidden>
+                    <!-- 임시저장 헤더: 뒤로가기, 제목, 수정 버튼 -->
+                    <div class="draft-panel__header">
+                        <button type="button" class="draft-panel__back" data-testid="app-bar-back" aria-label="돌아가기">
+                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g></svg>
+                        </button>
+                        <h2 class="draft-panel__title">임시저장</h2>
+                        <button type="button" class="draft-panel__action">수정</button>
+                    </div>
+
+                    <!-- 임시저장 탭 영역: 현재는 단일 라벨만 사용 -->
+                    <div class="draft-panel__tablist" aria-label="초안 탭">
+                        <div class="draft-panel__tab draft-panel__tab--active draft-panel__tab--single">
+                            임시저장
+                        </div>
+                    </div>
+
+                    <!-- 임시저장 본문: 목록 또는 빈 상태가 들어가는 영역 -->
+                    <div class="draft-panel__content">
+                        <!-- 임시저장 목록이 아예 없을 때만 쓰는 단순 구조 예시
+                        <div class="draft-panel__empty">
+                            <p class="draft-panel__empty-title">잠시 생각을 정리합니다</p>
+                            <p class="draft-panel__empty-body">아직 게시할 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성하세요.</p>
+                        </div>
+                        -->
+                        <!-- 임시저장 목록: 서버 렌더링 시 .draft-panel__item 구조를 반복해서 넣으면 된다 -->
+                        <div class="draft-panel__list">
+                            <button type="button" class="draft-panel__item" aria-pressed="false">
+                                <img
+                                    class="draft-panel__avatar"
+                                    alt=""
+                                    src="https://pbs.twimg.com/profile_images/2029361845321207808/LltLeaLS_bigger.jpg"
+                                />
+                                <span class="draft-panel__item-body">
                                     <span class="draft-panel__meta">@tmtsugar 님에게 보내는 답글</span>
                                     <span class="draft-panel__text">프로필 문구 수정 전 확인 부탁드립니다.</span>
                                     <span class="draft-panel__date">3월 10일 오전 11:20</span>
                                 </span>
-                    </button>
-                    <button type="button" class="draft-panel__item" aria-pressed="false">
-                        <img
-                                class="draft-panel__avatar"
-                                alt=""
-                                src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png"
-                        />
-                        <span class="draft-panel__item-body">
+                            </button>
+                            <button type="button" class="draft-panel__item" aria-pressed="false">
+                                <img
+                                    class="draft-panel__avatar"
+                                    alt=""
+                                    src="https://pbs.twimg.com/profile_images/2029093315963158528/9_GGpfuL_bigger.png"
+                                />
+                                <span class="draft-panel__item-body">
                                     <span class="draft-panel__meta">@elonmusk 님에게 보내는 답글</span>
                                     <span class="draft-panel__text">회의 끝나고 초안 정리해서 다시 보낼게요.</span>
                                     <span class="draft-panel__date">3월 9일 오후 7:10</span>
                                 </span>
-                    </button>
-                </div>
-                <div class="draft-panel__empty" hidden>
-                    <p class="draft-panel__empty-title">잠시 생각을 정리합니다</p>
-                    <p class="draft-panel__empty-body">아직 게시할 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성하세요.</p>
-                </div>
-            </div>
+                            </button>
+                        </div>
+                        <div class="draft-panel__empty" hidden>
+                            <p class="draft-panel__empty-title">잠시 생각을 정리합니다</p>
+                            <p class="draft-panel__empty-body">아직 게시할 준비가 되지 않았나요? 임시저장해 두고 나중에 이어서 작성하세요.</p>
+                        </div>
+                    </div>
 
-            <!-- 임시저장 수정 모드 하단 바: 전체 선택, 삭제 -->
-            <div class="draft-panel__footer" hidden>
-                <button type="button" class="draft-panel__footer-link draft-panel__select-all">모두 선택</button>
-                <button type="button" class="draft-panel__footer-delete" disabled>삭제하기</button>
-            </div>
+                    <!-- 임시저장 수정 모드 하단 바: 전체 선택, 삭제 -->
+                    <div class="draft-panel__footer" hidden>
+                        <button type="button" class="draft-panel__footer-link draft-panel__select-all">모두 선택</button>
+                        <button type="button" class="draft-panel__footer-delete" disabled>삭제하기</button>
+                    </div>
 
-            <!-- 삭제 확인 레이어: 실제 삭제 전에 한 번 더 묻는 영역 -->
-            <div class="draft-panel__confirm-overlay" hidden>
-                <div class="draft-panel__confirm-backdrop"></div>
-                <div
-                        class="draft-panel__confirm-card"
-                        role="alertdialog"
-                        aria-modal="true"
-                        aria-labelledby="draft-confirm-title"
-                        aria-describedby="draft-confirm-desc"
-                >
-                    <h3 id="draft-confirm-title" class="draft-panel__confirm-title">전송하지 않은 게시물 삭제하기</h3>
-                    <p id="draft-confirm-desc" class="draft-panel__confirm-desc">
-                        이 작업은 취소할 수 없으며 선택한 전송하지 않은 게시물이 삭제됩니다.
-                    </p>
-                    <div class="draft-panel__confirm-actions">
-                        <button type="button" class="draft-panel__confirm-primary">삭제하기</button>
-                        <button type="button" class="draft-panel__confirm-secondary">취소</button>
+                    <!-- 삭제 확인 레이어: 실제 삭제 전에 한 번 더 묻는 영역 -->
+                    <div class="draft-panel__confirm-overlay" hidden>
+                        <div class="draft-panel__confirm-backdrop"></div>
+                        <div
+                            class="draft-panel__confirm-card"
+                            role="alertdialog"
+                            aria-modal="true"
+                            aria-labelledby="draft-confirm-title"
+                            aria-describedby="draft-confirm-desc"
+                        >
+                            <h3 id="draft-confirm-title" class="draft-panel__confirm-title">전송하지 않은 게시물 삭제하기</h3>
+                            <p id="draft-confirm-desc" class="draft-panel__confirm-desc">
+                                이 작업은 취소할 수 없으며 선택한 전송하지 않은 게시물이 삭제됩니다.
+                            </p>
+                            <div class="draft-panel__confirm-actions">
+                                <button type="button" class="draft-panel__confirm-primary">삭제하기</button>
+                                <button type="button" class="draft-panel__confirm-secondary">취소</button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.tweet-modal__draft-view -->
+
+                <!-- 판매글 선택 서브뷰: compose view를 숨기고 이 블록을 대신 표시한다 -->
+                <div class="tweet-modal__product-view" data-product-select-modal hidden>
+                    <div class="draft-panel__header">
+                        <button type="button" class="draft-panel__back" data-product-select-close aria-label="돌아가기">
+                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></g></svg>
+                        </button>
+                        <h2 class="draft-panel__title">판매글 선택하기</h2>
+                        <button type="button" class="draft-panel__action" data-product-select-complete disabled>완료</button>
+                    </div>
+                    <div class="draft-panel__content">
+                        <div class="draft-panel__list" data-product-select-list>
+                            <!-- JS에서 동적으로 상품 목록 렌더링 -->
+                        </div>
+                        <div class="draft-panel__empty" data-product-empty hidden>
+                            <p class="draft-panel__empty-title">등록된 상품이 없습니다</p>
+                            <p class="draft-panel__empty-body">마이페이지에서 상품을 먼저 등록해 주세요.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div><!-- /.tweet-modal__draft-view -->
-
-        <!-- 판매글 선택 서브뷰: compose view를 숨기고 이 블록을 대신 표시한다 -->
-        <div class="tweet-modal__product-view" data-product-select-modal hidden>
-            <div class="draft-panel__header">
-                <button type="button" class="draft-panel__back" data-product-select-close aria-label="돌아가기">
-                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                        <g>
-                            <path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path>
-                        </g>
-                    </svg>
-                </button>
-                <h2 class="draft-panel__title">판매글 선택하기</h2>
-                <button type="button" class="draft-panel__action" data-product-select-complete disabled>완료</button>
-            </div>
-            <div class="draft-panel__content">
-                <div class="draft-panel__list" data-product-select-list>
-                    <!-- JS에서 동적으로 상품 목록 렌더링 -->
-                </div>
-                <div class="draft-panel__empty" data-product-empty hidden>
-                    <p class="draft-panel__empty-title">등록된 상품이 없습니다</p>
-                    <p class="draft-panel__empty-body">마이페이지에서 상품을 먼저 등록해 주세요.</p>
-                </div>
-            </div>
-        </div>
-    </div><!-- /.tweet-modal -->
-</div><!-- /.tweet-modal-overlay -->
-</body>
+            </div><!-- /.tweet-modal -->
+        </div><!-- /.tweet-modal-overlay -->
+    </th:block>
+    </body>
 </html>
