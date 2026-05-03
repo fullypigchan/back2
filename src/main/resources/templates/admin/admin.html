@@ -389,7 +389,7 @@
             </div>
         </div>
 
-        <!-- 뉴스 등록/4踰덊꺆 -->
+        <!-- 뉴스 등록/4번 탭 -->
         <div class="page" id="page-news-write">
             <div class="news-write-layout">
 
@@ -478,7 +478,7 @@
             </div>
         </div>
 
-        <!-- 회원 신고/5踰덊꺆 -->
+        <!-- 회원 신고/5번 탭 -->
         <div class="page" id="page-report-member">
             <div class="report-search-bar">
                 <label class="post-filter-check"><input type="checkbox" id="showPendingMemberOnly"/> 심사중만 보기</label>
@@ -568,7 +568,7 @@
             </div>
         </div>
 
-        <!-- 글 신고/6踰덊꺆 -->
+        <!-- 글 신고/6번 탭 -->
         <div class="page" id="page-report-post">
             <div class="report-search-bar">
                 <label class="post-filter-check"><input type="checkbox" id="showPendingPostOnly"/> 심사중만 보기</label>
@@ -1065,6 +1065,33 @@
                 <div class="modal-field-row">
                     <div class="modal-field-label">현재 상태</div>
                     <div class="modal-field-value" id="reportStatusBadge"></div>
+                </div>
+            </div>
+            <div class="module-card report-post-info-card" id="reportPostInfoCard" hidden>
+                <p class="modal-section-title">게시물 정보</p>
+                <div class="modal-field-row">
+                    <div class="modal-field-label">작성자</div>
+                    <div class="modal-field-value" id="reportPostAuthor"></div>
+                </div>
+                <div class="modal-field-row">
+                    <div class="modal-field-label">제목</div>
+                    <div class="modal-field-value" id="reportPostTitle"></div>
+                </div>
+                <div class="modal-field-row">
+                    <div class="modal-field-label">글 종류</div>
+                    <div class="modal-field-value" id="reportPostType"></div>
+                </div>
+                <div class="modal-field-row">
+                    <div class="modal-field-label">상품 종류</div>
+                    <div class="modal-field-value" id="reportPostCategory"></div>
+                </div>
+                <div class="modal-field-row">
+                    <div class="modal-field-label">게시일</div>
+                    <div class="modal-field-value" id="reportPostDate"></div>
+                </div>
+                <div class="modal-field-row-top">
+                    <div class="modal-field-label">내용</div>
+                    <div class="modal-field-value report-post-content" id="reportPostContent"></div>
                 </div>
             </div>
         </div>

@@ -109,7 +109,13 @@
         left join tbl_news n on n.post_id = v.id and n.news_type = 'emergency'
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{memberId})
           and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{memberId})
-          and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{memberId} and r.target_type = 'member')
+          and v.member_id not in (
+              select r.target_id
+              from tbl_report r
+              where r.reporter_id = #{memberId}
+                and r.target_type = 'member'
+                and r.status in ('pending', 'applied')
+          )
           and v.id not in (
               select r.target_id
               from tbl_report r
@@ -142,7 +148,13 @@
         from view_post_feed v
         where v.member_id not in (select bl.blocked_id from tbl_block bl where bl.blocker_id = #{postSearch.memberId})
         and v.member_id not in (select bl.blocker_id from tbl_block bl where bl.blocked_id = #{postSearch.memberId})
-        and v.member_id not in (select r.target_id from tbl_report r where r.reporter_id = #{postSearch.memberId} and r.target_type = 'member')
+        and v.member_id not in (
+        select r.target_id
+        from tbl_report r
+        where r.reporter_id = #{postSearch.memberId}
+        and r.target_type = 'member'
+        and r.status in ('pending', 'applied')
+        )
         and v.id not in (
         select r.target_id
         from tbl_report r

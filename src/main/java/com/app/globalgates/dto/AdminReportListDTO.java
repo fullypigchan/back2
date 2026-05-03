@@ -24,5 +24,11 @@ public class AdminReportListDTO {
     private String reason;
     private ReportStatus status;
     private String createdDatetime;
+    private String authorName;
+    private String postTitle;
+    private String postContent;
+    private String postType;
+    private String categoryName;
+    private String postCreatedDatetime;
     private List<PostFileDTO> postFiles;
 }

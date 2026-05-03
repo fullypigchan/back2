@@ -78,5 +78,11 @@ public interface AdminMapper {
     int updateReportedPostStatusByReportIds(@Param("reportIds") List<Long> reportIds,
                                             @Param("postStatus") String postStatus);
 
+    int updateReportedMemberStatusByReportIds(@Param("reportIds") List<Long> reportIds,
+                                              @Param("memberStatus") String memberStatus);
+
+    int updateReportedMemberPostStatusByReportIds(@Param("reportIds") List<Long> reportIds,
+                                                  @Param("postStatus") String postStatus);
+
     int deleteReports(@Param("reportIds") List<Long> reportIds);
 }
