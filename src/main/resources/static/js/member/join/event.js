@@ -60,13 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const preview = document.querySelector(".avatar-preview");
         if (preview) {
             preview.src = window.oauthJoinData.profileUrl;
-        }
-    }
-// SNS 프로필 사진을 프로필 모달 기본 미리보기로 사용
-    if (window.oauthJoinData.enabled && window.oauthJoinData.profileUrl) {
-        const preview = document.querySelector(".avatar-preview");
-        if (preview) {
-            preview.src = window.oauthJoinData.profileUrl;
+            // has-image가 없으면 avatar-preview는 opacity:0이라 SNS 사진이 가려진다.
+            preview.closest(".avatar-frame")?.classList.add("has-image");
         }
     }
 });
@@ -134,6 +129,50 @@ document.querySelector('#overlay-email .btn-edit').addEventListener('click', () 
     resetEmailState();
     hide('overlay-email');
     show('modal-create');
+});
+
+// 코드 재전송: "코드를 받지 못했나요?" 클릭 시 현재 모드(휴대폰/이메일)에 맞춰 다시 전송한다.
+const resendCodeButton = document.querySelector('#modal-code .change');
+let resendInFlight = false;
+resendCodeButton?.addEventListener('click', async () => {
+    if (resendInFlight) return;
+
+    const label = identityLabel?.textContent.trim();
+    const target = identityInput?.value.trim() || "";
+
+    if (!target) {
+        alert('먼저 연락처를 입력해주세요.');
+        return;
+    }
+
+    resendInFlight = true;
+    const originalText = resendCodeButton.querySelector('.replace-email')?.textContent;
+    const setLabel = (text) => {
+        const span = resendCodeButton.querySelector('.replace-email');
+        if (span) span.textContent = text;
+    };
+    setLabel('전송 중...');
+
+    try {
+        if (label === '이메일') {
+            emailCertCode = await joinService.sendEmailCode(target);
+            emailVerified = false;
+        } else {
+            certCode = await joinService.sendSms(target);
+            phoneVerified = false;
+        }
+
+        if (codeInput) codeInput.value = "";
+        codeInput?.dispatchEvent(new Event('input'));
+
+        setLabel('새 코드를 보냈습니다');
+        setTimeout(() => setLabel(originalText || '코드를 받지 못했나요?'), 2000);
+    } catch (error) {
+        setLabel(originalText || '코드를 받지 못했나요?');
+        alert(error.message || '인증번호 재전송에 실패했습니다.');
+    } finally {
+        resendInFlight = false;
+    }
 });
 
 // 코드 → 비밀번호
@@ -494,7 +533,13 @@ joinBtn.addEventListener('click', async () => {
 
     await joinService.memberRegister(formData);
 
-    location.href = "/member/join";
+    // 가입 직후 페이지 이동 없이 로그인 모달을 띄워 바로 로그인 진행할 수 있게 한다.
+    hideAll();
+    window.joinCreateModalReset?.();
+    window.joinPasswordModalReset?.();
+    resetSmsState();
+    resetEmailState();
+    document.getElementById('btn-login')?.click();
 })
 
 

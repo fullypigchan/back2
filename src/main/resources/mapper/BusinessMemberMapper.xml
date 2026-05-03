@@ -6,4 +6,12 @@
         values (#{id},#{businessNumber}, #{companyName}, #{ceoName},#{businessType})
     </insert>
 
+    <select id="countByCompanyName" resultType="int">
+        select count(*) from tbl_business_member where company_name = #{companyName}
+    </select>
+
+    <select id="countByBusinessNumber" resultType="int">
+        select count(*) from tbl_business_member where business_number = #{businessNumber}
+    </select>
+
 </mapper>

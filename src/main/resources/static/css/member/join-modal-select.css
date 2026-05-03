@@ -110,6 +110,12 @@
     color: #0f1419;
 }
 
+.join-select-modal .header-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
 .join-select-modal--category .join-modal-box1 {
     width: min(590px, 92vw);
     height: min(640px, 88vh);
@@ -271,23 +277,25 @@
 }
 
 .join-select-modal--language .language-head {
-    padding: 0 28px 10px;
+    /* 좌우 패딩을 list padding(28) + item margin(32) 합과 맞춰 타이틀이
+       언어 항목 좌우 끝선과 정렬되도록 한다. */
+    padding: 0 60px 10px;
 }
 
 .join-select-modal--language .language-title {
     margin: 0;
     color: #0f1419;
-    font-size: 42px;
-    line-height: 1.08;
+    font-size: 24px;
+    line-height: 1.2;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
 
 .join-select-modal--language .language-desc {
-    margin: 8px 0 0;
+    margin: 6px 0 0;
     color: #536471;
-    font-size: 12px;
-    line-height: 1.42;
+    font-size: 13px;
+    line-height: 1.45;
     font-weight: 400;
 }
 
@@ -306,15 +314,15 @@
 .join-select-modal--language .language-item {
     width: calc(100% - 64px);
     margin: 0 32px;
-    min-height: 54px;
+    min-height: 44px;
     border: 0;
     border-bottom: 1px solid #d7dfe4;
     background: transparent;
     color: #0f1419;
-    font-size: 26px;
-    line-height: 1.2;
+    font-size: 15px;
+    line-height: 1.4;
     font-weight: 400;
-    padding: 8px 0;
+    padding: 6px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -327,16 +335,16 @@
 }
 
 .join-select-modal--language .check-box {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     border: 2px solid #6e8596;
-    border-radius: 6px;
+    border-radius: 5px;
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-left: 16px;
+    margin-left: 12px;
 }
 
 .join-select-modal--language .language-item.is-checked .check-box {
@@ -355,12 +363,12 @@
 
 .join-select-modal--language .language-more {
     width: 100%;
-    min-height: 54px;
+    min-height: 44px;
     border: 0;
     margin-top: 1px;
     background: #e7f2fb;
     color: #1d9bf0;
-    font-size: 22px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
 }
@@ -375,12 +383,12 @@
     width: calc(100% - 180px);
     display: block;
     margin: 0 auto;
-    min-height: 46px;
+    min-height: 44px;
     border: 0;
     border-radius: 9999px;
     background: #07121f;
     color: #ffffff;
-    font-size: 20px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: -0.01em;
     cursor: pointer;
@@ -566,15 +574,16 @@
 
 @media (max-width: 520px) {
     .join-select-modal--language .language-head {
+        /* 모바일에선 list padding(20)만 매칭하면 끝선이 정렬된다. */
         padding: 0 20px 10px;
     }
 
     .join-select-modal--language .language-title {
-        font-size: 32px;
+        font-size: 22px;
     }
 
     .join-select-modal--language .language-desc {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .join-select-modal--language .language-list {
@@ -584,19 +593,19 @@
     .join-select-modal--language .language-item {
         width: 100%;
         margin: 0;
-        font-size: 20px;
-        min-height: 48px;
+        font-size: 15px;
+        min-height: 42px;
     }
 
     .join-select-modal--language .language-more {
-        font-size: 18px;
-        min-height: 48px;
+        font-size: 14px;
+        min-height: 42px;
     }
 
     .join-select-modal--language .next-button {
         width: calc(100% - 96px);
-        min-height: 42px;
-        font-size: 17px;
+        min-height: 40px;
+        font-size: 14px;
     }
 
     .join-select-modal--notification .notification-title {
