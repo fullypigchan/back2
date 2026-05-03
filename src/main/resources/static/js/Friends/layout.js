@@ -7,6 +7,11 @@ const friendsLayout = (() => {
         return friend.isFollowing;
     };
 
+    const isExpertRole = (role) => {
+        if (!role) return false;
+        return String(role).toLowerCase() === "expert";
+    };
+
     const createFriendCard = (friend, mode) => {
         console.log("들어옴1 createFriendCard, memberProfileFileName:", friend.memberProfileFileName);
         const avatarHtml = friend.memberProfileFileName
@@ -21,8 +26,12 @@ const friendsLayout = (() => {
             : "";
 
         const isFollowing = resolveIsFollowing(friend, mode);
+        const expert = isExpertRole(friend.memberRole);
         const btnClass = isFollowing ? "connected" : "default";
-        const btnText = isFollowing ? "Connected" : "Connect";
+        const btnText = isFollowing
+            ? (expert ? "Following" : "Connected")
+            : (expert ? "Follow" : "Connect");
+        const expertAttr = expert ? ' data-expert="true"' : "";
 
         return `
             <div class="user-card" data-handle="${handle}" data-member-id="${friend.id}" data-profile-id="${friend.id}">
@@ -34,7 +43,7 @@ const friendsLayout = (() => {
                             <div class="user-handle">${handle}</div>
                             ${followerIntro}
                         </div>
-                        <button class="connect-btn ${btnClass}" data-member-id="${friend.id}">${btnText}</button>
+                        <button class="connect-btn ${btnClass}"${expertAttr} data-member-id="${friend.id}">${btnText}</button>
                     </div>
                     <div class="user-bio">${bio}</div>
                 </div>

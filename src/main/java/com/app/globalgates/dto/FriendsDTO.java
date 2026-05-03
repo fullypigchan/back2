@@ -16,4 +16,5 @@ public class FriendsDTO {
     private String memberProfileFileName;
     private String followerIntro;
     private Boolean isFollowing;
+    private String memberRole;
 }

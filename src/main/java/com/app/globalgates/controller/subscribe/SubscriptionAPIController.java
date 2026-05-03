@@ -35,17 +35,6 @@ public class SubscriptionAPIController implements SubscriptionAPIControllerDocs 
         return subscriptionService.findByMemberId(userDetails.getId()).orElse(null);
     }
 
-    //    플랜 변경 예약 (만료 후 새 플랜으로 전환)
-    @PostMapping("/change")
-    @LogStatus
-    public void changePlan(@RequestBody SubscriptionDTO subscriptionDTO,
-                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        subscriptionDTO.setMemberId(userDetails.getId());
-        log.info("플랜변경예약 요청 회원id={} nextTier={}", userDetails.getId(), subscriptionDTO.getNextTier());
-        subscriptionService.changePlan(subscriptionDTO.getId(), userDetails.getId(),
-                subscriptionDTO.getNextTier(), subscriptionDTO.getNextBillingCycle());
-    }
-
     //    월간 구독 해지
     @PostMapping("/cancel")
     @LogStatus
