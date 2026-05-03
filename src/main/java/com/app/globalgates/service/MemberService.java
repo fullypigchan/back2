@@ -238,6 +238,18 @@ public class MemberService {
         return memberDAO.findMemberByMemberHandle("@" + memberHandle).isEmpty();
     }
 
+    //  업체명(상호명) 중복 검사 (true : 사용가능)
+    @LogStatusWithReturn
+    public boolean checkCompanyName(String companyName){
+        return !businessMemberDAO.existsByCompanyName(companyName);
+    }
+
+    //  사업자 등록번호 중복 검사 (true : 사용가능)
+    @LogStatusWithReturn
+    public boolean checkBusinessNumber(String businessNumber){
+        return !businessMemberDAO.existsByBusinessNumber(businessNumber);
+    }
+
     @Transactional
     @CachePut(value="member", key="#loginId")
     @LogStatus

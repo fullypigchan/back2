@@ -441,7 +441,8 @@ CREATE TYPE public.notification_type AS ENUM (
 CREATE TYPE public.oauth_provider AS ENUM (
     'kakao',
     'facebook',
-    'naver'
+    'naver',
+    'google'
 );
 
 

@@ -83,11 +83,14 @@
 
         const logoutBtn = document.getElementById('accountLogoutButton');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                if (confirm('로그아웃 하시겠습니까?')) {
-                    alert('로그아웃되었습니다.');
-                    accountMenuPopup.classList.add('off');
-                }
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const res = await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+                    if (!res.ok) throw new Error('logout failed');
+                } catch (_) {}
+                accountMenuPopup.classList.add('off');
+                location.href = '/member/join';
             });
         }
 

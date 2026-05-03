@@ -9,8 +9,8 @@ function initReplyModule(memberId) {
     // HTML의 <div id="layers">. 공유/더보기 드롭다운을 여기 append 하고 닫을 때 remove 한다.
     const layersRoot = document.getElementById("layers");
 
-    // HTML에 미리 선언된 [data-reply-modal] 오버레이. open/close 시 hidden만 토글하며 재사용한다.
-    const replyModalOverlay = document.querySelector("[data-reply-modal]");
+    // HTML에 미리 선언된 [data-explore-reply-modal] 오버레이. open/close 시 hidden만 토글하며 재사용한다.
+    const replyModalOverlay = document.querySelector("[data-explore-reply-modal]");
     // 답글 모달 내부에서 단일 요소를 선택하는 헬퍼
     const q = (sel) => replyModalOverlay?.querySelector(sel);
     // 답글 모달 내부에서 복수 요소를 선택하는 헬퍼

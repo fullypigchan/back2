@@ -105,6 +105,18 @@ public class MemberAPIController implements MemberAPIControllerDocs {
         return memberService.checkHandle(memberHandle);
     }
 
+    @GetMapping("check-company-name")
+    @LogStatusWithReturn
+    public boolean checkCompanyName(@RequestParam String companyName){
+        return memberService.checkCompanyName(companyName);
+    }
+
+    @GetMapping("check-business-number")
+    @LogStatusWithReturn
+    public boolean checkBusinessNumber(@RequestParam String businessNumber){
+        return memberService.checkBusinessNumber(businessNumber);
+    }
+
     @PostMapping("login")
     @LogStatusWithReturn
     public ResponseEntity<?> login(@RequestBody MemberDTO memberDTO){

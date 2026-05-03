@@ -57,6 +57,20 @@ const joinService = (() => {
             return isAvailable;
         }
 
+        const checkCompanyName = async (companyName) => {
+            const response = await fetch(`/api/member/check-company-name?companyName=${encodeURIComponent(companyName)}`);
+            const text = await response.text();
+            if (!response.ok) throw new Error(text || "Fetch error");
+            return text === "true";
+        }
+
+        const checkBusinessNumber = async (businessNumber) => {
+            const response = await fetch(`/api/member/check-business-number?businessNumber=${encodeURIComponent(businessNumber)}`);
+            const text = await response.text();
+            if (!response.ok) throw new Error(text || "Fetch error");
+            return text === "true";
+        }
+
         const sendSms = async (phone) => {
             // 휴대폰 번호를 보내고, 서버가 생성한 인증번호 문자열을 그대로 받는다.
             const response = await fetch("/api/messages/send", {
@@ -115,6 +129,8 @@ const joinService = (() => {
             checkEmail : checkEmail,
             checkPhone : checkPhone,
             checkHandle : checkHandle,
+            checkCompanyName : checkCompanyName,
+            checkBusinessNumber : checkBusinessNumber,
             sendSms : sendSms,
             sendEmailCode : sendEmailCode,
             oauthMemberRegister : oauthMemberRegister

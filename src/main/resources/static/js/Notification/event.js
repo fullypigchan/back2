@@ -10,20 +10,20 @@ window.onload = function () {
     const layersRoot = document.getElementById("layers");
 
     // HTML에 미리 선언된 [data-reply-modal] 오버레이. open/close 시 hidden만 토글하며 재사용한다.
-    const replyModalOverlay = document.querySelector("[data-reply-modal]");
+    const replyModalOverlay = document.querySelector("[data-notification-reply-modal]");
     // 답글 모달 내부에서 단일 요소를 선택하는 헬퍼
     const q = (sel) => replyModalOverlay?.querySelector(sel);
     // 답글 모달 내부에서 복수 요소를 선택하는 헬퍼
     const qAll = (sel) => replyModalOverlay?.querySelectorAll(sel) ?? [];
 
     // 답글 모달 본체 컨테이너
-    const replyModal = q(".tweet-modal");
+    const replyModal = q(".notification-modal");
     // 답글 모달의 닫기 버튼
-    const replyCloseButton = q(".tweet-modal__close");
+    const replyCloseButton = q(".notification-modal__close");
     // 답글 텍스트 입력 에디터 (contenteditable)
-    const replyEditor = q(".tweet-modal__editor");
+    const replyEditor = q(".notification-modal__editor");
     // 답글 제출(게시) 버튼
-    const replySubmitButton = q(".tweet-modal__submit");
+    const replySubmitButton = q(".notification-modal__submit");
     // 답글 글자수 원형 게이지
     const replyGauge = q("#replyGauge");
     // 답글 글자수 남은 수 텍스트
@@ -41,29 +41,29 @@ window.onload = function () {
     // 판매글 빈 상태
     const productSelectEmpty = replyProductView?.querySelector("[data-product-empty]");
     // 답글 대상 게시물의 컨텍스트 버튼
-    const replyContextButton = q(".tweet-modal__context-button");
+    const replyContextButton = q(".notification-modal__context-button");
     // 답글 하단 메타 정보 영역 (위치 등)
-    const replyFooterMeta = q(".tweet-modal__footer-meta");
+    const replyFooterMeta = q(".notification-modal__footer-meta");
     // 원본 게시물 작성자의 아바타 이미지
-    const replySourceAvatar = q(".tweet-modal__source-avatar");
+    const replySourceAvatar = q(".notification-modal__source-avatar");
     // 원본 게시물 작성자의 표시 이름
-    const replySourceName = q(".tweet-modal__source-name");
+    const replySourceName = q(".notification-modal__source-name");
     // 원본 게시물 작성자의 핸들 (@아이디)
-    const replySourceHandle = q(".tweet-modal__source-handle");
+    const replySourceHandle = q(".notification-modal__source-handle");
     // 원본 게시물의 작성 시간
-    const replySourceTime = q(".tweet-modal__source-time");
+    const replySourceTime = q(".notification-modal__source-time");
     // 원본 게시물의 본문 텍스트
-    const replySourceText = q(".tweet-modal__source-text");
+    const replySourceText = q(".notification-modal__source-text");
     // 텍스트 서식 버튼 목록 (굵게/기울임)
     const replyFormatButtons = qAll("[data-format]");
     // 이모지 피커 열기 버튼
     const replyEmojiButton = q("[data-testid='emojiButton']");
     // 이모지 선택 피커 패널
-    const replyEmojiPicker = q(".tweet-modal__emoji-picker");
+    const replyEmojiPicker = q(".notification-modal__emoji-picker");
     // 이모지 검색 입력 필드
     const replyEmojiSearchInput = q("[data-testid='emojiSearchInput']");
     // 이모지 카테고리 탭 버튼 목록
-    const replyEmojiTabs = qAll(".tweet-modal__emoji-tab");
+    const replyEmojiTabs = qAll(".notification-modal__emoji-tab");
     // 이모지 피커의 콘텐츠 영역
     const replyEmojiContent = q("[data-testid='emojiPickerContent']");
     // 미디어 업로드 버튼
@@ -74,8 +74,8 @@ window.onload = function () {
     const replyAttachmentPreview = q("[data-attachment-preview]");
     // 첨부파일 미디어 렌더링 영역
     const replyAttachmentMedia = q("[data-attachment-media]");
-    // 답글 모달 기본 작성 화면 (.tweet-modal__compose-view)
-    const composeView = q(".tweet-modal__compose-view");
+    // 답글 모달 기본 작성 화면 (.notification-modal__compose-view)
+    const composeView = q(".notification-modal__compose-view");
     // 위치 태그 버튼
     const replyGeoButton = q("[data-testid='geoButton']");
     // 위치 버튼의 SVG path 요소
@@ -84,10 +84,10 @@ window.onload = function () {
     const replyLocationDisplayButton = q("[data-location-display]");
     // 선택된 위치 이름 텍스트
     const replyLocationName = q("[data-location-name]");
-    // 위치 선택 서브뷰 (.tweet-modal__location-view)
-    const replyLocationView = q(".tweet-modal__location-view");
+    // 위치 선택 서브뷰 (.notification-modal__location-view)
+    const replyLocationView = q(".notification-modal__location-view");
     // 위치 패널의 닫기 버튼
-    const replyLocationCloseButton = q(".tweet-modal__location-close");
+    const replyLocationCloseButton = q(".notification-modal__location-close");
     // 위치 삭제 버튼
     const replyLocationDeleteButton = q("[data-location-delete]");
     // 위치 선택 완료 버튼
@@ -100,8 +100,8 @@ window.onload = function () {
     const replyUserTagTrigger = q("[data-user-tag-trigger]");
     // 사용자 태그 라벨 텍스트
     const replyUserTagLabel = q("[data-user-tag-label]");
-    // 사용자 태그 서브뷰 (.tweet-modal__tag-view)
-    const replyTagView = q(".tweet-modal__tag-view");
+    // 사용자 태그 서브뷰 (.notification-modal__tag-view)
+    const replyTagView = q(".notification-modal__tag-view");
     // 태그 패널의 뒤로가기 버튼
     const replyTagCloseButton = q("[data-testid='tag-back']");
     // 태그 선택 완료 버튼
@@ -118,8 +118,8 @@ window.onload = function () {
     const replyMediaAltTrigger = q("[data-media-alt-trigger]");
     // 미디어 대체 텍스트 라벨
     const replyMediaAltLabel = q("[data-media-alt-label]");
-    // 미디어 ALT 편집 서브뷰 (.tweet-modal__media-view)
-    const replyMediaView = q(".tweet-modal__media-view");
+    // 미디어 ALT 편집 서브뷰 (.notification-modal__media-view)
+    const replyMediaView = q(".notification-modal__media-view");
     // 미디어 편집 패널의 뒤로가기 버튼
     const replyMediaBackButton = q("[data-testid='media-back']");
     // 이전 미디어로 이동 버튼
@@ -205,47 +205,47 @@ window.onload = function () {
         recent: {
             label: "최근",
             sectionTitle: "최근",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 1.75A10.25 10.25 0 112.75 12 10.26 10.26 0 0112 1.75zm0 1.5A8.75 8.75 0 1020.75 12 8.76 8.76 0 0012 3.25zm.75 3.5v5.19l3.03 1.75-.75 1.3-3.78-2.18V6.75h1.5z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M12 1.75A10.25 10.25 0 112.75 12 10.26 10.26 0 0112 1.75zm0 1.5A8.75 8.75 0 1020.75 12 8.76 8.76 0 0012 3.25zm.75 3.5v5.19l3.03 1.75-.75 1.3-3.78-2.18V6.75h1.5z"></path></g></svg>',
         },
         smileys: {
             label: "스마일리 및 사람",
             sectionTitle: "스마일리 및 사람",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25S8.31 9.25 9 9.25s1.25.56 1.25 1.25S9.69 11.75 9 11.75zm6 0c-.69 0-1.25-.56-1.25-1.25S14.31 9.25 15 9.25s1.25.56 1.25 1.25S15.69 11.75 15 11.75zm-8.071 3.971c.307-.298.771-.397 1.188-.253.953.386 2.403.982 3.883.982s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M12 22.75C6.072 22.75 1.25 17.928 1.25 12S6.072 1.25 12 1.25 22.75 6.072 22.75 12 17.928 22.75 12 22.75zm0-20c-5.109 0-9.25 4.141-9.25 9.25s4.141 9.25 9.25 9.25 9.25-4.141 9.25-9.25S17.109 2.75 12 2.75zM9 11.75c-.69 0-1.25-.56-1.25-1.25S8.31 9.25 9 9.25s1.25.56 1.25 1.25S9.69 11.75 9 11.75zm6 0c-.69 0-1.25-.56-1.25-1.25S14.31 9.25 15 9.25s1.25.56 1.25 1.25S15.69 11.75 15 11.75zm-8.071 3.971c.307-.298.771-.397 1.188-.253.953.386 2.403.982 3.883.982s2.93-.596 3.883-.982c.417-.144.88-.044 1.188.253a.846.846 0 01-.149 1.34c-1.254.715-3.059 1.139-4.922 1.139s-3.668-.424-4.922-1.139a.847.847 0 01-.149-1.39z"></path></g></svg>',
         },
         animals: {
             label: "동물 및 자연",
             sectionTitle: "동물 및 자연",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 3.5c3.77 0 6.75 2.86 6.75 6.41 0 3.17-1.88 4.94-4.15 6.28-.74.44-1.54.9-1.6 1.86-.02.38-.33.68-.71.68h-.6a.71.71 0 01-.71-.67c-.07-.95-.86-1.42-1.6-1.85C7.13 14.85 5.25 13.08 5.25 9.91 5.25 6.36 8.23 3.5 12 3.5zm-4.79-.97c.61 0 1.1.49 1.1 1.1 0 .32-.14.63-.39.84-.4.34-.78.78-1.08 1.3-.18.3-.49.48-.84.48-.61 0-1.1-.49-1.1-1.1 0-.14.03-.29.09-.42.47-1.04 1.17-1.93 2.02-2.63.19-.15.43-.24.7-.24zm9.58 0c.27 0 .51.09.7.24.85.7 1.55 1.6 2.02 2.63.06.13.09.28.09.42 0 .61-.49 1.1-1.1 1.1-.35 0-.66-.18-.84-.48-.3-.52-.68-.96-1.08-1.3a1.1 1.1 0 01-.39-.84c0-.61.49-1.1 1.1-1.1z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M12 3.5c3.77 0 6.75 2.86 6.75 6.41 0 3.17-1.88 4.94-4.15 6.28-.74.44-1.54.9-1.6 1.86-.02.38-.33.68-.71.68h-.6a.71.71 0 01-.71-.67c-.07-.95-.86-1.42-1.6-1.85C7.13 14.85 5.25 13.08 5.25 9.91 5.25 6.36 8.23 3.5 12 3.5zm-4.79-.97c.61 0 1.1.49 1.1 1.1 0 .32-.14.63-.39.84-.4.34-.78.78-1.08 1.3-.18.3-.49.48-.84.48-.61 0-1.1-.49-1.1-1.1 0-.14.03-.29.09-.42.47-1.04 1.17-1.93 2.02-2.63.19-.15.43-.24.7-.24zm9.58 0c.27 0 .51.09.7.24.85.7 1.55 1.6 2.02 2.63.06.13.09.28.09.42 0 .61-.49 1.1-1.1 1.1-.35 0-.66-.18-.84-.48-.3-.52-.68-.96-1.08-1.3a1.1 1.1 0 01-.39-.84c0-.61.49-1.1 1.1-1.1z"></path></g></svg>',
         },
         food: {
             label: "음식 및 음료",
             sectionTitle: "음식 및 음료",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M5 10.5c0-3.59 3.36-6.5 7.5-6.5s7.5 2.91 7.5 6.5v.58a5.42 5.42 0 01-2.08 4.26L16.5 21H8.5l-1.42-5.66A5.42 5.42 0 015 11.08v-.58zm2 0v.58c0 1.08.5 2.08 1.36 2.76l.3.24.95 3.92h5.78l.95-3.92.3-.24a3.42 3.42 0 001.36-2.76v-.58c0-2.48-2.47-4.5-5.5-4.5S7 8.02 7 10.5z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M5 10.5c0-3.59 3.36-6.5 7.5-6.5s7.5 2.91 7.5 6.5v.58a5.42 5.42 0 01-2.08 4.26L16.5 21H8.5l-1.42-5.66A5.42 5.42 0 015 11.08v-.58zm2 0v.58c0 1.08.5 2.08 1.36 2.76l.3.24.95 3.92h5.78l.95-3.92.3-.24a3.42 3.42 0 001.36-2.76v-.58c0-2.48-2.47-4.5-5.5-4.5S7 8.02 7 10.5z"></path></g></svg>',
         },
         activities: {
             label: "활동",
             sectionTitle: "활동",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 2.25c5.385 0 9.75 4.365 9.75 9.75S17.385 21.75 12 21.75 2.25 17.385 2.25 12 6.615 2.25 12 2.25zm0 1.5A8.25 8.25 0 103.75 12 8.26 8.26 0 0012 3.75zm-4.1 4.5c.27 0 .53.12.71.33l1.94 2.55 3.12-2.29c.36-.27.87-.22 1.18.12l2.83 3.12a.88.88 0 01-.07 1.24.88.88 0 01-1.24-.07l-2.3-2.54-3.16 2.33a.88.88 0 01-1.23-.16L7.2 9.64a.88.88 0 01.7-1.39z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M12 2.25c5.385 0 9.75 4.365 9.75 9.75S17.385 21.75 12 21.75 2.25 17.385 2.25 12 6.615 2.25 12 2.25zm0 1.5A8.25 8.25 0 103.75 12 8.26 8.26 0 0012 3.75zm-4.1 4.5c.27 0 .53.12.71.33l1.94 2.55 3.12-2.29c.36-.27.87-.22 1.18.12l2.83 3.12a.88.88 0 01-.07 1.24.88.88 0 01-1.24-.07l-2.3-2.54-3.16 2.33a.88.88 0 01-1.23-.16L7.2 9.64a.88.88 0 01.7-1.39z"></path></g></svg>',
         },
         travel: {
             label: "여행 및 장소",
             sectionTitle: "여행 및 장소",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 2.25c-4.142 0-7.5 3.245-7.5 7.248 0 5.207 6.46 11.611 6.735 11.881a1.08 1.08 0 001.53 0c.275-.27 6.735-6.674 6.735-11.881 0-4.003-3.358-7.248-7.5-7.248zm0 17.493c-1.758-1.878-6-6.838-6-10.245 0-3.172 2.686-5.748 6-5.748s6 2.576 6 5.748c0 3.407-4.242 8.367-6 10.245zm0-13.243a3 3 0 100 6 3 3 0 000-6z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M12 2.25c-4.142 0-7.5 3.245-7.5 7.248 0 5.207 6.46 11.611 6.735 11.881a1.08 1.08 0 001.53 0c.275-.27 6.735-6.674 6.735-11.881 0-4.003-3.358-7.248-7.5-7.248zm0 17.493c-1.758-1.878-6-6.838-6-10.245 0-3.172 2.686-5.748 6-5.748s6 2.576 6 5.748c0 3.407-4.242 8.367-6 10.245zm0-13.243a3 3 0 100 6 3 3 0 000-6z"></path></g></svg>',
         },
         objects: {
             label: "사물",
             sectionTitle: "사물",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M12 2.5c2.07 0 3.75 1.68 3.75 3.75 0 1.45-.83 2.71-2.04 3.33l-.21.11V11h.5A2.5 2.5 0 0116.5 13.5v1.38c0 1.27-.7 2.43-1.82 3.03l-.93.5V21.5h-3.5v-3.09l-.93-.5A3.44 3.44 0 017.5 14.88V13.5A2.5 2.5 0 0110 11h.5V9.69l-.21-.11A3.75 3.75 0 018.25 6.25 3.75 3.75 0 0112 2.5zm0 1.5a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zm-2 8.5a1 1 0 00-1 1v1.38c0 .72.4 1.39 1.04 1.73l1.71.92v1.47h.5v-1.47l1.71-.92A1.97 1.97 0 0015 14.88V13.5a1 1 0 00-1-1h-4z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M12 2.5c2.07 0 3.75 1.68 3.75 3.75 0 1.45-.83 2.71-2.04 3.33l-.21.11V11h.5A2.5 2.5 0 0116.5 13.5v1.38c0 1.27-.7 2.43-1.82 3.03l-.93.5V21.5h-3.5v-3.09l-.93-.5A3.44 3.44 0 017.5 14.88V13.5A2.5 2.5 0 0110 11h.5V9.69l-.21-.11A3.75 3.75 0 018.25 6.25 3.75 3.75 0 0112 2.5zm0 1.5a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zm-2 8.5a1 1 0 00-1 1v1.38c0 .72.4 1.39 1.04 1.73l1.71.92v1.47h.5v-1.47l1.71-.92A1.97 1.97 0 0015 14.88V13.5a1 1 0 00-1-1h-4z"></path></g></svg>',
         },
         symbols: {
             label: "기호",
             sectionTitle: "기호",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M5 4h14v4.5h-2V6H7v2.5H5V4zm2 6h4v4H7v-4zm6 0h4v4h-4v-4zM5 16h6v4H5v-4zm8 0h6v4h-6v-4z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M5 4h14v4.5h-2V6H7v2.5H5V4zm2 6h4v4H7v-4zm6 0h4v4h-4v-4zM5 16h6v4H5v-4zm8 0h6v4h-6v-4z"></path></g></svg>',
         },
         flags: {
             label: "깃발",
             sectionTitle: "깃발",
-            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__emoji-tab-icon"><g><path d="M6 2.75A.75.75 0 016.75 2h.5a.75.75 0 01.75.75V3h9.38c.97 0 1.45 1.17.76 1.85L16.1 6.9l2.05 2.05c.69.68.21 1.85-.76 1.85H8v10.45a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75V2.75z"></path></g></svg>',
+            icon: '<svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__emoji-tab-icon"><g><path d="M6 2.75A.75.75 0 016.75 2h.5a.75.75 0 01.75.75V3h9.38c.97 0 1.45 1.17.76 1.85L16.1 6.9l2.05 2.05c.69.68.21 1.85-.76 1.85H8v10.45a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75V2.75z"></path></g></svg>',
         },
     };
 
@@ -545,12 +545,12 @@ window.onload = function () {
         { clearable = false, emptyText = "" } = {},
     ) {
         const headerAction = clearable
-            ? '<button type="button" class="tweet-modal__emoji-clear" data-action="clear-recent">모두 지우기</button>'
+            ? '<button type="button" class="notification-modal__emoji-clear" data-action="clear-recent">모두 지우기</button>'
             : "";
         const body = emojis.length
-            ? `<div class="tweet-modal__emoji-grid">${emojis.map((e) => `<button type="button" class="tweet-modal__emoji-option" data-emoji="${e}" role="menuitem">${e}</button>`).join("")}</div>`
-            : `<p class="tweet-modal__emoji-empty">${emptyText}</p>`;
-        return `<section class="tweet-modal__emoji-section"><div class="tweet-modal__emoji-section-header"><h3 class="tweet-modal__emoji-section-title">${title}</h3>${headerAction}</div>${body}</section>`;
+            ? `<div class="notification-modal__emoji-grid">${emojis.map((e) => `<button type="button" class="notification-modal__emoji-option" data-emoji="${e}" role="menuitem">${e}</button>`).join("")}</div>`
+            : `<p class="notification-modal__emoji-empty">${emptyText}</p>`;
+        return `<section class="notification-modal__emoji-section"><div class="notification-modal__emoji-section-header"><h3 class="notification-modal__emoji-section-title">${title}</h3>${headerAction}</div>${body}</section>`;
     }
 
     // 이모지 카테고리 탭의 활성 상태를 렌더링한다
@@ -559,7 +559,7 @@ window.onload = function () {
             const cat = tab.getAttribute("data-emoji-category");
             const meta = cat ? emojiCategoryMeta[cat] : null;
             const active = cat === activeEmojiCategory;
-            tab.classList.toggle("tweet-modal__emoji-tab--active", active);
+            tab.classList.toggle("notification-modal__emoji-tab--active", active);
             tab.setAttribute("aria-selected", String(active));
             if (meta) tab.innerHTML = meta.icon;
         });
@@ -666,9 +666,9 @@ window.onload = function () {
         replyTagChipList.innerHTML = pendingTaggedUsers
             .map((u) => {
                 const av = u.avatar
-                    ? `<span class="tweet-modal__tag-chip-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
-                    : '<span class="tweet-modal__tag-chip-avatar"></span>';
-                return `<button type="button" class="tweet-modal__tag-chip" data-tag-remove-id="${escapeHtml(u.id)}">${av}<span class="tweet-modal__tag-chip-name">${escapeHtml(u.name)}</span><svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-modal__tag-chip-icon"><g><path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button>`;
+                    ? `<span class="notification-modal__tag-chip-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
+                    : '<span class="notification-modal__tag-chip-avatar"></span>';
+                return `<button type="button" class="notification-modal__tag-chip" data-tag-remove-id="${escapeHtml(u.id)}">${av}<span class="notification-modal__tag-chip-name">${escapeHtml(u.name)}</span><svg viewBox="0 0 24 24" aria-hidden="true" class="notification-modal__tag-chip-icon"><g><path d="M10.59 12 4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button>`;
             })
             .join("");
     }
@@ -704,7 +704,7 @@ window.onload = function () {
         replyTagResults.id = "notification-tag-results";
         if (users.length === 0) {
             replyTagResults.innerHTML =
-                '<p class="tweet-modal__tag-empty">일치하는 사용자를 찾지 못했습니다.</p>';
+                '<p class="notification-modal__tag-empty">일치하는 사용자를 찾지 못했습니다.</p>';
             return;
         }
         replyTagResults.innerHTML = users
@@ -712,9 +712,9 @@ window.onload = function () {
                 const sel = pendingTaggedUsers.some((t) => t.id === u.id);
                 const sub = sel ? `${u.handle} 이미 태그됨` : u.handle;
                 const av = u.avatar
-                    ? `<span class="tweet-modal__tag-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
-                    : '<span class="tweet-modal__tag-avatar"></span>';
-                return `<div role="option" class="tweet-modal__tag-option" data-testid="typeaheadResult"><div role="checkbox" aria-checked="${sel}" aria-disabled="${sel}" class="tweet-modal__tag-checkbox"><button type="button" class="tweet-modal__tag-user" data-tag-user-id="${escapeHtml(u.id)}" ${sel ? "disabled" : ""}>${av}<span class="tweet-modal__tag-user-body"><span class="tweet-modal__tag-user-name">${escapeHtml(u.name)}</span><span class="tweet-modal__tag-user-handle">${escapeHtml(sub)}</span></span></button></div></div>`;
+                    ? `<span class="notification-modal__tag-avatar"><img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" /></span>`
+                    : '<span class="notification-modal__tag-avatar"></span>';
+                return `<div role="option" class="notification-modal__tag-option" data-testid="typeaheadResult"><div role="checkbox" aria-checked="${sel}" aria-disabled="${sel}" class="notification-modal__tag-checkbox"><button type="button" class="notification-modal__tag-user" data-tag-user-id="${escapeHtml(u.id)}" ${sel ? "disabled" : ""}>${av}<span class="notification-modal__tag-user-body"><span class="notification-modal__tag-user-name">${escapeHtml(u.name)}</span><span class="notification-modal__tag-user-handle">${escapeHtml(sub)}</span></span></button></div></div>`;
             })
             .join("");
     }
@@ -927,7 +927,7 @@ window.onload = function () {
         if (cachedLocationNames.length === 0 && replyLocationList) {
             cachedLocationNames = Array.from(
                 replyLocationList.querySelectorAll(
-                    ".tweet-modal__location-item-label",
+                    ".notification-modal__location-item-label",
                 ),
             )
                 .map((i) => getTextContent(i))
@@ -975,18 +975,18 @@ window.onload = function () {
         const locs = getFilteredLocations();
         if (locs.length === 0) {
             replyLocationList.innerHTML =
-                '<p class="tweet-modal__location-empty">일치하는 위치를 찾지 못했습니다.</p>';
+                '<p class="notification-modal__location-empty">일치하는 위치를 찾지 못했습니다.</p>';
             return;
         }
         replyLocationList.innerHTML = locs
             .map((loc) => {
                 const sel = pendingLocation === loc;
-                return `<button type="button" class="tweet-modal__location-item" role="menuitem"><span class="tweet-modal__location-item-label">${loc}</span><span class="tweet-modal__location-item-check">${sel ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg>' : ""}</span></button>`;
+                return `<button type="button" class="notification-modal__location-item" role="menuitem"><span class="notification-modal__location-item-label">${loc}</span><span class="notification-modal__location-item-check">${sel ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg>' : ""}</span></button>`;
             })
             .join("");
     }
 
-    // 기존 HTML 서브뷰 전환: .tweet-modal__compose-view 를 숨기고 .tweet-modal__location-view 를 보여준다.
+    // 기존 HTML 서브뷰 전환: .notification-modal__compose-view 를 숨기고 .notification-modal__location-view 를 보여준다.
     function openLocationPanel() {
         if (!composeView || !replyLocationView) return;
         closeEmojiPicker();
@@ -1111,7 +1111,7 @@ window.onload = function () {
         if (!replyAttachmentMedia || attachedReplyFiles.length === 0) return;
         const [file] = attachedReplyFiles,
             [fileUrl] = attachedReplyFileUrls;
-        replyAttachmentMedia.innerHTML = `<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container" aria-label="미디어" role="group"><video class="tweet-modal__attachment-video" controls preload="metadata"><source src="${fileUrl}" type="${file.type}"></video></div><div class="media-btn-row"><button type="button" class="media-btn" data-attachment-edit-index="0"><span>수정</span></button></div><button type="button" class="media-btn-delete" aria-label="미디어 삭제하기" data-attachment-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>`;
+        replyAttachmentMedia.innerHTML = `<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container" aria-label="미디어" role="group"><video class="notification-modal__attachment-video" controls preload="metadata"><source src="${fileUrl}" type="${file.type}"></video></div><div class="media-btn-row"><button type="button" class="media-btn" data-attachment-edit-index="0"><span>수정</span></button></div><button type="button" class="media-btn-delete" aria-label="미디어 삭제하기" data-attachment-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>`;
     }
 
     // HTML의 [data-attachment-preview] / [data-attachment-media] 내부를 갱신한다. 별도 모달을 추가하지 않는다.
@@ -1152,7 +1152,7 @@ window.onload = function () {
             "path",
         );
         const fn = document.createElement("span");
-        fp.className = "tweet-modal__attachment-file";
+        fp.className = "notification-modal__attachment-file";
         fi.setAttribute("viewBox", "0 0 24 24");
         fi.setAttribute("width", "22");
         fi.setAttribute("height", "22");
@@ -1161,7 +1161,7 @@ window.onload = function () {
             "d",
             "M14 2H7.75C5.68 2 4 3.68 4 5.75v12.5C4 20.32 5.68 22 7.75 22h8.5C18.32 22 20 20.32 20 18.25V8l-6-6zm0 2.12L17.88 8H14V4.12zm2.25 15.88h-8.5c-.97 0-1.75-.78-1.75-1.75V5.75C6 4.78 6.78 4 7.75 4H12v5.25c0 .41.34.75.75.75H18v8.25c0 .97-.78 1.75-1.75 1.75z",
         );
-        fn.className = "tweet-modal__attachment-file-name";
+        fn.className = "notification-modal__attachment-file-name";
         fn.textContent = attachedReplyFiles[0]?.name ?? "";
 
         fg.appendChild(fpath); fi.appendChild(fg); fp.appendChild(fi); fp.appendChild(fn);
@@ -1370,7 +1370,7 @@ window.onload = function () {
     }
 
     // HTML의 기존 data-testid="emojiButton" 에 외부 EmojiButton 라이브러리를 연결한다.
-    // 라이브러리를 쓰지 못하면 HTML에 남겨둔 .tweet-modal__emoji-picker fallback 마크업을 그대로 사용한다.
+    // 라이브러리를 쓰지 못하면 HTML에 남겨둔 .notification-modal__emoji-picker fallback 마크업을 그대로 사용한다.
     function ensureReplyEmojiLibraryPicker() {
         if (!replyEmojiButton || !replyEditor || !hasEmojiButtonLibrary()) return null;
         if (replyEmojiLibraryPicker) return replyEmojiLibraryPicker;
@@ -1441,7 +1441,7 @@ window.onload = function () {
                 ? document.queryCommandState(fmt)
                 : pendingReplyFormats.has(fmt);
             const labels = formatButtonLabels[fmt];
-            btn.classList.toggle("tweet-modal__tool-btn--active", active);
+            btn.classList.toggle("notification-modal__tool-btn--active", active);
             if (labels)
                 btn.setAttribute(
                     "aria-label",
@@ -2175,10 +2175,10 @@ window.onload = function () {
     }
 
     // ===== 7. Draft Panel =====
-    // 답글 모달 내부 초안 서브뷰 (.tweet-modal__draft-view)
-    const draftView = q(".tweet-modal__draft-view");
+    // 답글 모달 내부 초안 서브뷰 (.notification-modal__draft-view)
+    const draftView = q(".notification-modal__draft-view");
     // 임시저장 패널 열기 버튼
-    const draftButton = q(".tweet-modal__draft");
+    const draftButton = q(".notification-modal__draft");
     // 임시저장 패널 뒤로가기 버튼
     const draftBackButton = draftView?.querySelector(".draft-panel__back");
     // 임시저장 패널 수정/완료 토글 버튼
@@ -2410,7 +2410,7 @@ window.onload = function () {
         if (draftConfirmDesc) draftConfirmDesc.textContent = cc.body;
     }
 
-    // 기존 HTML 서브뷰 전환: .tweet-modal__compose-view 를 숨기고 .tweet-modal__draft-view 를 보여준다.
+    // 기존 HTML 서브뷰 전환: .notification-modal__compose-view 를 숨기고 .notification-modal__draft-view 를 보여준다.
     function openDraftPanel() {
         if (!composeView || !draftView) return;
         renderDraftPanel();
@@ -2781,7 +2781,7 @@ window.onload = function () {
     replyEmojiContent?.addEventListener("mousedown", (e) => {
         if (
             e.target.closest(
-                ".tweet-modal__emoji-option, .tweet-modal__emoji-clear",
+                ".notification-modal__emoji-option, .notification-modal__emoji-clear",
             )
         )
             e.preventDefault();
@@ -2795,7 +2795,7 @@ window.onload = function () {
             renderEmojiPicker();
             return;
         }
-        const eb = e.target.closest(".tweet-modal__emoji-option");
+        const eb = e.target.closest(".notification-modal__emoji-option");
         if (!eb) return;
         const emoji = eb.getAttribute("data-emoji");
         if (emoji) {
@@ -2831,10 +2831,10 @@ window.onload = function () {
 
     // 위치 목록에서 항목 클릭 시 해당 위치를 선택한다
     replyLocationList?.addEventListener("click", (e) => {
-        const lb = e.target.closest(".tweet-modal__location-item");
+        const lb = e.target.closest(".notification-modal__location-item");
         if (!lb) return;
         const loc = getTextContent(
-            lb.querySelector(".tweet-modal__location-item-label"),
+            lb.querySelector(".notification-modal__location-item-label"),
         );
         if (loc) {
             applyLocation(loc);
@@ -3088,7 +3088,7 @@ window.onload = function () {
 
         const card = document.createElement("div");
         card.setAttribute("data-selected-product", "");
-        card.className = "tweet-modal__selected-product";
+        card.className = "notification-modal__selected-product";
         card.innerHTML = `
             <div class="selected-product__card">
                 <img class="selected-product__image" src="${selectedProduct.image}" alt="${selectedProduct.name}">
