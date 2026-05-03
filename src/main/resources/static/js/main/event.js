@@ -965,11 +965,7 @@ window.onload = () => {
                 });
             });
         }
-        document.getElementById("accountLogoutButton").addEventListener("click", async (e) => {
-            e.preventDefault();
-            await service.logout();
-            location.href = "/member/join"
-        })
+        // 로그아웃 핸들러는 공통 header.js 에서 바인딩한다 (모든 탭에서 동일 동작).
     }
 
     load();
