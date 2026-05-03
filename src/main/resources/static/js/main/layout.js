@@ -121,14 +121,24 @@ const layout = (() => {
                     `;
         }
 
+        // 커뮤니티 게시글이면 커뮤니티 페이지와 동일하게 (커뮤니티명 → @handle → 닉네임·시간) 레이아웃을 사용한다.
+        const isCommunityPost = !!post.communityId;
+        const communityMetaHtml = isCommunityPost ? `
+                    <div class="communityPostMeta">
+                        <a class="communityPostMeta__text" href="/community/${post.communityId}">${post.communityName || ""}</a>
+                        ${post.categoryName ? `<span class="communityPostMeta__category">${post.categoryName}</span>` : ""}
+                    </div>
+                    <span class="communityPostHandle">${handle}</span>` : "";
+
         return `
-            <div class="postCard" data-post-id="${post.id}" data-member-id="${post.memberId}">
+            <div class="postCard${isCommunityPost ? ' communityPostCard' : ''}" data-post-id="${post.id}" data-member-id="${post.memberId}"${isCommunityPost ? ` data-community-id="${post.communityId}"` : ''}>
                 ${avatarHtml}
                 <div class="postBody">
+                    ${communityMetaHtml}
                     <header class="postHeader">
                         <div class="postIdentity">
                             <strong class="postName">${nickname}</strong>${badgeHtml}
-                            <span class="postHandle">${handle}</span>
+                            ${isCommunityPost ? "" : `<span class="postHandle">${handle}</span>`}
                             <span class="postTime">${post.createdDatetime || ""}</span>
                         </div>
                         <button class="postMoreButton">

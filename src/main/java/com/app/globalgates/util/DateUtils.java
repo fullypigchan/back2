@@ -49,4 +49,24 @@ public class DateUtils {
         long years = months / 12;
         return years + "년 전";
     }
+
+    /**
+     * 1일 이내는 toRelativeTime, 그 이후는 yyyy.MM.dd 로 표기.
+     * 댓글/뉴스 카드 등 가까운 과거의 자연스러운 시간 표기에 사용한다.
+     */
+    public static String toRelativeOrDate(String date) {
+        if (date == null || date.isEmpty()) return "";
+
+        DateTimeFormatter parser = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd HH:mm:ss")
+                .optionalStart()
+                .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
+                .optionalEnd()
+                .toFormatter();
+        LocalDateTime dt = LocalDateTime.parse(date, parser);
+        Duration diff = Duration.between(dt, LocalDateTime.now());
+        if (diff.toHours() < 24) return toRelativeTime(date);
+
+        return dt.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    }
 }

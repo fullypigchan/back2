@@ -72,10 +72,10 @@ const CommunityLayout = {
                     <a class="communityPostMeta__text" href="/community/${post.communityId}">${communityName}</a>
                     ${post.categoryName ? `<span class="communityPostMeta__category">${this.escapeHtml(post.categoryName)}</span>` : ''}
                 </div>
+                <span class="communityPostHandle">${handle}</span>
                 <header class="postHeader">
                     <div class="postIdentity">
                         <strong class="postName">${nickname}</strong>
-                        <span class="postHandle">${handle}</span>
                         <span class="postTime">${post.createdDatetime}</span>
                     </div>
                     <button class="postMoreButton" type="button" aria-label="게시물 더 보기">

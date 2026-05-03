@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -118,6 +119,23 @@ public class NewsAPIController {
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         newsReplyService.deleteReply(replyId, userDetails.getId());
         return ResponseEntity.ok().build();
+    }
+
+    //    댓글 수정 (작성자만)
+    @LogStatus
+    @PutMapping("/replies/{replyId}")
+    public ResponseEntity<?> updateReply(@PathVariable Long replyId,
+                                         @RequestBody NewsReplyDTO newsReplyDTO,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String content = newsReplyDTO.getContent();
+        if (content == null || content.codePoints().allMatch(c -> Character.isWhitespace(c) || Character.isSpaceChar(c))) {
+            return ResponseEntity.badRequest().body(Map.of("message", "내용을 입력해주세요."));
+        }
+        boolean updated = newsReplyService.updateReply(replyId, userDetails.getId(), content);
+        if (!updated) {
+            return ResponseEntity.status(403).body(Map.of("message", "수정 권한이 없거나 댓글을 찾을 수 없습니다."));
+        }
+        return ResponseEntity.ok(Map.of("id", replyId, "content", content));
     }
 
     //    댓글 좋아요 토글

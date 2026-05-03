@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}">
-    <link rel="stylesheet" href="/css/news/news.css">
+    <link rel="stylesheet" th:href="@{/css/news/news.css(v=20260503b)}" href="/css/news/news.css?v=20260503b">
     <link rel="stylesheet" href="/css/post-detailed/post-detailed.css">
     <title>news-detail</title>
     <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
@@ -144,7 +144,7 @@
     <div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
     <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </div>
-<script src="/js/news/news-detail.js"></script>
+<script th:src="@{/js/news/news-detail.js(v=20260503b)}" src="/js/news/news-detail.js?v=20260503b"></script>
 </th:block>
 </body>
 </html>
