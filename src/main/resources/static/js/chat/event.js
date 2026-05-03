@@ -925,7 +925,7 @@ window.onload = () => {
         if (btn?.classList.contains("Alias")) return openModal(changeAliasModal);
 
         if (upperBtn) {
-            if (upperBtn.classList.contains("Call")) return alert("추후 업데이트 예정입니다.");
+            if (upperBtn.classList.contains("Call")) startVideoCall();
             if (upperBtn.classList.contains("Profile")) {
                 if (currentPartnerId) window.location.href = `/mypage?memberId=${currentPartnerId}`;
                 return;
