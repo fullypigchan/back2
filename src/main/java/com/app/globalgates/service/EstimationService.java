@@ -2,11 +2,13 @@ package com.app.globalgates.service;
 
 import com.app.globalgates.aop.annotation.LogStatus;
 import com.app.globalgates.aop.annotation.LogStatusWithReturn;
+import com.app.globalgates.common.enumeration.NotificationType;
 import com.app.globalgates.common.pagination.Criteria;
 import com.app.globalgates.dto.EstimationDTO;
 import com.app.globalgates.dto.EstimationExpertDTO;
 import com.app.globalgates.dto.EstimationTagDTO;
 import com.app.globalgates.dto.EstimationWithPagingDTO;
+import com.app.globalgates.dto.NotificationDTO;
 import com.app.globalgates.dto.PostProductDTO;
 import com.app.globalgates.repository.EstimationDAO;
 import com.app.globalgates.repository.EstimationTagDAO;
@@ -29,6 +31,7 @@ public class EstimationService {
     private final EstimationTagDAO estimationTagDAO;
     private final MemberDAO memberDAO;
     private final PostProductService postProductService;
+    private final NotificationService notificationService;
 
     @LogStatus
     public void write(EstimationDTO estimationDTO) {
@@ -61,6 +64,20 @@ public class EstimationService {
 
             estimationTagDAO.saveRel(estimationDTO.getId(), tagDTO.getId());
         });
+
+        // 견적 요청 알림
+        if (estimationDTO.getReceiverId() != null
+                && !estimationDTO.getReceiverId().equals(estimationDTO.getRequesterId())) {
+            NotificationDTO noti = new NotificationDTO();
+            noti.setRecipientId(estimationDTO.getReceiverId());
+            noti.setSenderId(estimationDTO.getRequesterId());
+            noti.setNotificationType(NotificationType.ESTIMATION);
+            noti.setTitle("견적 요청");
+            noti.setContent("새 견적 요청이 도착했습니다.");
+            noti.setTargetId(estimationDTO.getId());
+            noti.setTargetType("estimation");
+            notificationService.createNotification(noti);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -127,7 +144,26 @@ public class EstimationService {
             return false;
         }
 
-        return estimationDAO.updateStatus(id, receiverId, status);
+        boolean updated = estimationDAO.updateStatus(id, receiverId, status);
+
+        if (updated && "approve".equals(status)) {
+            estimationDAO.findById(id).ifPresent(estimationDTO -> {
+                Long requesterId = estimationDTO.getRequesterId();
+                if (requesterId != null && !requesterId.equals(receiverId)) {
+                    NotificationDTO noti = new NotificationDTO();
+                    noti.setRecipientId(requesterId);
+                    noti.setSenderId(receiverId);
+                    noti.setNotificationType(NotificationType.APPROVE);
+                    noti.setTitle("견적 승인");
+                    noti.setContent("견적 요청이 승인되었습니다.");
+                    noti.setTargetId(id);
+                    noti.setTargetType("estimation");
+                    notificationService.createNotification(noti);
+                }
+            });
+        }
+
+        return updated;
     }
 
     @Transactional(readOnly = true)

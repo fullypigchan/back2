@@ -101,6 +101,17 @@
         });
     }
 
+    function applyBadgeCount(badges, count) {
+        badges.forEach(b => {
+            if (count > 0) {
+                b.textContent = count > 99 ? '99+' : String(count);
+                b.style.display = '';
+            } else {
+                b.style.display = 'none';
+            }
+        });
+    }
+
     function loadNotificationBadge() {
         const badges = document.querySelectorAll('.nav-badge--noti');
         if (!badges.length) return;
@@ -111,15 +122,21 @@
             .then(res => res.ok ? res.json() : null)
             .then(data => {
                 if (!data) return;
-                const count = Number(data.count) || 0;
-                badges.forEach(b => {
-                    if (count > 0) {
-                        b.textContent = count > 99 ? '99+' : String(count);
-                        b.style.display = '';
-                    } else {
-                        b.style.display = 'none';
-                    }
-                });
+                applyBadgeCount(badges, Number(data.count) || 0);
+            })
+            .catch(() => {});
+    }
+
+    function loadChatBadge() {
+        const badges = document.querySelectorAll('.nav-badge--chat');
+        if (!badges.length) return;
+
+        fetch('/api/v1/chat/rooms', { credentials: 'same-origin' })
+            .then(res => res.ok ? res.json() : null)
+            .then(rooms => {
+                if (!Array.isArray(rooms)) return;
+                const total = rooms.reduce((sum, r) => sum + (Number(r.unreadCount) || 0), 0);
+                applyBadgeCount(badges, total);
             })
             .catch(() => {});
     }
@@ -129,6 +146,7 @@
         bindNavMore();
         bindAccountMenu();
         loadNotificationBadge();
+        loadChatBadge();
     }
 
     if (document.readyState === 'loading') {

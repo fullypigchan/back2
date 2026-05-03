@@ -14,7 +14,7 @@ import java.util.Random;
 public class SmsService {
 
     // SolAPI에 등록된 발신번호를 사용해야 실제 발송이 된다.
-    private static final String SENDER = "01099139076";
+    private static final String SENDER = "01093973256";
 
     @Value("${message.api-key}")
     private String apiKey;
