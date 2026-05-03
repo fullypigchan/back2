@@ -77,7 +77,7 @@ public class AdvertisementService {
         Criteria criteria = new Criteria(page, advertisementDAO.getTotal(search, memberId));
 
         // 이미지 등록
-        List<AdvertisementDTO> ads = advertisementDAO.findBySearch(criteria, null, memberId).stream()
+        List<AdvertisementDTO> ads = advertisementDAO.findBySearch(criteria, search, memberId).stream()
                 .map(adDTO -> {
                     List<FileAdvertisementDTO> images = new ArrayList<>(fileAdvertisementDAO.findByAdId(adDTO.getId()));
                     if(!images.isEmpty()) {

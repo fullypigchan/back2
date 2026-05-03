@@ -128,6 +128,7 @@ window.onload = () => {
         try {
             if (tab === "popular") {
                 console.log('인기순');
+
                 const criteria = await exploreService.searchPosts(
                     state.page,
                     { keyword: currentKeyword, type: "popular" },
@@ -141,6 +142,7 @@ window.onload = () => {
 
             } else if (tab === "latest") {
                 console.log('최신순');
+
                 const criteria = await exploreService.searchPosts(
                     state.page,
                     { keyword: currentKeyword, type: "latest" },
@@ -154,6 +156,7 @@ window.onload = () => {
 
             } else if (tab === "members") {
                 console.log('유저 조회');
+
                 const criteria = await exploreService.searchUsers(
                     state.page,
                     currentKeyword,
