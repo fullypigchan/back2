@@ -10,6 +10,7 @@
                    s.status
             from tbl_subscription s
             where s.member_id = m.id
+              and s.status = 'active'
             order by s.id desc
             limit 1
         ) sub on true
@@ -47,6 +48,7 @@
                    s.status
             from tbl_subscription s
             where s.member_id = m.id
+              and s.status = 'active'
             order by s.id desc
             limit 1
         ) sub on true
