@@ -64,9 +64,6 @@ const CommunityLayout = {
 
         return `
         <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-community-id="${post.communityId}" data-is-followed="${isFollowed ? 'true' : 'false'}">
-            <div class="postAvatar" data-profile-id="${post.memberId}">
-                <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
-            </div>
             <div class="postBody">
                 <div class="communityPostMeta">
                     <a class="communityPostMeta__text" href="/community/${post.communityId}">${communityName}</a>
@@ -75,6 +72,9 @@ const CommunityLayout = {
                 <span class="communityPostHandle">${handle}</span>
                 <header class="postHeader">
                     <div class="postIdentity">
+                        <div class="postAvatar" data-profile-id="${post.memberId}">
+                            <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                        </div>
                         <strong class="postName">${nickname}</strong>
                         <span class="postTime">${post.createdDatetime}</span>
                     </div>

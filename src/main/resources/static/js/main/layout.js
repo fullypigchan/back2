@@ -132,11 +132,11 @@ const layout = (() => {
 
         return `
             <div class="postCard${isCommunityPost ? ' communityPostCard' : ''}" data-post-id="${post.id}" data-member-id="${post.memberId}"${isCommunityPost ? ` data-community-id="${post.communityId}"` : ''}>
-                ${avatarHtml}
                 <div class="postBody">
                     ${communityMetaHtml}
                     <header class="postHeader">
                         <div class="postIdentity">
+                            ${avatarHtml}
                             <strong class="postName">${nickname}</strong>${badgeHtml}
                             ${isCommunityPost ? "" : `<span class="postHandle">${handle}</span>`}
                             <span class="postTime">${post.createdDatetime || ""}</span>
@@ -272,12 +272,12 @@ const layout = (() => {
 
         return `
             <div class="postCard postCard--ad" data-post-id="${ad.id}" data-member-id="${ad.advertiserId}">
-                <div class="postAvatar postAvatar--image">
-                    <img class="postAvatarImage" src="${profileImg}" onerror="this.src='/images/profile/default_image.png'">
-                </div>
                 <div class="postBody">
                     <header class="postHeader">
                         <div class="postIdentity">
+                            <div class="postAvatar postAvatar--image">
+                                <img class="postAvatarImage" src="${profileImg}" onerror="this.src='/images/profile/default_image.png'">
+                            </div>
                             <strong class="postName">${advertiserName}</strong>
                             <span class="postHandle">${advertiserHandle}</span>
                             <span class="postTime">${ad.createdDatetime || ""}</span>

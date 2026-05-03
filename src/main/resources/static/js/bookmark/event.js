@@ -78,38 +78,38 @@
     const q = (sel) => replyModalOverlay?.querySelector(sel);
     const qAll = (sel) => replyModalOverlay?.querySelectorAll(sel) ?? [];
 
-    const replyModal = q(".tweet-modal");
-    const replyCloseButton = q(".tweet-modal__close");
-    const replyEditor = q(".tweet-modal__editor");
+    const replyModal = q(".bookmark-modal");
+    const replyCloseButton = q(".bookmark-modal__close");
+    const replyEditor = q(".bookmark-modal__editor");
     const replySubmitButton = q("[data-testid='tweetButton']");
     const replyGauge = q("#bookmarkReplyGauge");
     const replyGaugeText = q("#bookmarkReplyGaugeText");
-    const replySourceAvatar = q(".tweet-modal__source-avatar");
-    const replySourceName = q(".tweet-modal__source-name");
-    const replySourceHandle = q(".tweet-modal__source-handle");
-    const replySourceTime = q(".tweet-modal__source-time");
-    const replySourceText = q(".tweet-modal__source-text");
-    const replyContextButton = q(".tweet-modal__context-button");
-    const replyFooterMeta = q(".tweet-modal__footer-meta");
+    const replySourceAvatar = q(".bookmark-modal__source-avatar");
+    const replySourceName = q(".bookmark-modal__source-name");
+    const replySourceHandle = q(".bookmark-modal__source-handle");
+    const replySourceTime = q(".bookmark-modal__source-time");
+    const replySourceText = q(".bookmark-modal__source-text");
+    const replyContextButton = q(".bookmark-modal__context-button");
+    const replyFooterMeta = q(".bookmark-modal__footer-meta");
     const replyFormatButtons = qAll("[data-format]");
     const replyEmojiButton = q("[data-testid='emojiButton']");
     const replyMediaUploadButton = q("[data-testid='mediaUploadButton']");
     const replyFileInput = q("[data-testid='fileInput']");
     const replyAttachmentPreview = q("[data-attachment-preview]");
     const replyAttachmentMedia = q("[data-attachment-media]");
-    const composeView = q(".tweet-modal__compose-view");
+    const composeView = q(".bookmark-modal__compose-view");
     const replyGeoButton = q("[data-testid='geoButton']");
     const replyLocationDisplayButton = q("[data-location-display]");
     const replyLocationName = q("[data-location-name]");
-    const replyLocationView = q(".tweet-modal__location-view");
-    const replyLocationCloseButton = q(".tweet-modal__location-close");
+    const replyLocationView = q(".bookmark-modal__location-view");
+    const replyLocationCloseButton = q(".bookmark-modal__location-close");
     const replyLocationDeleteButton = q("[data-location-delete]");
     const replyLocationCompleteButton = q("[data-location-complete]");
     const replyLocationSearchInput = q("[data-location-search]");
     const replyLocationList = q("[data-location-list]");
     const replyUserTagTrigger = q("[data-user-tag-trigger]");
     const replyUserTagLabel = q("[data-user-tag-label]");
-    const replyTagView = q(".tweet-modal__tag-view");
+    const replyTagView = q(".bookmark-modal__tag-view");
     const replyTagCloseButton = q("[data-testid='tag-back']");
     const replyTagCompleteButton = q("[data-tag-complete]");
     const replyTagSearchForm = q("[data-tag-search-form]");
@@ -118,7 +118,7 @@
     const replyTagResults = q("[data-tag-results]");
     const replyMediaAltTrigger = q("[data-media-alt-trigger]");
     const replyMediaAltLabel = q("[data-media-alt-label]");
-    const replyMediaView = q(".tweet-modal__media-view");
+    const replyMediaView = q(".bookmark-modal__media-view");
     const replyMediaBackButton = q("[data-testid='media-back']");
     const replyMediaPrevButton = q("[data-media-prev]");
     const replyMediaNextButton = q("[data-media-next]");
@@ -1413,7 +1413,7 @@
             const isActive =
                 isReplyEditorSelectionActive() &&
                 document.queryCommandState?.(fmt || "") === true;
-            btn.classList.toggle("tweet-modal__tool-btn--active", isActive);
+            btn.classList.toggle("bookmark-modal__tool-btn--active", isActive);
         });
     }
 
@@ -1498,7 +1498,7 @@
     function renderReplyVideoAttachment() {
         if (!replyAttachmentMedia || attachedReplyFiles.length === 0) return;
         const [file] = attachedReplyFiles, [fileUrl] = attachedReplyFileUrls;
-        replyAttachmentMedia.innerHTML = `<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container" aria-label="미디어" role="group"><video class="tweet-modal__attachment-video" controls preload="metadata"><source src="${fileUrl}" type="${file.type}"></video></div><button type="button" class="media-btn-delete" aria-label="미디어 삭제하기" data-attachment-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>`;
+        replyAttachmentMedia.innerHTML = `<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container" aria-label="미디어" role="group"><video class="bookmark-modal__attachment-video" controls preload="metadata"><source src="${fileUrl}" type="${file.type}"></video></div><button type="button" class="media-btn-delete" aria-label="미디어 삭제하기" data-attachment-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>`;
     }
 
     function renderReplyAttachment() {
@@ -1527,13 +1527,13 @@
         const fp = document.createElement("div"), fi = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
             fg = document.createElementNS("http://www.w3.org/2000/svg", "g"),
             fpath = document.createElementNS("http://www.w3.org/2000/svg", "path"), fn = document.createElement("span");
-        fp.className = "tweet-modal__attachment-file";
+        fp.className = "bookmark-modal__attachment-file";
         fi.setAttribute("viewBox", "0 0 24 24");
         fi.setAttribute("width", "22");
         fi.setAttribute("height", "22");
         fi.setAttribute("aria-hidden", "true");
         fpath.setAttribute("d", "M14 2H7.75C5.68 2 4 3.68 4 5.75v12.5C4 20.32 5.68 22 7.75 22h8.5C18.32 22 20 20.32 20 18.25V8l-6-6zm0 2.12L17.88 8H14V4.12zm2.25 15.88h-8.5c-.97 0-1.75-.78-1.75-1.75V5.75C6 4.78 6.78 4 7.75 4H12v5.25c0 .41.34.75.75.75H18v8.25c0 .97-.78 1.75-1.75 1.75z");
-        fn.className = "tweet-modal__attachment-file-name";
+        fn.className = "bookmark-modal__attachment-file-name";
         fn.textContent = attachedReplyFiles[0]?.name ?? "";
         fg.appendChild(fpath);
         fi.appendChild(fg);
@@ -1569,7 +1569,7 @@
 
     function renderTagChipList() {
         if (!replyTagChipList) return;
-        replyTagChipList.innerHTML = pendingTaggedUsers.map((u) => `<button type="button" class="tweet-modal__tag-chip" data-tag-remove-id="${escapeHtml(u.id)}"><span class="tweet-modal__tag-chip-avatar">${u.avatar ? `<img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" />` : ""}</span><span class="tweet-modal__tag-chip-name">${escapeHtml(u.name)}</span></button>`).join("");
+        replyTagChipList.innerHTML = pendingTaggedUsers.map((u) => `<button type="button" class="bookmark-modal__tag-chip" data-tag-remove-id="${escapeHtml(u.id)}"><span class="bookmark-modal__tag-chip-avatar">${u.avatar ? `<img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" />` : ""}</span><span class="bookmark-modal__tag-chip-name">${escapeHtml(u.name)}</span></button>`).join("");
     }
 
     function openTagPanel() {
@@ -1625,16 +1625,16 @@
         if (!replyLocationList) return;
         const term = replyLocationSearchInput?.value.trim() ?? "";
         if (cachedLocationNames.length === 0) {
-            cachedLocationNames = Array.from(replyLocationList.querySelectorAll(".tweet-modal__location-item-label")).map((i) => i.textContent.trim()).filter(Boolean);
+            cachedLocationNames = Array.from(replyLocationList.querySelectorAll(".bookmark-modal__location-item-label")).map((i) => i.textContent.trim()).filter(Boolean);
         }
         const locs = term ? cachedLocationNames.filter((l) => l.includes(term)) : cachedLocationNames;
         if (locs.length === 0) {
-            replyLocationList.innerHTML = '<p class="tweet-modal__location-empty">일치하는 위치를 찾지 못했습니다.</p>';
+            replyLocationList.innerHTML = '<p class="bookmark-modal__location-empty">일치하는 위치를 찾지 못했습니다.</p>';
             return;
         }
         replyLocationList.innerHTML = locs.map((loc) => {
             const sel = pendingLocation === loc;
-            return `<button type="button" class="tweet-modal__location-item" role="menuitem"><span class="tweet-modal__location-item-label">${loc}</span><span class="tweet-modal__location-item-check">${sel ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg>' : ""}</span></button>`;
+            return `<button type="button" class="bookmark-modal__location-item" role="menuitem"><span class="bookmark-modal__location-item-label">${loc}</span><span class="bookmark-modal__location-item-check">${sel ? '<svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></g></svg>' : ""}</span></button>`;
         }).join("");
     }
 
@@ -1732,7 +1732,7 @@
         if (!selectedProduct || !replyEditor) return;
         const card = document.createElement("div");
         card.setAttribute("data-selected-product", "");
-        card.className = "tweet-modal__selected-product";
+        card.className = "bookmark-modal__selected-product";
         card.innerHTML = `<div class="selected-product__card"><img class="selected-product__image" src="${escapeHtml(selectedProduct.image)}" alt="${escapeHtml(selectedProduct.name)}"><div class="selected-product__info"><strong class="selected-product__name">${escapeHtml(selectedProduct.name)}</strong><span class="selected-product__price">${escapeHtml(selectedProduct.price)}</span></div><button type="button" class="selected-product__remove" aria-label="판매글 제거"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div>`;
         card.querySelector(".selected-product__remove")?.addEventListener("click", () => {
             selectedProduct = null;
@@ -1914,9 +1914,9 @@
     });
     replyLocationSearchInput?.addEventListener("input", renderLocationList);
     replyLocationList?.addEventListener("click", (e) => {
-        const item = e.target.closest(".tweet-modal__location-item");
+        const item = e.target.closest(".bookmark-modal__location-item");
         if (!item) return;
-        const label = item.querySelector(".tweet-modal__location-item-label")?.textContent.trim() ?? "";
+        const label = item.querySelector(".bookmark-modal__location-item-label")?.textContent.trim() ?? "";
         pendingLocation = pendingLocation === label ? null : label;
         if (replyLocationCompleteButton) replyLocationCompleteButton.disabled = !pendingLocation;
         renderLocationList();
@@ -1946,15 +1946,15 @@
         if (!replyTagResults) return;
         replyTagResults.innerHTML = users.map((u) => {
             const sel = pendingTaggedUsers.some((t) => t.id === u.id);
-            return `<div class="tweet-modal__tag-option"><button type="button" class="tweet-modal__tag-user" data-tag-user-id="${escapeHtml(u.id)}" ${sel ? "disabled" : ""}><span class="tweet-modal__tag-avatar">${u.avatar ? `<img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" />` : ""}</span><span class="tweet-modal__tag-user-body"><span class="tweet-modal__tag-user-name">${escapeHtml(u.name)}</span><span class="tweet-modal__tag-user-handle">${sel ? u.handle + " 이미 태그됨" : u.handle}</span></span></button></div>`;
-        }).join("") || '<p class="tweet-modal__tag-empty">일치하는 사용자를 찾지 못했습니다.</p>';
+            return `<div class="bookmark-modal__tag-option"><button type="button" class="bookmark-modal__tag-user" data-tag-user-id="${escapeHtml(u.id)}" ${sel ? "disabled" : ""}><span class="bookmark-modal__tag-avatar">${u.avatar ? `<img src="${escapeHtml(u.avatar)}" alt="${escapeHtml(u.name)}" />` : ""}</span><span class="bookmark-modal__tag-user-body"><span class="bookmark-modal__tag-user-name">${escapeHtml(u.name)}</span><span class="bookmark-modal__tag-user-handle">${sel ? u.handle + " 이미 태그됨" : u.handle}</span></span></button></div>`;
+        }).join("") || '<p class="bookmark-modal__tag-empty">일치하는 사용자를 찾지 못했습니다.</p>';
     });
     replyTagResults?.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-tag-user-id]");
         if (!btn || btn.disabled) return;
         const id = btn.dataset.tagUserId;
-        const name = btn.querySelector(".tweet-modal__tag-user-name")?.textContent.trim() || "";
-        const handle = btn.querySelector(".tweet-modal__tag-user-handle")?.textContent.trim() || "";
+        const name = btn.querySelector(".bookmark-modal__tag-user-name")?.textContent.trim() || "";
+        const handle = btn.querySelector(".bookmark-modal__tag-user-handle")?.textContent.trim() || "";
         const avatar = btn.querySelector("img")?.getAttribute("src") || "";
         if (!pendingTaggedUsers.some((u) => u.id === id)) {
             pendingTaggedUsers.push({id, name, handle, avatar});

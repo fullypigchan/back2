@@ -244,10 +244,10 @@ const exploreLayout = (() => {
             card.className = "postCard";
             card.dataset.postId = post.id;
             card.innerHTML = `
-            ${avatarHtml}
             <div class="postBody">
                 <header class="postHeader">
                     <div class="postIdentity">
+                        ${avatarHtml}
                         <strong class="postName">${post.memberNickname ?? ""}</strong>
                         <span class="postHandle">${post.memberHandle ?? ""}</span>
                         <span class="postTime">${post.createdDatetime}</span>
