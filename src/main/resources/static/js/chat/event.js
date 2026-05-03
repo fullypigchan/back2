@@ -1,4 +1,11 @@
 window.onload = () => {
+    // 사이드바 게시하기 모달 활성화. memberId는 chat.html 의 Chat-Layout dataset.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => Number(document.querySelector(".Chat-Layout")?.dataset.memberId) || null,
+    });
+
     // 1.DOM 요소 선언
 
     // 1-1.채팅방 관련 DOM

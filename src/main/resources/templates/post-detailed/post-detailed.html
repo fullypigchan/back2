@@ -43,33 +43,21 @@
         </header>
 
         <section class="post-detail-thread" aria-label="게시물 상세">
-<<<<<<< HEAD
-            <div class="post-detail-hero postCard" data-post-card th:data-post-id="${post.id}" th:data-member-id="${post.memberId}" th:attr="data-community-id=${post.communityId}" th:classappend="${post.communityId != null ? ' communityPostCard' : ''}">
-                <div class="post-detail-hero-top">
-                    <div class="post-detail-profile">
-                        <div class="post-detail-avatar post-detail-avatar--image">
-                            <img th:src="${post.memberProfileFileName != null ? post.memberProfileFileName : '/images/profile/default_image.png'}" alt="프로필"/>
-                        </div>
-                        <div class="post-detail-profile-copy">
-                            <div th:if="${post.communityId != null}" class="post-detail-community-meta">
-                                <a class="post-detail-community-link" th:href="'/community/' + ${post.communityId}" th:text="${post.communityName}"></a>
-                                <span th:if="${post.categoryName != null}" class="post-detail-community-category" th:text="${post.categoryName}"></span>
-                            </div>
-                            <div class="post-detail-name-row">
-                                <strong class="post-detail-name postName" th:text="${post.memberNickname ?: post.memberHandle}"></strong>
-                            </div>
-                            <div class="post-detail-handle-row">
-                                <span class="post-detail-handle postHandle" th:text="${post.memberHandle}"></span>
-                                <span class="post-detail-handle-sep">·</span>
-                                <span class="post-detail-handle" th:text="${post.createdDatetime}"></span>
-=======
-            <div class="postCard" data-post-card th:data-post-id="${post.id}" th:data-member-id="${post.memberId}">
+            <div class="postCard"
+                 data-post-card
+                 th:data-post-id="${post.id}"
+                 th:data-member-id="${post.memberId}"
+                 th:attr="data-community-id=${post.communityId}"
+                 th:classappend="${post.communityId != null ? ' communityPostCard' : ''}">
                 <div class="postBody">
+                    <div th:if="${post.communityId != null}" class="post-detail-community-meta">
+                        <a class="post-detail-community-link" th:href="'/community/' + ${post.communityId}" th:text="${post.communityName}"></a>
+                        <span th:if="${post.categoryName != null}" class="post-detail-community-category" th:text="${post.categoryName}"></span>
+                    </div>
                     <header class="postHeader">
                         <div class="postIdentity">
                             <div class="postAvatar postAvatar--image" th:data-profile-id="${post.memberId}">
                                 <img th:src="${post.memberProfileFileName != null ? post.memberProfileFileName : '/images/profile/default_image.png'}" alt="프로필"/>
->>>>>>> fix/qa.1.4.2
                             </div>
                             <strong class="postName" th:text="${post.memberNickname ?: post.memberHandle}"></strong>
                             <span class="postHandle" th:text="${post.memberHandle}"></span>
