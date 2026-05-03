@@ -450,6 +450,7 @@ img.postMediaImage {
 
 .feedSection,
 .friendsSection {
+    display: block;
     width: 100%;
     background: #fff;
 }

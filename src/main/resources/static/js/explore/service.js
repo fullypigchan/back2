@@ -105,6 +105,7 @@ const exploreService = (() => {
         }
 
         const keywords = await response.json();
+        console.log("받아옴 최신순");
         if(callback) callback(keywords.map(k => ({
             id: k.id,
             keyword: k.searchKeyword
