@@ -50,16 +50,16 @@
                  th:attr="data-community-id=${post.communityId}"
                  th:classappend="${post.communityId != null ? ' communityPostCard' : ''}">
                 <div class="postBody">
+                    <div th:if="${post.communityId != null}" class="post-detail-community-meta">
+                        <a class="post-detail-community-link" th:href="'/community/' + ${post.communityId}" th:text="${post.communityName}"></a>
+                        <span th:if="${post.categoryName != null}" class="post-detail-community-category" th:text="${post.categoryName}"></span>
+                    </div>
                     <header class="postHeader">
                         <div class="postIdentity">
                             <div class="postAvatar postAvatar--image" th:data-profile-id="${post.memberId}">
                                 <img class="postAvatarImage" th:src="${post.memberProfileFileName != null ? post.memberProfileFileName : '/images/profile/default_image.png'}" alt="프로필" onerror="this.src='/images/profile/default_image.png'"/>
                             </div>
                             <div class="postIdentity__copy">
-                                <div th:if="${post.communityId != null}" class="communityPostMeta">
-                                    <a class="communityPostMeta__text" th:href="'/community/' + ${post.communityId}" th:text="${post.communityName}"></a>
-                                    <span th:if="${post.categoryName != null}" class="communityPostMeta__category" th:text="${post.categoryName}"></span>
-                                </div>
                                 <div class="postIdentity__nameRow">
                                     <strong class="postName" th:text="${post.memberNickname ?: post.memberHandle}"></strong>
                                 </div>

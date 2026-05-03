@@ -250,9 +250,16 @@ const exploreLayout = (() => {
                 <header class="postHeader">
                     <div class="postIdentity">
                         ${avatarHtml}
-                        <strong class="postName">${post.memberNickname ?? ""}</strong>
-                        <span class="postHandle">${post.memberHandle ?? ""}</span>
-                        <span class="postTime">${post.createdDatetime}</span>
+                        <div class="postIdentity__copy">
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${post.memberNickname ?? ""}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                <span class="postHandle">${post.memberHandle ?? ""}</span>
+                                <span class="postIdentity__sep">·</span>
+                                <span class="postTime">${post.createdDatetime}</span>
+                            </div>
+                        </div>
                     </div>
                     <button
                         class="postMoreButton"
