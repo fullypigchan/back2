@@ -11,6 +11,13 @@
     <link rel="stylesheet" href="/css/mention/mention.css"/>
     <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
     <script src="/js/utils/exchange.js"></script>
+    <script th:inline="javascript">
+        const MEMBER_ID = /*[[${memberId}]]*/ 0;
+    </script>
+    <script src="/js/main/service.js" defer></script>
+    <script src="/js/main/layout.js" defer></script>
+    <script src="/js/Notification/service.js" defer></script>
+    <script src="/js/Notification/event.js" defer></script>
 </head>
 <body>
 <!-- 외부 이모지 라이브러리: 답글 모달의 기존 emojiButton과 event.js가 연결해서 사용한다 -->
@@ -989,12 +996,5 @@
         </div>
     </div><!-- /.tweet-modal -->
 </div><!-- /.tweet-modal-overlay -->
-<script th:inline="javascript">
-    const MEMBER_ID = /*[[${memberId}]]*/ 0;
-</script>
-<script src="/js/main/service.js" defer></script>
-<script src="/js/main/layout.js" defer></script>
-<script src="/js/Notification/service.js" defer></script>
-<script src="/js/Notification/event.js" defer></script>
 </body>
 </html>
