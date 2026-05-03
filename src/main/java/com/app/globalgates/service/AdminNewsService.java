@@ -21,17 +21,13 @@ public class AdminNewsService {
 
     @Transactional
     public void createAdminNews(NewsDTO newsDTO) {
-        if (newsDTO.getNewsType() == null) {
-            newsDTO.setNewsType(NewsType.GENERAL);
-        }
+        newsDTO.setNewsType(NewsType.EMERGENCY);
         adminNewsDAO.save(newsDTO);
     }
 
     @Transactional
     public int updateAdminNews(NewsDTO newsDTO) {
-        if (newsDTO.getNewsType() == null) {
-            newsDTO.setNewsType(NewsType.GENERAL);
-        }
+        newsDTO.setNewsType(NewsType.EMERGENCY);
         return adminNewsDAO.update(newsDTO);
     }
 
