@@ -126,6 +126,7 @@ textarea {
     height: fit-content;
     border-radius: 9999px;
     align-self: center;
+    cursor: pointer;
 }
 
 .nav-logo img {
