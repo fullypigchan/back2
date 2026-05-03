@@ -70,6 +70,25 @@
           and member_status = 'active'
     </select>
 
+    <select id="selectMemberByLoginIdAnyStatus">
+        select
+            m.id, m.member_email, m.member_password,
+            m.member_nickname, m.member_handle,
+            m.member_phone, m.member_bio,
+            m.member_region, m.member_country, m.member_status,
+            m.member_role, m.push_enabled,
+            m.member_language, m.birth_date, m.created_datetime,
+            m.updated_datetime, m.last_login_at, m.member_name,
+            o.provider, o.profile_url, o.provider_id,
+            (select f.file_name from tbl_member_profile_file mpf
+                join tbl_file f on mpf.id = f.id
+             where mpf.member_id = m.id
+               and mpf.profile_image_type = 'profile'
+             limit 1) as file_name
+        from tbl_member m left join tbl_oauth o on m.id = o.member_id
+        where member_email = #{loginId} or member_phone = #{loginId}
+    </select>
+
     <select id="selectTotalByKeyword">
         select count(*)
         from tbl_member

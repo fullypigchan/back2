@@ -826,6 +826,10 @@ body {
         padding-bottom: 300px;
     }
 
+    .sub-footer {
+        bottom: 53px;
+    }
+
     .sub-container {
         padding: 0 14px 44px;
     }

@@ -488,6 +488,7 @@
         }
         currentFolderId = null;
         currentFolderName = "모든 북마크";
+        window.history.replaceState({bookmarkView: "list"}, "", "/bookmark");
         await loadFolders();
         showToast("폴더를 삭제했습니다");
     }
@@ -668,6 +669,43 @@
         });
     }
 
+    // 폴더 detail 뷰 진입/이탈을 브라우저 히스토리에 반영. 게시물 상세에서 뒤로가기 시 폴더 컨텍스트 복원용.
+    function buildBookmarkUrl(folderId) {
+        return folderId
+            ? `/bookmark?folderId=${encodeURIComponent(folderId)}`
+            : `/bookmark?uncategorized=1`;
+    }
+
+    function pushDetailHistory(folderId, folderName) {
+        const state = {bookmarkView: "detail", folderId: folderId || "", folderName};
+        window.history.pushState(state, "", buildBookmarkUrl(folderId || ""));
+    }
+
+    function applyDetailViewFromState(folderId, folderName) {
+        currentFolderId = folderId || null;
+        if (!isDetailViewOpen) {
+            openBookmarkDetail(folderName);
+        } else {
+            currentFolderName = folderName || currentFolderName;
+            setHeaderTitle(currentFolderName);
+        }
+        if (folderId) {
+            loadFolderBookmarks(folderId);
+        } else {
+            loadUncategorizedBookmarks();
+        }
+    }
+
+    window.addEventListener("popstate", (event) => {
+        const state = event.state;
+        if (state && state.bookmarkView === "detail") {
+            applyDetailViewFromState(state.folderId || "", state.folderName || "북마크");
+        } else if (isDetailViewOpen) {
+            closeBookmarkDetail();
+            currentFolderId = null;
+        }
+    });
+
     document.addEventListener("click", (event) => {
         const folderButton = event.target.closest("[data-bookmark-folder]");
         if (folderButton) {
@@ -675,6 +713,7 @@
             const folderId = folderButton.dataset.folderId || "";
             currentFolderId = folderId || null;
             openBookmarkDetail(folderName);
+            pushDetailHistory(folderId, folderName);
             if (!folderId || folderId === "") {
                 loadUncategorizedBookmarks();
             } else {
@@ -1228,6 +1267,37 @@
 
 
     // ── 페이지 초기화: 폴더 목록 로드 ──
-    loadFolders();
+    (async () => {
+        await loadFolders();
+        const params = new URLSearchParams(window.location.search);
+        const folderIdParam = params.get("folderId");
+        const isUncategorized = params.get("uncategorized") === "1";
+        if (folderIdParam) {
+            const btn = bookmarkFolderList?.querySelector(
+                `[data-folder-id="${CSS.escape(folderIdParam)}"]`
+            );
+            const folderName = btn?.dataset.bookmarkFolder || "북마크";
+            currentFolderId = folderIdParam;
+            openBookmarkDetail(folderName);
+            window.history.replaceState(
+                {bookmarkView: "detail", folderId: folderIdParam, folderName},
+                "",
+                buildBookmarkUrl(folderIdParam)
+            );
+            loadFolderBookmarks(folderIdParam);
+        } else if (isUncategorized) {
+            currentFolderId = null;
+            const folderName = "미분류";
+            openBookmarkDetail(folderName);
+            window.history.replaceState(
+                {bookmarkView: "detail", folderId: "", folderName},
+                "",
+                buildBookmarkUrl("")
+            );
+            loadUncategorizedBookmarks();
+        } else {
+            window.history.replaceState({bookmarkView: "list"}, "", "/bookmark");
+        }
+    })();
 
 })();
