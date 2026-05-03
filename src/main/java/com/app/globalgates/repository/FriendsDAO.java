@@ -20,4 +20,20 @@ public class FriendsDAO {
     public int findTotal(Long memberId, Long categoryId) {
         return friendsMapper.selectTotal(memberId, categoryId);
     }
+
+    public List<FriendsDTO> findAllFollowers(Criteria criteria, Long memberId) {
+        return friendsMapper.selectAllFollowers(criteria, memberId);
+    }
+
+    public int findTotalFollowers(Long memberId) {
+        return friendsMapper.selectTotalFollowers(memberId);
+    }
+
+    public List<FriendsDTO> findAllFollowings(Criteria criteria, Long memberId) {
+        return friendsMapper.selectAllFollowings(criteria, memberId);
+    }
+
+    public int findTotalFollowings(Long memberId) {
+        return friendsMapper.selectTotalFollowings(memberId);
+    }
 }
