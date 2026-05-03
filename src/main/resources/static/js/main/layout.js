@@ -121,25 +121,31 @@ const layout = (() => {
                     `;
         }
 
-        // 커뮤니티 게시글이면 커뮤니티 페이지와 동일하게 (커뮤니티명 → @handle → 닉네임·시간) 레이아웃을 사용한다.
+        // 커뮤니티 게시글: 커뮤니티명 → 사용자명 → @handle · 작성일자 순으로 사용자명 라인에 맞춰 표시한다.
         const isCommunityPost = !!post.communityId;
         const communityMetaHtml = isCommunityPost ? `
-                    <div class="communityPostMeta">
-                        <a class="communityPostMeta__text" href="/community/${post.communityId}">${post.communityName || ""}</a>
-                        ${post.categoryName ? `<span class="communityPostMeta__category">${post.categoryName}</span>` : ""}
-                    </div>
-                    <span class="communityPostHandle">${handle}</span>` : "";
+                                <div class="communityPostMeta">
+                                    <a class="communityPostMeta__text" href="/community/${post.communityId}">${post.communityName || ""}</a>
+                                    ${post.categoryName ? `<span class="communityPostMeta__category">${post.categoryName}</span>` : ""}
+                                </div>` : "";
 
         return `
             <div class="postCard${isCommunityPost ? ' communityPostCard' : ''}" data-post-id="${post.id}" data-member-id="${post.memberId}"${isCommunityPost ? ` data-community-id="${post.communityId}"` : ''}>
                 <div class="postBody">
-                    ${communityMetaHtml}
                     <header class="postHeader">
                         <div class="postIdentity">
                             ${avatarHtml}
-                            <strong class="postName">${nickname}</strong>${badgeHtml}
-                            ${isCommunityPost ? "" : `<span class="postHandle">${handle}</span>`}
-                            <span class="postTime">${post.createdDatetime || ""}</span>
+                            <div class="postIdentity__copy">
+                                ${communityMetaHtml}
+                                <div class="postIdentity__nameRow">
+                                    <strong class="postName">${nickname}</strong>${badgeHtml}
+                                </div>
+                                <div class="postIdentity__metaRow">
+                                    <span class="postHandle">${handle}</span>
+                                    <span class="postIdentity__sep">·</span>
+                                    <span class="postTime">${post.createdDatetime || ""}</span>
+                                </div>
+                            </div>
                         </div>
                         <button class="postMoreButton">
                             <svg class="postMoreIcon" viewBox="0 0 24 24" aria-hidden="true"><g><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></g></svg>

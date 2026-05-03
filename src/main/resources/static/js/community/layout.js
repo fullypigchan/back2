@@ -65,18 +65,25 @@ const CommunityLayout = {
         return `
         <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-community-id="${post.communityId}" data-is-followed="${isFollowed ? 'true' : 'false'}">
             <div class="postBody">
-                <div class="communityPostMeta">
-                    <a class="communityPostMeta__text" href="/community/${post.communityId}">${communityName}</a>
-                    ${post.categoryName ? `<span class="communityPostMeta__category">${this.escapeHtml(post.categoryName)}</span>` : ''}
-                </div>
-                <span class="communityPostHandle">${handle}</span>
                 <header class="postHeader">
                     <div class="postIdentity">
                         <div class="postAvatar" data-profile-id="${post.memberId}">
                             <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
                         </div>
-                        <strong class="postName">${nickname}</strong>
-                        <span class="postTime">${post.createdDatetime}</span>
+                        <div class="postIdentity__copy">
+                            <div class="communityPostMeta">
+                                <a class="communityPostMeta__text" href="/community/${post.communityId}">${communityName}</a>
+                                ${post.categoryName ? `<span class="communityPostMeta__category">${this.escapeHtml(post.categoryName)}</span>` : ''}
+                            </div>
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${nickname}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                <span class="postHandle">${handle}</span>
+                                <span class="postIdentity__sep">·</span>
+                                <span class="postTime">${post.createdDatetime}</span>
+                            </div>
+                        </div>
                     </div>
                     <button class="postMoreButton" type="button" aria-label="게시물 더 보기">
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="postMoreIcon"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg>

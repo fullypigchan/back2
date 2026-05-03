@@ -3940,10 +3940,38 @@ input.tweet-modal__location-display-text-inner {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 8px;
-    align-items: center;
+    align-items: flex-start;
     min-width: 0;
     overflow: hidden;
     flex: 1;
+}
+
+.postIdentity__copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.postIdentity__nameRow {
+    display: flex;
+    align-items: center;
+    gap: 4px 8px;
+    flex-wrap: wrap;
+}
+
+.postIdentity__metaRow {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    color: #536471;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.postIdentity__sep {
+    color: #536471;
 }
 
 .postName {

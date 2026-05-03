@@ -131,6 +131,34 @@ a {
     border-bottom: 1px solid #eff3f4;
 }
 
+.post-detail-community-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 16px;
+}
+
+.post-detail-community-link {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.post-detail-community-link:hover {
+    text-decoration: underline;
+}
+
+.post-detail-community-category {
+    background: #eff3f4;
+    color: #536471;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+}
+
 .post-detail-hero-top,
 .post-detail-profile,
 .post-detail-name-row,
