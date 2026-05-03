@@ -98,10 +98,34 @@
         });
     }
 
+    function loadNotificationBadge() {
+        const badges = document.querySelectorAll('.nav-badge--noti');
+        if (!badges.length) return;
+        const memberId = badges[0].dataset.memberId;
+        if (!memberId) return;
+
+        fetch(`/api/notifications/${memberId}/unread-count`, { credentials: 'same-origin' })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data) return;
+                const count = Number(data.count) || 0;
+                badges.forEach(b => {
+                    if (count > 0) {
+                        b.textContent = count > 99 ? '99+' : String(count);
+                        b.style.display = '';
+                    } else {
+                        b.style.display = 'none';
+                    }
+                });
+            })
+            .catch(() => {});
+    }
+
     function init() {
         setActiveNavItem();
         bindNavMore();
         bindAccountMenu();
+        loadNotificationBadge();
     }
 
     if (document.readyState === 'loading') {
