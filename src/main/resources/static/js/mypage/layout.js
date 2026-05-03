@@ -235,11 +235,18 @@ const mypageLayout = (() => {
             ? `<div class="Post-Avatar Post-Avatar--Image"><img class="Post-Avatar-Image" src="${post.memberProfileFileName}" alt="프로필 이미지"></div>`
             : `<div class="Post-Avatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>`;
 
-        return `<article class="Post-Card" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}">
+        const communityMetaHtml = post.communityId && post.communityName
+            ? `<div class="Post-Community-Meta">
+                   <a class="Post-Community-Meta-Link" href="/community/${post.communityId}">${post.communityName}</a>
+               </div>`
+            : "";
+
+        return `<article class="Post-Card${post.communityId ? " Post-Card--Community" : ""}" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}"${post.communityId ? ` data-community-id="${post.communityId}"` : ""}>
               <div class="Post-Avatar-Wrapper">
                   ${avatarHtml}
               </div>
               <div class="Post-Body">
+                  ${communityMetaHtml}
                   <header class="Post-Header">
                       <div class="Post-Identity">
                           <strong class="Post-Name">${post.memberNickname ?? post.memberHandle ?? ""}</strong>

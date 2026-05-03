@@ -1273,6 +1273,25 @@ body {
     gap: 12px;
 }
 
+.Post-Community-Meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    color: #536471;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.Post-Community-Meta-Link {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.Post-Community-Meta-Link:hover {
+    text-decoration: underline;
+}
+
 .Post-Identity {
     display: flex;
     flex-wrap: wrap;
