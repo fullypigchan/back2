@@ -24,11 +24,6 @@ public class SubscriptionDAO {
         return subscriptionMapper.selectByMemberId(memberId);
     }
 
-    //    다음 플랜 예약 (만료 후 변경될 플랜)
-    public void setNextPlan(Long id, String nextTier, String nextBillingCycle) {
-        subscriptionMapper.updateNextPlan(id, nextTier, nextBillingCycle);
-    }
-
     //    구독 상태 변경
     public void setStatus(Long id, SubscriptionStatus status) {
         subscriptionMapper.updateStatus(id, status);

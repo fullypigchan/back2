@@ -16,9 +16,6 @@ public interface SubscriptionMapper {
     //    회원 id로 활성 구독 조회
     public Optional<SubscriptionDTO> selectByMemberId(Long memberId);
 
-    //    다음 플랜 예약 (만료 후 변경될 플랜)
-    void updateNextPlan(@Param("id") Long id, @Param("nextTier") String nextTier, @Param("nextBillingCycle") String nextBillingCycle);
-
     //    구독 상태 변경
     public void updateStatus(@Param("id") Long id, @Param("status") SubscriptionStatus status);
 

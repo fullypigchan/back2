@@ -1,11 +1,13 @@
 const subscribeService = (() => {
 
     // 구독 등록 (subscriptionId 반환)
-    const subscribe = async (tier, billingCycle, expiresAt) => {
+    // 월간 정기결제: billingKey + amount 함께 전달 → 백엔드가 첫 결제까지 처리
+    // 연간/free: billingKey 생략 (또는 null)
+    const subscribe = async (tier, billingCycle, expiresAt, billingKey, amount) => {
         const response = await fetch("/api/subscriptions/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tier, billingCycle, expiresAt }),
+            body: JSON.stringify({ tier, billingCycle, expiresAt, billingKey, amount }),
         });
         return await response.json();
     };
@@ -33,17 +35,6 @@ const subscribeService = (() => {
         return await response.json();
     };
 
-    // 플랜 변경 예약 (만료 후 새 플랜으로 전환)
-    const changePlan = async (id, nextTier, nextBillingCycle) => {
-        console.log("플랜변경예약 들어옴1");
-        await fetch("/api/subscriptions/change", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, nextTier, nextBillingCycle }),
-        });
-        console.log("플랜변경예약 들어옴2");
-    };
-
     // 구독 해지
     const cancel = async (id) => {
         await fetch("/api/subscriptions/cancel", {
@@ -53,5 +44,5 @@ const subscribeService = (() => {
         });
     };
 
-    return { subscribe: subscribe, savePayment: savePayment, getMy: getMy, changePlan: changePlan, cancel: cancel };
+    return { subscribe: subscribe, savePayment: savePayment, getMy: getMy, cancel: cancel };
 })();

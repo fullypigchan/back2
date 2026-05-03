@@ -14,7 +14,7 @@ public class PaymentSubscribeVO extends Period {
     private Long id;
     private Long subscriptionId;
     private Long memberId;
-    private Long amount;
+    private int amount;
     private PaymentStatus paymentStatus;
     private String paymentMethod;
     private String receiptId;

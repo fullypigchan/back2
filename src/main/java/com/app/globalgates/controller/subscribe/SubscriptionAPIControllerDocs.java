@@ -26,14 +26,6 @@ public interface SubscriptionAPIControllerDocs {
     public SubscriptionDTO my(@AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
-            summary = "플랜 변경 예약",
-            description = "만료 후 새 플랜으로 전환을 예약한다.",
-            parameters = {@Parameter(name = "subscriptionDTO", description = "변경할 플랜 정보"),
-                            @Parameter(name = "userDetails", description = "로그인한 유저의 정보")}
-    )
-    public void changePlan(@RequestBody SubscriptionDTO subscriptionDTO, @AuthenticationPrincipal CustomUserDetails userDetails);
-
-    @Operation(
             summary = "구독 해지",
             description = "월간 구독을 해지한다.",
             parameters = {@Parameter(name = "subscriptionDTO", description = "해지할 구독 정보"),

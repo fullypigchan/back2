@@ -98,6 +98,7 @@ window.onload = () => {
     }
 
     // 4. 결제 처리 (신규 구독 전용)
+    // 연간(단건 결제) 흐름: requestPayment 응답 → 여기로 들어옴
     const onPaymentSuccess = async (plan, bootpayData) => {
         console.log("결제성공 들어옴1");
         const subscriptionId = await subscribeService.subscribe(plan.tier, plan.billingCycle, calcExpiresAt(plan.billingCycle));
@@ -107,12 +108,17 @@ window.onload = () => {
         location.href = "/main/main";
     };
 
-    // 플랜 변경 예약 (결제 없음, 만료 후 전환)
-    const reserveChangePlan = async (plan) => {
-        console.log("플랜변경예약 들어옴1");
-        await subscribeService.changePlan(mySubscription.id, plan.tier, plan.billingCycle);
-        console.log("플랜변경예약 들어옴2");
-        alert("플랜 변경이 예약되었습니다. 현재 구독 만료 후 새 플랜으로 전환됩니다.");
+    // 월간 정기결제: 빌링키 발급만 받고 백엔드가 첫 결제 + 결제 기록 저장
+    const onSubscriptionIssued = async (plan, billingKey) => {
+        console.log("정기결제 빌링키 발급 성공");
+        await subscribeService.subscribe(
+            plan.tier,
+            plan.billingCycle,
+            calcExpiresAt(plan.billingCycle),
+            billingKey,
+            plan.amountValue
+        );
+        alert("정기 구독이 완료되었습니다!");
         location.href = "/main/main";
     };
 
@@ -139,10 +145,9 @@ window.onload = () => {
             return;
         }
 
-        // 플랜 변경 모드: 결제 없이 예약만
+        // 플랜 변경 차단: 활성 구독 중에는 다른 플랜으로 변경 불가
         if (isChangePlan) {
-            console.log("들어옴12 플랜변경예약모드");
-            await reserveChangePlan(plan);
+            alert("플랜 해지 완료 후 새로운 구독이 가능합니다.");
             return;
         }
 
@@ -150,9 +155,14 @@ window.onload = () => {
         console.log("들어옴12 신규구독모드");
         if (plan.amountValue <= 0) return;
 
+        const isMonthly = plan.billingCycle === "monthly";
         const successHandler = async (data) => await onPaymentSuccess(plan, data);
 
         if (typeof Bootpay === "undefined") {
+            if (isMonthly) {
+                alert("Bootpay 가 로드되지 않아 정기결제를 진행할 수 없습니다.");
+                return;
+            }
             const demoResult = {
                 price: plan.amountValue,
                 method: "데모",
@@ -163,29 +173,58 @@ window.onload = () => {
             return;
         }
 
+        const userInfo = {
+            id: String(memberId),
+            username: "회원",
+            phone: "01000000000",
+            email: "user@globalgates.com",
+        };
+        const items = [
+            { id: currentPlan, name: plan.orderName, qty: 1, price: plan.amountValue },
+        ];
+
         try {
+            // 월간: 빌링키 발급 → 백엔드가 첫 결제 + 결제 기록 저장
+            if (isMonthly) {
+                const response = await Bootpay.requestSubscription({
+                    application_id: "69604bf2b6279cebf60ad115",
+                    order_name: plan.orderName,
+                    subscription_id: plan.orderId,
+                    pg: "라이트페이",
+                    tax_free: 0,
+                    user: userInfo,
+                    items: items,
+                    extra: { open_type: "iframe" },
+                });
+                console.log("requestSubscription 풀 응답:", JSON.stringify(response, null, 2));
+
+                // 실제 billing_key 는 응답에 별도로 있음. receipt_id 는 영수증 ID 일 뿐.
+                const data = response?.data ?? response ?? {};
+                const billingKey = data.billing_key
+                    ?? response?.billing_key
+                    ?? data.receipt_id
+                    ?? response?.receipt_id;
+
+                if (!billingKey) {
+                    console.error("빌링키 발급 실패 — 응답에서 billing_key/receipt_id 못 찾음", response);
+                    alert("빌링키 발급에 실패했습니다.");
+                    return;
+                }
+
+                await onSubscriptionIssued(plan, billingKey);
+                return;
+            }
+
+            // 연간: 단건 결제 (기존 흐름)
             const response = await Bootpay.requestPayment({
                 application_id: "69604bf2b6279cebf60ad115",
-                // application_id: "69604bf2b6279cebf60ad118",
                 price: plan.amountValue,
                 order_name: plan.orderName,
                 order_id: plan.orderId,
                 pg: "라이트페이",
                 tax_free: 0,
-                user: {
-                    id: String(memberId),
-                    username: "회원",
-                    phone: "01000000000",
-                    email: "user@globalgates.com",
-                },
-                items: [
-                    {
-                        id: currentPlan,
-                        name: plan.orderName,
-                        qty: 1,
-                        price: plan.amountValue,
-                    },
-                ],
+                user: userInfo,
+                items: items,
                 extra: {
                     open_type: "iframe",
                     card_quota: "0,2,3",
@@ -361,32 +400,23 @@ window.onload = () => {
                 btnLabel.textContent = "해지";
                 payBtn.disabled = true;
             } else {
-                console.log("들어옴 구독변경모드");
-                // 구독 변경 모드
+                console.log("들어옴 구독변경모드 — 모든 변경 차단");
+                // 활성 구독 중에는 모든 플랜 변경 차단 (해지 → 만료 후 신규 구독만 가능)
                 const isSameTier = currentPlan === myPlan;
                 const myBillingCycle = mySubscription.billingCycle;
-
-                // 같은 플랜+같은 주기 선택 시
                 const isSameExact = isSameTier && ((currentPeriod === "expert" && myBillingCycle === "monthly") || currentPeriod === myBillingCycle);
-
-                // 월간→연간 변경 차단 (활성 구독 있을 때)
-                const isMonthlyToAnnual = myBillingCycle === "monthly" && currentPeriod === "annual";
 
                 if (isSameExact) {
                     footerPrice.textContent = "현재 플랜";
                     footerPeriod.textContent = "";
                     footerBilling.textContent = "";
-                } else if (isMonthlyToAnnual) {
+                } else {
                     footerPrice.textContent = "변경 불가";
                     footerPeriod.textContent = "";
-                    footerBilling.textContent = "현재 구독중인 플랜을 해지,만료 후 이용해주세요";
-                } else {
-                    footerPrice.textContent = plan.displayName;
-                    footerPeriod.textContent = "(만료 후 전환)";
-                    footerBilling.textContent = `${priceData[myPlan].displayName} → ${plan.displayName}`;
+                    footerBilling.textContent = "현재 구독중인 플랜을 해지, 만료 후 이용해주세요";
                 }
                 btnLabel.textContent = "플랜 변경";
-                payBtn.disabled = isSameExact || isMonthlyToAnnual;
+                payBtn.disabled = true;
             }
         } else {
             // 신규 구독 모드
