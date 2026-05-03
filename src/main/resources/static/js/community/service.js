@@ -106,10 +106,62 @@ const CommunityService = (() => {
         return await response.json();
     };
 
+    // ─── 공용 모달 (post-modal.js) 호환 — main API 그대로 사용 (일반 게시물 처리) ───
+    const writeReply = async (postId, formData) => {
+        await fetch(`/api/main/posts/${postId}/replies`, { method: "POST", body: formData });
+    };
+    const writePost = async (formData) => {
+        await fetch("/api/main/posts/write", { method: "POST", body: formData });
+    };
+    const updatePost = async (postId, formData) => {
+        await fetch(`/api/main/posts/update/${postId}`, { method: "POST", body: formData });
+    };
+    const getPost = async (postId, memberId) => {
+        const response = await fetch(`/api/main/posts/${postId}?memberId=${memberId}`);
+        return await response.json();
+    };
+    const getMyProducts = async (memberId, callback) => {
+        const response = await fetch(`/api/main/products/members/${memberId}`);
+        const data = await response.json();
+        if (callback) return callback(data);
+        return data;
+    };
+    const getPostTemps = async (memberId, callback) => {
+        const response = await fetch(`/api/main/post-temps/${memberId}`);
+        const data = await response.json();
+        if (callback) return callback(data);
+        return data;
+    };
+    const savePostTemp = async (memberId, postTempContent, location, tags) => {
+        await fetch("/api/main/post-temps", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ memberId, postTempContent, postTempLocation: location, postTempTags: tags })
+        });
+    };
+    const loadPostTemp = async (id) => {
+        const response = await fetch(`/api/main/post-temps/${id}/load`, { method: "POST" });
+        return await response.json();
+    };
+    const deletePostTemps = async (ids) => {
+        await fetch("/api/main/post-temps/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(ids)
+        });
+    };
+    const searchMentionMembers = async (keyword, memberId) => {
+        const response = await fetch(`/api/main/mentions/search?keyword=${encodeURIComponent(keyword)}&memberId=${memberId}`);
+        return await response.json();
+    };
+
     return {
         create, update, remove, getDetail,
         getList, getMyList, getByCategory, search,
         getHomeFeed, getExploreFeed,
-        join, leave, getMembers, kickMember, changeRole
+        join, leave, getMembers, kickMember, changeRole,
+        writeReply, writePost, updatePost, getPost,
+        getMyProducts, getPostTemps, savePostTemp, loadPostTemp, deletePostTemps,
+        searchMentionMembers
     };
 })();

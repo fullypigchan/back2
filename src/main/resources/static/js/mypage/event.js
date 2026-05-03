@@ -53,7 +53,7 @@ window.onload = function () {
 
     // 답글 버튼 카운트 증가 (마이페이지 .Post-Action-Btn.Reply 기준)
     function updateReplyCount(button) {
-        const cnt = button.querySelector(".Post-Action-Count");
+        const cnt = button.querySelector(".tweet-action-count, .Post-Action-Count");
         if (!cnt) return;
         const next = (Number.parseInt(cnt.textContent || "0", 10) || 0) + 1;
         cnt.textContent = String(next);
@@ -649,7 +649,7 @@ window.onload = function () {
         }
 
         const inLikes = !!btn.closest(".Profile-Content.Likes");
-        const count = btn.querySelector(".Post-Action-Count");
+        const count = btn.querySelector(".tweet-action-count, .Post-Action-Count");
         const emptyWrapper = document.createElement("span");
         const fullWrapper = document.createElement("span");
         const isLiked = btn.dataset.liked === "true" || inLikes;
@@ -664,7 +664,7 @@ window.onload = function () {
 
         emptyIcon.classList.toggle("off", isLiked);
         fullIcon.classList.toggle("off", !isLiked);
-        btn.classList.toggle("liked", isLiked);
+        btn.classList.toggle("active", isLiked);
         btn.dataset.liked = String(isLiked);
         btn.dataset.likeIconsReady = "true";
 
@@ -683,7 +683,7 @@ window.onload = function () {
             return;
         }
 
-        const count = btn.querySelector(".Post-Action-Count");
+        const count = btn.querySelector(".tweet-action-count, .Post-Action-Count");
         const emptyWrapper = document.createElement("span");
         const fullWrapper = document.createElement("span");
         const isBookmarked = btn.dataset.bookmarked === "true";
@@ -698,7 +698,7 @@ window.onload = function () {
 
         emptyIcon.classList.toggle("off", isBookmarked);
         fullIcon.classList.toggle("off", !isBookmarked);
-        btn.classList.toggle("bookmarked", isBookmarked);
+        btn.classList.toggle("active", isBookmarked);
         btn.dataset.bookmarked = String(isBookmarked);
         btn.dataset.bookmarkIconsReady = "true";
 
@@ -715,14 +715,14 @@ window.onload = function () {
     function toggleLikeButton(btn) {
         ensureLikeButtonIcons(btn);
 
-        const count = btn.querySelector(".Post-Action-Count");
+        const count = btn.querySelector(".tweet-action-count, .Post-Action-Count");
         const emptyIcon = btn.querySelector('[data-icon="like-empty"]');
         const fullIcon = btn.querySelector('[data-icon="like-full"]');
         const isLiked = btn.dataset.liked === "true";
         const nextLiked = !isLiked;
 
         btn.dataset.liked = String(nextLiked);
-        btn.classList.toggle("liked", nextLiked);
+        btn.classList.toggle("active", nextLiked);
         emptyIcon?.classList.toggle("off", nextLiked);
         fullIcon?.classList.toggle("off", !nextLiked);
 
@@ -743,15 +743,15 @@ window.onload = function () {
         const nextBookmarked = !isBookmarked;
 
         btn.dataset.bookmarked = String(nextBookmarked);
-        btn.classList.toggle("bookmarked", nextBookmarked);
+        btn.classList.toggle("active", nextBookmarked);
         emptyIcon?.classList.toggle("off", nextBookmarked);
         fullIcon?.classList.toggle("off", !nextBookmarked);
     }
 
     // 서버가 렌더한 정적 카드(답글/좋아요 탭 샘플)는 최초 진입 시 한 번만 아이콘 구조를 맞춘다.
     // 조회 후 추가되는 DOM은 아래 이벤트 위임 경로에서 클릭 시점에 자동으로 보정된다.
-    document.querySelectorAll(".Post-Action-Btn.Like").forEach((btn) => ensureLikeButtonIcons(btn));
-    document.querySelectorAll(".Post-Action-Btn.Bookmark").forEach((btn) => ensureBookmarkButtonIcons(btn));
+    document.querySelectorAll(".tweet-action-btn--like, .Post-Action-Btn.Like").forEach((btn) => ensureLikeButtonIcons(btn));
+    document.querySelectorAll(".tweet-action-btn--bookmark, .Post-Action-Btn.Bookmark").forEach((btn) => ensureBookmarkButtonIcons(btn));
 
     let activeMoreMenu = null,
         activeMenuEl = null,
@@ -902,13 +902,13 @@ window.onload = function () {
     }
 
     function getPostMetaFromButton(button) {
-        const card = button.closest(".Post-Card");
+        const card = button.closest(".postCard, .Post-Card");
         if (!card) return null;
 
         return {
             postId: Number(card.dataset.postId),
             memberId: Number(card.dataset.memberId),
-            handle: card.dataset.memberHandle || card.querySelector(".Post-Handle")?.textContent?.trim() || "@user",
+            handle: card.dataset.memberHandle || card.querySelector(".postHandle")?.textContent?.trim() || "@user",
             cardType: card.dataset.cardType || button.dataset.cardType || "",
         };
     }
@@ -1420,8 +1420,8 @@ window.onload = function () {
     document.addEventListener("click", (e) => {
         if (
             !e.target.closest(".Post-More-Menu") &&
-            !e.target.closest(".Post-More-Button") &&
-            !e.target.closest(".Post-Action-Btn.Share") &&
+            !e.target.closest(".postMoreButton, .Post-More-Button") &&
+            !e.target.closest('.tweet-action-btn[data-action="share"], .Post-Action-Btn.Share') &&
             !e.target.closest(".Profile-Edit-Btn.More") &&
             !e.target.closest(".layers-dropdown-container")
         ) {
@@ -1432,7 +1432,7 @@ window.onload = function () {
 
     // 게시글 카드 클릭 → 게시글 상세 이동 (액션/프로필/링크는 각자 핸들러)
     document.body.addEventListener("click", (e) => {
-        const card = e.target.closest('.Post-Card[data-post-id]');
+        const card = e.target.closest('.postCard[data-post-id], .Post-Card[data-post-id]');
         if (!card) return;
         if (e.target.closest('button, a, [data-action], [data-profile-id]')) return;
 
@@ -1453,11 +1453,11 @@ window.onload = function () {
 
             // 좋아요 버튼: UI 를 즉시 토글한 뒤 서버에 동기화한다.
             // 서버 호출이 실패하면 토글을 한 번 더 호출해 UI/DB 가 어긋나지 않도록 롤백한다.
-            const likeBtn = e.target.closest('.Post-Action-Btn.Like, [data-action="like"]');
+            const likeBtn = e.target.closest('.tweet-action-btn--like, .Post-Action-Btn.Like, [data-action="like"]');
             if (likeBtn) {
                 e.preventDefault();
                 e.stopPropagation();
-                const postId = likeBtn.closest('.Post-Card')?.dataset.postId;
+                const postId = likeBtn.closest('.postCard, .Post-Card')?.dataset.postId;
                 if (!postId) return;
 
                 const wasLiked = likeBtn.dataset.liked === 'true';
@@ -1469,11 +1469,11 @@ window.onload = function () {
                         // Likes 탭은 "내가 좋아요한 글"만 모은 곳이라,
                         // 좋아요를 풀면 그 카드도 목록에서 빠지는 게 정의와 맞다.
                         // 다른 탭(Posts/Replies)에서 좋아요 끄는 경우엔 카드를 남겨둔다.
-                        const card = likeBtn.closest('.Post-Card');
+                        const card = likeBtn.closest('.postCard, .Post-Card');
                         if (card?.closest('.Profile-Content.Likes')) {
                             card.remove();
                             const likeList = document.querySelector('.Profile-Content.Likes .Profile-Content-List');
-                            if (likeList && !likeList.querySelector('.Post-Card')) {
+                            if (likeList && !likeList.querySelector('.postCard, .Post-Card')) {
                                 likeList.innerHTML = `
                                   <p class="feedEmpty" style="padding: 20px; text-align: center; color: #536471;">
                                       좋아요한 게시글이 없습니다.
@@ -1491,11 +1491,11 @@ window.onload = function () {
             }
 
             // 북마크도 같은 패턴 — 낙관적 토글 + 서버 sync + 실패 시 롤백.
-            const bookmarkBtn = e.target.closest('.Post-Action-Btn.Bookmark, [data-action="bookmark"]');
+            const bookmarkBtn = e.target.closest('.tweet-action-btn--bookmark, .Post-Action-Btn.Bookmark, [data-action="bookmark"]');
             if (bookmarkBtn) {
                 e.preventDefault();
                 e.stopPropagation();
-                const postId = bookmarkBtn.closest('.Post-Card')?.dataset.postId;
+                const postId = bookmarkBtn.closest('.postCard, .Post-Card')?.dataset.postId;
                 if (!postId) return;
 
                 const wasBookmarked = bookmarkBtn.dataset.bookmarked === 'true';
@@ -1522,11 +1522,11 @@ window.onload = function () {
                 return;
             }
             // 더보기 버튼
-            const moreBtn = e.target.closest('.Post-Card .Post-More-Button, .Post-Card [data-action="more"]');
+            const moreBtn = e.target.closest('.postCard .postMoreButton, .Post-Card .postMoreButton, .Post-Card .Post-More-Button, .postCard [data-action="more"], .Post-Card [data-action="more"]');
             if (moreBtn) {
                 e.preventDefault();
                 e.stopPropagation();
-                const card = moreBtn.closest(".Post-Card");
+                const card = moreBtn.closest(".postCard, .Post-Card");
                 const cardType = moreBtn.dataset.cardType || card?.dataset.cardType || "";
 
                 // 내 상품 카드의 더보기 버튼을 누른 순간

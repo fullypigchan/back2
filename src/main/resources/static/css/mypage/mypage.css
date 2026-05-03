@@ -1210,47 +1210,6 @@ body {
 }
 
 /* [FIX 5] 답글 탭 연결선 - flex column */
-.Post-Avatar-Wrapper {
-    display: flex;
-    position: relative;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 16px;
-}
-
-.Post-Avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #cfe8fc;
-    color: #1d9bf0;
-    font-weight: 700;
-}
-
-.Post-Avatar--Image {
-    overflow: hidden;
-    background: #eff3f4;
-}
-
-.Post-Avatar-Image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.Post-Link-Line {
-    width: 2px;
-    flex: 1;
-    min-height: 12px;
-    background-color: #cfd9de;
-    border: none;
-}
-
 .Upper-Link-Line {
     position: absolute;
     width: 2px;
@@ -1300,12 +1259,6 @@ body {
     min-width: 0;
 }
 
-.Post-Name {
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.Post-Handle,
 .Post-Time {
     color: #536471;
     font-size: 14px;
@@ -1372,36 +1325,6 @@ body {
 .Post-Action-Btn:hover {
     background-color: rgba(29, 155, 240, 0.1);
     color: #1d9bf0;
-}
-
-/* 좋아요 */
-.Post-Action-Btn.Like:hover {
-    background-color: rgba(249, 24, 128, 0.1);
-    color: #f91880;
-}
-
-.Post-Action-Btn.Like.liked {
-    color: #f91880;
-}
-
-.Post-Action-Btn.Like.liked:hover {
-    color: #f91880;
-    background-color: rgba(249, 24, 128, 0.1);
-}
-
-/* 북마크 */
-.Post-Action-Btn.Bookmark:hover {
-    background-color: rgba(29, 155, 240, 0.1);
-    color: #1d9bf0;
-}
-
-.Post-Action-Btn.Bookmark.bookmarked {
-    color: #1d9bf0;
-}
-
-.Post-Action-Btn.Bookmark.bookmarked:hover {
-    color: #1d9bf0;
-    background-color: rgba(29, 155, 240, 0.1);
 }
 
 .Post-Action-Icon {
