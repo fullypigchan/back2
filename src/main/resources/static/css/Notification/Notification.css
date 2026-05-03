@@ -1157,7 +1157,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-.tweet-modal-overlay {
+.notification-modal-overlay {
     position: fixed;
     inset: 0;
     z-index: 200;
@@ -1168,11 +1168,11 @@ body.modal-open {
     background-color: rgba(91, 112, 131, 0.4);
 }
 
-.tweet-modal-overlay[hidden] {
+.notification-modal-overlay[hidden] {
     display: none;
 }
 
-.tweet-modal {
+.notification-modal {
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
@@ -1184,10 +1184,10 @@ body.modal-open {
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
-.tweet-modal:has(.tweet-modal__draft-view:not([hidden])),
-.tweet-modal:has(.tweet-modal__location-view:not([hidden])),
-.tweet-modal:has(.tweet-modal__media-view:not([hidden])),
-.tweet-modal:has(.tweet-modal__tag-view:not([hidden])) {
+.notification-modal:has(.notification-modal__draft-view:not([hidden])),
+.notification-modal:has(.notification-modal__location-view:not([hidden])),
+.notification-modal:has(.notification-modal__media-view:not([hidden])),
+.notification-modal:has(.notification-modal__tag-view:not([hidden])) {
     height: 90vh;
 }
 
@@ -1227,14 +1227,14 @@ body.modal-open {
     z-index: 1;
 }
 
-.tweet-modal__header {
+.notification-modal__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px 4px;
 }
 
-.tweet-modal__close {
+.notification-modal__close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1248,11 +1248,11 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__close:hover {
+.notification-modal__close:hover {
     background-color: rgba(15, 20, 25, 0.1);
 }
 
-.tweet-modal__title {
+.notification-modal__title {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1261,13 +1261,13 @@ body.modal-open {
     white-space: nowrap;
 }
 
-.tweet-modal__body {
+.notification-modal__body {
     flex: 1;
     overflow-y: auto;
     padding: 0 16px;
 }
 
-.tweet-modal__context-button {
+.notification-modal__context-button {
     display: inline-flex;
     align-items: center;
     max-width: 100%;
@@ -1282,7 +1282,7 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__source-tweet {
+.notification-modal__source-tweet {
     display: flex;
     gap: 12px;
     padding-bottom: 16px;
@@ -1290,8 +1290,8 @@ body.modal-open {
     border-bottom: 1px solid #eff3f4;
 }
 
-.tweet-modal__source-avatar,
-.tweet-modal__avatar-image {
+.notification-modal__source-avatar,
+.notification-modal__avatar-image {
     width: 36px;
     height: 36px;
     border-radius: 9999px;
@@ -1299,13 +1299,13 @@ body.modal-open {
     flex-shrink: 0;
 }
 
-.tweet-modal__source-body,
-.tweet-modal__input-wrap {
+.notification-modal__source-body,
+.notification-modal__input-wrap {
     min-width: 0;
     flex: 1;
 }
 
-.tweet-modal__source-meta {
+.notification-modal__source-meta {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -1315,24 +1315,24 @@ body.modal-open {
     line-height: 20px;
 }
 
-.tweet-modal__source-name {
+.notification-modal__source-name {
     font-weight: 700;
     color: #0f1419;
 }
 
-.tweet-modal__source-handle,
-.tweet-modal__source-time {
+.notification-modal__source-handle,
+.notification-modal__source-time {
     color: #536471;
 }
 
-.tweet-modal__source-text {
+.notification-modal__source-text {
     font-size: 15px;
     line-height: 20px;
     color: #0f1419;
     word-break: break-word;
 }
 
-.tweet-modal__composer {
+.notification-modal__composer {
     display: flex;
     gap: 12px;
     align-items: flex-start;
@@ -1340,11 +1340,11 @@ body.modal-open {
     padding: 6px 0 12px;
 }
 
-.tweet-modal__input-wrap {
+.notification-modal__input-wrap {
     padding-top: 2px;
 }
 
-.tweet-modal__draft {
+.notification-modal__draft {
     border: none;
     background: transparent;
     color: #1d9bf0;
@@ -1356,11 +1356,11 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__draft:hover {
+.notification-modal__draft:hover {
     background-color: rgba(29, 155, 240, 0.08);
 }
 
-.tweet-modal__editor {
+.notification-modal__editor {
     width: 100%;
     min-height: 88px;
     padding-top: 2px;
@@ -1373,7 +1373,7 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__editor:empty::before {
+.notification-modal__editor:empty::before {
     content: attr(data-placeholder);
     color: #536471;
     pointer-events: none;
@@ -1382,12 +1382,12 @@ body.modal-open {
 
 /* compose view 안의 첨부 미리보기.
    event.js 가 [data-attachment-preview] 표시를 토글하고 [data-attachment-media] 내용을 채운다. */
-.tweet-modal__attachment {
+.notification-modal__attachment {
     width: min(100%, 320px);
     margin-top: 12px;
 }
 
-.tweet-modal__attachment[hidden] {
+.notification-modal__attachment[hidden] {
     display: none;
 }
 
@@ -1518,7 +1518,7 @@ body.modal-open {
 }
 
 .media-img,
-.tweet-modal__attachment-video {
+.notification-modal__attachment-video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1527,7 +1527,7 @@ body.modal-open {
     -webkit-user-drag: none;
 }
 
-.tweet-modal__attachment-file {
+.notification-modal__attachment-file {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1538,12 +1538,12 @@ body.modal-open {
     color: #0f1419;
 }
 
-.tweet-modal__attachment-file svg {
+.notification-modal__attachment-file svg {
     flex-shrink: 0;
     fill: #536471;
 }
 
-.tweet-modal__attachment-file-name {
+.notification-modal__attachment-file-name {
     font-size: 15px;
     line-height: 20px;
     font-weight: 700;
@@ -1653,7 +1653,7 @@ body.modal-open {
     flex-shrink: 0;
 }
 
-.tweet-modal__attachment-meta-btn[hidden] {
+.notification-modal__attachment-meta-btn[hidden] {
     display: none;
 }
 
@@ -1662,14 +1662,14 @@ body.modal-open {
 }
 
 /* compose view 하단 고정 영역: 위치 메타, 툴바, 이모지 버튼, 답글 버튼 */
-.tweet-modal__footer {
+.notification-modal__footer {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding: 6px 16px 12px;
 }
 
-.tweet-modal__footer-meta {
+.notification-modal__footer-meta {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -1678,14 +1678,14 @@ body.modal-open {
     border-bottom: 1px solid #eff3f4;
 }
 
-.tweet-modal__footer-meta-slot {
+.notification-modal__footer-meta-slot {
     display: flex;
     align-items: center;
     min-width: 0;
     justify-content: flex-end;
 }
 
-.tweet-modal__footer-bottom {
+.notification-modal__footer-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1694,7 +1694,7 @@ body.modal-open {
     position: relative;
 }
 
-.tweet-modal__meta-btn {
+.notification-modal__meta-btn {
     border: none;
     background: transparent;
     color: #1d9bf0;
@@ -1706,12 +1706,12 @@ body.modal-open {
     padding: 0;
 }
 
-.tweet-modal__meta-btn--disabled {
+.notification-modal__meta-btn--disabled {
     opacity: 0.55;
     cursor: not-allowed;
 }
 
-.tweet-modal__location-display {
+.notification-modal__location-display {
     display: inline-flex;
     align-items: center;
     border: none;
@@ -1732,7 +1732,7 @@ body.modal-open {
     transition: background-color 0.2s, box-shadow 0.2s;
 }
 
-.tweet-modal__location-display-inner {
+.notification-modal__location-display-inner {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -1741,40 +1741,40 @@ body.modal-open {
     color: inherit;
 }
 
-.tweet-modal__location-display-icon {
+.notification-modal__location-display-icon {
     flex-shrink: 0;
     width: 14px;
     height: 14px;
     fill: currentColor;
 }
 
-.tweet-modal__location-display-text-wrap,
-.tweet-modal__location-display-text-outer {
+.notification-modal__location-display-text-wrap,
+.notification-modal__location-display-text-outer {
     display: inline-flex;
     align-items: center;
 }
 
-.tweet-modal__location-display-text-outer,
-.tweet-modal__location-display-text-inner {
+.notification-modal__location-display-text-outer,
+.notification-modal__location-display-text-inner {
     color: inherit;
     font: inherit;
     line-height: inherit;
 }
 
-.tweet-modal__location-display[hidden] {
+.notification-modal__location-display[hidden] {
     display: none;
 }
 
-.tweet-modal__location-display:hover,
-.tweet-modal__location-display:focus,
-.tweet-modal__location-display:focus-visible,
-.tweet-modal__location-display:active {
+.notification-modal__location-display:hover,
+.notification-modal__location-display:focus,
+.notification-modal__location-display:focus-visible,
+.notification-modal__location-display:active {
     background: rgba(29, 155, 240, 0.1);
     box-shadow: none;
     outline: none;
 }
 
-.tweet-modal__toolbar {
+.notification-modal__toolbar {
     display: flex;
     gap: 4px;
     flex-wrap: nowrap;
@@ -1783,13 +1783,13 @@ body.modal-open {
     scrollbar-width: none;
 }
 
-.tweet-modal__toolbar::-webkit-scrollbar {
+.notification-modal__toolbar::-webkit-scrollbar {
     display: none;
 }
 
 /* HTML에 남겨둔 커스텀 이모지 fallback 패널.
    외부 EmojiButton 라이브러리가 있을 때는 별도 DOM 이 reply modal overlay 안에 생성된다. */
-.tweet-modal__emoji-picker {
+.notification-modal__emoji-picker {
     position: fixed;
     left: 16px;
     top: 16px;
@@ -1803,18 +1803,18 @@ body.modal-open {
     z-index: 5;
 }
 
-.tweet-modal__emoji-picker[hidden] {
+.notification-modal__emoji-picker[hidden] {
     display: none;
 }
 
-.tweet-modal__location-modal {
+.notification-modal__location-modal {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.tweet-modal__location-header {
+.notification-modal__location-header {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -1827,7 +1827,7 @@ body.modal-open {
     backdrop-filter: blur(12px);
 }
 
-.tweet-modal__location-close {
+.notification-modal__location-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1842,15 +1842,15 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__location-close:hover {
+.notification-modal__location-close:hover {
     background-color: rgba(15, 20, 25, 0.08);
 }
 
-.tweet-modal__location-close svg {
+.notification-modal__location-close svg {
     fill: currentColor;
 }
 
-.tweet-modal__location-title {
+.notification-modal__location-title {
     margin: 0;
     font-size: 20px;
     font-weight: 800;
@@ -1858,14 +1858,14 @@ body.modal-open {
     line-height: 24px;
 }
 
-.tweet-modal__location-actions {
+.notification-modal__location-actions {
     margin-left: auto;
     display: flex;
     align-items: center;
     gap: 16px;
 }
 
-.tweet-modal__location-action {
+.notification-modal__location-action {
     min-height: 38px;
     min-width: 38px;
     padding: 0 18px;
@@ -1879,7 +1879,7 @@ body.modal-open {
     transition: background-color 0.2s, color 0.2s, opacity 0.2s;
 }
 
-.tweet-modal__location-action--ghost {
+.notification-modal__location-action--ghost {
     background: transparent;
     color: #0f1419;
     padding: 0;
@@ -1889,22 +1889,22 @@ body.modal-open {
     line-height: 1.2;
 }
 
-.tweet-modal__location-action--ghost:hover {
+.notification-modal__location-action--ghost:hover {
     background-color: transparent;
     text-decoration: underline;
 }
 
-.tweet-modal__location-action--solid {
+.notification-modal__location-action--solid {
     background-color: #0f1419;
     color: #ffffff;
 }
 
-.tweet-modal__location-action--solid:disabled {
+.notification-modal__location-action--solid:disabled {
     opacity: 0.45;
     cursor: not-allowed;
 }
 
-.tweet-modal__location-search {
+.notification-modal__location-search {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1915,13 +1915,13 @@ body.modal-open {
     min-height: 44px;
 }
 
-.tweet-modal__location-search-icon {
+.notification-modal__location-search-icon {
     flex-shrink: 0;
     color: #536471;
     fill: currentColor;
 }
 
-.tweet-modal__location-search-input {
+.notification-modal__location-search-input {
     width: 100%;
     min-height: 36px;
     border: none;
@@ -1933,16 +1933,16 @@ body.modal-open {
     caret-color: #1d9bf0;
 }
 
-.tweet-modal__location-search-input::placeholder {
+.notification-modal__location-search-input::placeholder {
     color: #536471;
 }
 
-.tweet-modal__location-list {
+.notification-modal__location-list {
     overflow-y: auto;
     padding-bottom: 12px;
 }
 
-.tweet-modal__location-item {
+.notification-modal__location-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1961,15 +1961,15 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__location-item:hover {
+.notification-modal__location-item:hover {
     background-color: transparent;
 }
 
-.tweet-modal__location-item-label {
+.notification-modal__location-item-label {
     min-width: 0;
 }
 
-.tweet-modal__location-item-check {
+.notification-modal__location-item-check {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1980,13 +1980,13 @@ body.modal-open {
     flex-shrink: 0;
 }
 
-.tweet-modal__location-item-check svg {
+.notification-modal__location-item-check svg {
     width: 20px;
     height: 20px;
     fill: currentColor;
 }
 
-.tweet-modal__location-empty {
+.notification-modal__location-empty {
     margin: 0;
     padding: 18px 14px 8px;
     color: #536471;
@@ -1994,7 +1994,7 @@ body.modal-open {
     line-height: 20px;
 }
 
-.tweet-modal__tag-modal {
+.notification-modal__tag-modal {
     width: 100%;
     height: 100%;
     display: flex;
@@ -2002,7 +2002,7 @@ body.modal-open {
     background-color: #ffffff;
 }
 
-.tweet-modal__tag-header {
+.notification-modal__tag-header {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -2015,7 +2015,7 @@ body.modal-open {
     backdrop-filter: blur(12px);
 }
 
-.tweet-modal__tag-close {
+.notification-modal__tag-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2030,15 +2030,15 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__tag-close:hover {
+.notification-modal__tag-close:hover {
     background-color: rgba(15, 20, 25, 0.08);
 }
 
-.tweet-modal__tag-close svg {
+.notification-modal__tag-close svg {
     fill: currentColor;
 }
 
-.tweet-modal__tag-title {
+.notification-modal__tag-title {
     margin: 0;
     font-size: 20px;
     font-weight: 800;
@@ -2046,13 +2046,13 @@ body.modal-open {
     line-height: 24px;
 }
 
-.tweet-modal__tag-actions {
+.notification-modal__tag-actions {
     margin-left: auto;
     display: flex;
     align-items: center;
 }
 
-.tweet-modal__tag-action {
+.notification-modal__tag-action {
     min-height: 32px;
     padding: 0 16px;
     border: 1px solid transparent;
@@ -2066,20 +2066,20 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__tag-search {
+.notification-modal__tag-search {
     display: flex;
     flex: 1;
     min-height: 0;
 }
 
-.tweet-modal__tag-search-form {
+.notification-modal__tag-search-form {
     display: flex;
     flex: 1;
     flex-direction: column;
     min-height: 0;
 }
 
-.tweet-modal__tag-search-shell {
+.notification-modal__tag-search-shell {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -2091,13 +2091,13 @@ body.modal-open {
     min-height: 44px;
 }
 
-.tweet-modal__tag-search-icon {
+.notification-modal__tag-search-icon {
     flex-shrink: 0;
     color: #536471;
     fill: currentColor;
 }
 
-.tweet-modal__tag-chip-list {
+.notification-modal__tag-chip-list {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -2105,7 +2105,7 @@ body.modal-open {
     min-width: 0;
 }
 
-.tweet-modal__tag-search-input {
+.notification-modal__tag-search-input {
     flex: 1 1 120px;
     min-width: 120px;
     min-height: 32px;
@@ -2119,23 +2119,23 @@ body.modal-open {
     caret-color: #1d9bf0;
 }
 
-.tweet-modal__tag-search-input::placeholder {
+.notification-modal__tag-search-input::placeholder {
     color: #536471;
 }
 
-.tweet-modal__tag-results {
+.notification-modal__tag-results {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     padding-bottom: 12px;
 }
 
-.tweet-modal__tag-results:empty {
+.notification-modal__tag-results:empty {
     padding-bottom: 0;
 }
 
 /* 검색 기록이 아예 없을 때 안내 문구를 따로 보여주고 싶으면 이 블록을 사용한다.
-.tweet-modal__tag-history-empty {
+.notification-modal__tag-history-empty {
     margin: 0;
     padding: 12px 16px;
     color: #536471;
@@ -2144,17 +2144,17 @@ body.modal-open {
 }
 */
 
-.tweet-modal__tag-option {
+.notification-modal__tag-option {
     display: block;
 }
 
-.tweet-modal__tag-checkbox {
+.notification-modal__tag-checkbox {
     display: flex;
     width: 100%;
     color: #0f1419;
 }
 
-.tweet-modal__tag-user {
+.notification-modal__tag-user {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -2167,19 +2167,19 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__tag-user:hover:not([disabled]) {
+.notification-modal__tag-user:hover:not([disabled]) {
     background: rgba(15, 20, 25, 0.03);
 }
 
-.tweet-modal__tag-user[disabled] {
+.notification-modal__tag-user[disabled] {
     cursor: default;
 }
 
-.tweet-modal__tag-checkbox[aria-disabled="true"] {
+.notification-modal__tag-checkbox[aria-disabled="true"] {
     opacity: 0.55;
 }
 
-.tweet-modal__tag-avatar {
+.notification-modal__tag-avatar {
     width: 40px;
     height: 40px;
     border-radius: 9999px;
@@ -2188,28 +2188,28 @@ body.modal-open {
     flex-shrink: 0;
 }
 
-.tweet-modal__tag-avatar img {
+.notification-modal__tag-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
 
-.tweet-modal__tag-user-body {
+.notification-modal__tag-user-body {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
 }
 
-.tweet-modal__tag-user-name {
+.notification-modal__tag-user-name {
     font-size: 15px;
     line-height: 20px;
     font-weight: 700;
     color: #0f1419;
 }
 
-.tweet-modal__tag-user-handle {
+.notification-modal__tag-user-handle {
     font-size: 15px;
     line-height: 20px;
     color: #536471;
@@ -2218,7 +2218,7 @@ body.modal-open {
     text-overflow: ellipsis;
 }
 
-.tweet-modal__tag-chip {
+.notification-modal__tag-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -2233,11 +2233,11 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__tag-chip:hover {
+.notification-modal__tag-chip:hover {
     background: rgba(15, 20, 25, 0.06);
 }
 
-.tweet-modal__tag-chip-avatar {
+.notification-modal__tag-chip-avatar {
     width: 20px;
     height: 20px;
     border-radius: 9999px;
@@ -2246,14 +2246,14 @@ body.modal-open {
     flex-shrink: 0;
 }
 
-.tweet-modal__tag-chip-avatar img {
+.notification-modal__tag-chip-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
 
-.tweet-modal__tag-chip-name {
+.notification-modal__tag-chip-name {
     min-width: 0;
     font-size: 14px;
     line-height: 18px;
@@ -2262,14 +2262,14 @@ body.modal-open {
     text-overflow: ellipsis;
 }
 
-.tweet-modal__tag-chip-icon {
+.notification-modal__tag-chip-icon {
     width: 16px;
     height: 16px;
     fill: currentColor;
     flex-shrink: 0;
 }
 
-.tweet-modal__tag-empty {
+.notification-modal__tag-empty {
     margin: 0;
     padding: 24px 16px 12px;
     color: #536471;
@@ -2277,7 +2277,7 @@ body.modal-open {
     line-height: 20px;
 }
 
-.tweet-modal__media-editor {
+.notification-modal__media-editor {
     width: 100%;
     height: 100%;
     display: flex;
@@ -2285,7 +2285,7 @@ body.modal-open {
     background: #ffffff;
 }
 
-.tweet-modal__media-header {
+.notification-modal__media-header {
     position: sticky;
     top: 0;
     z-index: 2;
@@ -2298,7 +2298,7 @@ body.modal-open {
     backdrop-filter: blur(12px);
 }
 
-.tweet-modal__media-title {
+.notification-modal__media-title {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
@@ -2306,14 +2306,14 @@ body.modal-open {
     color: #0f1419;
 }
 
-.tweet-modal__media-header-actions {
+.notification-modal__media-header-actions {
     margin-left: auto;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.tweet-modal__media-header-btn {
+.notification-modal__media-header-btn {
     min-height: 32px;
     padding: 0 14px;
     border: 1px solid #cfd9de;
@@ -2327,12 +2327,12 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__media-header-btn[disabled] {
+.notification-modal__media-header-btn[disabled] {
     opacity: 0.45;
     cursor: default;
 }
 
-.tweet-modal__media-header-btn--ghost {
+.notification-modal__media-header-btn--ghost {
     width: 32px;
     min-width: 32px;
     padding: 0;
@@ -2340,34 +2340,34 @@ body.modal-open {
     background: transparent;
 }
 
-.tweet-modal__media-header-btn--ghost svg {
+.notification-modal__media-header-btn--ghost svg {
     fill: currentColor;
 }
 
-.tweet-modal__media-header-btn--solid {
+.notification-modal__media-header-btn--solid {
     border-color: transparent;
     background: #0f1419;
     color: #ffffff;
 }
 
-.tweet-modal__media-body {
+.notification-modal__media-body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
 }
 
-.tweet-modal__media-panel {
+.notification-modal__media-panel {
     display: none;
     flex-direction: column;
     gap: 16px;
     padding: 16px;
 }
 
-.tweet-modal__media-panel--active {
+.notification-modal__media-panel--active {
     display: flex;
 }
 
-.tweet-modal__media-alt-preview {
+.notification-modal__media-alt-preview {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2377,7 +2377,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-.tweet-modal__media-preview-image {
+.notification-modal__media-preview-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -2385,20 +2385,20 @@ body.modal-open {
     transform-origin: center center;
 }
 
-.tweet-modal__media-preview-image--alt {
+.notification-modal__media-preview-image--alt {
     max-width: 100%;
     max-height: 320px;
     object-fit: contain;
     background: #000000;
 }
 
-.tweet-modal__media-alt-label {
+.notification-modal__media-alt-label {
     font-size: 14px;
     font-weight: 700;
     color: #0f1419;
 }
 
-.tweet-modal__media-alt-field {
+.notification-modal__media-alt-field {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -2407,20 +2407,20 @@ body.modal-open {
     border-radius: 16px;
 }
 
-.tweet-modal__media-alt-meta {
+.notification-modal__media-alt-meta {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
 }
 
-.tweet-modal__media-alt-count {
+.notification-modal__media-alt-count {
     color: #536471;
     font-size: 13px;
     line-height: 18px;
 }
 
-.tweet-modal__media-alt-input {
+.notification-modal__media-alt-input {
     min-height: 160px;
     border: none;
     outline: none;
@@ -2431,7 +2431,7 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__emoji-search {
+.notification-modal__emoji-search {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2439,13 +2439,13 @@ body.modal-open {
     border-bottom: 1px solid #eff3f4;
 }
 
-.tweet-modal__emoji-search-icon {
+.notification-modal__emoji-search-icon {
     color: #536471;
     fill: currentColor;
     flex-shrink: 0;
 }
 
-.tweet-modal__emoji-search-input {
+.notification-modal__emoji-search-input {
     width: 100%;
     height: 44px;
     padding: 0 18px;
@@ -2457,11 +2457,11 @@ body.modal-open {
     color: #0f1419;
 }
 
-.tweet-modal__emoji-search-input::placeholder {
+.notification-modal__emoji-search-input::placeholder {
     color: #536471;
 }
 
-.tweet-modal__emoji-tabs {
+.notification-modal__emoji-tabs {
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
     align-items: end;
@@ -2471,7 +2471,7 @@ body.modal-open {
     background-color: #ffffff;
 }
 
-.tweet-modal__emoji-tab {
+.notification-modal__emoji-tab {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -2485,15 +2485,15 @@ body.modal-open {
     transition: background-color 0.2s, color 0.2s;
 }
 
-.tweet-modal__emoji-tab:hover {
+.notification-modal__emoji-tab:hover {
     background-color: rgba(15, 20, 25, 0.04);
 }
 
-.tweet-modal__emoji-tab--active {
+.notification-modal__emoji-tab--active {
     color: #1d9bf0;
 }
 
-.tweet-modal__emoji-tab--active::after {
+.notification-modal__emoji-tab--active::after {
     content: "";
     position: absolute;
     left: 8px;
@@ -2504,39 +2504,39 @@ body.modal-open {
     background-color: #1d9bf0;
 }
 
-.tweet-modal__emoji-tab-icon {
+.notification-modal__emoji-tab-icon {
     width: 24px;
     height: 24px;
     fill: currentColor;
     color: inherit;
 }
 
-.tweet-modal__emoji-content {
+.notification-modal__emoji-content {
     max-height: 454px;
     overflow-y: auto;
     padding: 0;
 }
 
-.tweet-modal__emoji-content::-webkit-scrollbar {
+.notification-modal__emoji-content::-webkit-scrollbar {
     width: 10px;
 }
 
-.tweet-modal__emoji-content::-webkit-scrollbar-thumb {
+.notification-modal__emoji-content::-webkit-scrollbar-thumb {
     background-color: #c3c9cf;
     border-radius: 9999px;
     border: 2px solid #ffffff;
 }
 
-.tweet-modal__emoji-section {
+.notification-modal__emoji-section {
     padding: 18px 0 10px;
     border-top: 1px solid #eff3f4;
 }
 
-.tweet-modal__emoji-section:first-child {
+.notification-modal__emoji-section:first-child {
     border-top: none;
 }
 
-.tweet-modal__emoji-section-header {
+.notification-modal__emoji-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2544,14 +2544,14 @@ body.modal-open {
     margin-bottom: 18px;
 }
 
-.tweet-modal__emoji-section-title {
+.notification-modal__emoji-section-title {
     font-size: 19px;
     font-weight: 800;
     color: #0f1419;
     line-height: 24px;
 }
 
-.tweet-modal__emoji-clear {
+.notification-modal__emoji-clear {
     border: none;
     background: transparent;
     color: #1d9bf0;
@@ -2561,14 +2561,14 @@ body.modal-open {
     font-family: inherit;
 }
 
-.tweet-modal__emoji-grid {
+.notification-modal__emoji-grid {
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
     gap: 2px 4px;
     padding: 0 24px 14px;
 }
 
-.tweet-modal__emoji-option {
+.notification-modal__emoji-option {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2583,28 +2583,28 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__emoji-option:hover {
+.notification-modal__emoji-option:hover {
     background-color: rgba(29, 155, 240, 0.08);
 }
 
-.tweet-modal__emoji-option img,
-.tweet-modal__emoji-option .emoji {
+.notification-modal__emoji-option img,
+.notification-modal__emoji-option .emoji {
     width: 28px;
     height: 28px;
 }
 
-.tweet-modal__emoji-empty {
+.notification-modal__emoji-empty {
     padding: 0 28px 18px;
     color: #536471;
     font-size: 15px;
     line-height: 20px;
 }
 
-.tweet-modal__tool-file {
+.notification-modal__tool-file {
     position: relative;
 }
 
-.tweet-modal__tool-btn {
+.notification-modal__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2619,25 +2619,25 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__tool-btn:hover {
+.notification-modal__tool-btn:hover {
     background-color: rgba(29, 155, 240, 0.1);
 }
 
-.tweet-modal__tool-btn[hidden] {
+.notification-modal__tool-btn[hidden] {
     display: none;
 }
 
-.tweet-modal__tool-btn:disabled {
+.notification-modal__tool-btn:disabled {
     opacity: 0.35;
     pointer-events: none;
     cursor: default;
 }
 
-.tweet-modal__tool-btn--geo {
+.notification-modal__tool-btn--geo {
     padding: 0;
 }
 
-.tweet-modal__tool-btn-inner {
+.notification-modal__tool-btn-inner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2646,57 +2646,57 @@ body.modal-open {
     color: inherit;
 }
 
-.tweet-modal__tool-btn-icon {
+.notification-modal__tool-btn-icon {
     display: block;
     flex-shrink: 0;
     fill: currentColor;
 }
 
-.tweet-modal__tool-btn-icon--geo {
+.notification-modal__tool-btn-icon--geo {
     width: 18px;
     height: 18px;
 }
 
-.tweet-modal__tool-btn-text-wrap {
+.notification-modal__tool-btn-text-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
-.tweet-modal__tool-btn-text {
+.notification-modal__tool-btn-text {
     display: block;
     width: 0;
     height: 0;
     overflow: hidden;
 }
 
-.tweet-modal__tool-btn--format {
+.notification-modal__tool-btn--format {
     color: #1d9bf0;
 }
 
-.tweet-modal__tool-format-icon {
+.notification-modal__tool-format-icon {
     display: block;
     fill: currentColor;
     border-radius: 4px;
 }
 
-.tweet-modal__tool-btn--active {
+.notification-modal__tool-btn--active {
     background-color: #1d9bf0;
     color: #ffffff;
 }
 
-.tweet-modal__tool-btn--active:hover {
+.notification-modal__tool-btn--active:hover {
     background-color: #1a8cd8;
 }
 
-.tweet-modal__file-input {
+.notification-modal__file-input {
     position: absolute;
     inset: 0;
     opacity: 0;
     pointer-events: none;
 }
 
-.tweet-modal__submit {
+.notification-modal__submit {
     min-width: 74px;
     padding: 8px 16px;
     background-color: #0f1419;
@@ -2710,22 +2710,22 @@ body.modal-open {
     transition: background-color 0.2s;
 }
 
-.tweet-modal__submit:disabled {
+.notification-modal__submit:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.tweet-modal__submit:not(:disabled):hover {
+.notification-modal__submit:not(:disabled):hover {
     background-color: #0f1419;
 }
 
 @media (max-width: 600px) {
-    .tweet-modal-overlay {
+    .notification-modal-overlay {
         padding: 0;
         background-color: #fff;
     }
 
-    .tweet-modal {
+    .notification-modal {
         max-width: 100%;
         max-height: 100vh;
         min-height: 100vh;
@@ -2733,32 +2733,32 @@ body.modal-open {
         box-shadow: none;
     }
 
-    .tweet-modal__header,
-    .tweet-modal__body,
-    .tweet-modal__footer {
+    .notification-modal__header,
+    .notification-modal__body,
+    .notification-modal__footer {
         padding-left: 12px;
         padding-right: 12px;
     }
 
-    .tweet-modal__context-button {
+    .notification-modal__context-button {
         margin-left: 48px;
     }
 
-    .tweet-modal__editor {
+    .notification-modal__editor {
         min-height: 96px;
         font-size: 18px;
     }
 
-    .tweet-modal__footer-bottom {
+    .notification-modal__footer-bottom {
         align-items: flex-end;
     }
 
-    .tweet-modal__footer-meta,
-    .tweet-modal__footer-meta-slot {
+    .notification-modal__footer-meta,
+    .notification-modal__footer-meta-slot {
         justify-content: flex-start;
     }
 
-    .tweet-modal__location-modal {
+    .notification-modal__location-modal {
         width: 100%;
         max-height: 100vh;
         min-height: 100vh;
@@ -3001,16 +3001,16 @@ body.modal-open {
 
 /* ── 답글 모달 서브뷰 토글 ─────────────────────────────────
    모두 같은 [data-reply-modal] 내부에 있고 event.js 가 hidden 속성으로 전환한다. */
-.tweet-modal__compose-view[hidden],
-.tweet-modal__draft-view[hidden],
-.tweet-modal__location-view[hidden],
-.tweet-modal__media-view[hidden],
-.tweet-modal__tag-view[hidden] {
+.notification-modal__compose-view[hidden],
+.notification-modal__draft-view[hidden],
+.notification-modal__location-view[hidden],
+.notification-modal__media-view[hidden],
+.notification-modal__tag-view[hidden] {
     display: none;
 }
 
 /* 기본 답글 작성 화면 */
-.tweet-modal__compose-view {
+.notification-modal__compose-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -3018,7 +3018,7 @@ body.modal-open {
 }
 
 /* 임시저장 목록 화면 */
-.tweet-modal__draft-view {
+.notification-modal__draft-view {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -3027,7 +3027,7 @@ body.modal-open {
 }
 
 /* 위치 선택 화면 */
-.tweet-modal__location-view {
+.notification-modal__location-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -3035,7 +3035,7 @@ body.modal-open {
 }
 
 /* 사용자 태그 선택 화면 */
-.tweet-modal__tag-view {
+.notification-modal__tag-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -3043,7 +3043,7 @@ body.modal-open {
 }
 
 /* 미디어 ALT 편집 화면 */
-.tweet-modal__media-view {
+.notification-modal__media-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -3420,22 +3420,22 @@ body.modal-open {
 }
 
 /* ── 판매글 선택 서브뷰 ──────────────────────────────────────── */
-.tweet-modal__product-view {
+.notification-modal__product-view {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.tweet-modal__product-view[hidden] {
+.notification-modal__product-view[hidden] {
     display: none;
 }
 
-.tweet-modal__product-view .draft-panel__avatar {
+.notification-modal__product-view .draft-panel__avatar {
     border-radius: 8px;
 }
 
 /* ── 선택된 판매글 카드 ──────────────────────────────────────── */
-.tweet-modal__selected-product {
+.notification-modal__selected-product {
     margin-top: 12px;
     padding: 0 4px;
 }
