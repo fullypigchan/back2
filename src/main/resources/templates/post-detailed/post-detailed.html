@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/common/layout}">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -33,6 +34,7 @@
     <script src="/js/utils/exchange.js"></script>
 </head>
 <body>
+<th:block layout:fragment="content">
 <div class="post-detail-shell" id="postDetail">
     <main class="post-detail-main">
         <header class="post-detail-header">
@@ -493,6 +495,9 @@
         </section>
     </main>
 </div>
+    </th:block>
+
+    <th:block layout:fragment="modals">
 <!-- 모달/레이어 영역 -->
 <div class="layers-dropdown-container" id="postDetailMoreDropdown" hidden>
     <div class="layers-overlay"></div>
@@ -681,7 +686,7 @@
 <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
 <div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
 <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
-
+    </th:block>
 </body>
 </html>
 

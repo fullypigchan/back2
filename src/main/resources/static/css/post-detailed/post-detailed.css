@@ -56,6 +56,11 @@ a {
     background: #ffffff;
 }
 
+/* main.css .postCard {display:flex} 무력화 — hero는 본인 마크업 구조에 맞춰 block 누적 */
+.post-detail-hero.postCard {
+    display: block;
+}
+
 .post-detail-main {
     width: 100%;
     max-width: 600px;
@@ -522,6 +527,7 @@ div.postHashtags {
     gap: 12px;
     align-items: flex-start;
     min-height: 0;
+    height: auto;
     padding: 6px 0 12px;
 }
 

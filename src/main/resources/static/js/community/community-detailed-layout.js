@@ -147,7 +147,7 @@ const CommunityDetailLayout = {
             const nick = this.escapeHtml(member.memberNickname);
             const handle = this.formatHandle(member.memberHandle);
             return `
-            <article class="about-member-row" data-member-id="${member.memberId}">
+            <article class="about-member-row" data-member-id="${member.memberId}" data-profile-id="${member.memberId}">
                 <div class="about-member-avatar">
                     <img src="${member.memberProfileFilePath || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
                 </div>
@@ -195,7 +195,7 @@ const CommunityDetailLayout = {
         const roleLabel = role === "admin" ? "관리자" : role === "moderator" ? "중재자" : "";
         const canManage = (myRole === "admin" || myRole === "creator") && role !== "admin" && role !== "creator";
         return `
-        <div class="member-item" data-member-id="${member.memberId}">
+        <div class="member-item" data-member-id="${member.memberId}" data-profile-id="${member.memberId}">
             <div class="member-info">
                 <span class="member-nickname">${nick}</span>
                 <span class="member-handle">${handle}</span>
