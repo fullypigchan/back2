@@ -284,15 +284,15 @@
 
         return `
         <article class="post-detail-reply-card postCard" data-reply-id="${r.id}" data-member-id="${r.memberId}">
-            <div class="post-detail-avatar post-detail-avatar--image">
-                <img src="${profile}" alt="프로필" onerror="this.src='/images/profile/default_image.png'"/>
-            </div>
             <div class="post-detail-reply-content">
                 <header class="post-detail-reply-header">
                     <div class="post-detail-reply-identity">
+                        <div class="post-detail-avatar post-detail-avatar--image">
+                            <img src="${profile}" alt="프로필" onerror="this.src='/images/profile/default_image.png'"/>
+                        </div>
                         <strong class="postName">${name}</strong>
                         <span class="postHandle">${handle}</span>
-                        <span class="postTime" data-reply-time>·&nbsp;${time}${isEdited ? ' <span class="reply-edited-flag">(수정됨)</span>' : ''}</span>
+                        <span class="postTime" data-reply-time>${time}${isEdited ? ' <span class="reply-edited-flag">(수정됨)</span>' : ''}</span>
                     </div>
                     ${isAuthor ? `
                     <div class="post-detail-more-wrap">

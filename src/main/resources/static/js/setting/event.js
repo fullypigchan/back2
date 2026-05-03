@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // 사이드바 게시하기 모달 활성화. memberId는 setting.html inline의 window.settingMember.id 사용.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => window.settingMember?.id,
+    });
+
     /*
      * 이 파일은 setting.html 안의 설정 페이지 전체 상호작용을 담당한다.
      * 사용 위치:

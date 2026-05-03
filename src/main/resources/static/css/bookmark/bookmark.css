@@ -3284,3 +3284,14 @@ input {
         min-height: 64px;
     }
 }
+
+/* 자체 답글 모달(#bookmarkReplyModal)은 [hidden] 토글을 사용하지만
+   bookmark.css의 다른 .bookmark-modal-overlay 정의(line 2952)가 cascade로 display:none을 강제한다.
+   id selector specificity로 우회. Phase 3 통합 시 이 룰과 자체 답글 모달은 함께 제거된다. */
+#bookmarkReplyModal {
+    z-index: 2000;
+}
+
+#bookmarkReplyModal:not([hidden]) {
+    display: flex;
+}
