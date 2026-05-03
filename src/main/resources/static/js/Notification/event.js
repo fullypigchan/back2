@@ -1,5 +1,5 @@
 window.onload = function () {
-    // 사이드바 게시하기 모달 활성화. MEMBER_ID는 HTML inline top-level const.
+    // 사이드바 게시하기 + 공용 답글 모달 활성화. MEMBER_ID는 HTML inline top-level const.
     postModalApi.bootstrap({
         services: service,
         layout: layout,
@@ -17,7 +17,7 @@ window.onload = function () {
     const layersRoot = document.getElementById("layers");
 
     // HTML에 미리 선언된 [data-reply-modal] 오버레이. open/close 시 hidden만 토글하며 재사용한다.
-    const replyModalOverlay = document.querySelector("[data-reply-modal]");
+    const replyModalOverlay = document.querySelector("[data-notification-reply-modal]");
     // 답글 모달 내부에서 단일 요소를 선택하는 헬퍼
     const q = (sel) => replyModalOverlay?.querySelector(sel);
     // 답글 모달 내부에서 복수 요소를 선택하는 헬퍼
@@ -2628,7 +2628,8 @@ window.onload = function () {
                 e.stopPropagation();
                 closeShareDropdown();
                 closeNotificationDropdown();
-                openReplyModal(button);
+                // 답글 모달 열기는 공용 답글 모달(post-modal.js setupReply)이 처리한다.
+                // 자체 답글 모달 마크업/CSS/핸들러는 Phase 3 후속 PR에서 통째 제거 예정.
             });
         });
 
