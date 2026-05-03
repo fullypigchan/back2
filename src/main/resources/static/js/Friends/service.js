@@ -14,15 +14,15 @@ const friendsService = (() => {
         return data;
     };
 
-    const getFollowersList = async (page, memberId, callback) => {
-        const response = await fetch(`/api/friends/followers/${page}?memberId=${memberId}`);
+    const getFollowersList = async (page, profileId, viewerId, callback) => {
+        const response = await fetch(`/api/friends/followers/${page}?profileId=${profileId}&viewerId=${viewerId}`);
         const data = await response.json();
         if (callback) return callback(data);
         return data;
     };
 
-    const getFollowingsList = async (page, memberId, callback) => {
-        const response = await fetch(`/api/friends/followings/${page}?memberId=${memberId}`);
+    const getFollowingsList = async (page, profileId, viewerId, callback) => {
+        const response = await fetch(`/api/friends/followings/${page}?profileId=${profileId}&viewerId=${viewerId}`);
         const data = await response.json();
         if (callback) return callback(data);
         return data;
