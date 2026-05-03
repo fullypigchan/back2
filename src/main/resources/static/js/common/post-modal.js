@@ -493,6 +493,7 @@ const postModalApi = (() => {
         const locationDisplay = overlay.querySelector(".tweet-modal__location-display");
         const locationDisplayText = locationDisplay ? locationDisplay.querySelector(".tweet-modal__location-display-text-inner") : null;
         let selectedLocation = null;
+        let ps = null;
 
         function updateLocationUI() {
             if (locationDisplay && locationDisplayText) {
@@ -1041,6 +1042,8 @@ const postModalApi = (() => {
         const submit = overlay.querySelector(".tweet-modal__submit");
         const maxLength = 500;
         let targetPostId = null;
+        // onReplySubmitSuccess 콜백에서 카운트 갱신 등을 처리할 수 있도록 활성 트리거 버튼을 추적한다.
+        let activeReplyBtn = null;
 
         // 피드 카드의 답글 버튼 위임 — 동적 카드도 같은 경로로 모달이 열린다.
         document.addEventListener("click", (e) => {
@@ -1048,6 +1051,7 @@ const postModalApi = (() => {
             if (!replyBtn) { return; }
             const card = replyBtn.closest(".postCard");
             targetPostId = card ? card.dataset.postId : null;
+            activeReplyBtn = replyBtn;
 
             if (card) {
                 const sourceName = card.querySelector(".postName")?.textContent || "";
@@ -1115,6 +1119,16 @@ const postModalApi = (() => {
                 formData.append("memberId", getMemberId());
                 formData.append("postContent", editor.textContent);
 
+                const files = ctx.getAttachedFiles();
+                if (files.length > 0) {
+                    files.forEach(f => formData.append("files", f));
+                }
+
+                const tags = ctx.getTags();
+                tags.forEach((tag, i) => {
+                    formData.append(`hashtags[${i}].tagName`, tag.textContent.replace("#", ""));
+                });
+
                 const location = ctx.getSelectedLocation();
                 if (location) {
                     formData.append("location", location);
@@ -1132,8 +1146,12 @@ const postModalApi = (() => {
 
                 await _services.writeReply(targetPostId, formData);
             }
+            const submittedPostId = targetPostId;
+            const submittedButton = activeReplyBtn;
             close();
-            if (onSubmitSuccess) { onSubmitSuccess(); }
+            if (onSubmitSuccess && submittedPostId) {
+                onSubmitSuccess({ postId: submittedPostId, button: submittedButton });
+            }
         });
 
         return { close: close };
@@ -1159,18 +1177,21 @@ const postModalApi = (() => {
             });
         }
 
-        const replyOverlay = document.querySelector("[data-reply-modal]");
-        if (replyOverlay) {
-            const replyEditor = replyOverlay.querySelector(".tweet-modal__editor");
-            const replyMention = setupMention(replyEditor, replyEditor.parentElement, getMemberId);
-            const replyCtx = setupSubViews(replyOverlay, getMemberId);
-            setupReply({
-                overlay: replyOverlay,
-                mention: replyMention,
-                ctx: replyCtx,
-                getMemberId: getMemberId,
-                onSubmitSuccess: opts.onReplySubmitSuccess,
-            });
+        // 자체 답글 모달이 있는 페이지(bookmark/mypage/Notification 등)는 skipReply: true 로 공용 셋업을 건너뛴다.
+        if (!opts.skipReply) {
+            const replyOverlay = document.querySelector("[data-reply-modal]");
+            if (replyOverlay) {
+                const replyEditor = replyOverlay.querySelector(".tweet-modal__editor");
+                const replyMention = setupMention(replyEditor, replyEditor.parentElement, getMemberId);
+                const replyCtx = setupSubViews(replyOverlay, getMemberId);
+                setupReply({
+                    overlay: replyOverlay,
+                    mention: replyMention,
+                    ctx: replyCtx,
+                    getMemberId: getMemberId,
+                    onSubmitSuccess: opts.onReplySubmitSuccess,
+                });
+            }
         }
     }
 

@@ -15,4 +15,12 @@ public class BusinessMemberDAO {
     public void save(BusinessMemberVO businessMemberVO) {
         businessMemberMapper.insert(businessMemberVO);
     }
+
+    public boolean existsByCompanyName(String companyName) {
+        return businessMemberMapper.countByCompanyName(companyName) > 0;
+    }
+
+    public boolean existsByBusinessNumber(String businessNumber) {
+        return businessMemberMapper.countByBusinessNumber(businessNumber) > 0;
+    }
 }

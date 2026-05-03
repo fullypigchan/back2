@@ -1,3 +1,4 @@
+
 INSERT INTO tbl_news (admin_id, news_title, news_content, news_source_url, news_category, news_type)
 VALUES
     (900005, '2026 Export Record High', 'Export volume increased 12.3% YoY reaching $345 billion in H1 2026.', 'https://example.com/news/1', 'trade', 'general'),

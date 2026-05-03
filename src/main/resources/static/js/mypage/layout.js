@@ -203,7 +203,7 @@ const mypageLayout = (() => {
         const files = post.postFiles ?? []; // 첨부파일이 없을 때도 안전하게 처리하기 위해 기본값을 준다.
         const images = files.filter((file) => String(file.contentType).toUpperCase() === "IMAGE").slice(0, 4); // 이미지 파일만 최대 4장까지 뽑는다.
         const attachment = files.find((file) => String(file.contentType).toUpperCase() !== "IMAGE"); // 이미지가 없을 때 보여줄 일반 첨부파일 1개를 찾는다.
-        const hashtags = (post.hashtags ?? []).map((tag) => `<span class="Category-Tag">#${tag.tagName}</span>`).join(""); // 해시태그를 더미 카드에 맞는 span 목록으로 만든다.
+        const hashtags = (post.hashtags ?? []).map((tag) => `<a class="postHashtag" href="/explore/search?keyword=${encodeURIComponent(tag.tagName)}">#${tag.tagName}</a>`).join(" "); // 해시태그를 main 피드와 동일한 a 링크로 만든다.
         const viewCount = 0; // 현재 DTO에 조회수 필드가 없어서 더미 구조만 유지하고 값은 0으로 둔다.
         // 카드의 초기 아이콘 상태는 서버가 내려준 최종 상태를 그대로 따른다.
         // Likes 탭만 예외적으로 "내가 좋아요한 글 목록"이라는 화면 의미가 더 강하므로,
@@ -232,56 +232,68 @@ const mypageLayout = (() => {
         }
 
         const avatarHtml = post.memberProfileFileName
-            ? `<div class="Post-Avatar Post-Avatar--Image"><img class="Post-Avatar-Image" src="${post.memberProfileFileName}" alt="프로필 이미지"></div>`
-            : `<div class="Post-Avatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>`;
+            ? `<div class="postAvatar postAvatar--image"><img class="postAvatarImage" src="${post.memberProfileFileName}" alt="프로필 이미지"></div>`
+            : `<div class="postAvatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>`;
 
-        return `<article class="Post-Card" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}">
-              <div class="Post-Avatar-Wrapper">
-                  ${avatarHtml}
-              </div>
-              <div class="Post-Body">
-                  <header class="Post-Header">
-                      <div class="Post-Identity">
-                          <strong class="Post-Name">${post.memberNickname ?? post.memberHandle ?? ""}</strong>
-                          <span class="Post-Handle">${post.memberHandle ?? ""}</span>
-                          <span class="Post-Time">${post.createdDatetime ?? ""}</span>
+        const communityMetaHtml = post.communityId && post.communityName
+            ? `<div class="Post-Community-Meta">
+                   <a class="Post-Community-Meta-Link" href="/community/${post.communityId}">${post.communityName}</a>
+               </div>`
+            : "";
+
+        return `<article class="postCard${post.communityId ? " Post-Card--Community" : ""}" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}"${post.communityId ? ` data-community-id="${post.communityId}"` : ""}>
+              <div class="postBody">
+                  ${communityMetaHtml}
+                  <header class="postHeader">
+                      <div class="postIdentity">
+                          ${avatarHtml}
+                          <div class="postIdentity__copy">
+                              <div class="postIdentity__nameRow">
+                                  <strong class="postName">${post.memberNickname ?? post.memberHandle ?? ""}</strong>
+                              </div>
+                              <div class="postIdentity__metaRow">
+                                  <span class="postHandle">${post.memberHandle ?? ""}</span>
+                                  <span class="postIdentity__sep">·</span>
+                                  <span class="postTime">${post.createdDatetime ?? ""}</span>
+                              </div>
+                          </div>
                       </div>
-                      <button class="Post-More-Button" type="button" aria-label="더 보기" data-action="more" data-card-type="${cardType}">
-                          <svg viewBox="0 0 24 24" class="Post-More-Icon" aria-hidden="true">
+                      <button class="postMoreButton" type="button" aria-label="더 보기" data-action="more" data-card-type="${cardType}">
+                          <svg viewBox="0 0 24 24" class="postMoreIcon" aria-hidden="true">
                               <path d="${ICON_PATHS.more}"/>
                           </svg>
                       </button>
                   </header>
-                  <p class="Post-Text">${post.postContent ?? ""}</p>
-                  ${hashtags ? `<div class="Detail-Category-Tags">${hashtags}</div>` : ""}
+                  <p class="Post-Text postText">${post.postContent ?? ""}</p>
+                  ${hashtags ? `<div class="postHashtags">${hashtags}</div>` : ""}
                   ${mediaHtml}
-                  <footer class="Post-Metrics">
-                      <div class="Post-Action-Bar">
-                          <button class="Post-Action-Btn Reply" type="button" aria-label="답글 ${post.replyCount ?? 0}"
+                  <footer class="postMetrics">
+                      <div class="tweet-action-bar">
+                          <button class="tweet-action-btn" type="button" aria-label="답글 ${post.replyCount ?? 0}"
                                   data-action="reply">
-                              <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" class="tweet-action-icon" aria-hidden="true">
                                   <path d="${ICON_PATHS.reply}"/>
                               </svg>
-                              <span class="Post-Action-Count">${post.replyCount ?? 0}</span>
+                              <span class="tweet-action-count">${post.replyCount ?? 0}</span>
                           </button>
-                          <button class="Post-Action-Btn Like${isLiked ? " liked" : ""}" type="button" aria-label="좋아요 ${post.likeCount ?? 0}"
+                          <button class="tweet-action-btn tweet-action-btn--like${isLiked ? " active" : ""}" type="button" aria-label="좋아요 ${post.likeCount ?? 0}"
                                   data-action="like" data-liked="${isLiked}">
                               ${createActionIcon(isLiked ? FILLED_ICON_PATHS.like : ICON_PATHS.like)}
-                              <span class="Post-Action-Count">${post.likeCount ?? 0}</span>
+                              <span class="tweet-action-count">${post.likeCount ?? 0}</span>
                           </button>
-                          <button class="Post-Action-Btn" type="button" aria-label="조회수 ${viewCount}">
-                              <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
+                          <button class="tweet-action-btn" type="button" aria-label="조회수 ${viewCount}">
+                              <svg viewBox="0 0 24 24" class="tweet-action-icon" aria-hidden="true">
                                   <path d="${ICON_PATHS.views}"/>
                               </svg>
-                              <span class="Post-Action-Count">${viewCount}</span>
+                              <span class="tweet-action-count">${viewCount}</span>
                           </button>
-                          <div class="Post-Action-Right">
-                              <button class="Post-Action-Btn Bookmark${isBookmarked ? " bookmarked" : ""}" type="button" aria-label="북마크"
+                          <div class="tweet-action-right">
+                              <button class="tweet-action-btn tweet-action-btn--bookmark${isBookmarked ? " active" : ""}" type="button" aria-label="북마크"
                                       data-action="bookmark" data-bookmarked="${isBookmarked}">
                                   ${createActionIcon(isBookmarked ? FILLED_ICON_PATHS.bookmark : ICON_PATHS.bookmark)}
                               </button>
-                              <button class="Post-Action-Btn Share" type="button" aria-label="공유" data-action="share">
-                                  <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
+                              <button class="tweet-action-btn" type="button" aria-label="공유" data-action="share">
+                                  <svg viewBox="0 0 24 24" class="tweet-action-icon" aria-hidden="true">
                                       <path d="${ICON_PATHS.share}"/>
                                   </svg>
                               </button>

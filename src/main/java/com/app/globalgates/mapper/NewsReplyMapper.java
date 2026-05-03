@@ -20,4 +20,8 @@ public interface NewsReplyMapper {
     int selectCountByNewsId(Long newsId);
 
     void softDeleteById(@Param("id") Long id, @Param("memberId") Long memberId);
+
+    int updateContentById(@Param("id") Long id,
+                          @Param("memberId") Long memberId,
+                          @Param("content") String content);
 }

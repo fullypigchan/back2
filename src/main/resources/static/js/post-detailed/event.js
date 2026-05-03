@@ -30,6 +30,19 @@ window.onload = () => {
         p.setAttribute("d", active ? (p.dataset.pathActive || p.getAttribute("d")) : (p.dataset.pathInactive || p.getAttribute("d")));
     }
 
+    // 상세에서 토글된 좋아요/북마크 상태를 메인 목록 카드와 동기화하기 위한 sessionStorage 기록
+    const POST_STATE_KEY = "postStateChanges";
+    function recordPostStateChange(postId, field, value) {
+        if (!postId) return;
+        try {
+            const raw = sessionStorage.getItem(POST_STATE_KEY) || "{}";
+            const changes = JSON.parse(raw);
+            changes[postId] = changes[postId] || {};
+            changes[postId][field] = value;
+            sessionStorage.setItem(POST_STATE_KEY, JSON.stringify(changes));
+        } catch (e) { /* ignore */ }
+    }
+
     // ── 1. 인라인 답글 작성기 (메인 setupSubViews 방식 그대로) ──
     const overlay = document.querySelector(".post-detail-inline-reply");
     const replyBox = document.querySelector(".post-detail-reply-box");
@@ -112,6 +125,25 @@ window.onload = () => {
     const boldBtn = overlay?.querySelector(".tweet-modal__tool-btn--bold");
     const italicBtn = overlay?.querySelector(".tweet-modal__tool-btn--italic");
     const editorEl = document.querySelector(".post-detail-inline-reply-editor");
+
+    // 인라인 답글 펼침/접힘 토글
+    const inlineContext = overlay?.querySelector(".post-detail-inline-reply-context");
+    const inlineFooterBottom = overlay?.querySelector(".tweet-modal__footer-bottom");
+    const inlineComposerMeta = overlay?.querySelector(".composerMeta");
+
+    composeView?.addEventListener("focusin", () => {
+        inlineContext?.removeAttribute("hidden");
+        inlineFooterBottom?.removeAttribute("hidden");
+        inlineComposerMeta?.removeAttribute("hidden");
+    });
+
+    composeView?.addEventListener("focusout", (e) => {
+        if (e.relatedTarget && composeView.contains(e.relatedTarget)) return;
+        if (editorEl && editorEl.textContent.trim() !== "") return;
+        inlineContext?.setAttribute("hidden", "");
+        inlineFooterBottom?.setAttribute("hidden", "");
+        inlineComposerMeta?.setAttribute("hidden", "");
+    });
 
     function syncFormatButtons() {
         if (boldBtn) { boldBtn.classList.toggle("active", document.queryCommandState("bold")); }
@@ -249,6 +281,50 @@ window.onload = () => {
             if (e.key === "Escape") { inlineTagEditorOpen = false; syncInlineTagUI(); }
         });
     }
+
+    // ── 인라인 카테고리 chip (post-modal.js setupSubViews 패턴 동일, addTag 만 addInlineTag 로 교체) ──
+    const inlineCatScroll = overlay?.querySelector(".composerCategoryBanner .category-scroll");
+    const inlineCatLeft = overlay?.querySelector(".composerCategoryBanner .category-scroll-left");
+    const inlineCatRight = overlay?.querySelector(".composerCategoryBanner .category-scroll-right");
+    let inlineCatOriginalHTML = inlineCatScroll ? inlineCatScroll.innerHTML : "";
+
+    function checkInlineCatScroll() {
+        if (!inlineCatScroll || !inlineCatLeft || !inlineCatRight) { return; }
+        inlineCatLeft.classList.toggle("off", inlineCatScroll.scrollLeft <= 0);
+        inlineCatRight.classList.toggle("off", inlineCatScroll.scrollLeft >= inlineCatScroll.scrollWidth - inlineCatScroll.clientWidth - 1);
+    }
+
+    if (inlineCatScroll) {
+        inlineCatScroll.addEventListener("scroll", () => { checkInlineCatScroll(); });
+        inlineCatScroll.addEventListener("click", (e) => {
+            const chip = e.target.closest(".cat-chip");
+            const backBtn = e.target.closest(".cat-back-btn");
+            if (backBtn) { inlineCatScroll.innerHTML = inlineCatOriginalHTML; inlineCatScroll.scrollLeft = 0; setTimeout(checkInlineCatScroll, 50); return; }
+            if (!chip) { return; }
+            if (chip.classList.contains("has-subs")) {
+                const catName = chip.textContent.replace(" ›", "");
+                const subs = chip.getAttribute("data-subs");
+                if (!subs) { return; }
+                const subList = subs.split(",");
+                let html = '<button type="button" class="cat-back-btn"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(180 12 12)" fill="currentColor"/></svg></button>';
+                html += '<button type="button" class="cat-chip parent-highlight">' + catName + '</button>';
+                for (let i = 0; i < subList.length; i++) { html += '<button type="button" class="cat-chip" data-is-sub="true">' + subList[i] + '</button>'; }
+                inlineCatScroll.innerHTML = html;
+                inlineCatScroll.scrollLeft = 0;
+                setTimeout(checkInlineCatScroll, 50);
+                return;
+            }
+            const chipText = chip.textContent.trim();
+            if (chipText === "전체") { return; }
+            addInlineTag(chipText);
+            const allChips = inlineCatScroll.querySelectorAll(".cat-chip:not(.parent-highlight)");
+            for (let i = 0; i < allChips.length; i++) { allChips[i].classList.remove("active", "sub-active"); }
+            if (chip.getAttribute("data-is-sub")) { chip.classList.add("sub-active"); } else { chip.classList.add("active"); }
+        });
+    }
+    if (inlineCatLeft) { inlineCatLeft.addEventListener("click", () => { inlineCatScroll.scrollBy({ left: -200, behavior: "smooth" }); }); }
+    if (inlineCatRight) { inlineCatRight.addEventListener("click", () => { inlineCatScroll.scrollBy({ left: 200, behavior: "smooth" }); }); }
+    checkInlineCatScroll();
 
     // ── 인라인 상품 선택 (메인 setupSubViews 패턴) ──
     const productBtn = overlay?.querySelector(".tweet-modal__tool-btn--product");
@@ -636,6 +712,7 @@ window.onload = () => {
             if (countEl) countEl.textContent = count + 1;
         }
         syncPath(btn, !isActive);
+        recordPostStateChange(meta.postId, "liked", !isActive);
     });
 
     // ── 4. 북마크 토글 (이벤트 위임) ──
@@ -655,6 +732,7 @@ window.onload = () => {
             btn.classList.add("active");
         }
         syncPath(btn, !isActive);
+        recordPostStateChange(meta.postId, "bookmarked", !isActive);
     });
 
     // ── 5. 공유 드롭다운 (이벤트 위임) ──
@@ -758,8 +836,12 @@ window.onload = () => {
                 const card = document.querySelector(`.postCard[data-post-id="${shareBookmarkTargetPostId}"]`);
                 if (card) {
                     const btn = card.querySelector(".tweet-action-btn--bookmark");
-                    if (btn) btn.classList.add("active");
+                    if (btn) {
+                        btn.classList.add("active");
+                        syncPath(btn, true);
+                    }
                 }
+                recordPostStateChange(shareBookmarkTargetPostId, "bookmarked", true);
                 showToast("북마크 폴더에 추가되었습니다.");
             } else if (result.status === 409) {
                 showToast("이 폴더에 이미 북마크된 게시물입니다.");
@@ -842,7 +924,7 @@ window.onload = () => {
     }
 
     document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".post-detail-more-trigger");
+        const btn = e.target.closest(".postMoreButton");
         if (!btn) {
             if (moreDropdown && !moreDropdown.hidden && !moreDropdown.contains(e.target)) closeMoreDrop();
             return;
@@ -873,7 +955,8 @@ window.onload = () => {
         const rect = btn.getBoundingClientRect();
         if (moreMenu) {
             moreMenu.style.top = (rect.bottom + 8) + "px";
-            moreMenu.style.left = Math.max(16, rect.right - 240) + "px";
+            moreMenu.style.left = "auto";
+            moreMenu.style.right = (window.innerWidth - rect.right) + "px";
         }
         if (moreDropdown) moreDropdown.hidden = false;
     });
@@ -981,369 +1064,21 @@ window.onload = () => {
         }
     });
 
-    // ── 8. 대댓글 모달 (댓글에 답글) ──
-    const replyModal = document.querySelector("[data-reply-modal]");
-    const replyEditor = replyModal?.querySelector("[data-testid='tweetTextarea_0']");
-    const replySubmit = replyModal?.querySelector("[data-testid='tweetButton']");
-    const replyClose = replyModal?.querySelector("[data-testid='app-bar-close']");
-    const replySrcName = replyModal?.querySelector("[data-reply-source-name]");
-    const replySrcHandle = replyModal?.querySelector("[data-reply-source-handle]");
-    const replySrcTime = replyModal?.querySelector("[data-reply-source-time]");
-    const replySrcText = replyModal?.querySelector("[data-reply-source-text]");
-    const replySrcInitial = replyModal?.querySelector("[data-reply-source-initial]");
-    let replyTargetPostId = null;
+    // ── 8. 답글 모달 (post-modal.js 가 [data-reply-modal] fragment 를 자동 셋업) ──
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => memberId,
+        onReplySubmitSuccess: refreshReplies,
+    });
 
-    // 모달 답글 에디터에 멘션 셋업
-    const modalMention = replyEditor ? setupMention(replyEditor, replyEditor.parentElement) : null;
-
-    // ── 모달 내부 요소들 ──
-    const modalFileBtn = replyModal?.querySelector("[data-testid='mediaUploadButton']");
-    const modalFileInput = replyModal?.querySelector("[data-testid='fileInput']");
-    const modalAttachmentPreview = replyModal?.querySelector("[data-attachment-preview]");
-    const modalAttachmentMedia = replyModal?.querySelector("[data-attachment-media]");
-    const modalEmojiBtn = replyModal?.querySelector("[data-testid='emojiButton']");
-    const modalGeoBtn = replyModal?.querySelector("[data-testid='geoButton']");
-    const modalProductBtn = replyModal?.querySelector("[data-testid='productSelectButton']");
-    const modalBoldBtn = replyModal?.querySelector("[data-format='bold']");
-    const modalItalicBtn = replyModal?.querySelector("[data-format='italic']");
-    const modalGaugeText = replyModal?.querySelector("[data-reply-gauge-text]");
-    const modalLocationDisplay = replyModal?.querySelector("[data-location-display]");
-    const modalLocationName = replyModal?.querySelector("[data-location-name]");
-    const modalSelectedProduct = replyModal?.querySelector("[data-selected-product]");
-    const modalProductImage = replyModal?.querySelector("[data-selected-product-image]");
-    const modalProductNameEl = replyModal?.querySelector("[data-selected-product-name]");
-    const modalProductPrice = replyModal?.querySelector("[data-selected-product-price]");
-    const modalProductRemove = replyModal?.querySelector("[data-product-remove]");
-    let modalAttachedFiles = [];
-    let modalAttachedUrls = [];
-    let modalSelectedLocation = null;
-    let modalSelectedProductId = null;
-    let modalSavedRange = null;
-    const modalMaxLength = 500;
-
-    // 모달 파일 업로드
-    if (modalFileBtn && modalFileInput) {
-        modalFileBtn.addEventListener("click", () => { console.log("모달파일 들어옴1"); modalFileInput.click(); });
-    }
-
-    function makeModalImageCell(index, url, cls) {
-        return '<div class="media-cell ' + cls + '"><div class="media-cell-inner"><div class="media-img-container"><div class="media-bg" style="background-image:url(\'' + url + '\');"></div><img src="' + url + '" class="media-img" /></div><button type="button" class="media-btn-delete" data-modal-remove-index="' + index + '"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div>';
-    }
-
-    function updateModalAttachmentView() {
-        if (!modalAttachmentMedia) return;
-        if (modalAttachedFiles.length === 0) { if (modalAttachmentPreview) modalAttachmentPreview.setAttribute("hidden", ""); modalAttachmentMedia.innerHTML = ""; return; }
-        if (modalAttachmentPreview) modalAttachmentPreview.removeAttribute("hidden");
-        const file = modalAttachedFiles[0];
-        const url = modalAttachedUrls[0];
-        if (file.type.includes("video")) {
-            modalAttachmentMedia.innerHTML = '<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer"><div class="media-cell media-cell--single"><div class="media-cell-inner"><div class="media-img-container"><video class="tweet-modal__attachment-video" controls><source src="' + url + '" type="' + file.type + '"></video></div><button type="button" class="media-btn-delete" data-modal-remove-index="0"><svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></g></svg></button></div></div></div>';
-        } else {
-            modalAttachmentMedia.innerHTML = '<div class="media-aspect-ratio media-aspect-ratio--single"></div><div class="media-absolute-layer">' + makeModalImageCell(0, url, "media-cell--single") + '</div>';
-        }
-    }
-
-    if (modalFileInput && modalAttachmentPreview && modalAttachmentMedia) {
-        modalFileInput.addEventListener("change", (e) => {
-            console.log("모달파일 들어옴2 change");
-            const files = e.target.files;
-            if (files.length === 0) return;
-            const file = files[0];
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.addEventListener("load", (ev) => {
-                modalAttachedFiles = [file];
-                modalAttachedUrls = [ev.target.result];
-                modalFileInput.value = "";
-                updateModalAttachmentView();
-            });
-        });
-        modalAttachmentMedia.addEventListener("click", (e) => {
-            const removeBtn = e.target.closest("[data-modal-remove-index]");
-            if (removeBtn) { modalAttachedFiles = []; modalAttachedUrls = []; updateModalAttachmentView(); }
-        });
-    }
-
-    // 모달 이모지
-    if (modalEmojiBtn && replyEditor) {
-        const modalPicker = new EmojiButton({ position: "top-start", rootElement: replyModal });
-        modalPicker.on("emoji", (emoji) => {
-            console.log("모달이모지 들어옴1:", emoji);
-            replyEditor.focus();
-            const sel = window.getSelection();
-            if (modalSavedRange && replyEditor.contains(modalSavedRange.startContainer)) { sel.removeAllRanges(); sel.addRange(modalSavedRange); }
-            const textNode = document.createTextNode(emoji);
-            if (sel.rangeCount > 0 && replyEditor.contains(sel.getRangeAt(0).startContainer)) {
-                const range = sel.getRangeAt(0); range.deleteContents(); range.insertNode(textNode); range.setStartAfter(textNode); range.setEndAfter(textNode); sel.removeAllRanges(); sel.addRange(range);
-            } else { replyEditor.appendChild(textNode); const range = document.createRange(); range.setStartAfter(textNode); range.setEndAfter(textNode); sel.removeAllRanges(); sel.addRange(range); }
-            modalSavedRange = sel.getRangeAt(0).cloneRange();
-            replyEditor.dispatchEvent(new Event("input"));
-        });
-        modalEmojiBtn.addEventListener("click", () => { console.log("모달이모지 들어옴2 toggle"); modalPicker.togglePicker(modalEmojiBtn); });
-    }
-
-    // 모달 커서 위치 저장
-    if (replyEditor) {
-        replyEditor.addEventListener("keyup", () => { const sel = window.getSelection(); if (sel.rangeCount > 0 && replyEditor.contains(sel.anchorNode)) { modalSavedRange = sel.getRangeAt(0).cloneRange(); } });
-        replyEditor.addEventListener("mouseup", () => { const sel = window.getSelection(); if (sel.rangeCount > 0 && replyEditor.contains(sel.anchorNode)) { modalSavedRange = sel.getRangeAt(0).cloneRange(); } });
-    }
-
-    // 모달 볼드/이탤릭
-    function syncModalFormatButtons() {
-        if (modalBoldBtn) modalBoldBtn.classList.toggle("active", document.queryCommandState("bold"));
-        if (modalItalicBtn) modalItalicBtn.classList.toggle("active", document.queryCommandState("italic"));
-    }
-    if (modalBoldBtn && replyEditor) { modalBoldBtn.addEventListener("click", () => { replyEditor.focus(); document.execCommand("bold"); syncModalFormatButtons(); }); }
-    if (modalItalicBtn && replyEditor) { modalItalicBtn.addEventListener("click", () => { replyEditor.focus(); document.execCommand("italic"); syncModalFormatButtons(); }); }
-    if (replyEditor) { replyEditor.addEventListener("keyup", syncModalFormatButtons); replyEditor.addEventListener("mouseup", syncModalFormatButtons); }
-
-    // 모달 위치 선택 (서브뷰 전환)
-    const modalComposeView = replyModal?.querySelector(".tweet-modal__compose-view");
-    const modalLocationView = replyModal?.querySelector(".tweet-modal__location-view");
-    const modalLocationList = modalLocationView?.querySelector("[data-location-list]");
-    const modalLocationSearch = modalLocationView?.querySelector("[data-location-search]");
-    const modalLocationClose = modalLocationView?.querySelector("[data-testid='location-back']");
-    const modalLocationDelete = modalLocationView?.querySelector("[data-location-delete]");
-    const modalLocationComplete = modalLocationView?.querySelector("[data-location-complete]");
-    const modalLocationSearchBtn = modalLocationView?.querySelector(".tweet-modal__location-search-btn");
-
-    function showModalSubView(view) {
-        if (modalComposeView) modalComposeView.style.display = "none";
-        if (view) { view.removeAttribute("hidden"); view.style.display = ""; }
-    }
-    function backToModalCompose() {
-        if (modalComposeView) modalComposeView.style.display = "";
-        if (modalLocationView) { modalLocationView.setAttribute("hidden", ""); }
-        const productView = replyModal?.querySelector("[data-product-select-modal]");
-        if (productView) productView.setAttribute("hidden", "");
-    }
-    function updateModalLocationUI() {
-        if (modalLocationDisplay && modalLocationName) {
-            if (modalSelectedLocation) { modalLocationName.textContent = modalSelectedLocation; modalLocationDisplay.removeAttribute("hidden"); }
-            else { modalLocationName.textContent = ""; modalLocationDisplay.setAttribute("hidden", ""); }
-        }
-        if (modalLocationDelete) modalLocationDelete.hidden = !modalSelectedLocation;
-        if (modalLocationComplete) modalLocationComplete.disabled = !modalSelectedLocation;
-    }
-
-    let modalPs = null;
-    function searchModalPlaces() {
-        if (!modalLocationSearch) return;
-        const keyword = modalLocationSearch.value;
-        if (!keyword.replace(/^\s+|\s+$/g, '')) { alert('키워드를 입력해주세요!'); return; }
-        if (!modalPs) { modalPs = new kakao.maps.services.Places(); }
-        modalPs.keywordSearch(keyword, (datas, status) => {
-            if (status === kakao.maps.services.Status.OK) {
-                const addressNameSet = new Set();
-                datas.forEach((data) => {
-                    let addressName = data.address_name;
-                    const parts = addressName.split(" ");
-                    const last = parts[parts.length - 1];
-                    if (/^[0-9-]+$/.test(last)) { addressName = parts.slice(0, -1).join(" "); }
-                    addressNameSet.add(addressName);
-                });
-                let html = '';
-                addressNameSet.forEach((name) => {
-                    html += '<button type="button" class="tweet-modal__location-item"><span class="tweet-modal__location-item-label">' + name + '</span><span class="tweet-modal__location-item-check"></span></button>';
-                });
-                if (modalLocationList) modalLocationList.innerHTML = html;
-            } else if (status === kakao.maps.services.Status.ZERO_RESULT) { alert('검색 결과가 존재하지 않습니다.'); }
-            else { alert('검색 결과 중 오류가 발생했습니다.'); }
-        });
-    }
-
-    if (modalGeoBtn && modalLocationView) {
-        modalGeoBtn.addEventListener("click", () => {
-            console.log("모달위치 들어옴1");
-            showModalSubView(modalLocationView);
-            if (modalLocationSearch) modalLocationSearch.value = '';
-            updateModalLocationUI();
-        });
-    }
-    if (modalLocationSearchBtn) { modalLocationSearchBtn.addEventListener("click", () => searchModalPlaces()); }
-    if (modalLocationSearch) { modalLocationSearch.addEventListener("keyup", (e) => { if (e.key === "Enter") searchModalPlaces(); }); }
-    if (modalLocationList) {
-        modalLocationList.addEventListener("click", (e) => {
-            const item = e.target.closest(".tweet-modal__location-item");
-            if (!item) return;
-            const allItems = modalLocationList.querySelectorAll(".tweet-modal__location-item");
-            for (let i = 0; i < allItems.length; i++) { allItems[i].classList.remove("isSelected"); }
-            item.classList.add("isSelected");
-            modalSelectedLocation = item.querySelector(".tweet-modal__location-item-label").textContent;
-            updateModalLocationUI();
-            backToModalCompose();
-        });
-    }
-    if (modalLocationDelete) { modalLocationDelete.addEventListener("click", () => { modalSelectedLocation = null; updateModalLocationUI(); backToModalCompose(); }); }
-    if (modalLocationComplete) { modalLocationComplete.addEventListener("click", () => backToModalCompose()); }
-    if (modalLocationClose) { modalLocationClose.addEventListener("click", () => backToModalCompose()); }
-
-    // 모달 상품 선택
-    const modalProductView = replyModal?.querySelector("[data-product-select-modal]");
-    const modalProductList = modalProductView?.querySelector("[data-product-select-list]");
-    const modalProductClose = modalProductView?.querySelector("[data-product-select-close]");
-    const modalProductComplete = modalProductView?.querySelector("[data-product-select-complete]");
-    let modalTempProduct = null;
-
-    if (modalProductBtn && modalProductView) {
-        modalProductBtn.addEventListener("click", () => {
-            console.log("모달상품 들어옴1");
-            showModalSubView(modalProductView);
-            modalProductView.removeAttribute("hidden");
-            modalTempProduct = null;
-            if (modalProductComplete) modalProductComplete.disabled = true;
-            const allItems = modalProductList?.querySelectorAll("[data-product-id]");
-            if (allItems) { for (let i = 0; i < allItems.length; i++) allItems[i].setAttribute("aria-pressed", "false"); }
-        });
-    }
-    if (modalProductList) {
-        modalProductList.addEventListener("click", (e) => {
-            const item = e.target.closest("[data-product-id]");
-            if (!item) return;
-            const allItems = modalProductList.querySelectorAll("[data-product-id]");
-            for (let i = 0; i < allItems.length; i++) { allItems[i].setAttribute("aria-pressed", "false"); }
-            item.setAttribute("aria-pressed", "true");
-            modalTempProduct = { id: item.dataset.productId, name: item.dataset.productName, price: item.dataset.productPrice, image: item.dataset.productImage };
-            if (modalProductComplete) modalProductComplete.disabled = false;
-        });
-    }
-    if (modalProductComplete) {
-        modalProductComplete.addEventListener("click", () => {
-            if (modalTempProduct) {
-                modalSelectedProductId = modalTempProduct.id;
-                if (modalProductImage) modalProductImage.src = modalTempProduct.image;
-                if (modalProductNameEl) modalProductNameEl.textContent = modalTempProduct.name;
-                if (modalProductPrice) modalProductPrice.textContent = modalTempProduct.price;
-                if (modalSelectedProduct) modalSelectedProduct.removeAttribute("hidden");
-            }
-            backToModalCompose();
-        });
-    }
-    if (modalProductClose) { modalProductClose.addEventListener("click", () => backToModalCompose()); }
-    if (modalProductRemove) { modalProductRemove.addEventListener("click", () => { modalSelectedProductId = null; if (modalSelectedProduct) modalSelectedProduct.setAttribute("hidden", ""); }); }
-
-    // 상품 모달 (인라인에서 열었을 때도 처리)
-    const globalProductView = document.querySelector("[data-product-select-modal]");
-    const globalProductList = globalProductView?.querySelector("[data-product-select-list]");
-    const globalProductClose = globalProductView?.querySelector("[data-product-select-close]");
-    const globalProductComplete = globalProductView?.querySelector("[data-product-select-complete]");
-    let globalTempProduct = null;
-
-    if (globalProductList && globalProductView) {
-        globalProductList.addEventListener("click", (e) => {
-            const item = e.target.closest("[data-product-id]");
-            if (!item) return;
-            const allItems = globalProductList.querySelectorAll("[data-product-id]");
-            for (let i = 0; i < allItems.length; i++) allItems[i].setAttribute("aria-pressed", "false");
-            item.setAttribute("aria-pressed", "true");
-            globalTempProduct = { id: item.dataset.productId, name: item.dataset.productName, price: item.dataset.productPrice, image: item.dataset.productImage };
-            if (globalProductComplete) globalProductComplete.disabled = false;
-        });
-    }
-    if (globalProductComplete) {
-        globalProductComplete.addEventListener("click", () => {
-            if (globalTempProduct && globalProductView._targetContext === "inline") {
-                selectedProduct = { id: globalTempProduct.id, name: globalTempProduct.name, price: globalTempProduct.price, image: globalTempProduct.image };
-                renderSelectedProduct();
-                if (productBtn) productBtn.disabled = true;
-            }
-            if (globalProductView) globalProductView.setAttribute("hidden", "");
-            globalTempProduct = null;
-        });
-    }
-    if (globalProductClose) { globalProductClose.addEventListener("click", () => { if (globalProductView) globalProductView.setAttribute("hidden", ""); }); }
-
-    function openReplyModal(meta) {
-        if (!replyModal) return;
-        console.log("모달열기 들어옴1 postId:", meta.postId);
-        replyTargetPostId = meta.postId;
-        const card = meta.card;
-        if (replySrcName) replySrcName.textContent = meta.name;
-        if (replySrcHandle) replySrcHandle.textContent = meta.handle;
-        if (replySrcTime) replySrcTime.textContent = card.querySelector(".post-detail-reply-identity span:last-child")?.textContent || "";
-        if (replySrcText) replySrcText.textContent = card.querySelector(".post-detail-reply-text")?.textContent || "";
-        if (replySrcInitial) replySrcInitial.textContent = (meta.name || "?").charAt(0);
-        if (replyEditor) replyEditor.innerHTML = "";
-        if (replySubmit) replySubmit.disabled = true;
-        // 초기화
-        modalAttachedFiles = []; modalAttachedUrls = [];
-        if (modalAttachmentPreview) modalAttachmentPreview.setAttribute("hidden", "");
-        if (modalAttachmentMedia) modalAttachmentMedia.innerHTML = "";
-        modalSelectedLocation = null;
-        updateModalLocationUI();
-        modalSelectedProductId = null;
-        if (modalSelectedProduct) modalSelectedProduct.setAttribute("hidden", "");
-        modalSavedRange = null;
-        if (modalGaugeText) { modalGaugeText.textContent = modalMaxLength; modalGaugeText.style.color = ""; }
-        backToModalCompose();
-        replyModal.hidden = false;
-        document.body.classList.add("modal-open");
-        replyEditor?.focus();
-    }
-
-    function closeReplyModal() {
-        if (!replyModal) return;
-        replyModal.hidden = true;
-        document.body.classList.remove("modal-open");
-        replyTargetPostId = null;
-        if (modalMention) modalMention.closeMentionDropdown();
-    }
-
-    // 답글 버튼 (이벤트 위임): hero→인라인 포커스, 댓글→대댓글 모달
+    // 댓글 카드 영역 클릭 시 게시물 detail 이동. profile-link.js 가 처리하는 [data-profile-id] 와 액션 영역은 제외.
     document.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-testid='reply']");
-        if (!btn) return;
-        const card = btn.closest("[data-post-card]");
-        if (!card) return;
-        e.preventDefault();
-
-        if (card.classList.contains("post-detail-hero")) {
-            inlineEditor?.focus();
-            inlineEditor?.scrollIntoView({ behavior: "smooth", block: "center" });
-        } else {
-            const meta = getCardMeta(btn);
-            if (meta) openReplyModal(meta);
-        }
-    });
-
-    replyClose?.addEventListener("click", closeReplyModal);
-    replyModal?.addEventListener("click", (e) => {
-        if (e.target === replyModal) closeReplyModal();
-    });
-
-    // 모달 글자수 카운터
-    replyEditor?.addEventListener("input", () => {
-        const length = replyEditor.textContent.length;
-        const remaining = modalMaxLength - length;
-        if (modalGaugeText) {
-            modalGaugeText.textContent = remaining;
-            if (remaining < 0) modalGaugeText.style.color = "rgb(244, 33, 46)";
-            else if (remaining < 20) modalGaugeText.style.color = "rgb(255, 173, 31)";
-            else modalGaugeText.style.color = "";
-        }
-        if (replySubmit) replySubmit.disabled = (length === 0 || remaining < 0);
-    });
-
-    replySubmit?.addEventListener("click", async (e) => {
-        e.preventDefault();
-        console.log("모달제출 들어옴1");
-        const text = replyEditor?.textContent?.trim();
-        if (!text || !replyTargetPostId) return;
-        const replyFormData = new FormData();
-        replyFormData.append("memberId", memberId);
-        replyFormData.append("postContent", text);
-        if (modalSelectedLocation) { replyFormData.append("location", modalSelectedLocation); }
-        if (modalAttachedFiles.length > 0) { modalAttachedFiles.forEach(f => replyFormData.append("files", f)); }
-        // 멘션 handle 전송
-        const modalMentionHandles = collectMentionHandles(replyEditor);
-        modalMentionHandles.forEach((h, i) => {
-            replyFormData.append("mentionedHandles[" + i + "]", h);
-        });
-        console.log("모달제출 들어옴2 파일수:", modalAttachedFiles.length, "위치:", modalSelectedLocation);
-        await service.writeReply(replyTargetPostId, replyFormData);
-        closeReplyModal();
-        showToast("답글이 게시되었습니다");
-        await refreshReplies();
+        const card = e.target.closest("[data-post-card]");
+        if (!card) { return; }
+        if (e.target.closest("button, a, input, textarea, [data-profile-id], [data-stop-card-link]")) { return; }
+        const cardPostId = card.dataset.postId;
+        if (cardPostId) { window.location.href = `/main/post/detail/${cardPostId}`; }
     });
 
     // ── 9. 뒤로 가기 ──
@@ -1379,10 +1114,10 @@ window.onload = () => {
     }, { passive: true });
 
     // ── 11. 프로필 이미지 없으면 SVG 아바타 동적 생성 ──
-    document.querySelectorAll(".post-detail-avatar:not(.post-detail-avatar--image), .post-detail-inline-reply-avatar").forEach(el => {
+    document.querySelectorAll(".postAvatar:not(.postAvatar--image), .post-detail-inline-reply-avatar").forEach(el => {
         if (el.querySelector("img")) return;
         const initial = (el.textContent.trim() || "?").charAt(0);
-        el.classList.add("post-detail-avatar--image");
+        el.classList.add("postAvatar--image");
         el.innerHTML = `<img src="${layout.buildAvatarDataUri(initial)}" alt="프로필"/>`;
     });
 

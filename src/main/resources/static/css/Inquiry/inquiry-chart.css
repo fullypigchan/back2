@@ -83,7 +83,6 @@ body {
 .Activity-Header-Title {
     font-family: var(--font-sans);
     font-size: 24px;
-    font-weight: 800;
     line-height: 1.2;
     letter-spacing: -0.03em;
     color: var(--color-text-primary);
@@ -135,7 +134,6 @@ body {
     color: var(--color-text-secondary);
     font-family: var(--font-sans);
     font-size: 15px;
-    font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
     text-decoration: none;
@@ -148,7 +146,6 @@ body {
 
 .Inquiry-Tab--Active {
     color: var(--color-text-primary);
-    font-weight: 700;
 }
 
 .Inquiry-Tab-Label {
@@ -207,7 +204,6 @@ body {
 
 .Expert-State-Label {
     font-size: 12px;
-    font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-text-secondary);
@@ -215,7 +211,6 @@ body {
 
 .Expert-State-Value {
     font-size: 28px;
-    font-weight: 800;
     line-height: 1.2;
     letter-spacing: -0.03em;
     color: var(--color-text-primary);
@@ -264,7 +259,6 @@ body {
 
 .Chart-Header-Text {
     font-size: 18px;
-    font-weight: 700;
     color: var(--color-text-primary);
 }
 
@@ -319,7 +313,6 @@ body {
     position: relative;
     border: none;
     font-size: 18px;
-    font-weight: 700;
     color: var(--color-text-primary);
 }
 
@@ -355,7 +348,6 @@ body {
 
 .Chart-Header-Title .Chart-Header-Text {
     font-size: 18px;
-    font-weight: 700;
     color: var(--color-text-primary);
     white-space: nowrap;
 }
@@ -398,7 +390,6 @@ body {
     list-style: none;
     padding: 12px;
     font-size: 15px;
-    font-weight: 500;
     color: var(--color-text-primary);
     border-radius: 5px;
     cursor: pointer;
@@ -412,7 +403,6 @@ body {
 .Chart-Option[aria-selected="true"] {
     background: var(--color-primary-soft);
     color: var(--color-primary);
-    font-weight: 700;
 }
 
 .Chart-Header-Filter {
@@ -467,7 +457,6 @@ body {
     background: var(--color-primary);
     color: #ffffff;
     font-size: 15px;
-    font-weight: 600;
     box-shadow: 0 8px 24px rgba(15, 20, 25, 0.2);
     white-space: nowrap;
 }

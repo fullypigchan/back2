@@ -167,8 +167,12 @@ public class AdminService {
 
         if (status == ReportStatus.APPLIED) {
             adminDAO.updateReportedPostStatusByReportIds(filteredIds, Status.INACTIVE.getValue());
+            adminDAO.updateReportedMemberStatusByReportIds(filteredIds, Status.INACTIVE.getValue());
+            adminDAO.updateReportedMemberPostStatusByReportIds(filteredIds, Status.INACTIVE.getValue());
         } else if (status == ReportStatus.REJECTED) {
             adminDAO.updateReportedPostStatusByReportIds(filteredIds, Status.ACTIVE.getValue());
+            adminDAO.updateReportedMemberStatusByReportIds(filteredIds, Status.ACTIVE.getValue());
+            adminDAO.updateReportedMemberPostStatusByReportIds(filteredIds, Status.ACTIVE.getValue());
         }
     }
 

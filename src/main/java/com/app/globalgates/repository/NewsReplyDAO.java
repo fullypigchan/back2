@@ -32,4 +32,8 @@ public class NewsReplyDAO {
     public void softDeleteById(Long id, Long memberId) {
         newsReplyMapper.softDeleteById(id, memberId);
     }
+
+    public int updateContentById(Long id, Long memberId, String content) {
+        return newsReplyMapper.updateContentById(id, memberId, content);
+    }
 }

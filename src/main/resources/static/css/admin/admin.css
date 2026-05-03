@@ -1246,6 +1246,16 @@ a {
     opacity: 0.8;
 }
 
+.report-post-info-card {
+    margin-top: 14px;
+}
+
+.report-post-content {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    color: #536471;
+}
+
 /* 이미지 뷰어 오버레이 */
 #modalImageViewer {
     padding-left: 0;
@@ -1289,7 +1299,6 @@ a {
 
 .stats-card-label {
     font-size: 12px;
-    font-weight: 700;
     color: #536471;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -1297,7 +1306,6 @@ a {
 
 .stats-card-value {
     font-size: 40px;
-    font-weight: 800;
     color: #0f1419;
     line-height: 1.2;
     margin-top: 8px;
@@ -1311,7 +1319,6 @@ a {
 
 .stats-section-label {
     font-size: 17px;
-    font-weight: 700;
     color: #0f1419;
     margin: 8px 0 12px;
     padding-bottom: 10px;
@@ -1375,7 +1382,6 @@ a {
 
 .stats-data-label {
     font-size: 12px;
-    font-weight: 700;
     color: #536471;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -1383,7 +1389,6 @@ a {
 
 .stats-data-value {
     font-size: 28px;
-    font-weight: 800;
     color: #0f1419;
     line-height: 1.2;
     margin-top: 6px;
@@ -1391,7 +1396,6 @@ a {
 
 .stats-value-sm {
     font-size: 20px;
-    font-weight: 800;
     color: #0f1419;
     line-height: 1.2;
     margin-top: 6px;

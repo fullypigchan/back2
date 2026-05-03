@@ -58,6 +58,8 @@
 
         window.block
     </script>
+    <script src="/js/main/service.js"></script>
+    <script src="/js/main/layout.js"></script>
     <script src="/js/setting/service.js"></script>
     <script src="/js/setting/layout.js"></script>
     <script src="/js/setting/event.js"></script>
@@ -510,7 +512,7 @@
                                     </g>
                                 </svg>
                             </button>
-                            <div class="username-marketplace__brand">X</div>
+                            <div class="username-marketplace__brand">GlobalGates</div>
                             <p class="username-marketplace__copy">
                                 Handle Marketplace에 원하는 사용자 아이디가 있을 수도 있습니다
                             </p>
@@ -566,7 +568,7 @@
                             </div>
 
                             <div class="password-editor__notice">
-                                비밀번호를 변경하면 현재 사용 중인 세션을 제외한 모든 활성 X 세션에서 로그아웃됩니다. 내 계정에 대한 액세스 권한이 있는 1개의 애플리케이션은(는) 영향을
+                                비밀번호를 변경하면 현재 사용 중인 세션을 제외한 모든 활성 GlobalGates 세션에서 로그아웃됩니다. 내 계정에 대한 액세스 권한이 있는 1개의 애플리케이션은(는) 영향을
                                 받지 않습니다.
                             </div>
 
@@ -611,7 +613,7 @@
 
                             <h4 class="deactivate-editor__heading">그 밖에 내가 알아야 할 내용</h4>
                             <p class="deactivate-editor__copy">
-                                실수로 또는 잘못하여 X 계정을 비활성화한 후에도 30일 이내에 복구할 수 있습니다.
+                                실수로 또는 잘못하여 GlobalGates 계정을 비활성화한 후에도 30일 이내에 복구할 수 있습니다.
                             </p>
 
                             <div class="deactivate-editor__note-list">
@@ -620,15 +622,15 @@
                                 </div>
                                 <div class="deactivate-editor__note">
                                     @사용자 아이디를 변경하기 위해 계정을 비활성화할 필요는 없습니다.
-                                    <a href="#" class="deactivate-editor__link" data-deactivate-link>설정</a>에서 아이디를
+                                    <a href="#" class="deactivate-editor__link" data-deactivate-link data-deactivate-target="username-edit">설정</a>에서 아이디를
                                     수정하세요.
                                 </div>
                                 <div class="deactivate-editor__note">
-                                    현재 @사용자 아이디 또는 이메일 주소를 다른 X 계정에서 사용하려면 이 계정을 비활성화하기 전에 해당 항목을
-                                    <a href="#" class="deactivate-editor__link" data-deactivate-link>변경</a>하시기 바랍니다.
+                                    현재 @사용자 아이디 또는 이메일 주소를 다른 GlobalGates 계정에서 사용하려면 이 계정을 비활성화하기 전에 해당 항목을
+                                    <a href="#" class="deactivate-editor__link" data-deactivate-link data-deactivate-target="account-info">변경</a>하시기 바랍니다.
                                 </div>
                                 <div class="deactivate-editor__note">
-                                    <a href="#" class="deactivate-editor__link" data-deactivate-link>내 X 데이터</a>를
+                                    내 GlobalGates 데이터를
                                     다운로드하려면 계정을 비활성화하기 전에 요청 및 다운로드 프로세스를 모두 완료해야 합니다. 비활성화된 계정으로는 데이터 다운로드 링크를 보낼 수
                                     없습니다.
                                 </div>
@@ -696,7 +698,7 @@
                                 <div class="notification-push-editor__copy">
                                     <h3 class="notification-push-editor__title">푸시 알림</h3>
                                     <p class="notification-push-editor__summary">
-                                        자리를 비운 동안 X에서 일어난 일에 대한 푸시 알림을 받아 보세요. 알림은 언제든지 끌 수 있습니다. 이 선택 사항은 이 브라우저에서 사용하는
+                                        자리를 비운 동안 GlobalGates에서 일어난 일에 대한 푸시 알림을 받아 보세요. 알림은 언제든지 끌 수 있습니다. 이 선택 사항은 이 브라우저에서 사용하는
                                         모든 계정에 해당됩니다.
                                     </p>
                                 </div>
@@ -712,7 +714,7 @@
                             <section class="notification-push-editor__empty">
                                 <h4 class="notification-push-editor__empty-title">푸시 알림 켜기</h4>
                                 <p class="notification-push-editor__empty-copy">
-                                    푸시 알림을 통해 지금 일어나는 일에 대한 소식을 실시간으로 받아보세요. X에 로그인하지 않아도 알림을 받을 수 있습니다. 알림은 언제든지 끌 수
+                                    푸시 알림을 통해 지금 일어나는 일에 대한 소식을 실시간으로 받아보세요. GlobalGates에 로그인하지 않아도 알림을 받을 수 있습니다. 알림은 언제든지 끌 수
                                     있습니다.
                                 </p>
                                 <button
@@ -1168,7 +1170,7 @@
                                             </span>
                                 </label>
                                 <p class="country-editor__help">
-                                    사용자 계정과 연결된 기본 국가입니다. 사용자의 국가는 X 환경을 맞춤화하는 데 사용됩니다.
+                                    사용자 계정과 연결된 기본 국가입니다. 사용자의 국가는 GlobalGates 환경을 맞춤화하는 데 사용됩니다.
                                 </p>
                             </div>
                             <div class="country-editor__actions">
@@ -1254,7 +1256,7 @@
                         <span>지금</span>
                     </div>
                     <p class="appearance-preview__text">
-                        표시 설정은 이 브라우저의 모든 X 계정에
+                        표시 설정은 이 브라우저의 모든 GlobalGates 계정에
                         적용됩니다.
                     </p>
                 </div>
@@ -1459,7 +1461,7 @@
                         class="language-selection__summary"
                         id="languageSelectionSummary"
                 >
-                    X 환경을 맞춤 설정하는 데 사용할 언어를 선택하세요.
+                    GlobalGates 환경을 맞춤 설정하는 데 사용할 언어를 선택하세요.
                 </p>
 
                 <div
@@ -1768,7 +1770,7 @@
                     </g>
                 </svg>
             </button>
-            <div class="phone-modal__brand" aria-hidden="true">X</div>
+            <div class="phone-modal__brand" aria-hidden="true">GlobalGates</div>
             <div class="modal-spacer" aria-hidden="true"></div>
         </header>
 
@@ -1779,7 +1781,7 @@
                         전화번호 추가
                     </h2>
                     <p class="phone-modal__summary">
-                        내 X 계정에 연결할 전화번호를 입력하세요. 이 번호로
+                        내 GlobalGates 계정에 연결할 전화번호를 입력하세요. 이 번호로
                         인증 코드가 전송됩니다.
                     </p>
 
@@ -1837,7 +1839,7 @@
 
                     <label class="phone-modal__check-row">
                                 <span class="phone-modal__check-copy">
-                                    내 휴대폰 번호를 알고 있는 사람들이 X에서 나를 찾고 연락할 수 있도록 합니다.
+                                    내 휴대폰 번호를 알고 있는 사람들이 GlobalGates에서 나를 찾고 연락할 수 있도록 합니다.
                                                                     </span>
                         <span class="phone-modal__check-control">
                                     <input type="checkbox" class="phone-modal__checkbox"/>
@@ -1855,7 +1857,7 @@
 
                     <label class="phone-modal__check-row">
                                 <span class="phone-modal__check-copy">
-                                    X에서 광고(광고 기본 설정에서 허용하는 경우)를 포함한 맞춤 서비스를 제공하기 위해 내 전화번호를 사용할 수 있도록 합니다. 이 기능을 활성화하지 않더라도 X는 계정 보안 및 스팸, 사기 및 사이버 폭력 방지 등의 목적으로 내 전화번호를 사용할 수 있습니다.
+                                    GlobalGates에서 광고(광고 기본 설정에서 허용하는 경우)를 포함한 맞춤 서비스를 제공하기 위해 내 전화번호를 사용할 수 있도록 합니다. 이 기능을 활성화하지 않더라도 GlobalGates는 계정 보안 및 스팸, 사기 및 사이버 폭력 방지 등의 목적으로 내 전화번호를 사용할 수 있습니다.
                                 </span>
                         <span class="phone-modal__check-control">
                                     <input type="checkbox" class="phone-modal__checkbox" checked/>
@@ -2006,7 +2008,7 @@
                 </svg>
             </button>
             <div class="phone-modal__brand email-modal__brand" aria-hidden="true">
-                X
+                GlobalGates
             </div>
             <div class="modal-spacer" aria-hidden="true"></div>
         </header>
@@ -2024,7 +2026,7 @@
                         이메일 업데이트
                     </h2>
                     <p class="phone-modal__summary email-modal__summary">
-                        내 X 계정에 연결할 이메일 주소를 입력하세요. 이 이메일로
+                        내 GlobalGates 계정에 연결할 이메일 주소를 입력하세요. 이 이메일로
                         인증 코드가 전송됩니다.
                     </p>
 
@@ -2211,11 +2213,11 @@
             </div>
         </div>
     </section>
-
-    <!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
-    <div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
-    <div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </div>
+
+<!-- 모바일 nav + 더보기 아코디언 (공용 fragment) -->
+<div th:replace="~{common/mobile-nav :: mobileNav('more')}"></div>
+<div th:replace="~{common/mobile-nav :: mobileMoreSheet}"></div>
 </th:block>
 </body>
 </html>

@@ -103,6 +103,14 @@ public class AdminDAO {
         adminMapper.updateReportedPostStatusByReportIds(reportIds, postStatus);
     }
 
+    public void updateReportedMemberStatusByReportIds(List<Long> reportIds, String memberStatus) {
+        adminMapper.updateReportedMemberStatusByReportIds(reportIds, memberStatus);
+    }
+
+    public void updateReportedMemberPostStatusByReportIds(List<Long> reportIds, String postStatus) {
+        adminMapper.updateReportedMemberPostStatusByReportIds(reportIds, postStatus);
+    }
+
     public void deleteReports(List<Long> reportIds) {
         adminMapper.deleteReports(reportIds);
     }

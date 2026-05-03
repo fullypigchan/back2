@@ -153,10 +153,18 @@ const NotificationService = (function () {
         }
     }
 
+    // 알림 타입별 아바타 결정 — 시스템 알림은 발신자가 없으므로 로고, 그 외엔 발신자 프로필(없으면 기본 아바타)
+    function resolveAvatar(n) {
+        if (n.notificationType === "system" || !n.senderId) {
+            return "/images/main/global-gates-logo.png";
+        }
+        return n.senderProfileImage || "/images/profile/default_image.png";
+    }
+
     // ── DOM 렌더링: 일반 알림 ──
     function renderStandardItem(n) {
         const type = n.notificationType;
-        const profileImg = n.senderProfileImage || "/images/main/global-gates-logo.png";
+        const profileImg = resolveAvatar(n);
         const name = n.senderName || "";
         const handle = n.senderHandle || "";
         const time = formatTime(n.createdDatetime);
@@ -182,7 +190,7 @@ const NotificationService = (function () {
                     </ul>` : ""}
                     <div class="notif-content">
                         <p class="notif-message">
-                            ${name ? `<a href="/mypage?memberId=${n.senderId}" role="link" class="notif-username">${name}</a> ` : ""}${n.content || n.title}
+                            ${name ? `<a href="/mypage?memberId=${n.senderId}" role="link" class="notif-username">${name}</a>${type === "connect" ? "님이" : ""} ` : ""}${n.content || n.title}
                             <span class="notif-sep" aria-hidden="true">&middot;</span>
                             <time class="notif-time" datetime="${n.createdDatetime || ""}">${time}</time>
                         </p>
@@ -195,16 +203,17 @@ const NotificationService = (function () {
 
     // ── DOM 렌더링: 멘션(handle/reply) 알림 ──
     function renderMentionItem(n) {
-        const profileImg = n.senderProfileImage || "/images/main/global-gates-logo.png";
+        const profileImg = resolveAvatar(n);
         const name = n.senderName || "";
         const handle = n.senderHandle || "";
         const time = formatTime(n.createdDatetime);
         const postText = n.postContent || n.content || "";
+        const readClass = n.read ? " notif-item--read" : "";
         const link = getNotificationLink(n);
         const hrefAttr = link ? ` data-href="${link}"` : "";
 
         return `
-        <article class="notif-tweet-item" role="article" tabindex="0"
+        <article class="notif-tweet-item${readClass}" role="article" tabindex="0"
                  data-testid="tweet" data-notif-type="mention" data-notif-id="${n.id}" data-target-id="${n.targetId || ''}"${hrefAttr}>
             <div class="notif-item__inner">
                 <div class="tweet-body">
@@ -221,7 +230,7 @@ const NotificationService = (function () {
                     </div>
                     <p class="tweet-text">${postText}</p>
                     <div class="tweet-action-bar">
-                        <button type="button" class="tweet-action-btn" data-testid="reply" aria-label="답글">
+                        <button type="button" class="tweet-action-btn" data-testid="reply" data-action="reply" aria-label="답글">
                             <svg viewBox="0 0 24 24" aria-hidden="true" class="tweet-action-icon"><g><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></g></svg>
                         </button>
                         <button type="button" class="tweet-action-btn tweet-action-btn--like" data-testid="like" aria-label="0 마음에 들어요">
@@ -244,10 +253,10 @@ const NotificationService = (function () {
     }
 
     // ── 목록 렌더링 ──
-    function renderList(notifications) {
+    function renderList(notifications, emptyMessage = "알림이 없습니다.") {
         if (!container) return;
         if (!notifications || notifications.length === 0) {
-            container.innerHTML = `<div class="notif-empty" style="text-align:center;padding:40px 20px;color:#536471;">알림이 없습니다.</div>`;
+            container.innerHTML = `<div class="notif-empty" style="text-align:center;padding:40px 20px;color:#536471;">${emptyMessage}</div>`;
             return;
         }
         container.innerHTML = notifications.map(renderItem).join("");
@@ -277,7 +286,22 @@ const NotificationService = (function () {
     async function loadMentions() {
         if (!MEMBER_ID || MEMBER_ID === 0) return;
         const res = await getMentions(MEMBER_ID);
-        if (res.ok) renderList(res.data);
+        if (res.ok) renderList(res.data, "멘션이 없습니다.");
+    }
+
+    // 현재 활성화된 탭 기준으로 목록 새로고침 — '전체'면 loadAll, '멘션'이면 loadMentions
+    function reloadCurrentTab() {
+        const activeTab = document.querySelector(".notif-tab--active");
+        const type = activeTab ? activeTab.getAttribute("data-notif-tab") : "all";
+        if (type === "mentions") loadMentions();
+        else loadAll();
+    }
+
+    // 좌측 nav의 알림 배지도 함께 갱신 — header.js가 노출한 함수가 있으면 호출
+    function refreshNavBadge() {
+        if (typeof window.refreshNotificationBadge === "function") {
+            window.refreshNotificationBadge();
+        }
     }
 
     // ── 탭 전환 연동 ──
@@ -287,6 +311,23 @@ const NotificationService = (function () {
             const type = tab.getAttribute("data-notif-tab");
             if (type === "all") loadAll();
             else if (type === "mentions") loadMentions();
+        });
+    });
+
+    // ── 전체 읽음 버튼 ──
+    document.querySelectorAll("[data-notif-mark-all]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            if (!MEMBER_ID || MEMBER_ID === 0) return;
+            btn.disabled = true;
+            try {
+                const res = await markAllAsRead(MEMBER_ID);
+                if (res.ok) {
+                    reloadCurrentTab();
+                    refreshNavBadge();
+                }
+            } finally {
+                btn.disabled = false;
+            }
         });
     });
 

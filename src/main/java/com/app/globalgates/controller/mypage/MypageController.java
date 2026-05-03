@@ -58,6 +58,10 @@ public class MypageController {
                 ? loginMember
                 : memberService.getMemberById(pageMemberId);
 
+        if (!isOwner && (member.getMemberStatus() == null || !"active".equals(member.getMemberStatus().getValue()))) {
+            return "redirect:/main/main";
+        }
+
         // 상대 페이지의 상단 Approve 버튼은 첫 렌더에서 현재 팔로우 상태를 알아야
         // JS 연결 전에도 Approve/Approved 문구가 실제 상태와 어긋나지 않는다.
         boolean isFollowing = !isOwner && followService.getFollowings(loginMember.getId()).stream()

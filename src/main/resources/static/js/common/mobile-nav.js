@@ -12,6 +12,10 @@
             backdrop.classList.toggle("off", !open);
             moreBtn.setAttribute("aria-expanded", String(open));
             sheet.setAttribute("aria-hidden", String(!open));
+            if (open) {
+                document.body.style.setProperty("--mob-more-sheet-h", `${sheet.offsetHeight}px`);
+            }
+            document.body.classList.toggle("mob-more-open", open);
         };
 
         moreBtn.addEventListener("click", (e) => {

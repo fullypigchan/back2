@@ -21,6 +21,34 @@
         return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
     }
 
+    /** "yyyy-MM-dd HH:mm:ss[.fff]" 문자열 → Date (서버는 KST 그대로 보냄). */
+    function parseServerTime(str) {
+        if (!str) return null;
+        // 마이크로초 부분 제거 후 ISO 변환
+        const clean = String(str).replace(/(\.\d+)?$/, "").replace(" ", "T");
+        const d = new Date(clean);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    /**
+     * 1일 이내는 상대시간(방금 전/X분 전/X시간 전), 그 이후는 yyyy.MM.dd.
+     * (서버 DateUtils.toRelativeOrDate 와 동일 로직)
+     */
+    function formatRelativeOrDate(str) {
+        const d = parseServerTime(str);
+        if (!d) return "";
+        const diffSec = Math.max(0, (Date.now() - d.getTime()) / 1000);
+        if (diffSec < 60) return "방금 전";
+        const m = Math.floor(diffSec / 60);
+        if (m < 60) return m + "분 전";
+        const h = Math.floor(m / 60);
+        if (h < 24) return h + "시간 전";
+        const yyyy = d.getFullYear();
+        const MM = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        return `${yyyy}.${MM}.${dd}`;
+    }
+
     function showToast(message) {
         const toast = document.getElementById("newsToast");
         if (!toast) return;
@@ -180,13 +208,19 @@
 
             if (gauge) {
                 gauge.setAttribute("aria-valuenow", String(len));
+                const ratio = Math.min(len / MAX_REPLY_LENGTH, 1);
+                const fillColor = remaining < 0 ? "#f4212e" : (remaining <= 20 ? "#ffad1f" : "#1d9bf0");
+                gauge.style.background = "conic-gradient(" + fillColor + " " + (ratio * 360) + "deg, #d7dfe4 0deg)";
                 if (remaining <= 20) gauge.classList.add("composerGauge--warn");
                 else gauge.classList.remove("composerGauge--warn");
                 if (remaining < 0) gauge.classList.add("composerGauge--over");
                 else gauge.classList.remove("composerGauge--over");
             }
             if (gaugeText) {
-                gaugeText.textContent = remaining < 0 ? String(remaining) : (remaining <= 20 ? String(remaining) : "");
+                gaugeText.textContent = String(remaining);
+                if (remaining < 0) gaugeText.style.color = "rgb(244, 33, 46)";
+                else if (remaining <= 20) gaugeText.style.color = "rgb(255, 173, 31)";
+                else gaugeText.style.color = "";
             }
             submit.disabled = trimmedLen === 0 || len > MAX_REPLY_LENGTH;
         };
@@ -237,46 +271,71 @@
         const profile = r.memberProfileFileName
             ? esc(r.memberProfileFileName)
             : "/images/profile/default_image.png";
-        const handle = r.memberHandle ? `@${esc(r.memberHandle)}` : "";
+        const handle = r.memberHandle ? esc(r.memberHandle) : "";
         const name = esc(r.memberName || r.memberHandle || "사용자");
-        const time = esc(r.createdDatetime || "");
+        // 표기 시간: 수정된 적이 있으면 updated_datetime, 아니면 created_datetime
+        const isEdited = !!(r.createdDatetime && r.updatedDatetime && r.updatedDatetime > r.createdDatetime);
+        const displayTimeRaw = isEdited ? r.updatedDatetime : r.createdDatetime;
+        const time = esc(formatRelativeOrDate(displayTimeRaw));
         const content = esc(r.content || "");
         const likeCount = formatCount(r.likeCount || 0);
         const liked = !!r.liked;
         const isAuthor = memberId && r.memberId === memberId;
 
         return `
-        <article class="post-detail-reply-card postCard" data-reply-id="${r.id}" data-member-id="${r.memberId}">
-            <div class="post-detail-avatar post-detail-avatar--image">
-                <img src="${profile}" alt="프로필" onerror="this.src='/images/profile/default_image.png'"/>
-            </div>
-            <div class="post-detail-reply-content">
-                <header class="post-detail-reply-header">
-                    <div class="post-detail-reply-identity">
-                        <strong class="postName">${name}</strong>
-                        <span class="postHandle">${handle}</span>
-                        <span class="postTime">·&nbsp;${time}</span>
+        <article class="postCard" data-reply-id="${r.id}" data-member-id="${r.memberId}">
+            <div class="postBody">
+                <header class="postHeader">
+                    <div class="postIdentity">
+                        <div class="postAvatar postAvatar--image">
+                            <img src="${profile}" alt="프로필" onerror="this.src='/images/profile/default_image.png'"/>
+                        </div>
+                        <div class="postIdentity__copy">
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${name}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                <span class="postHandle">${handle}</span>
+                                <span class="postIdentity__sep">·</span>
+                                <span class="postTime" data-reply-time>${time}${isEdited ? ' <span class="reply-edited-flag">(수정됨)</span>' : ''}</span>
+                            </div>
+                        </div>
                     </div>
                     ${isAuthor ? `
                     <div class="post-detail-more-wrap">
-                        <button class="post-detail-icon-button post-detail-more-trigger" type="button" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" data-action="reply-more">
+                        <button class="postMoreButton" type="button" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" data-action="reply-more">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg>
                         </button>
                         <div class="dropdown-menu post-detail-reply-more-menu" role="menu" hidden>
+                            <button type="button" class="dropdown-item post-detail-reply-more-edit" role="menuitem" data-action="reply-edit">수정</button>
                             <button type="button" class="dropdown-item post-detail-reply-more-delete" role="menuitem" data-action="reply-delete">삭제</button>
                         </div>
                     </div>` : ""}
                 </header>
-                <p class="post-detail-reply-text">${content}</p>
+                <p class="postText" data-reply-text>${content}</p>
                 <div class="post-detail-actions post-detail-actions--reply">
-                    <div class="post-detail-action-slot">
-                        <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like ${liked ? "active" : ""}"
-                                type="button" data-action="reply-like">
+                    <button class="reply-action reply-action--like ${liked ? "is-active" : ""}" type="button" data-action="reply-like" aria-label="좋아요">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path data-path-inactive="${SVG_LIKE_OFF}" data-path-active="${SVG_LIKE_ON}" d="${liked ? SVG_LIKE_ON : SVG_LIKE_OFF}"></path>
+                        </svg>
+                        <span class="reply-action__count tweet-action-count">${likeCount}</span>
+                    </button>
+                    <div class="reply-share-wrap">
+                        <button class="reply-action reply-action--share" type="button" data-action="reply-share-open" aria-haspopup="menu" aria-expanded="false" aria-label="공유">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path data-path-inactive="${SVG_LIKE_OFF}" data-path-active="${SVG_LIKE_ON}" d="${liked ? SVG_LIKE_ON : SVG_LIKE_OFF}"></path>
+                                <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path>
                             </svg>
-                            <span class="tweet-action-count">${likeCount}</span>
                         </button>
+                        <div class="dropdown-menu reply-share-menu" role="menu" hidden>
+                            <button type="button" class="dropdown-item reply-share-item" role="menuitem" data-action="reply-share-link">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.36 5.64c-1.95-1.96-5.11-1.96-7.07 0L9.88 7.05 8.46 5.64l1.42-1.42c2.73-2.73 7.16-2.73 9.9 0 2.73 2.74 2.73 7.17 0 9.9l-1.42 1.42-1.41-1.42 1.41-1.41c1.96-1.96 1.96-5.12 0-7.07zm-2.12 3.53l-7.07 7.07-1.41-1.41 7.07-7.07 1.41 1.41zm-12.02.71l1.42-1.42 1.41 1.42-1.41 1.41c-1.96 1.96-1.96 5.12 0 7.07 1.95 1.96 5.11 1.96 7.07 0l1.41-1.41 1.42 1.41-1.42 1.42c-2.73 2.73-7.16 2.73-9.9 0-2.73-2.74-2.73-7.17 0-9.9z"></path></svg>
+                                <span>링크 복사하기</span>
+                            </button>
+                            <button type="button" class="dropdown-item reply-share-item" role="menuitem" data-action="reply-share-content">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 2H8c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2v-3h2c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-4 18H4V9h2v8c0 1.1.9 2 2 2h7v1zm4-5H8V4h11v11z"></path></svg>
+                                <span>내용 복사하기</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -309,9 +368,59 @@
         document.querySelectorAll(".post-detail-reply-more-menu").forEach(menu => {
             if (menu === except) return;
             menu.hidden = true;
-            const trigger = menu.parentElement?.querySelector(".post-detail-more-trigger");
+            const trigger = menu.parentElement?.querySelector(".postMoreButton");
             trigger?.setAttribute("aria-expanded", "false");
         });
+    }
+
+    function closeAllReplyShareMenus(except) {
+        document.querySelectorAll(".reply-share-menu").forEach(menu => {
+            if (menu === except) return;
+            menu.hidden = true;
+            const trigger = menu.parentElement?.querySelector('[data-action="reply-share-open"]');
+            trigger?.setAttribute("aria-expanded", "false");
+        });
+    }
+
+    // 인라인 수정 폼: 동일 카드의 텍스트 영역을 textarea + 버튼 두 개로 교체한다.
+    function enterReplyEdit(card) {
+        if (!card) return;
+        if (card.querySelector("[data-reply-edit-form]")) return;
+        const textEl = card.querySelector("[data-reply-text]");
+        if (!textEl) return;
+        const original = textEl.textContent || "";
+        const replyId = card.dataset.replyId;
+
+        const form = document.createElement("div");
+        form.className = "post-detail-reply-edit";
+        form.dataset.replyEditForm = "true";
+        form.innerHTML = `
+            <textarea class="post-detail-reply-edit-input" maxlength="500">${esc(original)}</textarea>
+            <div class="post-detail-reply-edit-actions">
+                <button type="button" class="post-detail-reply-edit-cancel" data-action="reply-edit-cancel">취소</button>
+                <button type="button" class="post-detail-reply-edit-save" data-action="reply-edit-save">저장</button>
+            </div>
+        `;
+        textEl.hidden = true;
+        textEl.after(form);
+
+        const textarea = form.querySelector("textarea");
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        // 주의: form 자체에 data-reply-id를 두지 않는다. closest("[data-reply-id]") 가 article 대신 form 을 잡아 저장 로직이 깨진다.
+        form.dataset.replyEditFor = replyId;
+        form.dataset.original = original;
+    }
+
+    function exitReplyEdit(card, nextText) {
+        if (!card) return;
+        const form = card.querySelector("[data-reply-edit-form]");
+        const textEl = card.querySelector("[data-reply-text]");
+        if (form) form.remove();
+        if (textEl) {
+            if (typeof nextText === "string") textEl.textContent = nextText;
+            textEl.hidden = false;
+        }
     }
 
     // ── 답글 카드 동작 (위임) ──
@@ -320,9 +429,58 @@
         if (!container) return;
 
         container.addEventListener("click", async (e) => {
-            const likeBtn = e.target.closest('[data-action="reply-like"]');
-            const moreBtn = e.target.closest('[data-action="reply-more"]');
-            const deleteBtn = e.target.closest('[data-action="reply-delete"]');
+            const actionEl = e.target.closest('[data-action]');
+            const action = actionEl?.dataset.action;
+            const likeBtn = action === "reply-like" ? actionEl : null;
+            const moreBtn = action === "reply-more" ? actionEl : null;
+            const editBtn = action === "reply-edit" ? actionEl : null;
+            const editCancelBtn = action === "reply-edit-cancel" ? actionEl : null;
+            const editSaveBtn = action === "reply-edit-save" ? actionEl : null;
+            const deleteBtn = action === "reply-delete" ? actionEl : null;
+            const shareOpenBtn = action === "reply-share-open" ? actionEl : null;
+            const shareLinkBtn = action === "reply-share-link" ? actionEl : null;
+            const shareContentBtn = action === "reply-share-content" ? actionEl : null;
+
+            if (shareOpenBtn) {
+                e.stopPropagation();
+                const wrap = shareOpenBtn.closest(".reply-share-wrap");
+                const menu = wrap?.querySelector(".reply-share-menu");
+                if (!menu) return;
+                const willOpen = menu.hidden;
+                closeAllReplyShareMenus(willOpen ? menu : null);
+                menu.hidden = !willOpen;
+                shareOpenBtn.setAttribute("aria-expanded", String(willOpen));
+                return;
+            }
+
+            const copyAndToast = async (text, okMsg) => {
+                if (!navigator.clipboard?.writeText) {
+                    showToast("이 브라우저에서는 복사를 지원하지 않습니다.");
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast(okMsg);
+                } catch {
+                    showToast("복사에 실패했습니다.");
+                }
+            };
+
+            if (shareLinkBtn) {
+                e.stopPropagation();
+                closeAllReplyShareMenus(null);
+                await copyAndToast(window.location.href, "링크가 복사되었습니다.");
+                return;
+            }
+
+            if (shareContentBtn) {
+                e.stopPropagation();
+                closeAllReplyShareMenus(null);
+                const card = shareContentBtn.closest("article[data-reply-id]");
+                const text = card?.querySelector("[data-reply-text]")?.textContent || "";
+                await copyAndToast(text, "내용이 복사되었습니다.");
+                return;
+            }
 
             if (likeBtn) {
                 if (!memberId) { showToast("로그인이 필요합니다."); return; }
@@ -333,7 +491,7 @@
                     const res = await fetch(`/api/news/replies/${replyId}/likes`, { method: "POST" });
                     if (!res.ok) throw new Error("reply like failed");
                     const data = await res.json();
-                    likeBtn.classList.toggle("active", data.liked);
+                    likeBtn.classList.toggle("is-active", data.liked);
                     setActionPath(likeBtn, data.liked);
                     const span = likeBtn.querySelector(".tweet-action-count");
                     if (span) {
@@ -356,6 +514,55 @@
                 closeAllReplyMenus(willOpen ? menu : null);
                 menu.hidden = !willOpen;
                 moreBtn.setAttribute("aria-expanded", String(willOpen));
+                return;
+            }
+
+            if (editBtn) {
+                e.stopPropagation();
+                closeAllReplyMenus(null);
+                const card = editBtn.closest("[data-reply-id]");
+                enterReplyEdit(card);
+                return;
+            }
+
+            if (editCancelBtn) {
+                e.stopPropagation();
+                const card = editCancelBtn.closest("[data-reply-id]");
+                exitReplyEdit(card);
+                return;
+            }
+
+            if (editSaveBtn) {
+                e.stopPropagation();
+                const form = editSaveBtn.closest("[data-reply-edit-form]");
+                const card = form?.closest("article[data-reply-id]");
+                const textarea = form?.querySelector("textarea");
+                const replyId = form?.dataset.replyEditFor;
+                if (!form || !card || !textarea || !replyId) return;
+                const next = textarea.value.trim();
+                if (!next) { showToast("내용을 입력해주세요."); return; }
+                if (next === form.dataset.original?.trim()) { exitReplyEdit(card); return; }
+                editSaveBtn.disabled = true;
+                try {
+                    const res = await fetch(`/api/news/replies/${replyId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content: next })
+                    });
+                    if (!res.ok) throw new Error("update failed");
+                    const data = await res.json();
+                    exitReplyEdit(card, data.content ?? next);
+                    // 시간 라벨: 방금 수정됐으니 "방금 전 (수정됨)"
+                    const timeEl = card.querySelector("[data-reply-time]");
+                    if (timeEl) {
+                        timeEl.innerHTML = `·&nbsp;방금 전 <span class="reply-edited-flag">(수정됨)</span>`;
+                    }
+                    showToast("답글을 수정했습니다.");
+                } catch (err) {
+                    console.error(err);
+                    showToast("답글 수정에 실패했습니다.");
+                    editSaveBtn.disabled = false;
+                }
                 return;
             }
 
@@ -389,6 +596,10 @@
                 !e.target.closest('[data-action="reply-more"]')) {
                 closeAllReplyMenus(null);
             }
+            if (!e.target.closest(".reply-share-menu") &&
+                !e.target.closest('[data-action="reply-share-open"]')) {
+                closeAllReplyShareMenus(null);
+            }
         });
     }
 
@@ -401,13 +612,22 @@
 
         const triggerLabel = trigger.querySelector("span");
 
+        const markActiveItem = (sort) => {
+            menu.querySelectorAll("[data-sort]").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.sort === sort);
+            });
+        };
+
         const close = () => {
             menu.hidden = true;
             trigger.setAttribute("aria-expanded", "false");
+            trigger.classList.remove("is-open");
         };
         const open = () => {
             menu.hidden = false;
             trigger.setAttribute("aria-expanded", "true");
+            trigger.classList.add("is-open");
+            markActiveItem(trigger.dataset.sort || "latest");
         };
 
         trigger.addEventListener("click", (e) => {
@@ -421,6 +641,7 @@
             const sort = item.dataset.sort;
             if (triggerLabel) triggerLabel.textContent = sort === "popular" ? "인기순" : "최신순";
             trigger.dataset.sort = sort;
+            markActiveItem(sort);
             close();
             await loadReplies(sort);
         });

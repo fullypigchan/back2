@@ -276,9 +276,35 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   display: flex;
   flex-wrap: wrap;
   gap: 4px 8px;
-  align-items: center;
+  align-items: flex-start;
   min-width: 0;
 }
+
+.postIdentity__copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.postIdentity__nameRow {
+  display: flex;
+  align-items: center;
+  gap: 4px 8px;
+  flex-wrap: wrap;
+}
+
+.postIdentity__metaRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  color: #536471;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.postIdentity__sep { color: #536471; }
 
 .postName { font-size: 15px; font-weight: 700; }
 
@@ -286,6 +312,30 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .postTime {
   color: #536471;
   font-size: 14px;
+}
+
+.communityPostMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.communityPostMeta__text {
+  color: #1d9bf0;
+  text-decoration: none;
+}
+
+.communityPostMeta__text:hover { text-decoration: underline; }
+
+.communityPostMeta__category {
+  background: #eff3f4;
+  color: #536471;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
 .postText {

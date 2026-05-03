@@ -68,6 +68,7 @@
                  left join tbl_post_product pp on pp.id = e.product_id
                  left join tbl_category c on c.id = pp.product_category_id
         where e.receiver_id = #{memberId}
+          and e.status = 'approve'
         group by coalesce(c.category_name, '미분류')
         order by value desc, label asc
         limit 6
@@ -81,6 +82,7 @@
         from tbl_estimation e
                  join tbl_member m on m.id = e.requester_id
         where e.receiver_id = #{memberId}
+          and e.status = 'approve'
         group by 1
         order by value desc, label asc
     </select>
