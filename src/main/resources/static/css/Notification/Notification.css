@@ -1157,10 +1157,6 @@ body.modal-open {
     overflow: hidden;
 }
 
-    margin-top: 12px;
-    padding: 0 4px;
-}
-
 .selected-product__card {
     display: flex;
     align-items: center;

@@ -270,7 +270,7 @@
     function getSharePostMeta(button) {
         const postCard = button.closest(".bookmark-post");
         const handle =
-            postCard?.querySelector(".bookmark-post-handle")?.textContent?.trim() ||
+            postCard?.querySelector(".postHandle")?.textContent?.trim() ||
             "@user";
         const postId = postCard?.dataset.postId || "1";
         const newsId = postCard?.dataset.newsId || "";
@@ -289,7 +289,7 @@
     function getBookmarkMoreMeta(button) {
         const postCard = button.closest(".bookmark-post");
         const handle =
-            postCard?.querySelector(".bookmark-post-handle")?.textContent?.trim() ||
+            postCard?.querySelector(".postHandle")?.textContent?.trim() ||
             "@user";
         const postMemberId = postCard?.dataset.postMemberId || null;
         const postId = postCard?.dataset.postId || null;

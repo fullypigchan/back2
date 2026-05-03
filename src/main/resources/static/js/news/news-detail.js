@@ -283,20 +283,27 @@
         const isAuthor = memberId && r.memberId === memberId;
 
         return `
-        <article class="post-detail-reply-card postCard" data-reply-id="${r.id}" data-member-id="${r.memberId}">
-            <div class="post-detail-reply-content">
-                <header class="post-detail-reply-header">
-                    <div class="post-detail-reply-identity">
-                        <div class="post-detail-avatar post-detail-avatar--image">
+        <article class="postCard" data-reply-id="${r.id}" data-member-id="${r.memberId}">
+            <div class="postBody">
+                <header class="postHeader">
+                    <div class="postIdentity">
+                        <div class="postAvatar postAvatar--image">
                             <img src="${profile}" alt="프로필" onerror="this.src='/images/profile/default_image.png'"/>
                         </div>
-                        <strong class="postName">${name}</strong>
-                        <span class="postHandle">${handle}</span>
-                        <span class="postTime" data-reply-time>${time}${isEdited ? ' <span class="reply-edited-flag">(수정됨)</span>' : ''}</span>
+                        <div class="postIdentity__copy">
+                            <div class="postIdentity__nameRow">
+                                <strong class="postName">${name}</strong>
+                            </div>
+                            <div class="postIdentity__metaRow">
+                                <span class="postHandle">${handle}</span>
+                                <span class="postIdentity__sep">·</span>
+                                <span class="postTime" data-reply-time>${time}${isEdited ? ' <span class="reply-edited-flag">(수정됨)</span>' : ''}</span>
+                            </div>
+                        </div>
                     </div>
                     ${isAuthor ? `
                     <div class="post-detail-more-wrap">
-                        <button class="post-detail-icon-button post-detail-more-trigger" type="button" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" data-action="reply-more">
+                        <button class="postMoreButton" type="button" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" data-action="reply-more">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"></path></svg>
                         </button>
                         <div class="dropdown-menu post-detail-reply-more-menu" role="menu" hidden>
@@ -305,7 +312,7 @@
                         </div>
                     </div>` : ""}
                 </header>
-                <p class="post-detail-reply-text" data-reply-text>${content}</p>
+                <p class="postText" data-reply-text>${content}</p>
                 <div class="post-detail-actions post-detail-actions--reply">
                     <button class="reply-action reply-action--like ${liked ? "is-active" : ""}" type="button" data-action="reply-like" aria-label="좋아요">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -361,7 +368,7 @@
         document.querySelectorAll(".post-detail-reply-more-menu").forEach(menu => {
             if (menu === except) return;
             menu.hidden = true;
-            const trigger = menu.parentElement?.querySelector(".post-detail-more-trigger");
+            const trigger = menu.parentElement?.querySelector(".postMoreButton");
             trigger?.setAttribute("aria-expanded", "false");
         });
     }

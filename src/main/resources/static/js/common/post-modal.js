@@ -1119,6 +1119,11 @@ const postModalApi = (() => {
                 formData.append("memberId", getMemberId());
                 formData.append("postContent", editor.textContent);
 
+                const files = ctx.getAttachedFiles();
+                if (files.length > 0) {
+                    files.forEach(f => formData.append("files", f));
+                }
+
                 const tags = ctx.getTags();
                 tags.forEach((tag, i) => {
                     formData.append(`hashtags[${i}].tagName`, tag.textContent.replace("#", ""));

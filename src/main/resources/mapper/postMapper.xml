@@ -234,6 +234,9 @@
                p.post_read_count
         from tbl_post p
         join tbl_member m on p.member_id = m.id
+        left join tbl_post_product_rel rel on rel.post_id = p.id
+        left join tbl_post_product pp on pp.id = rel.product_post_id
+        left join tbl_post ap on ap.id = rel.product_post_id
         where p.member_id = #{memberId}
           and p.post_status = 'active'
           and p.reply_post_id is not null
