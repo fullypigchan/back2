@@ -30,6 +30,19 @@ window.onload = () => {
         p.setAttribute("d", active ? (p.dataset.pathActive || p.getAttribute("d")) : (p.dataset.pathInactive || p.getAttribute("d")));
     }
 
+    // 상세에서 토글된 좋아요/북마크 상태를 메인 목록 카드와 동기화하기 위한 sessionStorage 기록
+    const POST_STATE_KEY = "postStateChanges";
+    function recordPostStateChange(postId, field, value) {
+        if (!postId) return;
+        try {
+            const raw = sessionStorage.getItem(POST_STATE_KEY) || "{}";
+            const changes = JSON.parse(raw);
+            changes[postId] = changes[postId] || {};
+            changes[postId][field] = value;
+            sessionStorage.setItem(POST_STATE_KEY, JSON.stringify(changes));
+        } catch (e) { /* ignore */ }
+    }
+
     // ── 1. 인라인 답글 작성기 (메인 setupSubViews 방식 그대로) ──
     const overlay = document.querySelector(".post-detail-inline-reply");
     const replyBox = document.querySelector(".post-detail-reply-box");
@@ -699,6 +712,7 @@ window.onload = () => {
             if (countEl) countEl.textContent = count + 1;
         }
         syncPath(btn, !isActive);
+        recordPostStateChange(meta.postId, "liked", !isActive);
     });
 
     // ── 4. 북마크 토글 (이벤트 위임) ──
@@ -718,6 +732,7 @@ window.onload = () => {
             btn.classList.add("active");
         }
         syncPath(btn, !isActive);
+        recordPostStateChange(meta.postId, "bookmarked", !isActive);
     });
 
     // ── 5. 공유 드롭다운 (이벤트 위임) ──
@@ -821,8 +836,12 @@ window.onload = () => {
                 const card = document.querySelector(`.postCard[data-post-id="${shareBookmarkTargetPostId}"]`);
                 if (card) {
                     const btn = card.querySelector(".tweet-action-btn--bookmark");
-                    if (btn) btn.classList.add("active");
+                    if (btn) {
+                        btn.classList.add("active");
+                        syncPath(btn, true);
+                    }
                 }
+                recordPostStateChange(shareBookmarkTargetPostId, "bookmarked", true);
                 showToast("북마크 폴더에 추가되었습니다.");
             } else if (result.status === 409) {
                 showToast("이 폴더에 이미 북마크된 게시물입니다.");
@@ -936,7 +955,8 @@ window.onload = () => {
         const rect = btn.getBoundingClientRect();
         if (moreMenu) {
             moreMenu.style.top = (rect.bottom + 8) + "px";
-            moreMenu.style.left = Math.max(16, rect.right - 240) + "px";
+            moreMenu.style.left = "auto";
+            moreMenu.style.right = (window.innerWidth - rect.right) + "px";
         }
         if (moreDropdown) moreDropdown.hidden = false;
     });
