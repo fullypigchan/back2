@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginErrorText = loginModal.querySelector(".field-error-message");
     const loginNextButton = loginModal.querySelector("#nextBtn");
     const loginCloseButton = loginModal.querySelector(".login-close");
-    const forgotButton = loginModal.querySelector(".btn-secondary");
     const originalFacebookButton = document.getElementById("facebook-login");
     const originalGoogleButton = document.getElementById("google-login");
     const loginFacebookButton = document.getElementById("login-facebook-login");
@@ -214,10 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         openPasswordModal();
-    });
-
-    forgotButton?.addEventListener("click", (event) => {
-        event.preventDefault();
     });
 
     passwordInput?.addEventListener("focus", () => {
