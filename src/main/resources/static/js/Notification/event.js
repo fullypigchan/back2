@@ -1,4 +1,11 @@
 window.onload = function () {
+    // 사이드바 게시하기 모달 활성화. MEMBER_ID는 HTML inline top-level const.
+    postModalApi.bootstrap({
+        services: service,
+        layout: layout,
+        getMemberId: () => MEMBER_ID,
+    });
+
     // ===== 1. DOM =====
     // 탭 네비게이션 링크 목록
     const tabLinks = document.querySelectorAll(".tab-link");

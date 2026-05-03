@@ -2,9 +2,10 @@
 <html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <link rel="stylesheet" href="/css/main/main.css">
-    <script src="/js/main/main.js"></script>
+    <link rel="stylesheet" href="/css/common/post-modal.css"/>
     <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
     <script src="/js/common/profile-link.js" defer></script>
+    <script src="/js/common/post-modal.js" defer></script>
     <script src="/js/common/header.js" defer></script>
 </head>
 <body>
@@ -13,5 +14,7 @@
 <th:block layout:fragment="content"></th:block>
 </main>
 <th:block layout:fragment="modals"></th:block>
+<div th:replace="~{common/compose-modal :: composeModal}"></div>
+<div th:replace="~{common/reply-modal :: replyModal}"></div>
 </body>
 </html>

@@ -9,7 +9,7 @@ window.addEventListener("load", function () {
     const overlay = document.getElementById("composerModalOverlay");
     const section = document.getElementById("composerSection");
     const composerModalClose = document.getElementById("composerModalClose");
-    const createPostButton = document.getElementById("createPostButton");
+    const createEstimationButton = document.getElementById("createEstimationButton");
     const composeView = document.getElementById("composerComposeView");
 
     // 폼 필드 — 마이페이지의 상품 등록 폼이 동일한 name(postName/postPrice/postContent)을
@@ -307,7 +307,7 @@ window.addEventListener("load", function () {
     // 작성 중 내용이 있으면 닫기 전 확인. 제출 성공 후엔 resetForm() 이후
     // close 버튼을 프로그래밍 클릭하므로 hasContent가 false라 confirm 안 뜬다.
     const setupModal = () => {
-        if (!overlay || !section || !createPostButton) return;
+        if (!overlay || !section || !createEstimationButton) return;
 
         const hasContent = () => {
             if (requiredFields.some((f) => f.value.trim())) return true;
@@ -330,7 +330,7 @@ window.addEventListener("load", function () {
             document.body.classList.remove("modal-open");
         };
 
-        createPostButton.addEventListener("click", open);
+        createEstimationButton.addEventListener("click", open);
         composerModalClose?.addEventListener("click", close);
         overlay.addEventListener("click", close);
         document.addEventListener("keydown", (e) => {
@@ -940,6 +940,6 @@ window.addEventListener("load", function () {
     // 독립 페이지(/estimation/regist) 진입 시 모달 자동 오픈.
     // 마이페이지 fragment에서는 트리거 클릭 시에만 열린다.
     if (window.location.pathname.startsWith("/estimation/regist")) {
-        window.setTimeout(() => createPostButton?.click(), 0);
+        window.setTimeout(() => createEstimationButton?.click(), 0);
     }
 });

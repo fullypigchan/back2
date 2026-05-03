@@ -7,8 +7,6 @@
     <title>게시물 / X</title>
     <link rel="stylesheet" href="/css/common/mobile-nav.css" th:href="@{/css/common/mobile-nav.css}"/>
     <link rel="stylesheet" href="/css/post-detailed/post-detailed.css"/>
-    <!-- 답글 모달 공용 스타일. post-detailed.css 다음에 로드해 모달 셀렉터를 덮어쓰게 한다. -->
-    <link rel="stylesheet" href="/css/common/post-modal.css"/>
     <link rel="stylesheet" href="/css/mention/mention.css"/>
     <link rel="stylesheet" href="/css/main/product-in-mainpage.css"/>
     <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
@@ -26,8 +24,6 @@
 <!--    <script src="/js/post-detailed/post-detailed-copy/service.js"></script>-->
 <!--    <script src="/js/post-detailed/post-detailed-copy/event.js"></script>-->
     <script src="/js/bookmark/service.js"></script>
-    <!-- 답글 모달 공용 모듈. event.js 보다 먼저 로드. -->
-    <script src="/js/common/post-modal.js"></script>
     <script src="/js/post-detailed/layout.js"></script>
     <script src="/js/post-detailed/service.js"></script>
     <script src="/js/post-detailed/event.js"></script>
@@ -636,10 +632,6 @@
         </div>
     </div>
 </div>
-<!-- 댓글/답글 카드용 작성 모달: Spring에서 렌더링한 카드 메타 정보를 JS가 그대로 주입한다. -->
-<!-- 답글 모달: 전역 fragment 사용 (post-modal.js가 [data-reply-modal] 셀렉터로 잡아 셋업). -->
-<div th:replace="~{common/reply-modal :: replyModal}"></div>
-
 <div id="layers" aria-hidden="true"></div>
 
 <!-- 북마크 폴더 선택 모달 -->

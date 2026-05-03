@@ -3,6 +3,13 @@ window.onload = () => {
 
     let memberId = null;
 
+    // 사이드바 게시하기 모달 활성화. memberId는 비동기로 채워지므로 getter로 늦은 바인딩.
+    postModalApi.bootstrap({
+        services: service,
+        layout: friendsLayout,
+        getMemberId: () => memberId,
+    });
+
     // ===== 1. DOM 참조 =====
     const scrollEl = document.getElementById("categoryScroll");
     const btnLeft = document.getElementById("scrollLeft");

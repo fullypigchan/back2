@@ -2230,14 +2230,10 @@ window.onload = function () {
         });
     }
 
-    // === 견적요청 모달 ===
-    // 모달 열기/닫기 + body.modal-open 토글 + 폼 제출 등 모든 흐름은
-    // estimation-regist/event.js가 담당한다. 여기서는 마이페이지의
-    // "견적요청" 버튼이 모달의 숨겨진 작성 버튼(#createPostButton)을
-    // 대신 클릭하도록 다리만 연결해 둔다.
+    // 견적요청 버튼은 estimation-regist 측 hidden 트리거(#createEstimationButton)를 대신 클릭한다.
     document.querySelector(".Profile-Edit-Btn.Request")
         ?.addEventListener("click", () => {
-            document.getElementById("createPostButton")?.click();
+            document.getElementById("createEstimationButton")?.click();
         });
 
     // 사이드바 견적 요약/더보기는 본인 mypage에서만 의미가 있다.

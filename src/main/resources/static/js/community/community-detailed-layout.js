@@ -79,12 +79,12 @@ const CommunityDetailLayout = {
 
         return `
         <article class="postCard communityPostCard" data-post-id="${post.id}" data-member-id="${post.memberId}" data-is-followed="${isFollowed ? 'true' : 'false'}">
-            <div class="postAvatar">
-                <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
-            </div>
             <div class="postBody">
                 <header class="postHeader">
                     <div class="postIdentity">
+                        <div class="postAvatar">
+                            <img class="postAvatarImage" src="${post.memberProfileFileName || '/images/profile/default_image.png'}" alt="" onerror="this.src='/images/profile/default_image.png'">
+                        </div>
                         <strong class="postName">${nickname}</strong>
                         <span class="postHandle">${handle}</span>
                         <span class="postTime">${post.createdDatetime}</span>
