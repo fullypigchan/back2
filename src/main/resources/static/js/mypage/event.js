@@ -18,6 +18,10 @@ window.onload = function () {
         services: service,
         layout: layout,
         getMemberId: () => mypageContext.loginMemberId,
+        // 답글 게시 후 카드의 답글 카운트 +1.
+        onReplySubmitSuccess: ({ button }) => {
+            updateReplyCount(button);
+        },
     });
 
     // ===== 1. DOM =====
@@ -2602,11 +2606,6 @@ window.onload = function () {
         renderTagResults([]);
         replyTagSearchInput?.focus();
     });
-    replySubmitButton?.addEventListener("click", () => {
-        if (!activeReplyTrigger || replySubmitButton.disabled) return;
-        updateReplyCount(activeReplyTrigger);
-        closeReplyModal({skipConfirm: true});
-    });
     document.addEventListener("click", (e) => {
         if (
             replyEmojiPicker &&
@@ -3643,6 +3642,20 @@ window.onload = function () {
             closeAllMoreMenus();
             closeProfileMoreDropdown();
         }
+    });
+
+    // 게시글 카드 클릭 → 게시글 상세 이동 (액션/프로필/링크는 각자 핸들러)
+    document.body.addEventListener("click", (e) => {
+        const card = e.target.closest('.Post-Card[data-post-id]');
+        if (!card) return;
+        if (e.target.closest('button, a, [data-action], [data-profile-id]')) return;
+
+        const postId = card.dataset.postId;
+        const memberId = mypageContext.loginMemberId;
+        const url = memberId
+            ? `/main/post/detail/${postId}?memberId=${memberId}`
+            : `/main/post/detail/${postId}`;
+        location.href = url;
     });
 
     // ── 카드 액션 버튼 이벤트 위임 ──
