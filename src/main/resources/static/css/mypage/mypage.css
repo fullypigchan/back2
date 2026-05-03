@@ -121,14 +121,7 @@ body {
     pointer-events: auto;
 }
 
-.Page-Layout {
-    display: flex;
-    flex-direction: row;
-    margin: 0 auto;
-    width: 100%;
-    justify-content: center;
-    min-height: 100%;
-}
+/* .Page-Layout — main.css 의 공용 규칙(max-width: 1280px) 사용. 페이지별 재정의 금지. */
 
 .Primary-Column {
     display: flex;

@@ -86,4 +86,13 @@
           and reply_status = 'active'
     </update>
 
+    <update id="updateContentById">
+        update tbl_news_reply
+        set content = #{content},
+            updated_datetime = current_timestamp
+        where id = #{id}
+          and member_id = #{memberId}
+          and reply_status = 'active'
+    </update>
+
 </mapper>

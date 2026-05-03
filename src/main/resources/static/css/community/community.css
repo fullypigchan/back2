@@ -414,6 +414,15 @@ button { cursor: pointer; }
     border-radius: 9999px;
 }
 
+/* 커뮤니티 라벨 바로 아래에 표시되는 작성자 핸들 */
+.communityPostHandle {
+    display: block;
+    margin: 0 0 4px;
+    color: #536471;
+    font-size: 13px;
+    line-height: 16px;
+}
+
 .communityTimeline .postAvatar,
 .communityTimeline .postAvatar.postAvatar--image {
     width: 36px;
