@@ -32,4 +32,18 @@ public class FriendsAPIController implements FriendsAPIControllerDocs {
         log.info("카테고리 목록 조회");
         return categoryDAO.findAll();
     }
+
+    @GetMapping("/followers/{page}")
+    @LogStatusWithReturn
+    public FriendsWithPagingDTO getFollowers(@PathVariable int page, @RequestParam Long memberId) {
+        log.info("커넥터 목록 조회 — page: {}, memberId: {}", page, memberId);
+        return friendsService.getFollowersList(page, memberId);
+    }
+
+    @GetMapping("/followings/{page}")
+    @LogStatusWithReturn
+    public FriendsWithPagingDTO getFollowings(@PathVariable int page, @RequestParam Long memberId) {
+        log.info("커넥팅 목록 조회 — page: {}, memberId: {}", page, memberId);
+        return friendsService.getFollowingsList(page, memberId);
+    }
 }
