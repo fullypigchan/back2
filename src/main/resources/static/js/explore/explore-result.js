@@ -1,9 +1,13 @@
 window.onload = () => {
-    // 사이드바 게시하기 모달 활성화. memberId는 explore-result.html inline top-level const.
+    // 사이드바 게시하기 + 공용 답글 모달 활성화. memberId는 explore-result.html inline top-level const.
     postModalApi.bootstrap({
         services: service,
         layout: layout,
         getMemberId: () => memberId,
+        // 답글 게시 후 검색 결과 카드의 답글 카운트 +1.
+        onReplySubmitSuccess: ({ button }) => {
+            updateReplyCount(button);
+        },
     });
 
     const tabPopular = document.getElementById("tabPopular");
@@ -3216,26 +3220,6 @@ window.onload = () => {
         if (replyTagSearchInput) replyTagSearchInput.value = "";
         renderTagResults([]);
         replyTagSearchInput?.focus();
-    });
-    replySubmitButton?.addEventListener("click", async () => {
-        if (!activeReplyTrigger || replySubmitButton.disabled) return;
-        const postId = activeReplyTrigger.closest(".postCard")?.dataset.postId;
-        const memberId = await getLoginMemberInfo();
-        if (postId && replyEditor) {
-            try {
-                const formData = new FormData();
-                formData.append("memberId", memberId);
-                formData.append("postContent", replyEditor.textContent);
-                if (attachedReplyFiles.length > 0) {
-                    attachedReplyFiles.forEach(f => formData.append("files", f));
-                }
-                await service.writeReply(postId, formData);
-            } catch (err) {
-                console.error("답글 저장 실패:", err);
-            }
-        }
-        updateReplyCount(activeReplyTrigger);
-        closeReplyModal({skipConfirm: true});
     });
     document.addEventListener("click", (e) => {
         if (replyEmojiPicker && !replyEmojiPicker.hidden && !replyEmojiPicker.contains(e.target) && !replyEmojiButton?.contains(e.target)) closeEmojiPicker();

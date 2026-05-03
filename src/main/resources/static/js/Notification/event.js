@@ -4,6 +4,10 @@ window.onload = function () {
         services: service,
         layout: layout,
         getMemberId: () => MEMBER_ID,
+        // 답글 게시 후 알림 카드의 답글 카운트 +1.
+        onReplySubmitSuccess: ({ button }) => {
+            updateReplyCount(button);
+        },
     });
 
     // ===== 1. DOM =====
@@ -2958,33 +2962,6 @@ window.onload = function () {
         if (replyTagSearchInput) replyTagSearchInput.value = "";
         renderTagResults([]);
         replyTagSearchInput?.focus();
-    });
-
-    // 답글 제출 버튼 클릭 시 API 호출 후 답글 수를 증가시키고 모달을 닫는다
-    replySubmitButton?.addEventListener("click", async () => {
-        if (!activeReplyTrigger || replySubmitButton.disabled) return;
-        const article = activeReplyTrigger.closest("[data-target-id]");
-        const postId = article?.dataset.targetId;
-        if (!postId || !MEMBER_ID || !replyEditor) return;
-
-        const formData = new FormData();
-        formData.append("memberId", MEMBER_ID);
-        formData.append("postContent", replyEditor.textContent);
-
-        // 첨부 파일
-        if (attachedReplyFiles && attachedReplyFiles.length > 0) {
-            attachedReplyFiles.forEach(f => formData.append("files", f));
-        }
-
-        // 멘션 핸들 수집
-        const mentionHandles = collectMentionHandles(replyEditor);
-        mentionHandles.forEach((h, i) => {
-            formData.append(`mentionedHandles[${i}]`, h);
-        });
-
-        await NotificationService.writeReply(postId, formData);
-        updateReplyCount(activeReplyTrigger);
-        closeReplyModal({skipConfirm: true});
     });
 
     // 문서 클릭 시 열린 피커/드롭다운을 외부 클릭으로 닫는다
