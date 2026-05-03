@@ -2779,10 +2779,10 @@ window.addEventListener("load", () => {
 
     const renderCard = (post) => `
         <article class="postCard" data-post-id="${post.id}">
-            <div class="postAvatar">${getInitial(post.memberNickname, post.memberHandle)}</div>
             <div class="postBody">
                 <header class="postHeader">
                     <div class="postIdentity">
+                        <div class="postAvatar">${getInitial(post.memberNickname, post.memberHandle)}</div>
                         <strong class="postName">${escapeHtml(post.memberNickname || "이름 없는 거래처")}</strong>
                         <span class="postHandle">${escapeHtml(post.memberHandle || "")}</span>
                         <span class="postTime">${escapeHtml(post.createdDatetime || "")}</span>

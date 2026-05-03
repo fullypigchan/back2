@@ -1165,18 +1165,21 @@ const postModalApi = (() => {
             });
         }
 
-        const replyOverlay = document.querySelector("[data-reply-modal]");
-        if (replyOverlay) {
-            const replyEditor = replyOverlay.querySelector(".tweet-modal__editor");
-            const replyMention = setupMention(replyEditor, replyEditor.parentElement, getMemberId);
-            const replyCtx = setupSubViews(replyOverlay, getMemberId);
-            setupReply({
-                overlay: replyOverlay,
-                mention: replyMention,
-                ctx: replyCtx,
-                getMemberId: getMemberId,
-                onSubmitSuccess: opts.onReplySubmitSuccess,
-            });
+        // 자체 답글 모달이 있는 페이지(bookmark/mypage/Notification 등)는 skipReply: true 로 공용 셋업을 건너뛴다.
+        if (!opts.skipReply) {
+            const replyOverlay = document.querySelector("[data-reply-modal]");
+            if (replyOverlay) {
+                const replyEditor = replyOverlay.querySelector(".tweet-modal__editor");
+                const replyMention = setupMention(replyEditor, replyEditor.parentElement, getMemberId);
+                const replyCtx = setupSubViews(replyOverlay, getMemberId);
+                setupReply({
+                    overlay: replyOverlay,
+                    mention: replyMention,
+                    ctx: replyCtx,
+                    getMemberId: getMemberId,
+                    onSubmitSuccess: opts.onReplySubmitSuccess,
+                });
+            }
         }
     }
 

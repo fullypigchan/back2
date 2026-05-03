@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    // 사이드바 게시하기 모달 활성화. memberId는 HTML inline top-level const.
+    // 사이드바 게시하기 + 공용 답글 모달 활성화. memberId는 HTML inline top-level const.
     postModalApi.bootstrap({
         services: service,
         layout: layout,
@@ -1131,10 +1131,8 @@
                 closeShareDropdown();
             }
 
-            if (action === "reply") {
-                openBookmarkReplyModal(actionButton);
-                return;
-            }
+            // 답글 트리거는 공용 답글 모달(post-modal.js setupReply)이 처리한다.
+            // 자체 답글 모달 마크업/CSS는 Phase 3 후속 PR에서 통째 제거 예정.
 
             if (action === "like") {
                 const isActive = !actionButton.classList.contains("active");

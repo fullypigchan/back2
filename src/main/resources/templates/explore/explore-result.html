@@ -9,9 +9,13 @@
     <link rel="stylesheet" href="/css/explore/explore.css"/>
     <link rel="stylesheet" href="/css/explore/explore-result.css"/>
     <script src="/js/common/mobile-nav.js" th:src="@{/js/common/mobile-nav.js}" defer></script>
+    <script th:inline="javascript">
+        const memberId = /*[[${member.id}]]*/ null;
+    </script>
     <script src="/js/explore/explore-result.js"></script>
     <script src="/js/explore/service.js"></script>
     <script src="/js/main/service.js"></script>
+    <script src="/js/main/layout.js"></script>
     <script src="/js/explore/layout.js"></script>
     <script src="/js/explore/reply.js"></script>
     <script src="/js/utils/exchange.js"></script>

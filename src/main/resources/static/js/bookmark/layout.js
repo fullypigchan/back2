@@ -42,7 +42,7 @@ const BookmarkLayout = (function () {
         const handle = rawHandle.startsWith("@") ? escapeHtml(rawHandle) : (rawHandle ? escapeHtml("@" + rawHandle) : "");
         const avatarInitial = (b.memberNickname || b.memberHandle || "?").charAt(0);
         const profileSrc = b.memberProfileFileName || "/images/profile/default_image.png";
-        const avatarHtml = `<div class="bookmark-post-avatar bookmark-post-avatar--image"><img src="${escapeHtml(profileSrc)}" alt="${nickname} 프로필 이미지"/></div>`;
+        const avatarHtml = `<div class="bookmark-post-avatar bookmark-post-avatar--image postAvatar"><img class="postAvatarImage" src="${escapeHtml(profileSrc)}" alt="${nickname} 프로필 이미지"/></div>`;
         const likeCount = b.likeCount || 0;
         const replyCount = b.replyCount || 0;
         const bookmarkCount = b.bookmarkCount || 0;
@@ -51,13 +51,13 @@ const BookmarkLayout = (function () {
         const mediaHtml = postFiles.length > 0
             ? `<div class="bookmark-post-media bookmark-post-media--${Math.min(postFiles.length, 4)}">${postFiles.slice(0, 4).map(pf => `<img src="${escapeHtml(pf.filePath)}" alt="${escapeHtml(pf.originalName || '')}" class="bookmark-post-media-img" data-media-preview="true"/>`).join("")}</div>`
             : "";
-        return `<article class="bookmark-post${isDeleted ? " bookmark-post--deleted" : ""}${isNews ? " bookmark-post--news" : ""}" data-post-id="${b.postId || ""}" data-news-id="${b.newsId || ""}" data-bookmark-type="${isNews ? "news" : "post"}" data-bookmark-id="${b.id}" data-post-member-id="${b.postMemberId || ""}">
-            ${avatarHtml}
+        return `<article class="bookmark-post postCard${isDeleted ? " bookmark-post--deleted" : ""}${isNews ? " bookmark-post--news" : ""}" data-post-id="${b.postId || ""}" data-news-id="${b.newsId || ""}" data-bookmark-type="${isNews ? "news" : "post"}" data-bookmark-id="${b.id}" data-post-member-id="${b.postMemberId || ""}">
             <div class="bookmark-post-body">
                 <header class="bookmark-post-header">
                     <div class="bookmark-post-identity">
-                        <strong class="bookmark-post-name">${nickname}</strong>
-                        ${handle ? `<span class="bookmark-post-handle">${handle}</span>` : ""}
+                        ${avatarHtml}
+                        <strong class="bookmark-post-name postName">${nickname}</strong>
+                        ${handle ? `<span class="bookmark-post-handle postHandle">${handle}</span>` : ""}
                     </div>
                     <div class="bookmark-post-more-wrap">
                         <button class="bookmark-post-more" type="button" aria-label="게시물 더 보기" aria-haspopup="menu" aria-expanded="false" data-post-more>
@@ -79,11 +79,11 @@ const BookmarkLayout = (function () {
                         </div>
                     </div>
                 </header>
-                <p class="bookmark-post-text">${content}</p>
+                <p class="bookmark-post-text postText">${content}</p>
                 ${mediaHtml}
                 <footer class="bookmark-post-metrics">
                     <div class="bookmark-post-actions">
-                        <button type="button" class="bookmark-post-action bookmark-post-action--reply" data-action="reply" aria-label="${replyCount} 답글">
+                        <button type="button" class="bookmark-post-action bookmark-post-action--reply tweet-action-btn" data-action="reply" aria-label="${replyCount} 답글">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></svg>
                             <span class="tweet-action-count">${replyCount}</span>
                         </button>
