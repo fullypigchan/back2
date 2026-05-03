@@ -13,11 +13,11 @@ public interface FriendsMapper {
 
     public int selectTotal(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
 
-    public List<FriendsDTO> selectAllFollowers(@Param("criteria") Criteria criteria, @Param("memberId") Long memberId);
+    public List<FriendsDTO> selectAllFollowers(@Param("criteria") Criteria criteria, @Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
 
-    public int selectTotalFollowers(@Param("memberId") Long memberId);
+    public int selectTotalFollowers(@Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
 
-    public List<FriendsDTO> selectAllFollowings(@Param("criteria") Criteria criteria, @Param("memberId") Long memberId);
+    public List<FriendsDTO> selectAllFollowings(@Param("criteria") Criteria criteria, @Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
 
-    public int selectTotalFollowings(@Param("memberId") Long memberId);
+    public int selectTotalFollowings(@Param("profileId") Long profileId, @Param("viewerId") Long viewerId);
 }

@@ -1,7 +1,24 @@
 window.onload = () => {
     "use strict";
 
-    let memberId = null;
+    let memberId = null;  // 로그인 사용자 = viewerId
+
+    // 페이지 주인 정보 (서버 렌더 데이터 속성에서 읽음)
+    const mainEl = document.querySelector(".main-content");
+    const pageMemberIdAttr = mainEl ? mainEl.dataset.pageMemberId : "";
+    const isOwnerAttr = mainEl ? mainEl.dataset.isOwner : "true";
+    const pageMemberId = pageMemberIdAttr ? Number(pageMemberIdAttr) : null;
+    const isOwner = isOwnerAttr !== "false";
+
+    // URL 파라미터로 초기 탭 결정 (mypage에서 진입 시 tab=followers/followings)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get("tab");
+    const allowedTabs = isOwner
+        ? ["recommend", "followers", "followings"]
+        : ["followers", "followings"];
+    const initialTab = allowedTabs.includes(tabParam)
+        ? tabParam
+        : (isOwner ? "recommend" : "followers");
 
     // 사이드바 게시하기 모달 활성화. memberId는 비동기로 채워지므로 getter로 늦은 바인딩.
     postModalApi.bootstrap({
@@ -25,7 +42,10 @@ window.onload = () => {
     // ===== 2. 화면 상태 =====
     let pendingDisconnectButton = null;
     let selectedCategoryId = null;
-    let currentTab = "recommend";
+    let currentTab = initialTab;
+
+    // 실제 조회 대상 회원 = pageMemberId (없으면 본인 = memberId)
+    const targetProfileId = () => pageMemberId || memberId;
 
     // ===== 3. 페이징 + 무한스크롤 =====
     let page = 1;
@@ -50,7 +70,8 @@ window.onload = () => {
             return;
         }
         if (currentTab === "followers") {
-            await friendsService.getFollowersList(page, memberId, (data) => {
+            await friendsService.getFollowersList(page, targetProfileId(), memberId, (data) => {
+                updateTabCount("followers", data.total);
                 if (page === 1 && data.friends.length === 0) {
                     friendsLayout.showEmptyState("아직 커넥터가 없습니다");
                     hasMore = false;
@@ -62,7 +83,8 @@ window.onload = () => {
             return;
         }
         if (currentTab === "followings") {
-            await friendsService.getFollowingsList(page, memberId, (data) => {
+            await friendsService.getFollowingsList(page, targetProfileId(), memberId, (data) => {
+                updateTabCount("followings", data.total);
                 if (page === 1 && data.friends.length === 0) {
                     friendsLayout.showEmptyState("아직 커넥팅한 회원이 없습니다");
                     hasMore = false;
@@ -72,6 +94,15 @@ window.onload = () => {
                 hasMore = data.criteria.hasMore;
             });
         }
+    };
+
+    // 탭 옆 카운트 갱신
+    const updateTabCount = (tabName, total) => {
+        if (total === undefined || total === null) return;
+        const tab = document.querySelector(`.friends-tab[data-tab="${tabName}"]`);
+        if (!tab) return;
+        const countSpan = tab.querySelector(".friends-tab-count");
+        if (countSpan) countSpan.textContent = total;
     };
 
     // 카테고리 칩 렌더링 (대카테고리만)
@@ -97,10 +128,13 @@ window.onload = () => {
         const member = await friendsService.getMyInfo();
         memberId = member.id;
 
-        await friendsService.getCategories((data) => {
-            categories = data;
-            renderCategoryChips();
-        });
+        // 본인 페이지 + 추천 탭 진입일 때만 카테고리 칩 로드
+        if (isOwner) {
+            await friendsService.getCategories((data) => {
+                categories = data;
+                renderCategoryChips();
+            });
+        }
 
         await loadList();
     };
@@ -246,6 +280,18 @@ window.onload = () => {
     // ===== 6. 이벤트 바인딩 =====
     const tabs = document.querySelectorAll(".friends-tab");
     const categoryBanner = document.getElementById("categoryBanner");
+
+    // 초기 탭 active 동기화 (URL 파라미터로 진입한 경우 Thymeleaf 기본값을 덮어씀)
+    tabs.forEach(tab => {
+        if (tab.dataset.tab === currentTab) {
+            tab.classList.add("active");
+        } else {
+            tab.classList.remove("active");
+        }
+    });
+    if (categoryBanner) {
+        categoryBanner.style.display = currentTab === "recommend" ? "" : "none";
+    }
 
     tabs.forEach(tab => {
         tab.addEventListener("click", async () => {
