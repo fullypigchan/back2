@@ -232,8 +232,8 @@ const mypageLayout = (() => {
         }
 
         const avatarHtml = post.memberProfileFileName
-            ? `<div class="Post-Avatar Post-Avatar--Image"><img class="Post-Avatar-Image" src="${post.memberProfileFileName}" alt="프로필 이미지"></div>`
-            : `<div class="Post-Avatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>`;
+            ? `<div class="Post-Avatar Post-Avatar--Image postAvatar"><img class="Post-Avatar-Image postAvatarImage" src="${post.memberProfileFileName}" alt="프로필 이미지"></div>`
+            : `<div class="Post-Avatar postAvatar">${(post.memberNickname || post.memberHandle || "?").charAt(0)}</div>`;
 
         const communityMetaHtml = post.communityId && post.communityName
             ? `<div class="Post-Community-Meta">
@@ -241,7 +241,7 @@ const mypageLayout = (() => {
                </div>`
             : "";
 
-        return `<article class="Post-Card${post.communityId ? " Post-Card--Community" : ""}" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}"${post.communityId ? ` data-community-id="${post.communityId}"` : ""}>
+        return `<article class="Post-Card postCard${post.communityId ? " Post-Card--Community" : ""}" data-type="${dataType}" data-post-id="${post.id}" data-member-id="${post.memberId}" data-member-handle="${post.memberHandle ?? ""}" data-card-type="${cardType}"${post.communityId ? ` data-community-id="${post.communityId}"` : ""}>
               <div class="Post-Avatar-Wrapper">
                   ${avatarHtml}
               </div>
@@ -249,9 +249,9 @@ const mypageLayout = (() => {
                   ${communityMetaHtml}
                   <header class="Post-Header">
                       <div class="Post-Identity">
-                          <strong class="Post-Name">${post.memberNickname ?? post.memberHandle ?? ""}</strong>
-                          <span class="Post-Handle">${post.memberHandle ?? ""}</span>
-                          <span class="Post-Time">${post.createdDatetime ?? ""}</span>
+                          <strong class="Post-Name postName">${post.memberNickname ?? post.memberHandle ?? ""}</strong>
+                          <span class="Post-Handle postHandle">${post.memberHandle ?? ""}</span>
+                          <span class="Post-Time postTime">${post.createdDatetime ?? ""}</span>
                       </div>
                       <button class="Post-More-Button" type="button" aria-label="더 보기" data-action="more" data-card-type="${cardType}">
                           <svg viewBox="0 0 24 24" class="Post-More-Icon" aria-hidden="true">
@@ -259,12 +259,12 @@ const mypageLayout = (() => {
                           </svg>
                       </button>
                   </header>
-                  <p class="Post-Text">${post.postContent ?? ""}</p>
+                  <p class="Post-Text postText">${post.postContent ?? ""}</p>
                   ${hashtags ? `<div class="Detail-Category-Tags">${hashtags}</div>` : ""}
                   ${mediaHtml}
                   <footer class="Post-Metrics">
                       <div class="Post-Action-Bar">
-                          <button class="Post-Action-Btn Reply" type="button" aria-label="답글 ${post.replyCount ?? 0}"
+                          <button class="Post-Action-Btn Reply tweet-action-btn" type="button" aria-label="답글 ${post.replyCount ?? 0}"
                                   data-action="reply">
                               <svg viewBox="0 0 24 24" class="Post-Action-Icon" aria-hidden="true">
                                   <path d="${ICON_PATHS.reply}"/>
