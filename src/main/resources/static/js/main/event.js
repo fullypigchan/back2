@@ -84,6 +84,73 @@ window.onload = () => {
         }
     });
 
+    // 게시물 상세에서 토글된 좋아요/북마크 상태를 목록 카드에 반영하기 위한 sessionStorage 동기화
+    const POST_STATE_KEY = "postStateChanges";
+
+    function readPostStateChanges() {
+        try { return JSON.parse(sessionStorage.getItem(POST_STATE_KEY) || "{}"); }
+        catch (e) { return {}; }
+    }
+
+    function savePostStateChange(postId, field, value) {
+        if (!postId) return;
+        const changes = readPostStateChanges();
+        changes[postId] = changes[postId] || {};
+        changes[postId][field] = value;
+        sessionStorage.setItem(POST_STATE_KEY, JSON.stringify(changes));
+    }
+
+    function applyPostStateChanges() {
+        const changes = readPostStateChanges();
+        if (!changes || Object.keys(changes).length === 0) return;
+        Object.keys(changes).forEach((postId) => {
+            const card = document.querySelector(`.postCard[data-post-id="${postId}"]`);
+            if (!card) return;
+            const change = changes[postId] || {};
+
+            if (Object.prototype.hasOwnProperty.call(change, "liked")) {
+                const likeBtn = card.querySelector(".tweet-action-btn--like");
+                if (likeBtn) {
+                    const wasActive = likeBtn.classList.contains("active");
+                    if (wasActive !== change.liked) {
+                        const countSpan = likeBtn.querySelector(".tweet-action-count");
+                        const cur = parseInt(countSpan?.textContent || "0") || 0;
+                        if (countSpan) countSpan.textContent = String(Math.max(0, cur + (change.liked ? 1 : -1)));
+                        likeBtn.classList.toggle("active", change.liked);
+                        const p = likeBtn.querySelector("path");
+                        if (p) {
+                            const next = change.liked ? p.dataset.pathActive : p.dataset.pathInactive;
+                            if (next) p.setAttribute("d", next);
+                        }
+                    }
+                }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(change, "bookmarked")) {
+                const bkBtn = card.querySelector(".tweet-action-btn--bookmark");
+                if (bkBtn) {
+                    bkBtn.classList.toggle("active", change.bookmarked);
+                    const p = bkBtn.querySelector("path");
+                    if (p) {
+                        const next = change.bookmarked ? p.dataset.pathActive : p.dataset.pathInactive;
+                        if (next) p.setAttribute("d", next);
+                    }
+                }
+            }
+        });
+    }
+
+    // 피드 카드가 새로 그려진 뒤에 sessionStorage 변경분을 한번 더 입혀준다.
+    const _origShowPostList = layout.showPostList;
+    layout.showPostList = function (posts, page) {
+        const result = _origShowPostList(posts, page);
+        applyPostStateChanges();
+        return result;
+    };
+
+    // bfcache 로 복원되어 showPostList 가 다시 호출되지 않을 때를 대비해 pageshow 에서도 한번 더 적용한다.
+    window.addEventListener("pageshow", () => applyPostStateChanges());
+
     // ── 2. 게시물 버튼 이벤트 (이벤트 위임) ──
     const mainShareDropdown = document.getElementById("mainShareDropdown");
     let activeMoreDropdown = null;
@@ -413,6 +480,14 @@ window.onload = () => {
         }
     });
 
+    // 좋아요/북마크 SVG path 토글 헬퍼
+    function syncActionPath(btn, active) {
+        const p = btn?.querySelector("path");
+        if (!p) return;
+        const next = active ? p.dataset.pathActive : p.dataset.pathInactive;
+        if (next) p.setAttribute("d", next);
+    }
+
     // 좋아요 토글 (이벤트 위임)
     document.addEventListener("click", async (e) => {
         const likeBtn = e.target.closest(".tweet-action-btn--like");
@@ -431,6 +506,8 @@ window.onload = () => {
             likeBtn.classList.add("active");
             countSpan.textContent = count + 1;
         }
+        syncActionPath(likeBtn, !isActive);
+        savePostStateChange(postId, "liked", !isActive);
     });
 
     // 북마크 토글 (이벤트 위임)
@@ -447,6 +524,8 @@ window.onload = () => {
             await service.addBookmark(memberId, postId);
             bookmarkBtn.classList.add("active");
         }
+        syncActionPath(bookmarkBtn, !isActive);
+        savePostStateChange(postId, "bookmarked", !isActive);
     });
 
     // 공유 드롭다운 토글 (이벤트 위임)
@@ -532,8 +611,12 @@ window.onload = () => {
                 const card = document.querySelector(`.postCard[data-post-id="${shareTargetPostId}"]`);
                 if (card) {
                     const btn = card.querySelector(".tweet-action-btn--bookmark");
-                    if (btn) btn.classList.add("active");
+                    if (btn) {
+                        btn.classList.add("active");
+                        syncActionPath(btn, true);
+                    }
                 }
+                savePostStateChange(shareTargetPostId, "bookmarked", true);
                 showShareToast("북마크 폴더에 추가되었습니다.");
             } else if (result.status === 409) {
                 showShareToast("이 폴더에 이미 북마크된 게시물입니다.");

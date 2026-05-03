@@ -271,7 +271,7 @@
         const profile = r.memberProfileFileName
             ? esc(r.memberProfileFileName)
             : "/images/profile/default_image.png";
-        const handle = r.memberHandle ? `@${esc(r.memberHandle)}` : "";
+        const handle = r.memberHandle ? esc(r.memberHandle) : "";
         const name = esc(r.memberName || r.memberHandle || "사용자");
         // 표기 시간: 수정된 적이 있으면 updated_datetime, 아니면 created_datetime
         const isEdited = !!(r.createdDatetime && r.updatedDatetime && r.updatedDatetime > r.createdDatetime);
