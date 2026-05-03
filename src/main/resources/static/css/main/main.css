@@ -209,7 +209,12 @@ textarea {
     transform: scale(1.04);
 }
 
-.nav-item.active span {
+.nav-item > span:not(.nav-icon-wrap):not(.nav-badge) {
+    font-size: 20px;
+    color: #0F1419;
+}
+
+.nav-item.active > span:not(.nav-icon-wrap):not(.nav-badge) {
     font-weight: 700;
 }
 
