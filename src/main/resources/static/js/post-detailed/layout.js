@@ -22,26 +22,26 @@ const layout = (() => {
         console.log("댓글카드 들어옴1:", r.memberNickname, r.memberHandle);
         const initial = (r.memberNickname || r.memberHandle || "?").charAt(0);
         const avatar = r.memberProfileFileName
-            ? `<div class="post-detail-avatar post-detail-avatar--image"><img src="${esc(r.memberProfileFileName)}" alt="프로필"/></div>`
-            : `<div class="post-detail-avatar post-detail-avatar--image"><img src="/images/profile/default_image.png" alt="프로필"/></div>`;
+            ? `<div class="post-detail-avatar post-detail-avatar--image" data-profile-id="${r.memberId}"><img class="postAvatarImage" src="${esc(r.memberProfileFileName)}" alt="프로필"/></div>`
+            : `<div class="post-detail-avatar post-detail-avatar--image" data-profile-id="${r.memberId}"><img class="postAvatarImage" src="/images/profile/default_image.png" alt="프로필"/></div>`;
 
         const threadClass = inThread ? " post-detail-thread-item" : "";
 
-        const replyBtn = `<button class="post-detail-action-button tweet-action-btn" type="button" data-testid="reply">
+        const replyBtn = `<button class="post-detail-action-button tweet-action-btn" type="button" data-action="reply">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></svg>
                         <span class="tweet-action-count">${r.replyCount || 0}</span>
                     </button>`;
 
         return `
-        <a href="/main/post/detail/${r.id}" class="post-detail-reply-card postCard${threadClass}" data-post-card data-post-id="${r.id}" data-member-id="${r.memberId}">
+        <div class="post-detail-reply-card postCard${threadClass}" data-post-card data-post-id="${r.id}" data-member-id="${r.memberId}">
             ${avatar}
             <div class="post-detail-reply-content">
                 <header class="post-detail-reply-header">
-                    <div class="post-detail-reply-identity">
+                    <div class="post-detail-reply-identity" data-profile-id="${r.memberId}">
                         <strong class="postName">${esc(r.memberNickname || r.memberHandle)}</strong>
                         <span class="postHandle">${esc(r.memberHandle || "")}</span>
                         <span>·</span>
-                        <span>${esc(r.createdDatetime || "")}</span>
+                        <span class="postTime">${esc(r.createdDatetime || "")}</span>
                     </div>
                     <div class="post-detail-more-wrap">
                         <button class="post-detail-icon-button post-detail-more-trigger" type="button" aria-label="더 보기">
@@ -49,7 +49,7 @@ const layout = (() => {
                         </button>
                     </div>
                 </header>
-                <p class="post-detail-reply-text">${esc(r.postContent || "")}</p>
+                <p class="post-detail-reply-text postText">${esc(r.postContent || "")}</p>
                 ${r.postFiles && r.postFiles.length > 0 ? `<div class="post-detail-media-grid${r.postFiles.length === 1 ? ' post-detail-media-grid--single' : (r.postFiles.length === 3 ? ' post-detail-media-grid--triple' : '')}">
                     ${r.postFiles.map(pf => pf.contentType === 'VIDEO' ? `<video controls class="post-detail-media-image"><source src="${esc(pf.filePath)}"/></video>` : `<img src="${esc(pf.filePath)}" alt="첨부 이미지" class="post-detail-media-image"/>`).join('')}
                 </div>` : ''}
@@ -66,7 +66,7 @@ const layout = (() => {
                                     <span name="price" class="Detail-Value">개당 ${(r.productPrice != null ? r.productPrice.toLocaleString() : '0')}원</span>
                                 </div>
                             </div>` : ''}
-                <div class="post-detail-actions post-detail-actions--reply">
+                <div class="post-detail-actions post-detail-actions--reply" data-stop-card-link>
                     ${replyBtn}
                     <button class="post-detail-action-button post-detail-action-button--like tweet-action-btn tweet-action-btn--like ${r.liked ? 'active' : ''}" type="button" data-testid="like">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path data-path-inactive="${SVG.likeOff}" data-path-active="${SVG.likeOn}" d="${r.liked ? SVG.likeOn : SVG.likeOff}"></path></svg>
@@ -82,7 +82,7 @@ const layout = (() => {
                     </div>
                 </div>
             </div>
-        </a>`;
+        </div>`;
     };
 
     // ── 멘션 드롭다운 아이템 HTML ──

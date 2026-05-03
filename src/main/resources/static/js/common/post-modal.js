@@ -493,6 +493,7 @@ const postModalApi = (() => {
         const locationDisplay = overlay.querySelector(".tweet-modal__location-display");
         const locationDisplayText = locationDisplay ? locationDisplay.querySelector(".tweet-modal__location-display-text-inner") : null;
         let selectedLocation = null;
+        let ps = null;
 
         function updateLocationUI() {
             if (locationDisplay && locationDisplayText) {
@@ -1114,6 +1115,11 @@ const postModalApi = (() => {
                 const formData = new FormData();
                 formData.append("memberId", getMemberId());
                 formData.append("postContent", editor.textContent);
+
+                const tags = ctx.getTags();
+                tags.forEach((tag, i) => {
+                    formData.append(`hashtags[${i}].tagName`, tag.textContent.replace("#", ""));
+                });
 
                 const location = ctx.getSelectedLocation();
                 if (location) {

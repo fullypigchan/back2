@@ -1,9 +1,6 @@
 window.onload = () => {
     let memberId = null;
 
-    // 장소 검색 객체 (검색 시 초기화)
-    var ps = null;
-
     // ── 1. 탭 전환 + 데이터 로드 + 무한스크롤 ──
     let activeTab = "feed";
     let postPage = 1;
@@ -878,18 +875,20 @@ window.onload = () => {
 
 
     // 작성/답글 모달 셋업 — 한 번 호출로 양쪽 다 처리 (마크업 없으면 자동 skip).
+    const refreshFeed = () => {
+        postPage = 1;
+        service.getPostList(postPage, memberId, (data) => {
+            const posts = layout.showPostList(data.posts, postPage);
+            initFollowState(posts);
+            postHasMore = data.criteria.hasMore;
+        });
+    };
     postModalApi.bootstrap({
         services: service,
         layout: layout,
         getMemberId: () => memberId,
-        onSubmitSuccess: () => {
-            postPage = 1;
-            service.getPostList(postPage, memberId, (data) => {
-                const posts = layout.showPostList(data.posts, postPage);
-                initFollowState(posts);
-                postHasMore = data.criteria.hasMore;
-            });
-        },
+        onSubmitSuccess: refreshFeed,
+        onReplySubmitSuccess: refreshFeed,
     });
 
     document.addEventListener("click", (e) => {

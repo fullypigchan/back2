@@ -4,6 +4,8 @@ select * from tbl_post_hashtag_rel;
 
 select * from tbl_post;
 
+select * from tbl_post where id=293;
+
 select * from tbl_block;
 
 delete from tbl_block where blocked_id = 85;
