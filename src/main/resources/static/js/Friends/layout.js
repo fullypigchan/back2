@@ -1,9 +1,10 @@
 const friendsLayout = (() => {
 
     const resolveIsFollowing = (friend, mode) => {
-        if (mode === "followers") return friend.isFollowing;
-        if (mode === "followings") return true;
-        return false;
+        // 추천 탭: SQL이 isFollowing을 안 내려줌 → false 고정
+        // 커넥터/커넥팅 탭: SQL의 is_following 신뢰
+        if (mode === "recommend") return false;
+        return friend.isFollowing;
     };
 
     const createFriendCard = (friend, mode) => {

@@ -38,26 +38,40 @@ public class FriendsService {
         return wrap(friends, criteria);
     }
 
-    public FriendsWithPagingDTO getFollowersList(int page, Long memberId) {
-        log.info("들어옴1 getFollowersList, page: {}, memberId: {}", page, memberId);
-        Criteria criteria = new Criteria(page, friendsDAO.findTotalFollowers(memberId));
-        List<FriendsDTO> friends = friendsDAO.findAllFollowers(criteria, memberId);
+    public FriendsWithPagingDTO getFollowersList(int page, Long profileId, Long viewerId) {
+        log.info("들어옴1 getFollowersList, page: {}, profileId: {}, viewerId: {}", page, profileId, viewerId);
+        int total = friendsDAO.findTotalFollowers(profileId, viewerId);
+        Criteria criteria = new Criteria(page, total);
+        List<FriendsDTO> friends = friendsDAO.findAllFollowers(criteria, profileId, viewerId);
 
         applyHasMore(criteria, friends);
         convertProfileUrls(friends);
 
-        return wrap(friends, criteria);
+        FriendsWithPagingDTO result = wrap(friends, criteria);
+        result.setTotal(total);
+        return result;
     }
 
-    public FriendsWithPagingDTO getFollowingsList(int page, Long memberId) {
-        log.info("들어옴1 getFollowingsList, page: {}, memberId: {}", page, memberId);
-        Criteria criteria = new Criteria(page, friendsDAO.findTotalFollowings(memberId));
-        List<FriendsDTO> friends = friendsDAO.findAllFollowings(criteria, memberId);
+    public FriendsWithPagingDTO getFollowingsList(int page, Long profileId, Long viewerId) {
+        log.info("들어옴1 getFollowingsList, page: {}, profileId: {}, viewerId: {}", page, profileId, viewerId);
+        int total = friendsDAO.findTotalFollowings(profileId, viewerId);
+        Criteria criteria = new Criteria(page, total);
+        List<FriendsDTO> friends = friendsDAO.findAllFollowings(criteria, profileId, viewerId);
 
         applyHasMore(criteria, friends);
         convertProfileUrls(friends);
 
-        return wrap(friends, criteria);
+        FriendsWithPagingDTO result = wrap(friends, criteria);
+        result.setTotal(total);
+        return result;
+    }
+
+    public int getFollowersCount(Long profileId, Long viewerId) {
+        return friendsDAO.findTotalFollowers(profileId, viewerId);
+    }
+
+    public int getFollowingsCount(Long profileId, Long viewerId) {
+        return friendsDAO.findTotalFollowings(profileId, viewerId);
     }
 
     private void applyHasMore(Criteria criteria, List<FriendsDTO> friends) {
