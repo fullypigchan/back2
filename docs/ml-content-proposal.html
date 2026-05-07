@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GlobalGates · ML 분류 컨텐츠 제안서 v3</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --surface: #171a21;
+    --surface-2: #1e222b;
+    --border: #2a2f3a;
+    --text: #e6e8ec;
+    --text-dim: #9aa3b2;
+    --accent: #6ee7b7;
+    --accent-2: #60a5fa;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --good: #34d399;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo",
+                 "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 48px 28px 96px; }
+  header.hero {
+    padding: 36px 32px;
+    background: linear-gradient(135deg, #1b2030 0%, #14171f 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 36px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -.02em; }
+  header.hero p  { margin: 0; color: var(--text-dim); }
+  header.hero .meta { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill {
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 4px 10px; border-radius: 999px;
+    font-size: 12px;
+  }
+  .pill.accent { color: var(--accent); border-color: rgba(110,231,183,.35); }
+  .pill.blue   { color: var(--accent-2); border-color: rgba(96,165,250,.35); }
+  .pill.warn   { color: var(--warn);  border-color: rgba(251,191,36,.35); }
+
+  /* callout */
+  .callout {
+    background: linear-gradient(135deg, #1f2533 0%, #181c25 100%);
+    border: 1px solid rgba(110,231,183,.35);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin: 28px 0;
+  }
+  .callout h4 { margin: 0 0 8px; color: var(--accent); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; }
+  .callout p  { margin: 0; color: var(--text); }
+  .callout.warn { border-left-color: var(--warn); border-color: rgba(251,191,36,.35); }
+  .callout.warn h4 { color: var(--warn); }
+
+  h2.section {
+    font-size: 20px; margin: 56px 0 20px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2.section .num {
+    display: inline-grid; place-items: center;
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--accent); color: #0b0f17; font-weight: 700; font-size: 14px;
+  }
+  h3 { font-size: 17px; margin: 24px 0 10px; }
+
+  /* tables */
+  table.tbl {
+    width: 100%; border-collapse: collapse; margin: 12px 0 8px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  table.tbl th, table.tbl td {
+    padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border);
+    vertical-align: top; font-size: 14px;
+  }
+  table.tbl th { background: #131720; color: var(--text-dim); font-weight: 600; font-size: 13px; letter-spacing: .02em; }
+  table.tbl tr:last-child td { border-bottom: none; }
+  table.tbl td.cat   { color: var(--accent); white-space: nowrap; font-weight: 600; }
+  table.tbl td.idx   { color: var(--text-dim); width: 36px; }
+  table.tbl td.tag   { white-space: nowrap; }
+  table.tbl .badge   { padding: 2px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; }
+  .b-bin   { background: rgba(96,165,250,.18); color: var(--accent-2); }
+  .b-multi { background: rgba(110,231,183,.18); color: var(--accent); }
+  .b-skip  { background: rgba(248,113,113,.16); color: var(--danger); }
+
+  /* roadmap */
+  .roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
+  .phase {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .phase h4 { margin: 0 0 6px; font-size: 15px; }
+  .phase .when { color: var(--text-dim); font-size: 12px; margin-bottom: 12px; }
+  .phase ul { padding-left: 18px; margin: 0; }
+  .phase li { margin: 6px 0; }
+  .phase.p1 { border-top: 3px solid var(--good); }
+  .phase.p2 { border-top: 3px solid var(--accent-2); }
+  .phase.p3 { border-top: 3px solid var(--warn); }
+
+  /* mockup cards */
+  .mockups { display: grid; gap: 28px; }
+  .mockup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .mockup .head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .mockup .head .badge {
+    background: var(--accent); color: #0b0f17; font-weight: 700;
+    padding: 2px 8px; border-radius: 6px; font-size: 12px;
+  }
+  .mockup .head .kind {
+    background: var(--surface-2); color: var(--text-dim);
+    padding: 2px 8px; border-radius: 6px; font-size: 11px; border: 1px solid var(--border);
+  }
+  .mockup .head h3 { margin: 0; font-size: 18px; }
+  .mockup .lead { color: var(--text-dim); margin: 0 0 18px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 920px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .roadmap { grid-template-columns: 1fr; }
+  }
+
+  .specs h4 { margin: 16px 0 6px; font-size: 13px; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+  .specs ul { padding-left: 18px; margin: 0; color: var(--text); }
+  .specs li { margin: 4px 0; }
+  pre.code {
+    background: #0c0f15; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; overflow-x: auto; margin: 8px 0 0;
+    font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    font-size: 12.5px; color: #d6deeb; line-height: 1.55;
+  }
+  pre.code .k { color: #c792ea; }
+  pre.code .s { color: #a5d6a7; }
+  pre.code .n { color: #f78c6c; }
+  pre.code .c { color: #5c6370; font-style: italic; }
+  pre.code .b { color: #82aaff; }
+
+  /* phone-frame style UI mockups */
+  .ui-frame {
+    background: #f7f8fa;
+    border-radius: 18px;
+    padding: 18px;
+    color: #1f2937;
+    border: 1px solid #d8dde6;
+    box-shadow: inset 0 0 0 1px #fff, 0 4px 16px rgba(0,0,0,.25);
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
+  }
+  .ui-frame .ui-title { font-weight: 700; margin: 0 0 14px; font-size: 14px; color: #111827; }
+  .ui-row { margin-bottom: 12px; }
+  .ui-label { font-size: 11.5px; color: #6b7280; margin-bottom: 4px; letter-spacing: .02em; }
+  .ui-input {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: #111827;
+  }
+  .ui-textarea { min-height: 56px; }
+  .ui-photo {
+    background: #eef1f6; border: 1px dashed #c8d0dc; border-radius: 8px;
+    height: 64px; display: grid; place-items: center; color: #6b7280; font-size: 12px;
+  }
+  .ui-suggest {
+    background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px;
+    padding: 12px; margin-top: 10px;
+  }
+  .ui-suggest .head {
+    display: flex; align-items: center; gap: 6px;
+    color: #047857; font-weight: 600; font-size: 12px; margin-bottom: 8px;
+  }
+  .opt {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 8px; border-radius: 6px; font-size: 13px;
+  }
+  .opt + .opt { margin-top: 2px; }
+  .opt.selected { background: #d1fae5; font-weight: 600; }
+  .opt .conf { color: #059669; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .help { font-size: 11px; color: #6b7280; margin-top: 6px; }
+
+  /* chat mockup */
+  .chat {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+    padding: 14px;
+  }
+  .msg { margin: 6px 0; display: flex; }
+  .msg .bubble {
+    background: #f1f5f9; padding: 8px 12px; border-radius: 12px; font-size: 13px;
+    max-width: 80%;
+  }
+  .msg.me { justify-content: flex-end; }
+  .msg.me .bubble { background: #dbeafe; color: #1e3a8a; }
+  .warn-box {
+    margin: 10px 0; background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 10px; padding: 12px;
+  }
+  .warn-box .title { color: #b45309; font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .warn-box .body  { font-size: 12.5px; color: #78350f; }
+  .warn-box .actions { margin-top: 8px; display: flex; gap: 8px; }
+  .btn {
+    border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+  }
+  .btn.primary { background: #f59e0b; color: #fff; }
+  .btn.ghost   { background: #fff;    color: #b45309; border: 1px solid #fde68a; }
+  .input-row {
+    margin-top: 10px; display: flex; gap: 6px; align-items: center;
+    background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px 8px;
+  }
+  .input-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 13px; }
+  .input-row .send { background: #2563eb; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; }
+
+  /* tier table */
+  .tier { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .tier th, .tier td { padding: 8px 10px; font-size: 13px; border-bottom: 1px solid var(--border); text-align: left; }
+  .tier th { color: var(--text-dim); font-weight: 600; }
+  .tier .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .tier .pass { background: var(--good); }
+  .tier .soft { background: var(--warn); }
+  .tier .block{ background: var(--danger); }
+
+  /* admin triage table mockup */
+  .admin-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+  .admin-table th, .admin-table td { padding: 10px 12px; font-size: 12.5px; border-bottom: 1px solid #e5e7eb; }
+  .admin-table th { background: #f3f4f6; color: #4b5563; font-weight: 600; text-align: left; }
+  .admin-table .lab {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  }
+  .lab.urgent { background: #fee2e2; color: #b91c1c; }
+  .lab.high   { background: #ffedd5; color: #c2410c; }
+  .lab.mid    { background: #fef3c7; color: #92400e; }
+  .lab.low    { background: #dcfce7; color: #166534; }
+
+  /* price classification mockup */
+  .seg-row { display: flex; gap: 6px; margin-top: 10px; }
+  .seg {
+    flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px;
+    background: #f3f4f6; color: #6b7280; font-size: 12px; font-weight: 600;
+    border: 2px solid transparent;
+  }
+  .seg.cheap   { color: #2563eb; }
+  .seg.fair    { background: #d1fae5; color: #047857; border-color: #34d399; }
+  .seg.expensive { color: #b91c1c; }
+  .price-input {
+    background: #fff; border: 2px solid #2563eb; border-radius: 10px;
+    padding: 14px 16px; font-size: 22px; font-weight: 700; color: #1e3a8a;
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .price-meta { font-size: 11.5px; color: #6b7280; text-align: center; margin-top: 8px; }
+
+  /* infra diagram */
+  .infra {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: #d6deeb;
+  }
+  .infra .layer {
+    background: #0c0f15; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; margin: 10px 0;
+  }
+  .infra .layer .title {
+    font-family: -apple-system, sans-serif; color: var(--accent);
+    font-weight: 600; font-size: 13px; margin-bottom: 6px;
+  }
+  .infra .arrow {
+    text-align: center; color: var(--text-dim); font-family: -apple-system, sans-serif;
+    font-size: 12px; margin: 4px 0;
+  }
+
+  /* technique map */
+  .tech-map { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .tech-map { grid-template-columns: 1fr; } }
+  .tech-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .tech-card h4 { margin: 0 0 8px; color: var(--accent-2); font-size: 14px; }
+  .tech-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+  .tech-card li { margin: 4px 0; color: var(--text); }
+
+  .next-steps { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-top: 12px; }
+  @media (max-width: 760px) { .next-steps { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .step .n {
+    display: inline-grid; place-items: center; width: 24px; height: 24px;
+    background: var(--accent-2); color: #0b0f17; border-radius: 6px; font-weight: 700;
+    margin-right: 8px;
+  }
+  .step h4 { margin: 0 0 4px; font-size: 14px; display: inline; }
+  .step p  { margin: 8px 0 0; color: var(--text-dim); font-size: 13px; }
+
+  footer {
+    margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 12px; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>GlobalGates · ML 분류 컨텐츠 제안서 <small style="color:var(--text-dim); font-weight:400; font-size:16px;">v3 · 분류 + 앙상블</small></h1>
+  <p>학습한 분류 기법(scikit-learn) + RandomForest / GBM / XGBoost / LightGBM 까지 — Jupyter → pkl → FastAPI → Spring Boot</p>
+  <div class="meta">
+    <span class="pill accent">Classification Only</span>
+    <span class="pill blue">scikit-learn + Boosting</span>
+    <span class="pill warn">Jupyter → FastAPI → Spring</span>
+    <span class="pill">v3 — 2026-05-06</span>
+  </div>
+</header>
+
+<!-- ====================== 회귀 vs 분류 박스 ====================== -->
+<div class="callout warn">
+  <h4>⚠ v1에서 수정된 사항</h4>
+  <p>
+    <b>시세 예측은 회귀(Regression)</b>가 맞습니다. v1의 가격 P25/P50/P75 예측은 분류 문제가 아니므로 제거했습니다.<br/>
+    대신 같은 비즈니스 가치를 <b>분류 문제로 reframe</b>한 버전을 새로 넣었습니다 — <i>"이 가격에 등록하면 시세 대비 저가/적정/고가인가?"</i> 라는 3-class 분류로.
+  </p>
+</div>
+
+<div class="callout">
+  <h4>이 제안서가 다루는 문제 형태</h4>
+  <p>
+    <b>분류(Classification)</b> — 입력을 <b>정해진 라벨 집합</b> 중 하나로 매핑.<br/>
+    이진분류 (정상/스팸), 다중분류 (전자기기/의류/도서/...), 순서형 다중분류 (저가/적정/고가) 모두 포함.<br/>
+    회귀(연속값 예측), 추천(랭킹), 유사도 검색은 이 문서에서 제외.
+  </p>
+</div>
+
+<div class="callout">
+  <h4>v3에서 추가된 모델 옵션</h4>
+  <p>
+    각 분류기마다 두 단계로 정의 — <b>v1 (간단·빠른 베이스라인)</b> → <b>v2 (정확도·운영 안정 강화)</b>.<br/>
+    v2에는 <code>RandomForestClassifier</code>, <code>GradientBoostingClassifier</code>, <code>AdaBoostClassifier</code>, <code>XGBClassifier</code>, <code>LGBMClassifier</code> 등 앙상블/부스팅 계열을 우선 검토.<br/>
+    먼저 NB·DT로 PoC → 지표가 부족할 때 RF·Boosting으로 교체하는 흐름이 가장 안전합니다.
+  </p>
+</div>
+
+<!-- ====================== Section 1 ====================== -->
+<h2 class="section"><span class="num">1</span> 분류로 풀 수 있는 ML 컨텐츠 (재선정)</h2>
+
+<table class="tbl">
+  <thead>
+    <tr><th>#</th><th>컨텐츠</th><th>분류 종류</th><th>입력 → 라벨</th><th>v1 (베이스라인)</th><th>v2 (정확도 ↑)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="idx">1</td><td class="cat">상품 카테고리 자동 분류</td>
+        <td class="tag"><span class="badge b-multi">다중분류</span></td>
+        <td>제목+설명 → {전자기기, 의류, 도서, ...}</td>
+        <td>CV + MultinomialNB</td>
+        <td>TF-IDF + LinearSVC, 또는 <b>LightGBM</b> (텍스트+수치 혼합)</td></tr>
+    <tr><td class="idx">2</td><td class="cat">욕설/스팸 채팅 필터</td>
+        <td class="tag"><span class="badge b-bin">이진분류</span></td>
+        <td>메시지 → {정상, 욕설/스팸}</td>
+        <td>CV + MultinomialNB</td>
+        <td>TF-IDF + <b>LogisticRegression</b> 또는 <b>LightGBM</b></td></tr>
+    <tr><td class="idx">3</td><td class="cat">신고 콘텐츠 자동 트리아지</td>
+        <td class="tag"><span class="badge b-multi">다중분류</span></td>
+        <td>신고 본문 → {긴급, 높음, 보통, 낮음}</td>
+        <td>TF-IDF + DecisionTree</td>
+        <td>TF-IDF + <b>RandomForest</b> 또는 <b>XGBoost</b></td></tr>
+    <tr><td class="idx">4</td><td class="cat">시세 구간 분류 <small>(회귀의 분류버전)</small></td>
+        <td class="tag"><span class="badge b-multi">3-class</span></td>
+        <td>(카테고리, 사용감, 가격) → {저가, 적정, 고가}</td>
+        <td>DecisionTree</td>
+        <td><b>RandomForest</b> · <b>LightGBM</b> (수치+범주 혼합에 강함)</td></tr>
+    <tr><td class="idx">5</td><td class="cat">사기 거래 탐지</td>
+        <td class="tag"><span class="badge b-bin">이진분류</span></td>
+        <td>거래 feature → {정상, 사기 의심}</td>
+        <td>DecisionTree</td>
+        <td><b>XGBoost</b> · <b>LightGBM</b> (불균형·tabular 표준 솔루션)</td></tr>
+    <tr><td class="idx">6</td><td class="cat">봇/가짜 계정 탐지</td>
+        <td class="tag"><span class="badge b-bin">이진분류</span></td>
+        <td>가입/행동 feature → {사람, 봇 의심}</td>
+        <td>DecisionTree</td>
+        <td><b>RandomForest</b> · <b>GradientBoosting</b></td></tr>
+    <tr><td class="idx">7</td><td class="cat">채팅 의도 분류</td>
+        <td class="tag"><span class="badge b-multi">다중분류</span></td>
+        <td>메시지 → {예약, 거래완료, 주소, 가격흥정, 일반}</td>
+        <td>CV + MultinomialNB</td>
+        <td>TF-IDF + <b>LogisticRegression</b> · <b>LightGBM</b></td></tr>
+    <tr><td class="idx">8</td><td class="cat">댓글/리뷰 감성 분류</td>
+        <td class="tag"><span class="badge b-multi">다중분류</span></td>
+        <td>본문 → {긍정, 중립, 부정}</td>
+        <td><code>feeling_model.pkl</code> 패턴</td>
+        <td>TF-IDF + <b>LinearSVC</b> 또는 <b>LightGBM</b></td></tr>
+    <tr><td class="idx">9</td><td class="cat">이탈 예측</td>
+        <td class="tag"><span class="badge b-bin">이진분류</span></td>
+        <td>최근 30일 활동 feature → {잔류, 이탈 위험}</td>
+        <td>DecisionTree</td>
+        <td><b>XGBoost</b> · <b>LightGBM</b> (Kaggle churn 정석)</td></tr>
+    <tr><td class="idx">10</td><td class="cat">중복 게시물 자동 표시</td>
+        <td class="tag"><span class="badge b-bin">이진분류</span></td>
+        <td>두 글의 텍스트 유사도 feature → {중복, 비중복}</td>
+        <td>DecisionTree</td>
+        <td><b>RandomForest</b> · <b>AdaBoost</b></td></tr>
+    <tr><td class="idx" style="opacity:.4;">—</td><td class="cat" style="opacity:.4;">시세 가격 예측 (원 단위)</td>
+        <td class="tag"><span class="badge b-skip">제외</span></td>
+        <td>회귀 문제 → 이번 범위 밖</td>
+        <td>❌ 회귀 (LinearRegression / LightGBM)</td></tr>
+    <tr><td class="idx" style="opacity:.4;">—</td><td class="cat" style="opacity:.4;">개인화 피드 랭킹</td>
+        <td class="tag"><span class="badge b-skip">제외</span></td>
+        <td>학습-투-랭크 (별도 분야)</td>
+        <td>❌ LTR (LambdaMART)</td></tr>
+    <tr><td class="idx" style="opacity:.4;">—</td><td class="cat" style="opacity:.4;">시각 유사 상품 검색</td>
+        <td class="tag"><span class="badge b-skip">제외</span></td>
+        <td>임베딩 + 근사 최근접</td>
+        <td>❌ CNN + FAISS</td></tr>
+  </tbody>
+</table>
+
+<!-- ====================== Section 2 ====================== -->
+<h2 class="section"><span class="num">2</span> 페인포인트 ↔ 분류 매칭</h2>
+
+<table class="tbl">
+  <thead>
+    <tr><th>사용자 페인포인트</th><th>매칭 분류 컨텐츠</th><th>효용</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>"카테고리 뭘로 올려야 하지?"</td><td class="cat">① 상품 자동 분류</td><td>등록 시간 ↓ · 노출 정확도 ↑</td></tr>
+    <tr><td>"채팅창 욕설/스팸"</td><td class="cat">② 욕설·스팸 필터</td><td>이탈률 ↓ · 신고 처리비용 ↓</td></tr>
+    <tr><td>"신고 들어오면 운영팀이 일일이 봐야 함"</td><td class="cat">③ 신고 트리아지</td><td>운영 처리시간 ↓ · 긴급건 빠른 대응</td></tr>
+    <tr><td>"이 가격이 시세 대비 적정한가?"</td><td class="cat">④ 시세 구간 분류</td><td>거래 신뢰 ↑ · 협상 시간 ↓</td></tr>
+    <tr><td>"사기당할까 무서워"</td><td class="cat">⑤ 사기 거래 탐지</td><td>분쟁 ↓ · 신뢰 ↑</td></tr>
+    <tr><td>"봇 계정이 도배"</td><td class="cat">⑥ 봇 계정 탐지</td><td>피드 품질 ↑</td></tr>
+    <tr><td>"채팅에서 약속 잡기 번거로움"</td><td class="cat">⑦ 채팅 의도 분류</td><td>거래완료율 ↑</td></tr>
+    <tr><td>"리뷰 별점만 보고 신뢰가 안 됨"</td><td class="cat">⑧ 댓글 감성 분류</td><td>리뷰 요약/필터링</td></tr>
+  </tbody>
+</table>
+
+<!-- ====================== Section 3 ====================== -->
+<h2 class="section"><span class="num">3</span> 우선순위 (분류 only)</h2>
+
+<div class="roadmap">
+  <div class="phase p1">
+    <h4>Phase 1 — 즉시 효과</h4>
+    <div class="when">2–4주 · 학습한 패턴 그대로</div>
+    <ul>
+      <li><b>P1-A.</b> 상품 카테고리 다중분류</li>
+      <li><b>P1-B.</b> 욕설/스팸 이진분류</li>
+      <li><b>P1-C.</b> 신고 트리아지 다중분류</li>
+    </ul>
+  </div>
+  <div class="phase p2">
+    <h4>Phase 2 — 신뢰 인프라</h4>
+    <div class="when">4–8주 · 거래 안정성</div>
+    <ul>
+      <li><b>P2-A.</b> 시세 구간 3-class 분류</li>
+      <li><b>P2-B.</b> 사기 거래 이진분류</li>
+      <li><b>P2-C.</b> 봇 계정 이진분류</li>
+    </ul>
+  </div>
+  <div class="phase p3">
+    <h4>Phase 3 — UX 강화</h4>
+    <div class="when">8주+ · 디테일</div>
+    <ul>
+      <li><b>P3-A.</b> 채팅 의도 분류</li>
+      <li><b>P3-B.</b> 리뷰 감성 분류</li>
+      <li><b>P3-C.</b> 이탈 위험 분류</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====================== Section 4 ====================== -->
+<h2 class="section"><span class="num">4</span> Top 3 분류 목업</h2>
+
+<div class="mockups">
+
+  <!-- ============ Mockup A ============ -->
+  <section class="mockup">
+    <div class="head">
+      <span class="badge">P1-A</span>
+      <span class="kind">다중분류 · MultinomialNB → LightGBM</span>
+      <h3>상품 카테고리 자동 분류기</h3>
+    </div>
+    <p class="lead">제목+설명 텍스트만으로 카테고리 Top-K를 추천. <b>감정 분류 노트북과 100% 같은 구조</b>로 데이터셋만 교체.</p>
+
+    <div class="grid2">
+      <div class="ui-frame">
+        <p class="ui-title">상품 등록</p>
+        <div class="ui-row">
+          <div class="ui-label">제목</div>
+          <div class="ui-input">맥북 프로 14인치 M3 거의 새것</div>
+        </div>
+        <div class="ui-row">
+          <div class="ui-label">설명</div>
+          <div class="ui-input ui-textarea">작년 10월 구입, 박스풀세트, 사용감 거의 없음 ...</div>
+        </div>
+        <div class="ui-row">
+          <div class="ui-label">카테고리</div>
+          <div class="ui-input">전자기기 ▾</div>
+          <div class="ui-suggest">
+            <div class="head">✨ AI 추천 (분류 모델)</div>
+            <div class="opt selected"><span>전자기기</span><span class="conf">0.91</span></div>
+            <div class="opt"><span>노트북</span><span class="conf">0.74</span></div>
+            <div class="opt"><span>PC주변기기</span><span class="conf">0.42</span></div>
+            <div class="help"><code>predict_proba</code> 결과 Top-3을 표시.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="specs">
+        <h4>학습 v1 — MultinomialNB (베이스라인)</h4>
+<pre class="code"><span class="k">import</span> pandas <span class="k">as</span> pd, pickle
+<span class="k">from</span> sklearn.preprocessing <span class="k">import</span> LabelEncoder
+<span class="k">from</span> sklearn.model_selection <span class="k">import</span> train_test_split
+<span class="k">from</span> sklearn.feature_extraction.text <span class="k">import</span> CountVectorizer
+<span class="k">from</span> sklearn.naive_bayes <span class="k">import</span> MultinomialNB
+<span class="k">from</span> sklearn.pipeline <span class="k">import</span> Pipeline
+
+df = pd.read_csv(<span class="s">'./datasets/products.csv'</span>).dropna().drop_duplicates(ignore_index=<span class="b">True</span>)
+enc = LabelEncoder(); df[<span class="s">'target'</span>] = enc.fit_transform(df.category)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df.title + <span class="s">' '</span> + df.description, df.target,
+    stratify=df.target, test_size=<span class="n">0.3</span>, random_state=<span class="n">124</span>)
+
+pipe = Pipeline([(<span class="s">'cv'</span>, CountVectorizer()), (<span class="s">'nb'</span>, MultinomialNB())])
+pipe.fit(X_train, y_train)
+<span class="k">print</span>(pipe.score(X_test, y_test))
+pickle.dump(pipe, <span class="k">open</span>(<span class="s">'category_model_v1.pkl'</span>, <span class="s">'wb'</span>))
+pickle.dump(enc,  <span class="k">open</span>(<span class="s">'category_encoder.pkl'</span>, <span class="s">'wb'</span>))</pre>
+
+        <h4>학습 v2 — LightGBM (정확도 ↑)</h4>
+<pre class="code"><span class="k">from</span> sklearn.feature_extraction.text <span class="k">import</span> TfidfVectorizer
+<span class="k">from</span> lightgbm <span class="k">import</span> LGBMClassifier
+<span class="k">from</span> sklearn.model_selection <span class="k">import</span> cross_val_score
+
+pipe_v2 = Pipeline([
+    (<span class="s">'tfidf'</span>, TfidfVectorizer(min_df=<span class="n">3</span>, ngram_range=(<span class="n">1</span>,<span class="n">2</span>), max_features=<span class="n">50_000</span>)),
+    (<span class="s">'lgbm'</span>,  LGBMClassifier(n_estimators=<span class="n">400</span>, learning_rate=<span class="n">0.05</span>,
+                                num_leaves=<span class="n">63</span>, class_weight=<span class="s">'balanced'</span>,
+                                random_state=<span class="n">124</span>))
+])
+scores = cross_val_score(pipe_v2, X_train, y_train, cv=<span class="n">5</span>, scoring=<span class="s">'f1_macro'</span>)
+<span class="k">print</span>(scores.mean(), scores.std())
+pipe_v2.fit(X_train, y_train)
+pickle.dump(pipe_v2, <span class="k">open</span>(<span class="s">'category_model_v2.pkl'</span>, <span class="s">'wb'</span>))</pre>
+
+        <h4>FastAPI 서빙</h4>
+<pre class="code"><span class="k">from</span> fastapi <span class="k">import</span> FastAPI
+<span class="k">from</span> pydantic <span class="k">import</span> BaseModel
+<span class="k">import</span> pickle
+
+model = pickle.load(<span class="k">open</span>(<span class="s">'category_model.pkl'</span>, <span class="s">'rb'</span>))
+enc   = pickle.load(<span class="k">open</span>(<span class="s">'category_encoder.pkl'</span>, <span class="s">'rb'</span>))
+app = FastAPI()
+
+<span class="k">class</span> Req(BaseModel):
+    title: str
+    description: str
+
+<span class="b">@app.post</span>(<span class="s">'/predict/category'</span>)
+<span class="k">def</span> predict(req: Req):
+    text  = req.title + <span class="s">' '</span> + req.description
+    proba = model.predict_proba([text])[<span class="n">0</span>]
+    top3  = proba.argsort()[::-<span class="n">1</span>][:<span class="n">3</span>]
+    <span class="k">return</span> [{<span class="s">"name"</span>: enc.classes_[i], <span class="s">"confidence"</span>: <span class="k">float</span>(proba[i])} <span class="k">for</span> i <span class="k">in</span> top3]</pre>
+
+        <h4>Spring 통합</h4>
+<pre class="code">controller/ml/MlCategoryController     <span class="c">// 신규</span>
+service/ml/CategorySuggestService      <span class="c">// 신규 — RestTemplate</span>
+config/MlClientConfig                  <span class="c">// FastAPI base URL</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Mockup B ============ -->
+  <section class="mockup">
+    <div class="head">
+      <span class="badge">P1-B</span>
+      <span class="kind">이진분류 · MultinomialNB → LightGBM</span>
+      <h3>욕설/스팸 채팅 필터</h3>
+    </div>
+    <p class="lead"><code>spam_model.pkl</code> 학습 패턴 그대로 — 라벨만 {정상, 욕설/스팸}으로 재정의. 3-tier 정책으로 오탐 최소화.</p>
+
+    <div class="grid2">
+      <div class="ui-frame">
+        <p class="ui-title">💬 김판매자</p>
+        <div class="chat">
+          <div class="msg"><div class="bubble">안녕하세요 거래 가능한가요?</div></div>
+          <div class="msg me"><div class="bubble">네 가능합니다</div></div>
+          <div class="warn-box">
+            <div class="title">⚠ 표현이 거칠 수 있어요 <small>(score 0.62)</small></div>
+            <div class="body">그대로 보낼까요? 커뮤니티 가이드를 다시 확인해보세요.</div>
+            <div class="actions">
+              <button class="btn ghost">수정</button>
+              <button class="btn primary">그대로 전송</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <input value="너 같은 ××× …" />
+            <button class="send">전송</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="specs">
+        <h4>3-tier 정책 (predict_proba 기준)</h4>
+        <table class="tier">
+          <thead><tr><th>Score</th><th>동작</th><th>UI</th></tr></thead>
+          <tbody>
+            <tr><td><span class="dot pass"></span>0.0–0.4</td><td>통과</td><td>즉시 전송</td></tr>
+            <tr><td><span class="dot soft"></span>0.4–0.8</td><td>소프트 경고</td><td>"그대로 보낼까요?"</td></tr>
+            <tr><td><span class="dot block"></span>0.8–1.0</td><td>자동 차단</td><td>전송 거부 + 신고 큐 등록</td></tr>
+          </tbody>
+        </table>
+
+        <h4>학습 v1 — MultinomialNB (요약)</h4>
+<pre class="code"><span class="c"># spam_model.pkl 학습 흐름과 동일</span>
+pipe = Pipeline([
+    (<span class="s">'cv'</span>, CountVectorizer(ngram_range=(<span class="n">1</span>,<span class="n">2</span>))),
+    (<span class="s">'nb'</span>, MultinomialNB(alpha=<span class="n">0.1</span>))
+])
+pipe.fit(X_train, y_train)  <span class="c"># y ∈ {0:정상, 1:욕설}</span>
+pickle.dump(pipe, <span class="k">open</span>(<span class="s">'toxic_model_v1.pkl'</span>, <span class="s">'wb'</span>))</pre>
+
+        <h4>학습 v2 — LightGBM (이진분류 + 불균형 보정)</h4>
+<pre class="code"><span class="k">from</span> sklearn.feature_extraction.text <span class="k">import</span> TfidfVectorizer
+<span class="k">from</span> lightgbm <span class="k">import</span> LGBMClassifier
+
+pipe_v2 = Pipeline([
+    (<span class="s">'tfidf'</span>, TfidfVectorizer(min_df=<span class="n">2</span>, ngram_range=(<span class="n">1</span>,<span class="n">2</span>),
+                              analyzer=<span class="s">'char_wb'</span>)),  <span class="c"># 자모/은어에 강함</span>
+    (<span class="s">'lgbm'</span>,  LGBMClassifier(n_estimators=<span class="n">300</span>, learning_rate=<span class="n">0.05</span>,
+                                is_unbalance=<span class="b">True</span>, random_state=<span class="n">124</span>))
+])
+pipe_v2.fit(X_train, y_train)
+pickle.dump(pipe_v2, <span class="k">open</span>(<span class="s">'toxic_model_v2.pkl'</span>, <span class="s">'wb'</span>))</pre>
+
+        <h4>FastAPI</h4>
+<pre class="code"><span class="b">@app.post</span>(<span class="s">'/predict/toxic'</span>)
+<span class="k">def</span> toxic(req: Req):
+    score = <span class="k">float</span>(model.predict_proba([req.text])[<span class="n">0</span>][<span class="n">1</span>])
+    tier  = <span class="s">'block'</span> <span class="k">if</span> score >= <span class="n">0.8</span> <span class="k">else</span> (<span class="s">'soft'</span> <span class="k">if</span> score >= <span class="n">0.4</span> <span class="k">else</span> <span class="s">'pass'</span>)
+    <span class="k">return</span> {<span class="s">"score"</span>: score, <span class="s">"tier"</span>: tier}</pre>
+
+        <h4>Spring 통합</h4>
+<pre class="code">auth/websocket/ChatMessageInterceptor   <span class="c">// 송신 직전 호출</span>
+service/ml/ToxicityScoreService         <span class="c">// 신규</span>
+common/MlScoreCache (Caffeine)          <span class="c">// 동일 메시지 캐싱</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Mockup C ============ -->
+  <section class="mockup">
+    <div class="head">
+      <span class="badge">P1-C</span>
+      <span class="kind">다중분류 · DecisionTree → RandomForest → XGBoost</span>
+      <h3>신고 콘텐츠 자동 트리아지</h3>
+    </div>
+    <p class="lead">신고 본문을 {긴급, 높음, 보통, 낮음} 4-class로 분류해 운영 큐 자동 정렬. CS 처리시간 단축.</p>
+
+    <div class="grid2">
+      <div class="ui-frame">
+        <p class="ui-title">관리자 · 신고 큐</p>
+        <table class="admin-table">
+          <thead><tr><th>시간</th><th>본문 요약</th><th>AI 라벨</th></tr></thead>
+          <tbody>
+            <tr><td>09:14</td><td>"돈만 받고 잠수…"</td><td><span class="lab urgent">긴급</span></td></tr>
+            <tr><td>09:11</td><td>"욕설 했어요"</td><td><span class="lab high">높음</span></td></tr>
+            <tr><td>08:57</td><td>"카테고리 잘못됨"</td><td><span class="lab low">낮음</span></td></tr>
+            <tr><td>08:42</td><td>"사진 도용 같아요"</td><td><span class="lab mid">보통</span></td></tr>
+            <tr><td>08:30</td><td>"광고 도배"</td><td><span class="lab high">높음</span></td></tr>
+          </tbody>
+        </table>
+        <div class="help" style="color:#6b7280; margin-top:8px;">
+          긴급 라벨은 운영자에게 푸시 알림. 라벨은 <code>predict</code> 결과, 신뢰도는 <code>predict_proba.max()</code>로 같이 표시 가능.
+        </div>
+      </div>
+
+      <div class="specs">
+        <h4>데이터</h4>
+        <ul>
+          <li>입력: <code>report.title</code> + <code>report.body</code></li>
+          <li>라벨: 운영팀 처리 결과 — 처리 우선순위 4단계</li>
+          <li>표본: 라벨당 300건+ 권장. 부족하면 <code>class_weight='balanced'</code></li>
+        </ul>
+
+        <h4>학습 v1 — DecisionTree (베이스라인)</h4>
+<pre class="code"><span class="k">from</span> sklearn.tree <span class="k">import</span> DecisionTreeClassifier
+<span class="k">from</span> sklearn.feature_extraction.text <span class="k">import</span> TfidfVectorizer
+<span class="k">from</span> sklearn.model_selection <span class="k">import</span> cross_val_score
+
+pipe = Pipeline([
+    (<span class="s">'tfidf'</span>, TfidfVectorizer(min_df=<span class="n">3</span>, ngram_range=(<span class="n">1</span>,<span class="n">2</span>))),
+    (<span class="s">'dt'</span>, DecisionTreeClassifier(max_depth=<span class="n">12</span>, class_weight=<span class="s">'balanced'</span>,
+                                  random_state=<span class="n">124</span>))
+])
+<span class="k">print</span>(cross_val_score(pipe, X, y, cv=<span class="n">5</span>, scoring=<span class="s">'f1_macro'</span>).mean())</pre>
+
+        <h4>학습 v2 — RandomForest (안정성 ↑)</h4>
+<pre class="code"><span class="k">from</span> sklearn.ensemble <span class="k">import</span> RandomForestClassifier
+pipe_v2 = Pipeline([
+    (<span class="s">'tfidf'</span>, TfidfVectorizer(min_df=<span class="n">3</span>, ngram_range=(<span class="n">1</span>,<span class="n">2</span>))),
+    (<span class="s">'rf'</span>, RandomForestClassifier(n_estimators=<span class="n">300</span>, max_depth=<span class="n">20</span>,
+                                  class_weight=<span class="s">'balanced'</span>, n_jobs=-<span class="n">1</span>,
+                                  random_state=<span class="n">124</span>))
+])
+pipe_v2.fit(X, y)</pre>
+
+        <h4>학습 v3 — XGBoost (최종 정확도)</h4>
+<pre class="code"><span class="k">from</span> xgboost <span class="k">import</span> XGBClassifier
+pipe_v3 = Pipeline([
+    (<span class="s">'tfidf'</span>, TfidfVectorizer(min_df=<span class="n">3</span>, ngram_range=(<span class="n">1</span>,<span class="n">2</span>))),
+    (<span class="s">'xgb'</span>, XGBClassifier(n_estimators=<span class="n">500</span>, max_depth=<span class="n">6</span>, learning_rate=<span class="n">0.05</span>,
+                            objective=<span class="s">'multi:softprob'</span>, tree_method=<span class="s">'hist'</span>,
+                            random_state=<span class="n">124</span>))
+])
+pipe_v3.fit(X, y)
+pickle.dump(pipe_v3, <span class="k">open</span>(<span class="s">'report_triage_v3.pkl'</span>, <span class="s">'wb'</span>))</pre>
+
+        <h4>FastAPI</h4>
+<pre class="code"><span class="b">@app.post</span>(<span class="s">'/predict/report-triage'</span>)
+<span class="k">def</span> triage(req: Req):
+    text  = req.title + <span class="s">' '</span> + req.body
+    label = enc.classes_[model.predict([text])[<span class="n">0</span>]]
+    conf  = <span class="k">float</span>(model.predict_proba([text])[<span class="n">0</span>].max())
+    <span class="k">return</span> {<span class="s">"label"</span>: label, <span class="s">"confidence"</span>: conf}</pre>
+
+        <h4>Spring 통합</h4>
+<pre class="code">controller/admin/ReportController       <span class="c">// 큐 조회 시 라벨 부착</span>
+service/ml/ReportTriageService          <span class="c">// 신규</span>
+task/ReportPushNotifier @Async          <span class="c">// 긴급 라벨 → 운영자 푸시</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Mockup D — 시세 분류 (보너스) ============ -->
+  <section class="mockup">
+    <div class="head">
+      <span class="badge">P2-A</span>
+      <span class="kind">3-class · RandomForest / LightGBM</span>
+      <h3>시세 구간 분류 <small style="color:var(--text-dim); font-weight:400; font-size:13px;">(회귀를 분류로 변환)</small></h3>
+    </div>
+    <p class="lead">사용자가 입력한 가격이 <b>최근 동일 카테고리 시세 분포 대비</b> 어디 구간인지 분류. 회귀 모델 없이 분류만으로도 같은 UX 달성 가능.</p>
+
+    <div class="grid2">
+      <div class="ui-frame">
+        <p class="ui-title">가격 입력</p>
+        <div class="price-input">₩ 2,300,000</div>
+
+        <div class="ui-row" style="margin-top:14px">
+          <div class="ui-label">💡 시세 대비 구간 (분류 모델)</div>
+          <div class="seg-row">
+            <div class="seg cheap">저가</div>
+            <div class="seg fair">적정</div>
+            <div class="seg expensive">고가 ✓</div>
+          </div>
+          <div class="price-meta">예측: <b>고가</b> · 신뢰도 0.78 · 비슷한 상품 312건 기준</div>
+        </div>
+
+        <div class="warn-box" style="margin-top:14px;">
+          <div class="title">시세보다 약간 높아요</div>
+          <div class="body">최근 30일 거래 데이터로 보면 "적정" 구간에서 거래되는 비율이 가장 높습니다.</div>
+        </div>
+      </div>
+
+      <div class="specs">
+        <h4>라벨 정의 (학습 시)</h4>
+        <ul>
+          <li>최근 N일 같은 카테고리 체결가 분포에서:</li>
+          <li>가격 ≤ P25 → <code>cheap</code></li>
+          <li>P25 &lt; 가격 ≤ P75 → <code>fair</code></li>
+          <li>가격 &gt; P75 → <code>expensive</code></li>
+        </ul>
+
+        <h4>입력 feature</h4>
+        <ul>
+          <li>category_id, condition(상/중/하), region_code</li>
+          <li>brand_keyword (CountVectorizer로 텍스트 처리)</li>
+          <li>price_input (정규화된 수치)</li>
+        </ul>
+
+        <h4>학습 v1 — DecisionTree</h4>
+<pre class="code"><span class="k">from</span> sklearn.tree <span class="k">import</span> DecisionTreeClassifier
+<span class="k">from</span> sklearn.compose <span class="k">import</span> ColumnTransformer
+<span class="k">from</span> sklearn.preprocessing <span class="k">import</span> OneHotEncoder, StandardScaler
+
+pre = ColumnTransformer([
+    (<span class="s">'cat'</span>, OneHotEncoder(handle_unknown=<span class="s">'ignore'</span>),
+        [<span class="s">'category_id'</span>, <span class="s">'condition'</span>, <span class="s">'region_code'</span>]),
+    (<span class="s">'num'</span>, StandardScaler(), [<span class="s">'price_input'</span>]),
+])
+pipe = Pipeline([(<span class="s">'pre'</span>, pre),
+                 (<span class="s">'dt'</span>, DecisionTreeClassifier(max_depth=<span class="n">10</span>, random_state=<span class="n">124</span>))])
+pipe.fit(X_train, y_train)  <span class="c"># y ∈ {cheap, fair, expensive}</span></pre>
+
+        <h4>학습 v2 — RandomForest / LightGBM</h4>
+<pre class="code"><span class="k">from</span> sklearn.ensemble <span class="k">import</span> RandomForestClassifier
+<span class="k">from</span> lightgbm <span class="k">import</span> LGBMClassifier
+
+pipe_rf = Pipeline([(<span class="s">'pre'</span>, pre),
+    (<span class="s">'rf'</span>, RandomForestClassifier(n_estimators=<span class="n">400</span>, max_depth=<span class="n">15</span>,
+                                  n_jobs=-<span class="n">1</span>, random_state=<span class="n">124</span>))])
+
+pipe_lgbm = Pipeline([(<span class="s">'pre'</span>, pre),
+    (<span class="s">'lgbm'</span>, LGBMClassifier(n_estimators=<span class="n">500</span>, learning_rate=<span class="n">0.05</span>,
+                              num_leaves=<span class="n">63</span>, random_state=<span class="n">124</span>))])
+<span class="c"># f1_macro 비교 후 좋은 쪽 채택</span></pre>
+
+        <h4>왜 분류로 풀어도 되나</h4>
+        <ul>
+          <li>사용자에게 보여줄 정보는 "이 가격이 적정한가" 한 줄.</li>
+          <li>정확한 시세 원 단위 숫자가 꼭 필요하지는 않음.</li>
+          <li>회귀(원) → 분류(저/중/고)로 reframe하면 학습한 기법으로 충분.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ====================== Section 5 ====================== -->
+<h2 class="section"><span class="num">5</span> 학습한 기법 → 적용 매핑</h2>
+
+<div class="tech-map">
+  <div class="tech-card">
+    <h4>CountVectorizer / TF-IDF + MultinomialNB</h4>
+    <ul>
+      <li>① 상품 카테고리 — v1 베이스라인</li>
+      <li>② 욕설/스팸 — v1 베이스라인</li>
+      <li>⑦ 채팅 의도 — v1 베이스라인</li>
+      <li>⑧ 리뷰 감성 — v1 베이스라인</li>
+    </ul>
+    <small style="color:var(--text-dim);">텍스트 분류의 빠른 기준점. 학습 5분, 추론 1ms.</small>
+  </div>
+
+  <div class="tech-card">
+    <h4>DecisionTreeClassifier</h4>
+    <ul>
+      <li>③ 신고 트리아지 — v1</li>
+      <li>④ 시세 구간 — v1</li>
+      <li>⑤⑥⑨ 사기/봇/이탈 — v1</li>
+    </ul>
+    <small style="color:var(--text-dim);">단일 트리 — 시각화·해석성 검증용. 운영은 RF/Boosting로 교체.</small>
+  </div>
+
+  <div class="tech-card">
+    <h4>RandomForestClassifier</h4>
+    <ul>
+      <li>③ 신고 트리아지 — v2</li>
+      <li>④ 시세 구간 — v2</li>
+      <li>⑥ 봇 계정 탐지</li>
+      <li>⑩ 중복 게시물</li>
+    </ul>
+    <small style="color:var(--text-dim);">DT 과적합 방지. 튜닝 거의 불필요, 학습 빠름. 보통 무조건 DT보다 좋음.</small>
+  </div>
+
+  <div class="tech-card">
+    <h4>Boosting — XGBoost / LightGBM / GBM / AdaBoost</h4>
+    <ul>
+      <li>① 카테고리 — v2 (LightGBM)</li>
+      <li>② 욕설/스팸 — v2 (LightGBM, char n-gram + is_unbalance)</li>
+      <li>③ 신고 트리아지 — v3 (XGBoost)</li>
+      <li>⑤ 사기 탐지 — XGBoost (불균형 강함)</li>
+      <li>⑨ 이탈 예측 — LightGBM</li>
+      <li>⑩ 중복 — AdaBoost</li>
+    </ul>
+    <small style="color:var(--text-dim);">tabular + 텍스트 둘 다 가장 강한 SOTA 베이스라인. <code>scale_pos_weight</code>·<code>is_unbalance</code>로 불균형 처리.</small>
+  </div>
+
+  <div class="tech-card">
+    <h4>Pipeline + train_test_split + cross_val_score</h4>
+    <ul>
+      <li>모든 모델 학습/검증 워크플로우 공통</li>
+      <li><code>stratify=y</code>로 클래스 비율 유지</li>
+      <li><code>cv=5, scoring='f1_macro'</code>로 다중분류 평가</li>
+      <li>이진분류는 <code>roc_auc</code>·<code>average_precision</code>도 같이 확인</li>
+    </ul>
+  </div>
+
+  <div class="tech-card">
+    <h4>LabelEncoder + pickle (+ joblib)</h4>
+    <ul>
+      <li>모든 분류 모델: <code>model.pkl</code> + <code>encoder.pkl</code> 한 쌍</li>
+      <li>큰 부스팅 모델은 <code>joblib.dump(compress=3)</code> 추천</li>
+      <li>FastAPI 시작 시 1회 로드 → 재사용</li>
+      <li>버전 관리: <code>{name}_v{n}.pkl</code></li>
+    </ul>
+  </div>
+</div>
+
+<h3>모델 선택 의사결정</h3>
+<table class="tbl">
+  <thead><tr><th>상황</th><th>추천 모델</th><th>이유</th></tr></thead>
+  <tbody>
+    <tr><td>텍스트 단독 · 빠른 PoC가 우선</td><td class="cat">MultinomialNB</td><td>학습/추론 빠름, 베이스라인 지표 확보</td></tr>
+    <tr><td>텍스트 단독 · 정확도 한 단계 더</td><td class="cat">LogisticRegression / LinearSVC</td><td>고차원 sparse 텍스트의 정석</td></tr>
+    <tr><td>텍스트 + 수치/범주 혼합</td><td class="cat">LightGBM / XGBoost</td><td>혼합 feature에 가장 강함, 결측 자동 처리</td></tr>
+    <tr><td>설명/근거가 필요한 도메인 (운영팀 룰북)</td><td class="cat">DecisionTree → RandomForest</td><td>feature_importances_, 단일 트리 시각화 가능</td></tr>
+    <tr><td>심한 클래스 불균형 (사기 1%, 정상 99%)</td><td class="cat">XGBoost / LightGBM</td><td><code>scale_pos_weight</code>, <code>is_unbalance</code> 옵션</td></tr>
+    <tr><td>표본 매우 적음 (수백 건)</td><td class="cat">NaiveBayes / LogisticRegression</td><td>부스팅은 데이터 부족하면 과적합</td></tr>
+    <tr><td>표본 충분 (수만 건+)</td><td class="cat">LightGBM</td><td>속도 + 정확도 + 메모리 효율 모두 최상위</td></tr>
+    <tr><td>약한 모델 여러 개 합치고 싶음</td><td class="cat">AdaBoost / GradientBoosting</td><td>부스팅 동작 직접 학습/시각화에 좋음</td></tr>
+  </tbody>
+</table>
+
+<!-- ====================== Section 6 ====================== -->
+<h2 class="section"><span class="num">6</span> End-to-End 워크플로우</h2>
+
+<div class="infra">
+  <div class="layer">
+    <div class="title">① Jupyter Notebook · 학습 + 검증</div>
+    pandas → 결측/중복 제거 → LabelEncoder<br/>
+    train_test_split (stratify) → Pipeline (CV/TF-IDF + NB / DT / RF / LGBM / XGB)<br/>
+    cross_val_score(cv=5, scoring='f1_macro') → confusion_matrix<br/>
+    pickle.dump 또는 joblib.dump(compress=3)
+  </div>
+  <div class="arrow">↓ category_model.pkl, category_encoder.pkl</div>
+  <div class="layer">
+    <div class="title">② FastAPI · 추론 서버</div>
+    uvicorn 단일 프로세스 + pickle.load (앱 시작 시 1회)<br/>
+    POST /predict/category   → top-3 + confidence<br/>
+    POST /predict/toxic      → score + tier<br/>
+    POST /predict/report-triage → label + confidence<br/>
+    POST /predict/price-bucket  → {cheap, fair, expensive}
+  </div>
+  <div class="arrow">↑↓ HTTP/JSON · localhost:8000</div>
+  <div class="layer">
+    <div class="title">③ Spring Boot · globalgates</div>
+    util/MlClient (RestTemplate / WebClient)<br/>
+    service/ml/* — 도메인별 호출 추상화<br/>
+    controller/ml/* + 기존 controller에서 사용<br/>
+    common/MlScoreCache — 동일 입력 짧은 캐싱
+  </div>
+</div>
+
+<h3>운영 규칙</h3>
+<ul>
+  <li><b>버전 핀</b> — pkl 파일명에 버전 포함 (<code>category_model_v3.pkl</code>) → 회귀 시 즉시 롤백</li>
+  <li><b>A/B</b> — Spring에서 <code>feature_flag</code>로 노출률 단계 조정 (10% → 50% → 100%)</li>
+  <li><b>KPI</b> — 카테고리 채택률 / 욕설 차단 후 재신고율 / 신고 라벨 정확도</li>
+  <li><b>재학습</b> — Spring <code>@Scheduled</code> 잡이 누적 데이터 export → Jupyter 재학습 (수동 또는 cron)</li>
+</ul>
+
+<!-- ====================== Section 7 ====================== -->
+<h2 class="section"><span class="num">7</span> 다음 단계</h2>
+
+<div class="next-steps">
+  <div class="step"><span class="n">1</span><h4>Top 1 PoC — 상품 카테고리 분류기</h4>
+    <p>감정 분류 노트북 복제 → 데이터셋만 상품 CSV로 교체 → pkl 저장 → FastAPI 한 엔드포인트 → Spring <code>MlCategoryController</code> 스텁까지 연결.</p>
+  </div>
+  <div class="step"><span class="n">2</span><h4>학습 데이터 확보 점검</h4>
+    <p>실제 DB에 라벨 표본이 카테고리당 500건+ 있는지 확인. 부족하면 under-sampling으로 균형 맞추기 (감정 노트북에서 1482건씩 맞춘 것과 동일).</p>
+  </div>
+  <div class="step"><span class="n">3</span><h4>FastAPI 보일러플레이트</h4>
+    <p>4개 엔드포인트 한 파일에 묶어 서빙. uvicorn 단일 프로세스로도 충분 (수십 RPS까지).</p>
+  </div>
+  <div class="step"><span class="n">4</span><h4>Spring MlClient 추상화</h4>
+    <p><code>util/MlClient</code>에서 base URL + 타임아웃 + 실패 시 fallback (모델 비활성)을 한 번에 처리.</p>
+  </div>
+</div>
+
+<footer>GlobalGates · ML Classification Proposal v3 · 2026-05-06</footer>
+
+</div>
+</body>
+</html>

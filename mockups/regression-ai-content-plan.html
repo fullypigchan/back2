@@ -1,0 +1,1204 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GlobalGates 회귀형 ML AI 콘텐츠 계획안</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --panel-soft: #eef5f4;
+      --ink: #13212b;
+      --muted: #667684;
+      --line: #d9e2e8;
+      --nav: #10232b;
+      --teal: #148477;
+      --blue: #2563eb;
+      --green: #168252;
+      --amber: #ad7214;
+      --red: #bd3d36;
+      --violet: #6652a3;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 278px minmax(0, 1fr);
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 18px;
+      background: var(--nav);
+      color: #eff7f8;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      font-weight: 850;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #39a6a3;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: transparent;
+      color: #c7d6de;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255, 255, 255, 0.11);
+      color: #fff;
+    }
+
+    .side-note {
+      margin-top: 22px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #d9e6eb;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    main { min-width: 0; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 248, 251, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .pill.blue { color: var(--blue); border-color: #bdd0fb; background: #eef4ff; }
+    .pill.green { color: var(--green); border-color: #acd9bf; background: #eef8f2; }
+    .pill.amber { color: var(--amber); border-color: #e4ca8c; background: #fff8df; }
+    .pill.red { color: var(--red); border-color: #ebb4ae; background: #fff1f0; }
+    .pill.violet { color: var(--violet); border-color: #c9bff0; background: #f4f1ff; }
+
+    .content { padding: 26px 28px 44px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .section { margin-bottom: 24px; }
+
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .section-lead {
+      margin: -5px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two { grid-template-columns: minmax(0, 1fr) minmax(330px, 0.85fr); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; line-height: 1.5; }
+    .strong { font-weight: 850; }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.45;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      margin-top: 7px;
+      border-radius: 999px;
+      background: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .dot.green { background: var(--green); }
+    .dot.amber { background: var(--amber); }
+    .dot.red { background: var(--red); }
+    .dot.violet { background: var(--violet); }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 880px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef3f6;
+      font-size: 12px;
+      color: #42515d;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .score {
+      display: inline-grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: #eaf7f2;
+      color: var(--green);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .flow-step {
+      min-height: 128px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .flow-step strong { font-size: 14px; }
+    .flow-step span { color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .mock-screen {
+      border: 1px solid #cad5dd;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .mock-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      background: #f9fbfc;
+    }
+
+    .mock-search {
+      flex: 1;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: var(--muted);
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .mock-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mock-tab {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .mock-tab.active {
+      color: #fff;
+      border-color: var(--teal);
+      background: var(--teal);
+    }
+
+    .feed {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      background: #f3f6f8;
+    }
+
+    .feed-card {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .thumb {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(20, 132, 119, 0.2), rgba(37, 99, 235, 0.08)),
+        repeating-linear-gradient(45deg, #dbe9e8, #dbe9e8 8px, #edf4f5 8px, #edf4f5 16px);
+      border: 1px solid #cfdce2;
+    }
+
+    .feed-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .feed-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .feed-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .fit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      background: #ecf8f3;
+      color: var(--green);
+      border: 1px solid #b8dfc8;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .quiet-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: #f4f7f9;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .apply-map {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(330px, 0.9fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .screen-wire {
+      border: 1px solid #cbd7de;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .wire-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbfc;
+    }
+
+    .wire-title {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .wire-title strong { font-size: 14px; }
+    .wire-title span { color: var(--muted); font-size: 12px; }
+
+    .wire-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      background: #f2f6f8;
+    }
+
+    .wire-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .wire-card.dimmed {
+      opacity: 0.7;
+      background: #fbfcfd;
+    }
+
+    .callout {
+      position: absolute;
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.24);
+    }
+
+    .callout.one { top: 10px; right: 12px; }
+    .callout.two { top: 45px; right: 12px; background: var(--green); }
+    .callout.three { bottom: 44px; right: 12px; background: var(--amber); }
+    .callout.four { bottom: 10px; right: 12px; background: var(--violet); }
+
+    .wire-lines {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .wire-line {
+      height: 10px;
+      border-radius: 999px;
+      background: #d8e2e8;
+    }
+
+    .wire-line.short { width: 52%; }
+    .wire-line.mid { width: 72%; }
+    .wire-line.long { width: 94%; }
+
+    .screen-change {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .change-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .change-box h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .rank-preview {
+      display: grid;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .rank-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 62px;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: #fbfdfe;
+      font-size: 12px;
+    }
+
+    .rank-no {
+      display: inline-grid;
+      place-items: center;
+      height: 24px;
+      border-radius: 999px;
+      background: #edf3f6;
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    .rank-score {
+      color: var(--green);
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .feature {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .feature span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .code {
+      overflow-x: auto;
+      border-radius: 8px;
+      background: #101b22;
+      color: #d8e8ef;
+      padding: 15px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1040px) {
+      .shell { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+        border-right: 0;
+      }
+      .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid.two, .grid.three, .grid.four { grid-template-columns: 1fr; }
+      .apply-map, .screen-change { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (max-width: 640px) {
+      .content, .topbar { padding-left: 16px; padding-right: 16px; }
+      .nav { grid-template-columns: 1fr; }
+      .feed-card { grid-template-columns: 1fr; }
+      .wire-card { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">GG</div>
+        <div>
+          <div>GlobalGates</div>
+          <div class="small muted">Regression ML Plan</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="계획 섹션">
+        <button type="button" data-panel="cases">대기업 사례</button>
+        <button type="button" data-panel="ideas">적용 아이디어</button>
+        <button type="button" data-panel="mvp">추천 MVP</button>
+        <button type="button" data-panel="mock">화면 목업</button>
+        <button class="active" type="button" data-panel="screen">화면 적용</button>
+        <button type="button" data-panel="build">구현 계획</button>
+        <button type="button" data-panel="sources">출처</button>
+      </nav>
+      <div class="side-note">
+        이 계획안은 LLM/API 호출 없이 GlobalGates DB의 게시글, 상품, 반응, 신고, 검색 데이터를 학습 데이터로 만들어 회귀 모델을 서비스 안에 심는 방향입니다.
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1>회귀형 ML AI 콘텐츠 계획안</h1>
+          <p>Jupyter 학습 -> 모델 저장 -> FastAPI 추론 -> Spring Boot 추천 상품/피드 연동</p>
+        </div>
+        <div class="toolbar">
+          <span class="pill green">1차 추천: AI 적합도 점수</span>
+          <span class="pill blue">Regression</span>
+          <span class="pill amber">No LLM</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="panel" id="cases">
+          <div class="section">
+            <h2>대기업 사이트의 비LLM 머신러닝 콘텐츠</h2>
+            <p class="section-lead">커뮤니티, 피드, 상품, 거래가 섞인 서비스에서 자주 쓰이는 ML 콘텐츠를 사용자 접점 기준으로 정리했습니다.</p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>서비스</th>
+                    <th>사이트에 보이는 AI 콘텐츠</th>
+                    <th>학습 데이터</th>
+                    <th>사용자 불편 해소</th>
+                    <th>GlobalGates 적용성</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Instagram / Meta</td>
+                    <td>Explore, 피드, 알림 후보를 여러 단계로 추천/랭킹</td>
+                    <td>조회, 좋아요, 저장, 숨김, 신고, 사용자-콘텐츠 상호작용</td>
+                    <td>너무 많은 콘텐츠 중 관심 있는 것만 먼저 보여줌</td>
+                    <td><span class="pill green">높음</span> 상품/게시글 추천순 정렬</td>
+                  </tr>
+                  <tr>
+                    <td>Amazon</td>
+                    <td>관련 상품, 함께 본 상품, 개인화 상품 추천</td>
+                    <td>구매/조회 이력, 상품 간 동시 구매/조회 관계</td>
+                    <td>검색어를 정확히 몰라도 원하는 상품을 발견</td>
+                    <td><span class="pill green">높음</span> 상품-게시글 관계 추천</td>
+                  </tr>
+                  <tr>
+                    <td>Etsy / eBay</td>
+                    <td>검색 결과 랭킹, 개인화 상품 추천 모듈</td>
+                    <td>검색어, 클릭, 장바구니, 구매 가능성, 상품 속성</td>
+                    <td>비슷한 상품이 많아도 구매 가능성이 높은 결과 우선</td>
+                    <td><span class="pill green">높음</span> 추천제품 탭 개선</td>
+                  </tr>
+                  <tr>
+                    <td>Pinterest</td>
+                    <td>Related Pins, Home Feed, Explore 추천</td>
+                    <td>저장, 클릭, 보드-핀 그래프, 최근 관심 행동</td>
+                    <td>사용자 관심을 이어갈 다음 콘텐츠 발견</td>
+                    <td><span class="pill amber">중간</span> 팔로우/북마크 기반 추천 확장</td>
+                  </tr>
+                  <tr>
+                    <td>Alibaba / Taobao</td>
+                    <td>홈 추천, 검색 랭킹, 후보 회수-랭킹-재랭킹 파이프라인</td>
+                    <td>사용자 테이블, 상품 테이블, 행동 테이블, 실시간 로그</td>
+                    <td>대량 상품에서 구매/관심 가능성이 높은 후보만 압축</td>
+                    <td><span class="pill green">높음</span> DB 구조와 잘 맞음</td>
+                  </tr>
+                  <tr>
+                    <td>당근</td>
+                    <td>피드 추천, 검색 랭킹, 신고/운영 자동화</td>
+                    <td>지역, 게시글, 검색, 운영자 처리 결과, 신고 데이터</td>
+                    <td>동네생활 품질 유지, 운영 업무 감소, 관련 검색 개선</td>
+                    <td><span class="pill green">매우 높음</span> 사이트 성격 유사</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="ideas">
+          <div class="section">
+            <h2>GlobalGates에 넣을 AI 콘텐츠 후보</h2>
+            <p class="section-lead">현재 DB에는 회원, 게시글, 상품, 좋아요, 북마크, 댓글, 커뮤니티, 신고, 검색 이력이 있어 회귀형 점수 예측에 바로 쓸 수 있습니다.</p>
+            <div class="grid three">
+              <div class="card">
+                <span class="score">1</span>
+                <h3>AI 추천 적합도 점수</h3>
+                <ul class="list small">
+                  <li><span class="dot green"></span><span>상품/게시글이 특정 사용자에게 얼마나 유용할지 0-100점으로 예측</span></li>
+                  <li><span class="dot green"></span><span>추천제품, 메인 피드, 커뮤니티 피드 정렬에 사용</span></li>
+                  <li><span class="dot green"></span><span>기존 최신순 추천의 불편함을 바로 줄임</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <span class="score">2</span>
+                <h3>거래/문의 가능성 점수</h3>
+                <ul class="list small">
+                  <li><span class="dot blue"></span><span>상품이 채팅, 견적, 북마크로 이어질 가능성을 예측</span></li>
+                  <li><span class="dot blue"></span><span>구매자는 반응 좋은 상품을 빨리 찾고, 판매자는 글 품질을 개선</span></li>
+                  <li><span class="dot blue"></span><span>채팅/견적 완료 데이터가 충분해지면 정확도 상승</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <span class="score">3</span>
+                <h3>가격 적정성 가이드</h3>
+                <ul class="list small">
+                  <li><span class="dot amber"></span><span>카테고리, 제목, 태그, 과거 상품 가격으로 예상 가격을 회귀 예측</span></li>
+                  <li><span class="dot amber"></span><span>판매자에게 "비슷한 상품 대비 높음/낮음" 표시</span></li>
+                  <li><span class="dot amber"></span><span>브랜드, 상태, 거래완료 가격 데이터가 없으면 보조 기능으로 시작</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <span class="score">4</span>
+                <h3>검색 결과 품질 점수</h3>
+                <ul class="list small">
+                  <li><span class="dot violet"></span><span>검색어와 게시글/상품의 클릭 가능성, 저장 가능성을 예측</span></li>
+                  <li><span class="dot violet"></span><span>관련 검색어와 인기순 정렬을 더 정교하게 개선</span></li>
+                  <li><span class="dot violet"></span><span>검색 노출/클릭 로그를 추가하면 효과가 커짐</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <span class="score">5</span>
+                <h3>커뮤니티 성장 예측</h3>
+                <ul class="list small">
+                  <li><span class="dot blue"></span><span>커뮤니티의 다음 7일 가입/게시글 증가량을 예측</span></li>
+                  <li><span class="dot blue"></span><span>탐색 화면에서 활발한 커뮤니티를 먼저 보여줌</span></li>
+                  <li><span class="dot blue"></span><span>초기 데이터가 적으면 규칙 기반과 섞어 사용</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <span class="score">6</span>
+                <h3>운영 위험도 점수</h3>
+                <ul class="list small">
+                  <li><span class="dot red"></span><span>예상 신고 수 또는 블라인드 가능성을 회귀 예측</span></li>
+                  <li><span class="dot red"></span><span>사용자 피드 품질과 운영자 처리 우선순위 개선</span></li>
+                  <li><span class="dot red"></span><span>자동 제재가 아니라 관리자 참고 점수로 시작</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="mvp">
+          <div class="section">
+            <h2>1차 MVP: AI 추천 적합도 회귀 모델</h2>
+            <div class="grid two">
+              <div class="card">
+                <h3>사용자에게 보이는 콘텐츠</h3>
+                <ul class="list small">
+                  <li><span class="dot green"></span><span>추천제품 카드에 "AI 추천 87점", "북마크 가능성 높음", "관심 카테고리와 가까움" 배지 표시</span></li>
+                  <li><span class="dot green"></span><span>기존 최신순 상품 목록을 예측 점수 높은 순서로 정렬</span></li>
+                  <li><span class="dot green"></span><span>점수가 낮거나 신고가 많은 글은 뒤로 밀고, 차단/신고 필터는 기존처럼 유지</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>왜 회귀가 맞는가</h3>
+                <p class="small muted">분류는 "좋다/나쁘다"처럼 나누지만, 추천 정렬은 숫자 점수가 필요합니다. 좋아요, 댓글, 북마크, 조회, 신고를 합쳐 목표 점수를 만들고, 새 상품이 들어왔을 때 예상 점수를 회귀로 예측하면 화면 정렬에 바로 쓸 수 있습니다.</p>
+                <div class="code">target_score =
+  1.0 * log1p(view_count_7d)
+  + 2.0 * like_count_7d
+  + 3.0 * bookmark_count_7d
+  + 2.5 * reply_count_7d
+  - 5.0 * report_count_7d</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>학습 피처 설계</h2>
+            <div class="feature-grid">
+              <div class="feature">
+                <strong>상품/게시글 피처</strong>
+                <span>가격, 재고, 카테고리, 제목 길이, 내용 길이, 이미지 수, 해시태그 수, 작성 후 경과 시간, 커뮤니티 여부</span>
+              </div>
+              <div class="feature">
+                <strong>작성자 피처</strong>
+                <span>가입 후 경과일, 팔로워 수, 팔로잉 수, 최근 게시글 수, 배지 여부, 신고 누적 수</span>
+              </div>
+              <div class="feature">
+                <strong>사용자-상품 피처</strong>
+                <span>사용자의 관심 카테고리 일치 여부, 같은 작성자 팔로우 여부, 같은 지역 여부, 최근 검색어와 제목 유사도</span>
+              </div>
+              <div class="feature">
+                <strong>품질/안전 피처</strong>
+                <span>신고 수, 차단 관계 제외, 비활성 게시글 제외, 너무 오래된 글 감점, 재고 0 제외 또는 감점</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="mock">
+          <div class="section">
+            <h2>추천제품 화면 목업</h2>
+            <p class="section-lead">현재 `explore.html`의 추천제품 탭에 붙일 수 있는 형태입니다. 핵심은 사용자가 "왜 이 상품이 먼저 보이는지"를 짧은 배지로 이해하게 하는 것입니다.</p>
+            <div class="mock-screen">
+              <div class="mock-top">
+                <div class="mock-search">검색</div>
+                <span class="pill green">AI 정렬 적용</span>
+              </div>
+              <div class="mock-tabs">
+                <span class="mock-tab active">추천제품</span>
+                <span class="mock-tab">뉴스</span>
+                <span class="mock-tab">실시간</span>
+              </div>
+              <div class="feed">
+                <article class="feed-card">
+                  <div class="thumb" aria-hidden="true"></div>
+                  <div>
+                    <h3>미개봉 스마트 워치 실버</h3>
+                    <div class="feed-meta">@seller_park · 강남구 · 12분 전</div>
+                    <div class="feed-row">
+                      <span class="fit-badge">AI 추천 91점</span>
+                      <span class="quiet-badge">관심 카테고리 일치</span>
+                      <span class="quiet-badge">북마크 가능성 높음</span>
+                    </div>
+                    <p class="small muted">비슷한 상품보다 반응 속도가 빠르고, 최근 검색/북마크 패턴과 가까운 상품입니다.</p>
+                  </div>
+                </article>
+                <article class="feed-card">
+                  <div class="thumb" aria-hidden="true"></div>
+                  <div>
+                    <h3>온라인 한국어 회화 스터디 모집</h3>
+                    <div class="feed-meta">@language_gate · 커뮤니티 · 35분 전</div>
+                    <div class="feed-row">
+                      <span class="fit-badge">AI 추천 84점</span>
+                      <span class="quiet-badge">댓글 가능성 높음</span>
+                      <span class="quiet-badge">최근 활동 증가</span>
+                    </div>
+                    <p class="small muted">사용자가 팔로우한 주제와 가까워 댓글/저장 가능성이 높은 콘텐츠입니다.</p>
+                  </div>
+                </article>
+                <article class="feed-card">
+                  <div class="thumb" aria-hidden="true"></div>
+                  <div>
+                    <h3>노트북 거치대 2개 일괄</h3>
+                    <div class="feed-meta">@global_mall · 서초구 · 1시간 전</div>
+                    <div class="feed-row">
+                      <span class="fit-badge">AI 추천 77점</span>
+                      <span class="quiet-badge">가격 반응 양호</span>
+                      <span class="quiet-badge">이미지 있음</span>
+                    </div>
+                    <p class="small muted">상품 기본 정보가 충분하고 비슷한 가격대 상품의 반응이 안정적입니다.</p>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel active" id="screen">
+          <div class="section">
+            <h2>실제 화면 적용 방식</h2>
+            <p class="section-lead">현재 서비스의 `/explore` 추천제품 탭에 바로 얹는 기준입니다. 기존 카드 구조는 유지하고, 정렬 기준과 카드 안의 보조 배지만 추가합니다.</p>
+            <div class="apply-map">
+              <div class="screen-wire">
+                <div class="wire-header">
+                  <div class="wire-title">
+                    <strong>Explore 추천제품 탭</strong>
+                    <span>현재 `productsSection` 카드 렌더링 위치에 적용</span>
+                  </div>
+                  <span class="pill green">AI 추천순</span>
+                </div>
+                <div class="mock-tabs">
+                  <span class="mock-tab active">추천제품</span>
+                  <span class="mock-tab">뉴스</span>
+                  <span class="mock-tab">실시간</span>
+                </div>
+                <div class="wire-body">
+                  <article class="wire-card">
+                    <span class="callout one">1</span>
+                    <span class="callout two">2</span>
+                    <span class="callout three">3</span>
+                    <span class="callout four">4</span>
+                    <div class="thumb" aria-hidden="true"></div>
+                    <div class="wire-lines">
+                      <div class="feed-row">
+                        <span class="fit-badge">AI 추천 91점</span>
+                        <span class="quiet-badge">관심 카테고리</span>
+                      </div>
+                      <strong>미개봉 스마트 워치 실버</strong>
+                      <div class="feed-meta">@seller_park · 강남구 · 12분 전</div>
+                      <div class="wire-line long"></div>
+                      <div class="wire-line mid"></div>
+                      <div class="feed-row">
+                        <span class="quiet-badge">북마크 가능성 높음</span>
+                        <span class="quiet-badge">비슷한 가격대 반응 좋음</span>
+                      </div>
+                    </div>
+                  </article>
+                  <article class="wire-card dimmed">
+                    <div class="thumb" aria-hidden="true"></div>
+                    <div class="wire-lines">
+                      <div class="feed-row">
+                        <span class="fit-badge">AI 추천 64점</span>
+                        <span class="quiet-badge">최신 상품</span>
+                      </div>
+                      <strong>생활 소품 일괄 판매</strong>
+                      <div class="feed-meta">@global_user · 송파구 · 8분 전</div>
+                      <div class="wire-line long"></div>
+                      <div class="wire-line short"></div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>화면에 추가되는 요소</h3>
+                <ul class="list small">
+                  <li><span class="dot green"></span><span><span class="strong">1. 상단 정렬 상태</span> 추천제품 탭 우측 또는 카드 목록 상단에 `AI 추천순` 배지를 표시합니다.</span></li>
+                  <li><span class="dot green"></span><span><span class="strong">2. 카드 점수</span> 상품 제목 위 또는 바로 아래에 `AI 추천 91점`을 붙입니다.</span></li>
+                  <li><span class="dot amber"></span><span><span class="strong">3. 추천 사유</span> `관심 카테고리`, `북마크 가능성 높음`, `가격 반응 양호`처럼 2개까지만 표시합니다.</span></li>
+                  <li><span class="dot violet"></span><span><span class="strong">4. 기존 액션 유지</span> 좋아요, 조회수, 북마크 버튼은 그대로 두고 점수는 정렬과 설명에만 사용합니다.</span></li>
+                  <li><span class="dot red"></span><span><span class="strong">Fallback</span> FastAPI가 내려가거나 점수가 없으면 최신순 목록과 기존 카드 UI로 돌아갑니다.</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>Before / After</h2>
+            <div class="screen-change">
+              <div class="change-box">
+                <h3>현재 화면</h3>
+                <ul class="mini-list">
+                  <li>추천제품은 최신 등록순으로 내려옵니다.</li>
+                  <li>사용자는 왜 먼저 보이는지 알 수 없습니다.</li>
+                  <li>관심 없는 최신 상품이 상단을 차지할 수 있습니다.</li>
+                </ul>
+                <div class="rank-preview">
+                  <div class="rank-row"><span class="rank-no">1</span><span>8분 전 등록 상품</span><span class="rank-score muted">최신</span></div>
+                  <div class="rank-row"><span class="rank-no">2</span><span>12분 전 등록 상품</span><span class="rank-score muted">최신</span></div>
+                  <div class="rank-row"><span class="rank-no">3</span><span>1시간 전 등록 상품</span><span class="rank-score muted">최신</span></div>
+                </div>
+              </div>
+              <div class="change-box">
+                <h3>AI 적용 후</h3>
+                <ul class="mini-list">
+                  <li>후보 상품 50-100개를 먼저 가져온 뒤 AI 점수로 재정렬합니다.</li>
+                  <li>사용자에게 추천 이유를 짧은 배지로 보여줍니다.</li>
+                  <li>차단, 신고, 비활성 필터는 기존 쿼리와 동일하게 유지합니다.</li>
+                </ul>
+                <div class="rank-preview">
+                  <div class="rank-row"><span class="rank-no">1</span><span>관심 카테고리 상품</span><span class="rank-score">91점</span></div>
+                  <div class="rank-row"><span class="rank-no">2</span><span>북마크 가능성 높음</span><span class="rank-score">84점</span></div>
+                  <div class="rank-row"><span class="rank-no">3</span><span>가격 반응 양호</span><span class="rank-score">77점</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>화면별 확장 위치</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>화면</th>
+                    <th>적용 UI</th>
+                    <th>사용자 입장 효과</th>
+                    <th>연동 데이터</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>탐색 > 추천제품</td>
+                    <td>`AI 추천순` 정렬, 카드 점수, 추천 사유 배지</td>
+                    <td>관심 상품을 먼저 발견</td>
+                    <td>`aiScore`, `aiReasons`</td>
+                  </tr>
+                  <tr>
+                    <td>메인 피드</td>
+                    <td>추천 점수 높은 게시글을 일부 상단 섞기</td>
+                    <td>팔로우 외 콘텐츠 발견성 증가</td>
+                    <td>게시글 반응 예측 점수</td>
+                  </tr>
+                  <tr>
+                    <td>상품 상세</td>
+                    <td>`비슷한 상품 추천` 또는 `함께 보면 좋은 글`</td>
+                    <td>다른 후보를 다시 검색하지 않아도 됨</td>
+                    <td>상품 카테고리, 태그, 가격대</td>
+                  </tr>
+                  <tr>
+                    <td>상품 등록</td>
+                    <td>예상 반응 점수와 가격 적정성 보조 문구</td>
+                    <td>판매자가 제목, 이미지, 가격을 조정 가능</td>
+                    <td>작성 중 상품 피처</td>
+                  </tr>
+                  <tr>
+                    <td>관리자</td>
+                    <td>낮은 품질/높은 신고 위험 상품 모니터링</td>
+                    <td>문제 콘텐츠 대응 우선순위 설정</td>
+                    <td>예상 신고 수, 실제 신고 수</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="build">
+          <div class="section">
+            <h2>구현 흐름</h2>
+            <div class="flow">
+              <div class="flow-step">
+                <strong>1. 데이터셋 생성</strong>
+                <span>PostgreSQL에서 상품/게시글/반응/신고/작성자 피처를 CSV로 추출</span>
+              </div>
+              <div class="flow-step">
+                <strong>2. Jupyter 학습</strong>
+                <span>`c_regression`의 workflow를 복사해 Linear/Ridge/DecisionTree/RandomForest 비교</span>
+              </div>
+              <div class="flow-step">
+                <strong>3. 검증</strong>
+                <span>R2, MAE, RMSE 확인. 점수 구간별 실제 반응률도 같이 확인</span>
+              </div>
+              <div class="flow-step">
+                <strong>4. FastAPI 서빙</strong>
+                <span>`model.pkl`을 로딩하고 `/predict/product-fit`로 점수 반환</span>
+              </div>
+              <div class="flow-step">
+                <strong>5. Spring 연동</strong>
+                <span>추천 후보 50개를 조회한 뒤 FastAPI 점수로 재정렬하고 화면에 배지 표시</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>Spring Boot 변경 지점</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>파일</th>
+                    <th>변경 내용</th>
+                    <th>검증</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>`PostProductMapper.xml`</td>
+                    <td>추천 후보를 최신순 20개가 아니라 50-100개 가져오고, 피처 컬럼을 함께 조회</td>
+                    <td>기존 추천 상품 목록이 깨지지 않는지 확인</td>
+                  </tr>
+                  <tr>
+                    <td>`PostProductDTO.java`</td>
+                    <td>`aiScore`, `aiReasons` 필드 추가</td>
+                    <td>JSON 응답에 점수/사유가 포함되는지 확인</td>
+                  </tr>
+                  <tr>
+                    <td>`PostProductService.java`</td>
+                    <td>FastAPI 클라이언트 호출 후 `aiScore desc` 정렬</td>
+                    <td>FastAPI 장애 시 기존 최신순으로 fallback</td>
+                  </tr>
+                  <tr>
+                    <td>`explore/layout.js`</td>
+                    <td>카드에 `AI 추천 87점`, 사유 배지 렌더링</td>
+                    <td>점수가 없으면 배지를 숨김</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>FastAPI 요청/응답 초안</h2>
+            <div class="code">POST /predict/product-fit
+{
+  "member_id": 7,
+  "items": [
+    {
+      "post_id": 101,
+      "product_price": 35000,
+      "product_stock": 2,
+      "category_id": 14,
+      "title_length": 18,
+      "content_length": 120,
+      "image_count": 2,
+      "like_count": 3,
+      "bookmark_count": 1,
+      "reply_count": 0,
+      "report_count": 0,
+      "same_region": 1,
+      "category_match": 1,
+      "author_followed": 0
+    }
+  ]
+}
+
+200 OK
+{
+  "scores": [
+    {
+      "post_id": 101,
+      "ai_score": 87.4,
+      "reasons": ["관심 카테고리 일치", "북마크 가능성 높음"]
+    }
+  ]
+}</div>
+          </div>
+        </section>
+
+        <section class="panel" id="sources">
+          <div class="section">
+            <h2>참고 출처</h2>
+            <ul class="source-list">
+              <li><a href="https://engineering.fb.com/2023/08/09/ml-applications/scaling-instagram-explore-recommendations-system/" target="_blank" rel="noopener noreferrer">Meta Engineering: Scaling the Instagram Explore recommendations system</a></li>
+              <li><a href="https://www.amazon.science/the-history-of-amazons-recommendation-algorithm" target="_blank" rel="noopener noreferrer">Amazon Science: The history of Amazon's recommendation algorithm</a></li>
+              <li><a href="https://www.etsy.com/codeascraft/deep-learning-for-search-ranking-at-etsy" target="_blank" rel="noopener noreferrer">Etsy Engineering: Deep Learning for Search Ranking at Etsy</a></li>
+              <li><a href="https://www.etsy.com/legal/policy/search-advertisement-recommendation/899478564529" target="_blank" rel="noopener noreferrer">Etsy: Search, Advertisement & Recommendation Ranking Disclosures</a></li>
+              <li><a href="https://innovation.ebayinc.com/stories/evolving-recommendations-a-personalized-user-based-ranking-model/" target="_blank" rel="noopener noreferrer">eBay: Evolving Recommendations, a Personalized User-Based Ranking Model</a></li>
+              <li><a href="https://www.alibabacloud.com/help/en/airec/what-is-pai-rec/product-overview/what-is-pairec" target="_blank" rel="noopener noreferrer">Alibaba Cloud: What is PAI-Rec?</a></li>
+              <li><a href="https://medium.com/pinterest-engineering/introducing-pixie-an-advanced-graph-based-recommendation-system-e7b4229b664b" target="_blank" rel="noopener noreferrer">Pinterest Engineering: Introducing Pixie</a></li>
+              <li><a href="https://medium.com/daangn/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-%EB%AA%A8%EB%8D%B8%EB%A1%9C-%EB%8F%99%EB%84%A4%EC%83%9D%ED%99%9C-%EC%8B%A0%EA%B3%A0-%EC%97%85%EB%AC%B4-%EC%9E%90%EB%8F%99%ED%99%94%ED%95%98%EA%B8%B0-3b96608960" target="_blank" rel="noopener noreferrer">당근 테크 블로그: 머신러닝 모델로 동네생활 신고 업무 자동화하기</a></li>
+              <li><a href="https://medium.com/daangn/%ED%85%8C%EC%8A%A4%ED%8A%B8-%ED%85%8C%EC%8A%A4%ED%8A%B8-39fb8577c4c7" target="_blank" rel="noopener noreferrer">당근 테크 블로그: 검색 랭킹 흐름 만들기</a></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll(".nav button");
+    const panels = document.querySelectorAll(".panel");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.panel;
+        buttons.forEach((item) => item.classList.remove("active"));
+        panels.forEach((panel) => panel.classList.remove("active"));
+        button.classList.add("active");
+        document.getElementById(id)?.classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>
