@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>채팅 비속어 분류기 — 계획서 (포트폴리오)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#11151b; --panel2:#161b22; --line:#1e2530;
+    --ink:#e6edf3; --ink-dim:#9aa6b2; --muted:#6b7785;
+    --accent:#7dd3fc; --accent2:#a78bfa; --good:#34d399; --warn:#fbbf24; --bad:#f87171;
+    --code-bg:#0a0e13;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:48px 28px 96px}
+  header{padding:40px 32px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#0e1420 0%,#10131a 60%,#15101e 100%);position:relative;overflow:hidden}
+  header::after{content:"";position:absolute;inset:auto -40px -120px auto;width:520px;height:520px;background:radial-gradient(circle,rgba(125,211,252,.18),transparent 60%);filter:blur(20px)}
+  h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em}
+  .sub{color:var(--ink-dim);font-size:15px;margin:0}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .pill{font-size:12px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--ink-dim);background:rgba(255,255,255,.02)}
+  .pill.accent{color:var(--accent);border-color:rgba(125,211,252,.35)}
+  .pill.warn{color:var(--warn);border-color:rgba(251,191,36,.35)}
+  section{margin-top:40px}
+  h2{font-size:20px;margin:0 0 4px;letter-spacing:-.005em}
+  h2 .num{display:inline-block;font-size:12px;padding:3px 9px;border:1px solid var(--line);border-radius:6px;color:var(--accent);margin-right:10px;vertical-align:middle}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--ink)}
+  h4{font-size:14px;margin:14px 0 8px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.04em}
+  p{color:var(--ink-dim)}
+  .lede{color:var(--ink-dim);margin:6px 0 18px;font-size:14px}
+
+  .grid{display:grid;gap:14px}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:880px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+
+  .card{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:18px}
+  .card.alt{background:var(--panel2)}
+  .card.accent{border-color:rgba(125,211,252,.35);background:linear-gradient(180deg,rgba(125,211,252,.05),transparent 70%)}
+  .card.warn{border-color:rgba(251,191,36,.32);background:linear-gradient(180deg,rgba(251,191,36,.06),transparent 70%)}
+  .card h3{margin-top:0}
+  .tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;margin-right:6px;border:1px solid var(--line);color:var(--ink-dim)}
+  .tag.good{color:var(--good);border-color:rgba(52,211,153,.35)}
+  .tag.warn{color:var(--warn);border-color:rgba(251,191,36,.35)}
+  .tag.bad{color:var(--bad);border-color:rgba(248,113,113,.35)}
+  .tag.accent{color:var(--accent);border-color:rgba(125,211,252,.35)}
+
+  table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:13.5px}
+  th{background:var(--panel2);color:var(--ink);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td code{font-size:12.5px;background:var(--code-bg);padding:2px 6px;border-radius:4px;color:var(--accent)}
+
+  .callout{border-left:3px solid var(--accent);background:var(--panel2);padding:14px 16px;border-radius:10px;margin:14px 0}
+  .callout.warn{border-left-color:var(--warn)}
+  .callout.bad{border-left-color:var(--bad)}
+  .callout strong{color:var(--ink)}
+  .callout p{margin:6px 0 0}
+
+  .step{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .n{flex:0 0 28px;height:28px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);font-weight:600;font-size:13px}
+  .step .body{flex:1}
+  .step .body b{color:var(--ink)}
+
+  ul.tight{margin:6px 0 0 18px;padding:0;color:var(--ink-dim)}
+  ul.tight li{margin:3px 0}
+  ul.tight li b{color:var(--ink)}
+
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;margin-top:8px;font-size:13px}
+  .kv dt{color:var(--ink-dim)}
+  .kv dd{margin:0;color:var(--ink)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font:12.5px/1.6 ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#cdd6f4}
+  pre .c{color:#6b7785}
+  pre .k{color:var(--accent2)}
+  pre .s{color:#fbbf24}
+  pre .f{color:var(--accent)}
+
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>채팅 비속어 분류기 · 계획서 v1</h1>
+  <p class="sub">MultinomialNB 기반 한국어 채팅 욕설/혐오/스팸 분류 — 주피터 검증 → FastAPI 적재 → Spring Boot 연동</p>
+  <div class="pills">
+    <span class="pill accent">scikit-learn · MultinomialNB</span>
+    <span class="pill">CountVectorizer · TfidfVectorizer</span>
+    <span class="pill">Pipeline · cross_val_score</span>
+    <span class="pill">크롤링 우선 · 합성 보조</span>
+    <span class="pill warn">코드 미작성 · 계획안만</span>
+    <span class="pill">포트폴리오 제출용</span>
+  </div>
+</header>
+
+<!-- ───────────── 0. 원칙 ───────────── -->
+<section>
+  <h2><span class="num">0</span>작업 원칙</h2>
+  <p class="lede">먼저 합의해야 하는 룰을 못박고 시작합니다. 이후 모든 결정은 이 4가지를 기준으로 판단합니다.</p>
+
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>① 코드는 ml 폴더 안에서만</h3>
+      <ul class="tight">
+        <li>참고 노트북: <b>b_classifier/i_naive_bayes_task_강사.ipynb</b> (NB + Pipeline + LabelEncoder 패턴)</li>
+        <li>보조 참고: <b>b_classifier/h_naive_bayes.ipynb</b>(이론), <b>d_cross_validation.ipynb</b>(검증)</li>
+        <li>저장 패턴: <b>b_classifier/feeling_model.pkl</b> + <b>feeling_encoder.pkl</b> 쌍</li>
+        <li>외부 새 라이브러리 도입 ✗ (sklearn / pandas / numpy / matplotlib / pickle / requests / BeautifulSoup4 한도 내)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>② 데이터: 크롤링 우선 → 합성 보조</h3>
+      <ul class="tight">
+        <li><b>1순위</b>: 공개 데이터셋 (라이선스 OK인 것)</li>
+        <li><b>2순위</b>: 국내 커뮤니티 댓글 크롤링 (BeautifulSoup4)</li>
+        <li><b>3순위</b>: 부족할 때만 1·2를 기반으로 변형/확장 (자모 분리 우회·반복 음절 등)</li>
+        <li>합성 데이터 비율은 전체의 30%를 넘지 않도록 제한 (편향 방지)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>③ 작업 위치 단일화</h3>
+      <ul class="tight">
+        <li>모든 코드는 <b>task/classifier_task.ipynb</b> 한 파일에 셀 단위로 작성</li>
+        <li>데이터는 <b>task/datasets/</b> 디렉터리에 raw / clean / split 단계별 저장</li>
+        <li>최종 산출물은 <b>task/artifacts/</b>에 pkl + 리포트 png</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>④ 분류 문제로만 정의</h3>
+      <ul class="tight">
+        <li>회귀(점수) 사용 ✗ — 라벨은 모두 <b>이산값</b></li>
+        <li>경계가 애매하면 다중분류로 풀고, 임계치는 <code>predict_proba</code>로 후처리</li>
+        <li>다중분류는 stratify split + class_weight 또는 under-sampling으로 불균형 처리</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── 1. 데이터셋 설계안 ───────────── -->
+<section>
+  <h2><span class="num">1</span>데이터셋 설계안 — 3가지</h2>
+  <p class="lede">컬럼/타겟의 결을 다르게 한 3가지 안. 포트폴리오는 <b>안 B(다중분류)</b>를 메인으로 진행하고, 안 A·C는 비교군으로 부록에 수록하는 것을 권장합니다.</p>
+
+  <!-- Plan A -->
+  <div class="card">
+    <h3>안 A · 이진 분류 — clean / abusive</h3>
+    <span class="tag good">단순</span>
+    <span class="tag accent">베이스라인</span>
+    <span class="tag warn">정보량 적음</span>
+
+    <h4>스키마</h4>
+    <table>
+      <tr><th style="width:18%">컬럼</th><th style="width:14%">타입</th><th>설명 / 예시</th></tr>
+      <tr><td><code>id</code></td><td>int</td><td>행 고유번호 (자동증가)</td></tr>
+      <tr><td><code>text</code></td><td>str</td><td>채팅 원문 — "ㅎㅇ 뭐해?", "ㅅㅂ 진짜 짜증나"</td></tr>
+      <tr><td><code>source</code></td><td>str</td><td>출처 (crawl_dcinside / crawl_youtube / synthetic / public_kbully …)</td></tr>
+      <tr><td><code>label</code></td><td>str</td><td><b>타겟</b>: <code>clean</code> | <code>abusive</code></td></tr>
+    </table>
+    <p class="lede" style="margin-top:10px">장점: 라벨링 비용↓, 베이스라인 정확도↑. 단점: "혐오 vs 단순욕"을 구분 못 해 신고 자동화에 약함.</p>
+  </div>
+
+  <!-- Plan B -->
+  <div class="card accent" style="margin-top:14px">
+    <h3>안 B · 다중 분류 — 5클래스 <span class="tag accent">권장</span></h3>
+    <span class="tag good">서비스 적합</span>
+    <span class="tag accent">신고 트리아지 연동 가능</span>
+    <span class="tag warn">불균형 주의</span>
+
+    <h4>스키마</h4>
+    <table>
+      <tr><th style="width:18%">컬럼</th><th style="width:14%">타입</th><th>설명 / 예시</th></tr>
+      <tr><td><code>id</code></td><td>int</td><td>행 고유번호</td></tr>
+      <tr><td><code>text</code></td><td>str</td><td>채팅 원문 (전처리 전)</td></tr>
+      <tr><td><code>text_clean</code></td><td>str</td><td>전처리 후 (소문자화·자모정규화·반복문자 축약·URL/이모지 토큰화)</td></tr>
+      <tr><td><code>length</code></td><td>int</td><td>전처리 후 길이 (분포 분석용, 학습엔 미사용 또는 별도 피처)</td></tr>
+      <tr><td><code>source</code></td><td>str</td><td>출처</td></tr>
+      <tr><td><code>label</code></td><td>str</td><td><b>타겟</b>: <code>clean</code> · <code>profanity</code>(일반욕) · <code>hate</code>(혐오/차별) · <code>sexual</code>(성적) · <code>spam</code>(광고/도배)</td></tr>
+    </table>
+    <p class="lede" style="margin-top:10px"><b>왜 이 5개?</b> 우리 <code>tbl_report.target_type</code>이 post/member라 사유는 <code>reason</code> text에 자유서술인데, 운영팀이 처리 우선순위를 매길 때 자주 쓰는 5축이 위와 같습니다. <code>hate</code>는 정지, <code>profanity</code>는 경고, <code>spam</code>은 자동 숨김처럼 후속 액션이 다르게 매핑됩니다.</p>
+    <p class="lede"><b>불균형 처리</b>: clean이 압도적으로 많을 것 — under-sampling으로 클래스당 N개씩 균등화 (i_naive_bayes_task의 anger/fear/joy/love/sadness 1482개씩 패턴 그대로 차용).</p>
+  </div>
+
+  <!-- Plan C -->
+  <div class="card" style="margin-top:14px">
+    <h3>안 C · 강도(severity) 분류 — 3클래스 ordinal</h3>
+    <span class="tag good">필터 강도 조절에 유리</span>
+    <span class="tag warn">라벨링 일관성 어려움</span>
+
+    <h4>스키마</h4>
+    <table>
+      <tr><th style="width:18%">컬럼</th><th style="width:14%">타입</th><th>설명 / 예시</th></tr>
+      <tr><td><code>id</code></td><td>int</td><td>행 고유번호</td></tr>
+      <tr><td><code>text</code></td><td>str</td><td>채팅 원문</td></tr>
+      <tr><td><code>category</code></td><td>str</td><td>보조 라벨 (안 B의 5클래스) — 분석/필터링용, 학습 타겟 ✗</td></tr>
+      <tr><td><code>severity</code></td><td>str</td><td><b>타겟</b>: <code>none</code> · <code>mild</code>(경미) · <code>severe</code>(심각)</td></tr>
+    </table>
+    <p class="lede" style="margin-top:10px">사용 예: 사용자 설정 "비속어 필터 강도(약/중/강)"를 <code>severity</code>로 매핑. ordinal이지만 분류 모델로 풀고, 후처리에서 mild→severe 순서를 보장.</p>
+  </div>
+
+  <div class="callout">
+    <strong>최종 권장</strong>
+    <p>안 B를 메인 모델로 학습 → 부록에 안 A(이진)와 안 C(강도)를 동일 데이터로 비교 학습한 결과 표 1장 추가. 포트폴리오 스토리: <em>"같은 데이터로 라벨 정의를 바꿨을 때 정확도/혼동행렬이 어떻게 달라지는가"</em> — 라벨 설계 역량을 보여줄 수 있음.</p>
+  </div>
+</section>
+
+<!-- ───────────── 2. 데이터 수집 전략 ───────────── -->
+<section>
+  <h2><span class="num">2</span>데이터 수집 전략 — 크롤링 우선</h2>
+  <p class="lede">크롤링 → 공개 데이터셋 → 합성 순으로 확보. 합성은 마지막 보조 수단.</p>
+
+  <h3>2-1. 공개 데이터셋 (1순위 · 라이선스 확인 후)</h3>
+  <table>
+    <tr><th style="width:32%">데이터셋</th><th style="width:18%">라이선스</th><th>용도 / 예상 라벨 매핑</th></tr>
+    <tr><td><b>Korean HateSpeech Dataset</b><br/><span class="tag">smilegate-ai/korean_unsmile_dataset</span></td><td>CC-BY</td><td>혐오/차별 라벨 풍부 → 안 B의 <code>hate</code>로 매핑</td></tr>
+    <tr><td><b>Curse-detection-data</b><br/><span class="tag">2runo/Curse-detection-data</span></td><td>MIT</td><td>일반 욕설 0/1 → 안 A 베이스라인 또는 안 B의 <code>profanity</code></td></tr>
+    <tr><td><b>KOLD (Korean Offensive Language Dataset)</b></td><td>학술용 — 출처 명시</td><td>offensive 다단계 라벨 → 안 C(severity)에 활용</td></tr>
+    <tr><td><b>네이버 영화/쇼핑 리뷰</b></td><td>공개</td><td><code>clean</code> 음성 데이터 풍부 — 음성/양성 양쪽 균형용</td></tr>
+  </table>
+
+  <h3>2-2. 직접 크롤링 (2순위 · BeautifulSoup4 / requests)</h3>
+  <table>
+    <tr><th style="width:24%">대상</th><th style="width:14%">난이도</th><th>수집 정책 / 주의</th></tr>
+    <tr><td>유튜브 댓글 (특정 이슈영상)</td><td>중</td><td>YouTube Data API 무료 할당 또는 페이지 파싱. <b>로그인 없이 가능한 페이지만</b>.</td></tr>
+    <tr><td>디시인사이드 / 에펨코리아 베스트 댓글</td><td>중상</td><td>욕설 비율 높음. <code>robots.txt</code> 확인, 요청 간격 1~2초, User-Agent 명시.</td></tr>
+    <tr><td>인벤·루리웹 게임 게시판 댓글</td><td>중</td><td>게임 욕설/혐오 표현 다양 — 데이터 다양성 보강용</td></tr>
+    <tr><td>트위터/X (검색)</td><td>상</td><td>API 유료화 — 공개된 아카이브 덤프(예: 학술용)만 사용</td></tr>
+  </table>
+  <div class="callout warn">
+    <strong>법적/윤리 가드레일</strong>
+    <p>① 개인 식별 정보(아이디·실명·연락처)는 수집 즉시 마스킹 → 학습 데이터에 절대 포함 ✗<br/>
+    ② 출처별 robots.txt 준수, 요청 간격 ≥ 1초.<br/>
+    ③ 포트폴리오에 원본 텍스트 그대로 노출 ✗ — 예시는 자모 마스킹(<code>ㅅㅂ → ㅅ*</code>)으로만 표기.<br/>
+    ④ 수집 스크립트와 결과 csv는 git에 커밋하지 않음 (<code>.gitignore</code>에 <code>task/datasets/raw/</code> 추가).</p>
+  </div>
+
+  <h3>2-3. 합성 (3순위 · 부족분만)</h3>
+  <ul class="tight">
+    <li><b>변형 규칙</b>: 자모 분리(욕→ㅇㅛㄱ), 반복(ㅅㅂㅂㅂㅂ), 특수문자 끼워넣기(시*발), 띄어쓰기(시 발), 영문 치환(siba)</li>
+    <li><b>금지</b>: 학습 셋에서 변형 규칙으로 만든 데이터를 검증 셋에도 넣기 ✗ — leakage 발생</li>
+    <li><b>비율 상한</b>: 클래스당 합성 데이터 비율 ≤ 30%. 그 이상이면 모델이 합성 패턴만 학습.</li>
+  </ul>
+
+  <h3>2-4. 목표 분포 (예시)</h3>
+  <table>
+    <tr><th>클래스</th><th>최소 목표</th><th>주 출처</th></tr>
+    <tr><td><code>clean</code></td><td>3,000</td><td>네이버 리뷰 + 일반 채팅 크롤링</td></tr>
+    <tr><td><code>profanity</code></td><td>3,000</td><td>Curse-detection-data + 디시/에펨 크롤링</td></tr>
+    <tr><td><code>hate</code></td><td>3,000</td><td>korean_unsmile + KOLD</td></tr>
+    <tr><td><code>sexual</code></td><td>1,500 (합성 비중 ↑)</td><td>공개 셋 부족 → 변형으로 보강</td></tr>
+    <tr><td><code>spam</code></td><td>1,500</td><td>도박/대출 광고 크롤링 + 변형</td></tr>
+  </table>
+  <p class="lede">최종 학습은 under-sampling으로 <b>클래스당 1,500개씩 균등화</b>(i_naive_bayes_task와 동일 패턴).</p>
+</section>
+
+<!-- ───────────── 3. DB 컬럼 매핑 ───────────── -->
+<section>
+  <h2><span class="num">3</span>현재 DB 테이블 활용 계획</h2>
+  <p class="lede">신규 테이블 추가 없이 기존 테이블만으로 학습/추론 흐름 설계. 운영 환경에서 모델이 채팅을 어떻게 잡아먹고, 결과가 어디에 쓰일지 명시합니다.</p>
+
+  <h3>3-1. 학습 데이터로 끌어올 후보 컬럼</h3>
+  <table>
+    <tr><th style="width:22%">테이블</th><th style="width:22%">컬럼</th><th>활용 방식</th></tr>
+    <tr><td><code>tbl_message</code></td><td><code>content</code></td><td><b>핵심</b> — 본문 텍스트. 학습 입력 X.</td></tr>
+    <tr><td><code>tbl_message</code></td><td><code>id</code>, <code>created_datetime</code></td><td>샘플링/시계열 분포 분석용 (모델 입력 ✗)</td></tr>
+    <tr><td><code>tbl_message</code></td><td><code>is_deleted</code></td><td><code>true</code>인 메시지는 신고/관리자 삭제 가능성 ↑ → 약한 라벨(weak label)로 활용 후 수동 검증</td></tr>
+    <tr><td><code>tbl_report</code></td><td><code>target_id</code> + <code>target_type</code>='post'</td><td>신고된 게시물/메시지 ID 매칭 → <b>positive 라벨 후보</b></td></tr>
+    <tr><td><code>tbl_report</code></td><td><code>reason</code></td><td>키워드(욕설/혐오/광고) 추출하여 multi-class 약라벨 부여</td></tr>
+    <tr><td><code>tbl_report</code></td><td><code>status</code>='applied'</td><td>운영팀이 실제 인정한 신고만 사용 → <b>골드 라벨</b>로 신뢰도 ↑</td></tr>
+    <tr><td><code>tbl_block</code> / <code>tbl_mute</code></td><td>blocked_id 빈도</td><td>차단 多 사용자의 메시지 → 부정 클래스 후보 (보조 신호, 직접 라벨 ✗)</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>약라벨(weak label) 전략</strong>
+    <p>운영 초기엔 라벨링 인력이 없으니 <em>tbl_report.status='applied' AND target_type='post'</em>인 메시지를 모아 <b>profanity/hate/sexual/spam 후보</b>로 분류 → 사람이 빠르게 검수 → 골드 셋 1,000건만 확보해도 NB는 충분히 학습됨.</p>
+  </div>
+
+  <h3>3-2. 추론 시 흐름 (운영 환경)</h3>
+  <div class="card">
+    <div class="step"><div class="n">1</div><div class="body"><b>WebSocket Interceptor</b> — <code>ChatMessageInterceptor</code>가 <code>send</code> 직전에 <code>content</code>를 추출</div></div>
+    <div class="step"><div class="n">2</div><div class="body"><b>MlClient.predict(text)</b> — Spring → FastAPI <code>POST /predict/profanity</code> (1~2초 timeout, 실패 시 통과 처리)</div></div>
+    <div class="step"><div class="n">3</div><div class="body"><b>FastAPI</b>가 <code>profanity_model.pkl</code> + <code>profanity_encoder.pkl</code>로 <code>predict_proba</code> → top1 라벨 + 확신도 반환</div></div>
+    <div class="step"><div class="n">4</div><div class="body"><b>정책 매핑</b> — clean: 통과 / profanity ≥ 0.7: 마스킹 / hate ≥ 0.6: 차단+신고 자동생성 / spam ≥ 0.8: 숨김</div></div>
+    <div class="step"><div class="n">5</div><div class="body"><b>로깅</b> — 예측 결과를 <code>tbl_report</code>에 자동 INSERT (reporter_id = 시스템 봇 계정, status = 'pending') → 운영팀 대시보드에서 검수</div></div>
+  </div>
+
+  <h3>3-3. 신규 테이블 (선택)</h3>
+  <p class="lede">계획 단계에선 만들지 않지만, v2에서 추가 권장:</p>
+  <ul class="tight">
+    <li><code>tbl_message_moderation</code>(message_id, predicted_label, confidence, action_taken, model_version, created_datetime) — 모델 정확도 추적용</li>
+    <li><code>tbl_profanity_lexicon</code>(word, label, severity, source) — 사전 기반 빠른 1차 필터(NB와 병행)</li>
+  </ul>
+</section>
+
+<!-- ───────────── 4. 노트북 구조 ───────────── -->
+<section>
+  <h2><span class="num">4</span>주피터 노트북 셀 구조 — task/classifier_task.ipynb</h2>
+  <p class="lede"><b>i_naive_bayes_task_강사.ipynb</b>의 셀 흐름을 그대로 차용. 각 단계별 셀에 무엇이 들어갈지만 명시(코드는 작성 ✗).</p>
+
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:24%">셀 제목</th><th>들어갈 내용 (계획)</th></tr>
+    <tr><td>1</td><td>문제 정의</td><td>마크다운 — 안 B 채택 이유, 5개 클래스 정의, 평가 기준(macro F1)</td></tr>
+    <tr><td>2</td><td>라이브러리 import</td><td>pandas / numpy / matplotlib / sklearn (CountVectorizer, TfidfVectorizer, MultinomialNB, Pipeline, train_test_split, LabelEncoder, cross_val_score, classification_report, confusion_matrix), pickle</td></tr>
+    <tr><td>3</td><td>데이터 로드</td><td><code>datasets/clean/profanity_dataset.csv</code> 읽기 → 5개 컬럼(text, text_clean, length, source, label) 확인</td></tr>
+    <tr><td>4</td><td>EDA 1 — 분포</td><td>label별 행 수 bar chart, 길이 histogram, source별 비율 stacked bar</td></tr>
+    <tr><td>5</td><td>EDA 2 — 단어 빈도</td><td>label별 top 20 단어 (CountVectorizer 임시 fit) — 시각적으로 분리도 확인</td></tr>
+    <tr><td>6</td><td>전처리 함수 정의</td><td>소문자화, 자모 정규화, URL/이모지 토큰 치환, 반복문자 축약 — 함수만 정의</td></tr>
+    <tr><td>7</td><td>under-sampling</td><td>클래스당 1,500개씩 샘플링 (i_naive_bayes_task의 anger/fear/joy/love/sadness 1482개 패턴 그대로)</td></tr>
+    <tr><td>8</td><td>LabelEncoder</td><td><code>profanity_encoder.fit_transform(df.label)</code> → <code>df.target</code> 컬럼 추가</td></tr>
+    <tr><td>9</td><td>train_test_split</td><td><code>stratify=df.target, test_size=0.3, random_state=124</code> (강사 노트북과 동일)</td></tr>
+    <tr><td>10</td><td>Pipeline 1: CountVectorizer + NB</td><td>베이스라인. 학습 → <code>score</code> 출력</td></tr>
+    <tr><td>11</td><td>Pipeline 2: TfidfVectorizer + NB</td><td>비교 모델. 학습 → score 비교 표</td></tr>
+    <tr><td>12</td><td>cross_val_score</td><td>cv=5, scoring='f1_macro' — 두 파이프라인 평균±std 비교</td></tr>
+    <tr><td>13</td><td>classification_report</td><td>최종 모델로 test set 예측 → precision/recall/f1 클래스별</td></tr>
+    <tr><td>14</td><td>confusion_matrix</td><td>matplotlib heatmap, 클래스명은 encoder.classes_ 사용</td></tr>
+    <tr><td>15</td><td>오분류 샘플 분석</td><td>잘못 분류된 30건 표 출력 — 모델이 어디서 흔들리는지 정성 평가</td></tr>
+    <tr><td>16</td><td>실사용 예측 데모</td><td>10개 임의 문장에 대해 <code>predict</code> + <code>predict_proba</code> top3 출력</td></tr>
+    <tr><td>17</td><td>모델 저장</td><td><code>pickle.dump(pipe, 'artifacts/profanity_model.pkl')</code> + <code>encoder.pkl</code></td></tr>
+    <tr><td>18</td><td>회고</td><td>마크다운 — 한계(미등록 신조어, 맥락 의존 표현, 칭찬형 욕), 개선 방향(charset n-gram, BERT)</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>왜 이 순서?</strong>
+    <p>강사 노트북(i_naive_bayes_task_강사.ipynb)의 spam → feeling 흐름과 동일한 골격이라, 면접관이 <em>"어디서 차용했는지"</em>가 한눈에 보입니다. 그 위에 <b>15·18번 회고</b>는 사고 깊이를 보여주는 가산점 셀.</p>
+  </div>
+</section>
+
+<!-- ───────────── 5. 검증 계획 ───────────── -->
+<section>
+  <h2><span class="num">5</span>검증 / 평가 계획</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>주 평가지표</h3>
+      <ul class="tight">
+        <li><b>macro F1</b> — 클래스 불균형이 있어도 공정. 주 의사결정 지표.</li>
+        <li><b>per-class recall</b> — hate/sexual은 놓치면 비용↑ → recall 최소 0.7 목표</li>
+        <li><b>clean precision</b> — 정상 메시지를 욕설로 잘못 잡으면 UX 파괴 → precision 0.95 목표</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>검증 방법</h3>
+      <ul class="tight">
+        <li>train/test stratified split (7:3)</li>
+        <li><code>cross_val_score(cv=5, scoring='f1_macro')</code></li>
+        <li>혼동행렬 heatmap → 클래스 간 혼동 패턴 보고</li>
+        <li>오분류 30건 정성 분석 → 데이터 보강 우선순위 결정</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>합격선 (포트폴리오 기준)</h3>
+      <ul class="tight">
+        <li>macro F1 ≥ <b>0.75</b> (베이스라인 NB 기준 충분히 달성 가능)</li>
+        <li>혼동행렬에서 clean ↔ hate 오분류 ≤ 5%</li>
+        <li>실사용 데모 10문장 중 직관과 8개 이상 일치</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>실패 시 대응 (계획만)</h3>
+      <ul class="tight">
+        <li>데이터 부족 → 크롤링 추가, 합성 비율 조정</li>
+        <li>특정 클래스 recall 낮음 → class_weight 또는 over-sampling</li>
+        <li>NB 한계 도달 → 동일 데이터로 LogisticRegression 비교(같은 sklearn, 동일 폴더 범위)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── 6. 산출물 / 디렉터리 ───────────── -->
+<section>
+  <h2><span class="num">6</span>산출물 & 디렉터리 구조</h2>
+  <pre>machine-learning/
+└── task/
+    ├── classifier_task.ipynb        <span class="c"># ← 이 파일이 메인</span>
+    ├── datasets/
+    │   ├── raw/                     <span class="c"># 크롤링 원본 (gitignore)</span>
+    │   ├── public/                  <span class="c"># 공개 데이터셋 원본</span>
+    │   ├── synthetic/               <span class="c"># 합성 데이터</span>
+    │   └── clean/
+    │       └── profanity_dataset.csv  <span class="c"># 학습용 최종 5컬럼</span>
+    └── artifacts/
+        ├── profanity_model.pkl
+        ├── profanity_encoder.pkl
+        ├── confusion_matrix.png
+        └── classification_report.txt</pre>
+
+  <h3>포트폴리오 제출 패키징</h3>
+  <ul class="tight">
+    <li><b>README.md</b> (별도) — 본 계획서 요약, 실행 방법, 결과 표 1장, 한계·개선 방향</li>
+    <li><b>classifier_task.ipynb</b> — 셀 결과(차트·혼동행렬) 포함하여 export</li>
+    <li><b>artifacts/</b> 일체</li>
+    <li><b>크롤러 스크립트</b>는 <code>scripts/</code>에 별도(노트북에 포함 ✗ — 깔끔함을 위해)</li>
+  </ul>
+</section>
+
+<!-- ───────────── 7. 다음 액션 ───────────── -->
+<section>
+  <h2><span class="num">7</span>다음 액션 (이 계획서 승인 후)</h2>
+  <div class="card">
+    <div class="step"><div class="n">A</div><div class="body"><b>데이터셋 안 확정</b> — 안 A·B·C 중 메인 선택 (기본 권장: B)</div></div>
+    <div class="step"><div class="n">B</div><div class="body"><b>크롤링 대상 확정</b> — 표 2-2에서 3~4곳 골라 우선순위 매기기</div></div>
+    <div class="step"><div class="n">C</div><div class="body"><b>약라벨 1,000건 검수 가능 여부 확인</b> — 시간/인력 안 되면 공개 데이터셋 비중을 ↑</div></div>
+    <div class="step"><div class="n">D</div><div class="body"><b>노트북 셀 1~9 골격 작성 시작</b> (이 단계부터 코드 작성)</div></div>
+  </div>
+</section>
+
+<footer>
+  GlobalGates · Chat Profanity Classifier Plan v1 · 2026-05-06 · 코드 미작성, 계획안만
+</footer>
+
+</div>
+</body>
+</html>

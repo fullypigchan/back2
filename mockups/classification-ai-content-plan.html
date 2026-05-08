@@ -1,0 +1,1667 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GlobalGates 분류형 ML 화면 목업</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-2: #edf3f6;
+      --ink: #14202a;
+      --muted: #657380;
+      --line: #d8e0e5;
+      --nav: #10222b;
+      --blue: #2563eb;
+      --teal: #148477;
+      --green: #198754;
+      --amber: #b7791f;
+      --red: #c2413a;
+      --violet: #6750a4;
+      --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: var(--nav);
+      color: #eef6f8;
+      padding: 22px 18px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      font-weight: 850;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #39a6a3;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: transparent;
+      color: #c8d6de;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255, 255, 255, 0.11);
+      color: #fff;
+    }
+
+    .side-note {
+      margin-top: 22px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #d7e3e8;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    main { min-width: 0; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 246, 248, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .content {
+      padding: 26px 28px 44px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .section { margin-bottom: 24px; }
+
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .section-lead {
+      margin: -5px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card,
+    .mock-screen,
+    .phase,
+    .source-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .card { padding: 18px; }
+    .card h3 { margin: 0 0 10px; font-size: 15px; }
+
+    .small { font-size: 12px; line-height: 1.5; }
+    .muted { color: var(--muted); }
+    .strong { font-weight: 850; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .pill.blue { color: var(--blue); border-color: #bdd0fb; background: #eef4ff; }
+    .pill.green { color: var(--green); border-color: #acd8bf; background: #eef8f2; }
+    .pill.amber { color: var(--amber); border-color: #e2cb8b; background: #fff7df; }
+    .pill.red { color: var(--red); border-color: #ebb4ae; background: #fff1f0; }
+    .pill.violet { color: var(--violet); border-color: #c9bff0; background: #f4f1ff; }
+    .pill.dark { color: #fff; border-color: #26343e; background: #16252f; }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 23px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: #42515d;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .kpi {
+      min-height: 132px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .kpi strong {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .map-item {
+      min-height: 148px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .map-item b { font-size: 14px; }
+
+    .mock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .mock-screen {
+      overflow: hidden;
+      min-height: 520px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .screen-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafb;
+    }
+
+    .screen-title {
+      display: grid;
+      gap: 2px;
+    }
+
+    .screen-title b { font-size: 14px; }
+
+    .screen-body {
+      display: grid;
+      grid-template-columns: 128px minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    .screen-nav {
+      border-right: 1px solid var(--line);
+      background: #eef4f6;
+      padding: 12px;
+      display: grid;
+      align-content: start;
+      gap: 7px;
+    }
+
+    .screen-nav span {
+      display: block;
+      padding: 8px 9px;
+      border-radius: 7px;
+      color: #4b5d68;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .screen-nav span.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+
+    .screen-main {
+      min-width: 0;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .app-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 36px;
+    }
+
+    .searchbox,
+    .input-line,
+    .textarea-box,
+    .select-line {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: #4b5d68;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .textarea-box {
+      min-height: 98px;
+      display: grid;
+      align-content: start;
+      gap: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .ai-strip {
+      border: 1px solid #bdd0fb;
+      border-radius: 8px;
+      background: #f3f7ff;
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .ai-strip.green { border-color: #acd8bf; background: #f2fbf5; }
+    .ai-strip.amber { border-color: #e2cb8b; background: #fff9e9; }
+    .ai-strip.red { border-color: #ebb4ae; background: #fff5f4; }
+    .ai-strip.violet { border-color: #c9bff0; background: #f7f4ff; }
+
+    .ai-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bar {
+      height: 9px;
+      border-radius: 999px;
+      background: #e1e8ed;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .bar span.green { background: var(--green); }
+    .bar span.amber { background: var(--amber); }
+    .bar span.red { background: var(--red); }
+    .bar span.violet { background: var(--violet); }
+
+    .feed-list,
+    .queue-list,
+    .metric-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .feed-item,
+    .queue-item,
+    .metric-item,
+    .product-row,
+    .message-row,
+    .notice-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .feed-head,
+    .queue-head,
+    .metric-head,
+    .message-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .thumb {
+      min-height: 112px;
+      border: 1px solid #cdd7de;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(20, 132, 119, 0.16), rgba(37, 99, 235, 0.12)),
+        repeating-linear-gradient(45deg, #f7fafb 0 10px, #eef4f6 10px 20px);
+      display: grid;
+      place-items: center;
+      color: #42515d;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .thumb.warn {
+      background:
+        linear-gradient(135deg, rgba(183, 121, 31, 0.16), rgba(194, 65, 58, 0.08)),
+        repeating-linear-gradient(45deg, #fffaf0 0 10px, #f7ede5 10px 20px);
+    }
+
+    .mini-chart {
+      height: 130px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(to top, transparent 24%, rgba(216, 224, 229, 0.75) 25%, transparent 26%),
+        linear-gradient(to top, transparent 49%, rgba(216, 224, 229, 0.75) 50%, transparent 51%),
+        linear-gradient(to top, transparent 74%, rgba(216, 224, 229, 0.75) 75%, transparent 76%),
+        #fff;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      padding: 14px;
+    }
+
+    .mini-chart span {
+      flex: 1;
+      border-radius: 6px 6px 0 0;
+      background: var(--teal);
+      min-height: 22px;
+    }
+
+    .mini-chart span:nth-child(2) { background: var(--blue); }
+    .mini-chart span:nth-child(3) { background: var(--amber); }
+    .mini-chart span:nth-child(4) { background: var(--red); }
+    .mini-chart span:nth-child(5) { background: var(--violet); }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 210px;
+      gap: 12px;
+    }
+
+    .phone {
+      max-width: 330px;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #111b24;
+      padding: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .phone-screen {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #f7fafb;
+      min-height: 520px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .phone-top,
+    .phone-bottom {
+      padding: 12px 14px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .phone-bottom {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: flex;
+      justify-content: space-around;
+      color: var(--muted);
+    }
+
+    .chat-body {
+      padding: 14px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .bubble {
+      max-width: 86%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .bubble.me {
+      justify-self: end;
+      background: #e9f2ff;
+      border-color: #bdd0fb;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      min-width: 880px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    th {
+      background: #edf3f6;
+      color: #40505c;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .step {
+      min-height: 132px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .code {
+      margin: 0;
+      padding: 14px;
+      border-radius: 8px;
+      background: #111b24;
+      color: #d9f7df;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .source-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .source-row {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr) 210px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 1180px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; }
+      .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid.two, .grid.three, .grid.four, .mock-grid, .map-grid, .flow, .source-row { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .screen-body { grid-template-columns: 1fr; }
+      .screen-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); border-right: 0; border-bottom: 1px solid var(--line); }
+      .split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .content, .topbar { padding-left: 16px; padding-right: 16px; }
+      aside { padding: 18px 14px; }
+      .nav, .screen-nav { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .mock-screen { min-height: 0; }
+      .source-row { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">GG</div>
+        <div>
+          <div>GlobalGates</div>
+          <div class="small muted">Screen Mockup</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="화면 목업 탭">
+        <button class="active" data-tab="map">전체 화면 지도</button>
+        <button data-tab="create">작성/등록 화면</button>
+        <button data-tab="deal">거래/소통 화면</button>
+        <button data-tab="community">탐색/커뮤니티 화면</button>
+        <button data-tab="ops">운영/관리자 화면</button>
+        <button data-tab="pipeline">학습/연동 화면</button>
+        <button data-tab="sources">사례 출처</button>
+      </nav>
+      <div class="side-note">
+        분류 결과는 별도 챗봇이 아니라 기존 화면에 배지, 자동선택, 경고, 큐 정렬, 보류 상태로 붙습니다.
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1>GlobalGates 분류형 ML 화면 활용 목업</h1>
+          <p>주피터 노트북에서 학습한 분류 모델을 FastAPI로 서빙하고 Spring Boot 화면에 심는 방식</p>
+        </div>
+        <div class="toolbar">
+          <span class="pill blue">화면 중심</span>
+          <span class="pill green">분류 모델</span>
+          <span class="pill amber">회귀 제외</span>
+          <span class="pill violet">LLM 아님</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <section id="map" class="panel active">
+          <div class="section">
+            <h2>화면에서 보이는 AI 콘텐츠 요약</h2>
+            <p class="section-lead">사용자는 모델명을 보지 않습니다. 대신 작성 폼의 자동 분류, 상품 등록의 카테고리 선택, 채팅 위험 경고, 관리자 큐 정렬처럼 화면 안의 작은 판단 결과로 보게 됩니다.</p>
+            <div class="grid four">
+              <div class="card kpi">
+                <span class="pill blue">사용자 화면</span>
+                <strong>9개</strong>
+                <span class="muted">글쓰기, 상품, 커뮤니티, 탐색, 견적, 채팅, 영상, 뉴스, 알림</span>
+              </div>
+              <div class="card kpi">
+                <span class="pill red">운영 화면</span>
+                <strong>5개</strong>
+                <span class="muted">신고, 광고, 결제, 회원가입 위험, 커뮤니티 건강도</span>
+              </div>
+              <div class="card kpi">
+                <span class="pill green">1차 MVP</span>
+                <strong>4개</strong>
+                <span class="muted">게시글 의도, 상품 카테고리, 신고 사유, 광고 정책</span>
+              </div>
+              <div class="card kpi">
+                <span class="pill amber">가격 기능</span>
+                <strong>분류</strong>
+                <span class="muted">시세 숫자 예측이 아니라 저가/정상/고가/검토필요 라벨</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>GlobalGates 화면별 적용 지도</h2>
+            <div class="map-grid" id="screenMap"></div>
+          </div>
+
+          <div class="section">
+            <h2>첫 구현 순서</h2>
+            <div class="grid three">
+              <div class="card">
+                <h3>1. 작성 전 자동분류</h3>
+                <div class="tag-row">
+                  <span class="tag">post_intent</span>
+                  <span class="tag">product_taxonomy</span>
+                  <span class="tag">post_safety</span>
+                </div>
+                <p class="small muted">사용자가 글/상품을 올리기 전에 의도, 카테고리, 위험도를 분류해 선택 부담과 운영 사고를 줄입니다.</p>
+              </div>
+              <div class="card">
+                <h3>2. 신고/광고 검토 큐</h3>
+                <div class="tag-row">
+                  <span class="tag">report_reason</span>
+                  <span class="tag">severity</span>
+                  <span class="tag">ad_policy</span>
+                </div>
+                <p class="small muted">운영자가 모든 건을 동일하게 보지 않고, 심각도와 정책 위반 유형 기준으로 먼저 볼 건을 정합니다.</p>
+              </div>
+              <div class="card">
+                <h3>3. 거래 안전 확장</h3>
+                <div class="tag-row">
+                  <span class="tag">chat_risk</span>
+                  <span class="tag">payment_risk</span>
+                  <span class="tag">notification_priority</span>
+                </div>
+                <p class="small muted">채팅, 결제, 알림으로 확장해 거래 과정의 불편함과 위험을 줄입니다.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="create" class="panel">
+          <div class="section">
+            <h2>작성/등록 화면</h2>
+            <p class="section-lead">대기업 사례로는 Meta Marketplace 상품 카테고리/정책 분류, NAVER Shopping 카테고리 분류, 당근 글쓰기 카테고리 분류를 GlobalGates 글쓰기/상품 등록에 적용합니다.</p>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>메인/커뮤니티 글쓰기</b>
+                    <span class="small muted">post_intent + post_safety + notification_priority</span>
+                  </div>
+                  <span class="pill green">MVP</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>홈</span><span class="active">글쓰기</span><span>커뮤니티</span><span>알림</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="app-head">
+                      <b>새 게시글</b>
+                      <span class="pill blue">자동분류 완료</span>
+                    </div>
+                    <div class="input-line">베트남 수출용 친환경 포장재 샘플 공급처 찾습니다</div>
+                    <div class="textarea-box">
+                      <span>식품 포장용 생분해 포장재 샘플을 받을 수 있는 공급처를 찾습니다.</span>
+                      <span class="muted">MOQ, 인증서, 리드타임을 확인하고 싶습니다.</span>
+                    </div>
+                    <div class="ai-strip">
+                      <div class="ai-head">
+                        <b>게시글 의도</b>
+                        <span class="pill blue">견적/공급처 요청 0.91</span>
+                      </div>
+                      <div class="bar"><span style="width:91%"></span></div>
+                      <div class="tag-row">
+                        <span class="tag">견적요청으로 등록</span>
+                        <span class="tag">관련 전문가 알림</span>
+                        <span class="tag">커뮤니티: 수출입 실무</span>
+                      </div>
+                    </div>
+                    <div class="ai-strip green">
+                      <div class="ai-head">
+                        <b>안전 등급</b>
+                        <span class="pill green">정상 0.96</span>
+                      </div>
+                      <div class="small muted">사기, 금지거래, 개인정보 노출, 욕설 라벨 모두 낮음</div>
+                    </div>
+                    <div class="tag-row">
+                      <span class="pill dark">임시저장</span>
+                      <span class="pill blue">카테고리 적용</span>
+                      <span class="pill green">게시</span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>마이페이지 상품 등록</b>
+                    <span class="small muted">product_taxonomy + price_band + image_policy</span>
+                  </div>
+                  <span class="pill green">MVP</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>프로필</span><span class="active">상품</span><span>견적</span><span>좋아요</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="thumb">상품 이미지</div>
+                    <div class="form-grid">
+                      <div class="input-line">친환경 포장재 샘플팩 100매</div>
+                      <div class="input-line">48,000원</div>
+                    </div>
+                    <div class="ai-strip green">
+                      <div class="ai-head">
+                        <b>상품 카테고리</b>
+                        <span class="pill green">산업재 > 포장재 0.88</span>
+                      </div>
+                      <div class="bar"><span class="green" style="width:88%"></span></div>
+                      <div class="tag-row">
+                        <span class="tag">자동 선택</span>
+                        <span class="tag">탐색 필터 반영</span>
+                        <span class="tag">관련 견적 노출</span>
+                      </div>
+                    </div>
+                    <div class="ai-strip amber">
+                      <div class="ai-head">
+                        <b>가격대 분류</b>
+                        <span class="pill amber">정상 상단 0.74</span>
+                      </div>
+                      <div class="small muted">숫자 시세예측이 아니라 카테고리 내 가격대 라벨만 표시</div>
+                    </div>
+                    <div class="ai-strip green">
+                      <div class="ai-head">
+                        <b>이미지 정책</b>
+                        <span class="pill green">정상상품 이미지 0.93</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>뉴스 댓글/신고 전 경고</h2>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>뉴스 댓글 작성</b>
+                    <span class="small muted">reply_toxicity + misinformation_sensitive</span>
+                  </div>
+                  <span class="pill amber">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>뉴스</span><span class="active">댓글</span><span>북마크</span><span>공유</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="feed-item">
+                      <div class="feed-head">
+                        <b>관세율 변경 안내</b>
+                        <span class="pill blue">정책/통관</span>
+                      </div>
+                      <div class="small muted">뉴스 분류: 무역정책, 통관, 긴급도 보통</div>
+                    </div>
+                    <div class="textarea-box">이 업체들은 다 사기 같은데...</div>
+                    <div class="ai-strip amber">
+                      <div class="ai-head">
+                        <b>댓글 안전 분류</b>
+                        <span class="pill amber">비방 가능성 0.77</span>
+                      </div>
+                      <div class="small muted">게시 전 문구 수정 제안. 자동 삭제가 아니라 사용자에게 먼저 확인.</div>
+                    </div>
+                    <div class="tag-row">
+                      <span class="pill blue">수정하고 게시</span>
+                      <span class="pill amber">그대로 게시</span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>회원가입/비즈니스 인증</b>
+                    <span class="small muted">signup_risk + business_profile_type</span>
+                  </div>
+                  <span class="pill amber">3차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span class="active">가입</span><span>프로필</span><span>인증</span><span>설정</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="form-grid">
+                      <div class="input-line">company@globalparts.kr</div>
+                      <div class="input-line">Global Parts Trading</div>
+                      <div class="input-line">사업자번호 확인 완료</div>
+                      <div class="input-line">대한민국</div>
+                    </div>
+                    <div class="ai-strip green">
+                      <div class="ai-head">
+                        <b>비즈니스 유형</b>
+                        <span class="pill green">수출입/유통 0.82</span>
+                      </div>
+                      <div class="tag-row">
+                        <span class="tag">추천 커뮤니티: 무역 실무</span>
+                        <span class="tag">초기 알림: 견적/상품</span>
+                      </div>
+                    </div>
+                    <div class="ai-strip">
+                      <div class="ai-head">
+                        <b>가입 위험</b>
+                        <span class="pill blue">낮음 0.89</span>
+                      </div>
+                      <div class="small muted">동일 전화번호 반복 가입, 신고 계정 연관, 비정상 국가/언어 패턴 없음</div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="deal" class="panel">
+          <div class="section">
+            <h2>거래/소통 화면</h2>
+            <p class="section-lead">채팅 답변을 생성하는 것이 아니라 메시지 의도, 사기 위험, 견적 긴급도, 알림 우선순위를 분류해 거래 과정의 불편함을 줄입니다.</p>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>견적 등록/전문가 라우팅</b>
+                    <span class="small muted">estimation_request + urgency + expert_route</span>
+                  </div>
+                  <span class="pill blue">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>목록</span><span class="active">견적등록</span><span>전문가</span><span>내 견적</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="input-line">포장재 샘플 수입 견적 요청</div>
+                    <div class="textarea-box">베트남 공급처 샘플 수입, 통관 서류와 운송 리드타임 확인이 필요합니다.</div>
+                    <div class="ai-strip violet">
+                      <div class="ai-head">
+                        <b>견적 유형</b>
+                        <span class="pill violet">통관/물류 복합 0.79</span>
+                      </div>
+                      <div class="tag-row">
+                        <span class="tag">통관 전문가</span>
+                        <span class="tag">물류 전문가</span>
+                        <span class="tag">제품 보유자 제외</span>
+                      </div>
+                    </div>
+                    <div class="ai-strip amber">
+                      <div class="ai-head">
+                        <b>긴급도</b>
+                        <span class="pill amber">48시간 내 응답 권장 0.72</span>
+                      </div>
+                      <div class="small muted">마감일, 문의 문구, 상품 카테고리를 기반으로 알림 우선순위를 높입니다.</div>
+                    </div>
+                    <div class="feed-list">
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>추천 수신자: 통관 전문 업체</b>
+                          <span class="pill blue">route 1</span>
+                        </div>
+                        <div class="small muted">단순 유사도 추천이 아니라 견적 유형 분류 결과로 수신자 그룹을 선택</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>채팅 안전 경고</b>
+                    <span class="small muted">chat_intent + chat_risk + file_safety</span>
+                  </div>
+                  <span class="pill blue">2차</span>
+                </div>
+                <div class="phone">
+                  <div class="phone-screen">
+                    <div class="phone-top">Global Parts Trading</div>
+                    <div class="chat-body">
+                      <div class="bubble">샘플 견적서 보내드렸습니다. 확인 부탁드립니다.</div>
+                      <div class="bubble me">네 확인했습니다. 결제는 플랫폼에서 진행할게요.</div>
+                      <div class="bubble">플랫폼 말고 외부 링크에서 결제하면 10% 할인 가능합니다.</div>
+                      <div class="ai-strip red">
+                        <div class="ai-head">
+                          <b>채팅 위험 분류</b>
+                          <span class="pill red">외부결제 유도 0.86</span>
+                        </div>
+                        <div class="small muted">거래 보호를 위해 플랫폼 결제를 유지하도록 경고 표시</div>
+                      </div>
+                      <div class="message-row">
+                        <div class="message-head">
+                          <b>첨부파일</b>
+                          <span class="pill green">문서 정상 0.92</span>
+                        </div>
+                        <div class="small muted">견적서.pdf</div>
+                      </div>
+                    </div>
+                    <div class="phone-bottom"><span>채팅</span><span>신고</span><span>설정</span></div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>영상회의/알림</h2>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>영상회의 기록</b>
+                    <span class="small muted">meeting_type + recording_sensitivity</span>
+                  </div>
+                  <span class="pill amber">3차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>화상</span><span class="active">녹화</span><span>참여자</span><span>파일</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="thumb">회의 녹화 미리보기</div>
+                    <div class="ai-strip blue">
+                      <div class="ai-head">
+                        <b>회의 유형</b>
+                        <span class="pill blue">견적 협의 0.81</span>
+                      </div>
+                      <div class="tag-row">
+                        <span class="tag">견적서와 연결</span>
+                        <span class="tag">채팅방에 기록</span>
+                      </div>
+                    </div>
+                    <div class="ai-strip amber">
+                      <div class="ai-head">
+                        <b>녹화 민감도</b>
+                        <span class="pill amber">계약정보 포함 가능 0.69</span>
+                      </div>
+                      <div class="small muted">공개 공유 버튼을 숨기고 참여자에게만 표시</div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>알림 우선순위</b>
+                    <span class="small muted">notification_priority + activity_priority</span>
+                  </div>
+                  <span class="pill blue">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>전체</span><span class="active">중요</span><span>멘션</span><span>마케팅</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="notice-row">
+                      <div class="queue-head">
+                        <b>견적 답변 마감 4시간 전</b>
+                        <span class="pill red">거래필수</span>
+                      </div>
+                      <div class="small muted">알림 상단 고정, 푸시 발송</div>
+                    </div>
+                    <div class="notice-row">
+                      <div class="queue-head">
+                        <b>@yoon 님이 댓글에서 언급했습니다</b>
+                        <span class="pill blue">멘션</span>
+                      </div>
+                      <div class="small muted">일반 알림 묶음에 표시</div>
+                    </div>
+                    <div class="notice-row">
+                      <div class="queue-head">
+                        <b>새 광고 상품 안내</b>
+                        <span class="pill amber">저가치</span>
+                      </div>
+                      <div class="small muted">야간 푸시 제외, 알림함 하단 표시</div>
+                    </div>
+                    <div class="ai-strip green">
+                      <div class="ai-head">
+                        <b>알림 분류 효과</b>
+                        <span class="pill green">중요 알림 누락 감소</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="community" class="panel">
+          <div class="section">
+            <h2>탐색/커뮤니티 화면</h2>
+            <p class="section-lead">추천 유사도만 쓰는 것이 아니라 검색 의도, 커뮤니티 건강도, 북마크 폴더, 뉴스 주제를 분류해 사용자가 찾는 목적에 맞는 화면을 만듭니다.</p>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>탐색/검색 결과</b>
+                    <span class="small muted">query_intent + unsafe_query + content_type</span>
+                  </div>
+                  <span class="pill blue">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span class="active">탐색</span><span>상품</span><span>뉴스</span><span>사람</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="searchbox">검색어: 베트남 포장재 인증</div>
+                    <div class="ai-strip">
+                      <div class="ai-head">
+                        <b>검색 의도</b>
+                        <span class="pill blue">정보/견적 혼합 0.83</span>
+                      </div>
+                      <div class="tag-row">
+                        <span class="tag">뉴스 우선</span>
+                        <span class="tag">견적 사례</span>
+                        <span class="tag">전문가 함께 표시</span>
+                      </div>
+                    </div>
+                    <div class="feed-list">
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>베트남 식품 포장 인증 절차</b>
+                          <span class="pill blue">뉴스</span>
+                        </div>
+                        <div class="small muted">news_topic: 인증/통관</div>
+                      </div>
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>포장재 샘플 견적 요청 사례</b>
+                          <span class="pill violet">견적</span>
+                        </div>
+                        <div class="small muted">estimation_type: 제품견적</div>
+                      </div>
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>수출입 실무 커뮤니티</b>
+                          <span class="pill green">커뮤니티</span>
+                        </div>
+                        <div class="small muted">community_health: 활성</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>커뮤니티 관리자</b>
+                    <span class="small muted">community_health + community_post_safety</span>
+                  </div>
+                  <span class="pill blue">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>홈</span><span class="active">관리</span><span>멤버</span><span>미디어</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="app-head">
+                      <b>수출입 실무 커뮤니티</b>
+                      <span class="pill amber">주의</span>
+                    </div>
+                    <div class="mini-chart">
+                      <span style="height:42%"></span>
+                      <span style="height:65%"></span>
+                      <span style="height:78%"></span>
+                      <span style="height:54%"></span>
+                      <span style="height:35%"></span>
+                    </div>
+                    <div class="ai-strip amber">
+                      <div class="ai-head">
+                        <b>커뮤니티 건강도</b>
+                        <span class="pill amber">분쟁 증가 0.76</span>
+                      </div>
+                      <div class="small muted">신고율, 차단율, 부정 댓글 분류가 동시에 상승</div>
+                    </div>
+                    <div class="queue-list">
+                      <div class="queue-item">
+                        <div class="queue-head">
+                          <b>관리자에게 검토 요청</b>
+                          <span class="pill red">게시글 3건</span>
+                        </div>
+                        <div class="small muted">정책 위반 가능 게시글만 우선 표시</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>북마크/뉴스 분류</h2>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>북마크 폴더 자동분류</b>
+                    <span class="small muted">bookmark_folder + content_topic</span>
+                  </div>
+                  <span class="pill amber">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>전체</span><span class="active">폴더</span><span>게시글</span><span>뉴스</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="feed-item">
+                      <div class="feed-head">
+                        <b>관세율 변경 안내</b>
+                        <span class="pill blue">뉴스</span>
+                      </div>
+                      <div class="ai-strip">
+                        <div class="ai-head">
+                          <b>폴더 분류</b>
+                          <span class="pill blue">통관/정책 0.87</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="feed-item">
+                      <div class="feed-head">
+                        <b>포장재 공급처 목록</b>
+                        <span class="pill green">상품/거래</span>
+                      </div>
+                      <div class="ai-strip green">
+                        <div class="ai-head">
+                          <b>폴더 분류</b>
+                          <span class="pill green">공급처 후보 0.79</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>피드 라벨 표시</b>
+                    <span class="small muted">post_intent + content_quality</span>
+                  </div>
+                  <span class="pill green">MVP</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span class="active">홈</span><span>상품</span><span>커뮤니티</span><span>뉴스</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="feed-list">
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>태국 바이어 찾습니다</b>
+                          <span class="pill violet">파트너 모집</span>
+                        </div>
+                        <div class="small muted">품질: 정상, 상업성: 보통, 알림: 소셜</div>
+                      </div>
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>스테인리스 텀블러 500ml</b>
+                          <span class="pill green">상품판매</span>
+                        </div>
+                        <div class="small muted">상품 카테고리: 소비재 > 주방용품, 가격대: 정상</div>
+                      </div>
+                      <div class="feed-item">
+                        <div class="feed-head">
+                          <b>통관 서류 질문드립니다</b>
+                          <span class="pill blue">질문</span>
+                        </div>
+                        <div class="small muted">전문가 답변 유도, 관련 뉴스 연결</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="ops" class="panel">
+          <div class="section">
+            <h2>운영/관리자 화면</h2>
+            <p class="section-lead">Reddit, Pinterest, LinkedIn, Amazon, Etsy 사례처럼 위험/정책/스팸/가짜 계정 분류를 운영 화면에 넣습니다. 자동 차단보다 검토 우선순위와 보류 상태가 1차 적용입니다.</p>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>관리자 신고 큐</b>
+                    <span class="small muted">report_reason + severity + moderation_queue</span>
+                  </div>
+                  <span class="pill green">MVP</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>대시보드</span><span class="active">신고</span><span>게시글</span><span>회원</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="app-head">
+                      <b>오늘의 우선 검토</b>
+                      <span class="pill red">긴급 7건</span>
+                    </div>
+                    <div class="queue-list">
+                      <div class="queue-item">
+                        <div class="queue-head">
+                          <b>채팅 외부결제 유도</b>
+                          <span class="pill red">사기 의심 0.88</span>
+                        </div>
+                        <div class="small muted">대상: message #3921, 조치 제안: 경고 및 거래 보호 안내</div>
+                      </div>
+                      <div class="queue-item">
+                        <div class="queue-head">
+                          <b>금지상품 가능성</b>
+                          <span class="pill amber">검토필요 0.74</span>
+                        </div>
+                        <div class="small muted">대상: product post #113, 조치 제안: 상품 등록 임시 보류</div>
+                      </div>
+                      <div class="queue-item">
+                        <div class="queue-head">
+                          <b>비방 댓글 반복</b>
+                          <span class="pill violet">괴롭힘 0.81</span>
+                        </div>
+                        <div class="small muted">대상: news reply #882, 조치 제안: 댓글 숨김 후보</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>광고 등록 검토</b>
+                    <span class="small muted">ad_policy + landing_risk</span>
+                  </div>
+                  <span class="pill green">MVP</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>광고</span><span class="active">검토</span><span>결제</span><span>통계</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="input-line">동남아 물류비 50% 절감 보장</div>
+                    <div class="input-line">landing-url.example/pay-direct</div>
+                    <div class="thumb warn">광고 소재</div>
+                    <div class="ai-strip red">
+                      <div class="ai-head">
+                        <b>광고 정책 분류</b>
+                        <span class="pill red">과장 표현 0.84</span>
+                      </div>
+                      <div class="small muted">절감률 보장 표현과 근거 부족. 자동 승인 대신 보류.</div>
+                    </div>
+                    <div class="ai-strip amber">
+                      <div class="ai-head">
+                        <b>랜딩 위험</b>
+                        <span class="pill amber">외부 결제 폼 0.71</span>
+                      </div>
+                    </div>
+                    <div class="tag-row">
+                      <span class="pill red">보류</span>
+                      <span class="pill blue">수정 요청</span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>결제/구독/회원 운영</h2>
+            <div class="mock-grid">
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>결제 위험 분류</b>
+                    <span class="small muted">payment_risk + subscription_churn</span>
+                  </div>
+                  <span class="pill amber">3차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span>결제</span><span class="active">위험</span><span>구독</span><span>웹훅</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="metric-list">
+                      <div class="metric-item">
+                        <div class="metric-head">
+                          <b>광고 결제 #pay_1022</b>
+                          <span class="pill green">정상</span>
+                        </div>
+                        <div class="small muted">amount: 120,000원, member history 정상</div>
+                      </div>
+                      <div class="metric-item">
+                        <div class="metric-head">
+                          <b>구독 결제 #sub_934</b>
+                          <span class="pill amber">재시도 필요</span>
+                        </div>
+                        <div class="small muted">최근 실패 2회, 카드 만료 가능성</div>
+                      </div>
+                      <div class="metric-item">
+                        <div class="metric-head">
+                          <b>광고 결제 #pay_1041</b>
+                          <span class="pill red">도난카드 의심</span>
+                        </div>
+                        <div class="small muted">가입 직후 고액 광고 결제, 국가/전화 패턴 불일치</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="mock-screen">
+                <div class="screen-top">
+                  <div class="screen-title">
+                    <b>관리자 대시보드</b>
+                    <span class="small muted">admin_stats + classifier summaries</span>
+                  </div>
+                  <span class="pill blue">2차</span>
+                </div>
+                <div class="screen-body">
+                  <div class="screen-nav">
+                    <span class="active">통계</span><span>회원</span><span>게시글</span><span>신고</span>
+                  </div>
+                  <div class="screen-main">
+                    <div class="mini-chart">
+                      <span style="height:36%"></span>
+                      <span style="height:68%"></span>
+                      <span style="height:48%"></span>
+                      <span style="height:82%"></span>
+                      <span style="height:55%"></span>
+                    </div>
+                    <div class="grid two">
+                      <div class="ai-strip red">
+                        <div class="ai-head">
+                          <b>오늘 위험 콘텐츠</b>
+                          <span class="pill red">24건</span>
+                        </div>
+                      </div>
+                      <div class="ai-strip amber">
+                        <div class="ai-head">
+                          <b>광고 보류</b>
+                          <span class="pill amber">6건</span>
+                        </div>
+                      </div>
+                      <div class="ai-strip blue">
+                        <div class="ai-head">
+                          <b>견적 긴급</b>
+                          <span class="pill blue">11건</span>
+                        </div>
+                      </div>
+                      <div class="ai-strip green">
+                        <div class="ai-head">
+                          <b>자동 카테고리 적용</b>
+                          <span class="pill green">83%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="pipeline" class="panel">
+          <div class="section">
+            <h2>학습/연동 화면</h2>
+            <p class="section-lead">사용자가 말한 `/Users/yoonchan/Desktop/gb/ai/machine-learning/b_classifier` 작업 흐름에 맞춰 Jupyter에서 학습/검증하고 FastAPI에 심은 뒤 Spring Boot에서 호출합니다.</p>
+            <div class="flow">
+              <div class="step">
+                <span class="pill blue">1</span>
+                <b>DB 추출</b>
+                <span class="small muted">tbl_post, tbl_post_product, tbl_report, tbl_message, tbl_advertisement 등 CSV 생성</span>
+              </div>
+              <div class="step">
+                <span class="pill green">2</span>
+                <b>Jupyter 학습</b>
+                <span class="small muted">전처리, 라벨링, train/validation/test 분리, 분류 모델 학습</span>
+              </div>
+              <div class="step">
+                <span class="pill amber">3</span>
+                <b>검증</b>
+                <span class="small muted">confusion matrix, macro F1, precision/recall, threshold 저장</span>
+              </div>
+              <div class="step">
+                <span class="pill violet">4</span>
+                <b>FastAPI</b>
+                <span class="small muted">모델별 `/classifiers/{name}/predict` 엔드포인트 제공</span>
+              </div>
+              <div class="step">
+                <span class="pill red">5</span>
+                <b>Spring 화면</b>
+                <span class="small muted">작성 폼, 상품 등록, 채팅, 신고 큐, 광고 검토에 결과 표시</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>FastAPI 응답이 화면 UI로 바뀌는 예</h2>
+            <div class="grid two">
+              <pre class="code">POST /classifiers/post-intent/predict
+{
+  "memberId": 41,
+  "title": "베트남 수출용 포장재 공급처 찾습니다",
+  "content": "MOQ, 인증서, 리드타임을 확인하고 싶습니다.",
+  "source": "post_write"
+}</pre>
+              <pre class="code">{
+  "label": "estimation_request",
+  "confidence": 0.91,
+  "uiAction": "suggest_estimation_category",
+  "chips": ["견적요청", "관련 전문가 알림"],
+  "reviewRequired": false
+}</pre>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>화면별 호출 지점</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>화면</th>
+                    <th>Spring API</th>
+                    <th>FastAPI 분류기</th>
+                    <th>화면 변화</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>글쓰기</td>
+                    <td>/api/main/posts/write, /api/communities/{id}/posts</td>
+                    <td>post_intent, post_safety</td>
+                    <td>카테고리 자동선택, 위험 문구 경고, 검토 플래그</td>
+                  </tr>
+                  <tr>
+                    <td>상품 등록</td>
+                    <td>/api/mypage/products</td>
+                    <td>product_taxonomy, price_band, image_policy</td>
+                    <td>상품 카테고리 선택, 가격대 배지, 이미지 재업로드 안내</td>
+                  </tr>
+                  <tr>
+                    <td>채팅</td>
+                    <td>/api/v1/chat/send, /api/v1/chat/send-with-file</td>
+                    <td>chat_risk_intent, file_safety</td>
+                    <td>외부결제/괴롭힘 경고, 신고 버튼 강조</td>
+                  </tr>
+                  <tr>
+                    <td>광고</td>
+                    <td>/api/ad/write</td>
+                    <td>ad_policy, landing_risk</td>
+                    <td>자동 승인, 보류, 수정 요청</td>
+                  </tr>
+                  <tr>
+                    <td>관리자</td>
+                    <td>/api/admin/reports, /api/admin/posts</td>
+                    <td>report_reason, severity, moderation_queue</td>
+                    <td>큐 우선순위, 사유 라벨, 담당자 라우팅</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="sources" class="panel">
+          <div class="section">
+            <h2>사례 출처와 화면 반영</h2>
+            <p class="section-lead">출처는 공식/엔지니어링 문서 중심입니다. 목업에는 생성형 기능이 아니라 분류 라벨, 정책 판단, 위험도 큐, 카테고리 자동선택에 해당하는 부분만 반영했습니다.</p>
+            <div class="source-grid" id="sourceGrid"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const screenMap = [
+      {area: "메인 글쓰기", model: "post_intent, post_safety", ui: "의도 배지, 카테고리 자동선택, 작성 전 경고", priority: "MVP"},
+      {area: "상품 등록", model: "product_taxonomy, price_band", ui: "카테고리 자동선택, 가격대 라벨, 금지상품 보류", priority: "MVP"},
+      {area: "커뮤니티", model: "community_health", ui: "분쟁/스팸 증가 알림, 관리자 검토 카드", priority: "2차"},
+      {area: "탐색/검색", model: "query_intent", ui: "검색 의도별 뉴스/상품/견적/사람 섹션 재배치", priority: "2차"},
+      {area: "견적", model: "estimation_request", ui: "전문가 유형 라우팅, 긴급도 표시", priority: "2차"},
+      {area: "채팅", model: "chat_risk_intent", ui: "외부결제/괴롭힘/개인정보 요구 경고", priority: "2차"},
+      {area: "영상회의", model: "meeting_type", ui: "회의 유형, 녹화 민감도, 공유 제한", priority: "3차"},
+      {area: "뉴스/댓글", model: "news_topic, reply_toxicity", ui: "주제 라벨, 댓글 게시 전 경고", priority: "2차"},
+      {area: "북마크", model: "bookmark_folder", ui: "폴더 자동분류, 콘텐츠 주제 라벨", priority: "2차"},
+      {area: "알림", model: "notification_priority", ui: "거래필수/멘션/마케팅 알림 분리", priority: "2차"},
+      {area: "광고", model: "ad_policy, landing_risk", ui: "승인/보류/수정요청 상태", priority: "MVP"},
+      {area: "결제/구독", model: "payment_risk", ui: "정상/재시도/도난카드의심 운영 플래그", priority: "3차"},
+      {area: "회원가입", model: "signup_risk", ui: "가입 위험도, 비즈니스 유형 초기 설정", priority: "3차"},
+      {area: "관리자 신고", model: "report_reason, severity", ui: "신고 사유 자동분류, 긴급 큐 정렬", priority: "MVP"},
+      {area: "친구/문의", model: "activity_priority, lead_type", ui: "중요 활동, 리드 유형 분류", priority: "2차"},
+      {area: "설정", model: "preference_segment", ui: "알림 선호와 언어/국가 기반 기본값", priority: "3차"}
+    ];
+
+    const sources = [
+      {service: "Meta Marketplace", model: "상품 카테고리/정책 위반 분류", screen: "상품 등록, 금지상품 보류", url: "https://engineering.fb.com/2018/10/02/ml-applications/under-the-hood-facebook-marketplace-powered-by-artificial-intelligence/"},
+      {service: "Instagram", model: "공격적 캡션/댓글 경고", screen: "게시글/뉴스 댓글 작성 전 경고", url: "https://about.fb.com/news/2019/12/our-progress-on-leading-the-fight-against-online-bullying/"},
+      {service: "YouTube", model: "정책 위반 가능 콘텐츠 자동 식별", screen: "영상/뉴스/광고 검토 큐", url: "https://support.google.com/youtube/answer/13304829?hl=en&ref_topic=9387060"},
+      {service: "Reddit", model: "괴롭힘, 밴 회피, 성인 콘텐츠 필터", screen: "커뮤니티 관리자, 신고 큐", url: "https://redditinc.com/news/keeping-our-platform-safe"},
+      {service: "Pinterest", model: "정책 위반 카테고리와 스팸 도메인 분류", screen: "이미지/뉴스/커뮤니티 안전 등급", url: "https://medium.com/pinterest-engineering/how-pinterest-fights-misinformation-hate-speech-and-self-harm-content-with-machine-learning-1806b73b40ef"},
+      {service: "LinkedIn", model: "바이럴 스팸, fake account risk 분류", screen: "회원가입 위험, 피드 스팸, 관리자 대시보드", url: "https://engineering.linkedin.com/content/engineering/en-us/blog/2023/viral-spam-content-detection-at-linkedin"},
+      {service: "Amazon", model: "가짜 리뷰/악성 행위 위험 분류", screen: "상품/회원 신뢰도, 운영 검토", url: "https://www.aboutamazon.com/news/policy-news-views/how-ai-spots-fake-reviews-amazon"},
+      {service: "Etsy", model: "리스팅 텍스트/이미지 정책 위반 분류", screen: "상품/광고 등록 검토", url: "https://www.etsy.com/codeascraft/machine-learning-in-content-moderation-at-etsy"},
+      {service: "NAVER Shopping", model: "상품 카테고리 자동 매칭", screen: "상품 등록 카테고리 자동선택", url: "https://blog.tensorflow.org/2019/05/auto-classification-of-naver-shopping.html"},
+      {service: "당근", model: "글쓰기 카테고리, 신고 자동화", screen: "글쓰기 자동분류, 신고 사유 큐", url: "https://medium.com/daangn/%EA%B8%80%EC%93%B0%EA%B8%B0-%EC%B9%B4%ED%85%8C%EA%B3%A0%EB%A6%AC-%EC%B6%94%EC%B2%9C%EB%AA%A8%EB%8D%B8-%EA%B0%9C%EB%B0%9C%ED%95%98%EA%B8%B0-cbbcc43e1f7f"},
+      {service: "eBay", model: "상품 카테고리/상세정보 자동 채움", screen: "상품 이미지 기반 등록 보조", url: "https://innovation.ebayinc.com/stories/magical-listing-tool-harnesses-the-power-of-ai-to-make-selling-on-ebay-faster-easier-and-more-accurate/"}
+    ];
+
+    function priorityClass(priority) {
+      if (priority === "MVP") return "green";
+      if (priority === "2차") return "blue";
+      return "amber";
+    }
+
+    function renderScreenMap() {
+      const target = document.querySelector("#screenMap");
+      target.innerHTML = screenMap.map((item) => `
+        <div class="map-item">
+          <div class="tag-row">
+            <span class="pill ${priorityClass(item.priority)}">${item.priority}</span>
+          </div>
+          <b>${item.area}</b>
+          <div class="small muted">${item.model}</div>
+          <div class="small">${item.ui}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderSources() {
+      const target = document.querySelector("#sourceGrid");
+      target.innerHTML = sources.map((item) => `
+        <div class="source-row">
+          <div>
+            <b>${item.service}</b>
+            <div class="small muted">${item.model}</div>
+          </div>
+          <div>${item.screen}</div>
+          <a class="small" href="${item.url}" target="_blank" rel="noreferrer">출처 열기</a>
+        </div>
+      `).join("");
+    }
+
+    document.querySelectorAll("[data-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+        document.querySelectorAll("[data-tab]").forEach((item) => item.classList.toggle("active", item === button));
+        document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        window.scrollTo({top: 0, behavior: "smooth"});
+      });
+    });
+
+    renderScreenMap();
+    renderSources();
+  </script>
+</body>
+</html>

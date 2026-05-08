@@ -1,4 +1,4 @@
-const layout = (() => {
+ layout = (() => {
 
     let loginMemberId = null;
     let adInterval = 3;

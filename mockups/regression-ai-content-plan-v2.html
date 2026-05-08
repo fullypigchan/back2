@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GlobalGates 회귀형 ML AI 콘텐츠 계획안 v2</title>
+  <style>
+    :root {
+      --bg: #f5f7f8;
+      --panel: #ffffff;
+      --panel-2: #eef4f6;
+      --ink: #14212b;
+      --muted: #65727f;
+      --line: #d8e0e5;
+      --nav: #10222b;
+      --blue: #2563eb;
+      --teal: #148477;
+      --green: #198754;
+      --amber: #b7791f;
+      --red: #c2413a;
+      --violet: #6750a4;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 276px minmax(0, 1fr); }
+
+    aside {
+      position: sticky; top: 0; height: 100vh;
+      background: var(--nav); color: #eef6f8;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 22px 18px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; font-weight: 850; }
+    .brand-mark {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: grid; place-items: center;
+      background: #39a6a3; color: #fff; font-weight: 900;
+    }
+
+    .nav { display: grid; gap: 7px; }
+    .nav button {
+      width: 100%; border: 0; border-radius: 8px;
+      padding: 11px 12px; background: transparent;
+      color: #c8d6de; text-align: left; cursor: pointer; font-size: 14px;
+    }
+    .nav button.active, .nav button:hover {
+      background: rgba(255, 255, 255, 0.11); color: #fff;
+    }
+
+    .side-note {
+      margin-top: 22px; padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #d7e3e8; font-size: 13px; line-height: 1.55;
+    }
+
+    main { min-width: 0; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 4;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(245, 247, 248, 0.94);
+      backdrop-filter: blur(10px);
+    }
+    .topbar h1 { margin: 0; font-size: 22px; line-height: 1.25; }
+    .topbar p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+
+    .toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+    .pill {
+      display: inline-flex; align-items: center;
+      min-height: 28px; padding: 5px 9px;
+      border: 1px solid var(--line); border-radius: 999px;
+      background: #fff; color: var(--muted);
+      font-size: 12px; font-weight: 750; white-space: nowrap;
+    }
+    .pill.blue { color: var(--blue); border-color: #bdd0fb; background: #eef4ff; }
+    .pill.green { color: var(--green); border-color: #acd8bf; background: #eef8f2; }
+    .pill.amber { color: var(--amber); border-color: #e2cb8b; background: #fff7df; }
+    .pill.red { color: var(--red); border-color: #ebb4ae; background: #fff1f0; }
+    .pill.violet { color: var(--violet); border-color: #c9bff0; background: #f4f1ff; }
+
+    .content { padding: 26px 28px 44px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .section { margin-bottom: 24px; }
+    .section h2 { margin: 0 0 12px; font-size: 18px; }
+    .section-lead { margin: -5px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: minmax(0, 1.05fr) minmax(330px, 0.95fr); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      border: 1px solid var(--line); border-radius: 8px;
+      background: var(--panel); box-shadow: var(--shadow); padding: 18px;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 15px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; line-height: 1.5; }
+    .strong { font-weight: 850; }
+
+    .kpi { display: grid; gap: 8px; min-height: 128px; }
+    .kpi strong { font-size: 28px; line-height: 1; }
+
+    .list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .list li { display: flex; align-items: flex-start; gap: 10px; line-height: 1.45; }
+
+    .dot { width: 8px; height: 8px; margin-top: 7px; border-radius: 999px; background: var(--blue); flex: 0 0 auto; }
+    .dot.green { background: var(--green); }
+    .dot.amber { background: var(--amber); }
+    .dot.red { background: var(--red); }
+    .dot.violet { background: var(--violet); }
+
+    .service-map { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .service-card {
+      min-height: 152px;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; padding: 14px;
+      display: grid; gap: 9px;
+    }
+    .service-card b { font-size: 14px; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      display: inline-flex; align-items: center;
+      min-height: 24px; border-radius: 999px;
+      padding: 4px 8px;
+      background: var(--panel-2); color: #42515d;
+      font-size: 12px; font-weight: 750;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; box-shadow: var(--shadow);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left; vertical-align: top;
+      font-size: 13px; line-height: 1.5;
+    }
+    th { background: #edf3f6; color: #40505c; font-weight: 850; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+
+    .model-card { min-height: 252px; display: grid; gap: 11px; }
+    .model-title {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    }
+    .model-title b { font-size: 15px; line-height: 1.35; }
+
+    .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+    .step {
+      min-height: 128px;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; padding: 14px;
+    }
+    .step b { display: block; margin-bottom: 7px; font-size: 13px; }
+
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 750; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; color: var(--ink);
+      padding: 11px 12px; font: inherit; font-size: 14px;
+    }
+    textarea { min-height: 112px; resize: vertical; }
+
+    .btn-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    button.primary, button.secondary, button.ghost {
+      border: 1px solid transparent; border-radius: 8px;
+      padding: 10px 12px; cursor: pointer;
+      font-size: 13px; font-weight: 800;
+    }
+    button.primary { background: var(--blue); color: #fff; }
+    button.secondary { background: #e7eefc; color: #1b4db8; border-color: #c9d8fb; }
+    button.ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+
+    .prediction { display: grid; gap: 12px; }
+    .pred-row {
+      display: grid; grid-template-columns: 156px minmax(0, 1fr);
+      align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--line);
+    }
+    .pred-row:last-child { border-bottom: 0; }
+    .pred-value { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .pred-value .num { font-size: 22px; font-weight: 900; color: var(--ink); }
+    .pred-value .unit { font-size: 13px; color: var(--muted); font-weight: 750; }
+    .pred-value .ci { font-size: 12px; color: var(--muted); }
+
+    .range-bar {
+      height: 14px; margin-top: 8px;
+      position: relative; overflow: visible;
+      border-radius: 999px;
+      background: linear-gradient(90deg,
+        #e6edf0 0%, #e6edf0 18%,
+        #cfe5d8 18%, #cfe5d8 38%,
+        #93c8a9 38%, #93c8a9 62%,
+        #cfe5d8 62%, #cfe5d8 82%,
+        #e6edf0 82%, #e6edf0 100%);
+    }
+    .range-bar .pin {
+      position: absolute; top: -4px;
+      width: 4px; height: 22px;
+      background: var(--blue); border-radius: 2px;
+      box-shadow: 0 0 0 2px #fff;
+    }
+    .range-axis {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .residual-card {
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; padding: 14px;
+    }
+    .residual-grid {
+      display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
+      grid-auto-rows: 22px; gap: 4px; margin-top: 8px;
+    }
+    .residual-grid div { border-radius: 3px; background: #d6e8db; }
+    .residual-grid div.ok { background: #b7d9c2; }
+    .residual-grid div.warn { background: #f1c476; }
+    .residual-grid div.high { background: #d97c75; }
+
+    .metric-row {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px dashed var(--line);
+      font-size: 13px;
+    }
+    .metric-row:last-child { border-bottom: 0; }
+    .metric-row b { font-size: 14px; }
+
+    .queue { display: grid; gap: 12px; }
+    .queue-item {
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; padding: 14px;
+      display: grid; gap: 8px;
+    }
+    .queue-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+
+    .code {
+      margin: 0; padding: 14px; border-radius: 8px;
+      background: #111b24; color: #d9f7df;
+      overflow: auto; font-size: 12px; line-height: 1.55;
+      white-space: pre;
+    }
+
+    .roadmap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .phase {
+      border-left: 4px solid var(--blue); border-radius: 8px;
+      background: #fff; padding: 16px; box-shadow: var(--shadow);
+    }
+    .phase:nth-child(2) { border-left-color: var(--teal); }
+    .phase:nth-child(3) { border-left-color: var(--amber); }
+
+    .bar-chart {
+      display: grid; grid-template-columns: 110px 1fr 80px;
+      gap: 10px; align-items: center;
+      padding: 7px 0; font-size: 13px;
+      border-bottom: 1px dashed var(--line);
+    }
+    .bar-chart:last-child { border-bottom: 0; }
+    .bar-chart .bar {
+      height: 10px; background: #e6edf0;
+      border-radius: 999px; overflow: hidden;
+    }
+    .bar-chart .bar > span { display: block; height: 100%; background: var(--blue); }
+    .bar-chart .bar > span.green { background: var(--green); }
+    .bar-chart .bar > span.amber { background: var(--amber); }
+    .bar-chart .bar > span.red { background: var(--red); }
+    .bar-chart .bar > span.violet { background: var(--violet); }
+    .bar-chart .num { text-align: right; font-weight: 800; }
+
+    @media (max-width: 1100px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; }
+      .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid.two, .grid.three, .grid.four,
+      .service-map, .flow, .roadmap { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 620px) {
+      .content, .topbar { padding-left: 16px; padding-right: 16px; }
+      aside { padding: 18px 14px; }
+      .nav { grid-template-columns: 1fr; }
+      .pred-row { grid-template-columns: 1fr; }
+      .queue-head { flex-direction: column; }
+      .service-card { min-height: 0; }
+      .residual-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">GG</div>
+        <div>
+          <div>GlobalGates</div>
+          <div class="small muted">Regression ML Plan v2</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="계획안 탭">
+        <button class="active" data-tab="overview">조사 요약</button>
+        <button data-tab="services">서비스 스캔</button>
+        <button data-tab="cases">대기업 사례</button>
+        <button data-tab="models">모델 카탈로그</button>
+        <button data-tab="mockup">화면 목업</button>
+        <button data-tab="pipeline">FastAPI 연동</button>
+        <button data-tab="validation">검증 계획</button>
+        <button data-tab="sources">출처</button>
+      </nav>
+      <div class="side-note">
+        이 문서는 LLM/외부 API가 아니라 GlobalGates DB의 데이터를 주피터 노트북에서 회귀 학습한 뒤, FastAPI로 서빙해 Spring Boot 화면에 숫자 예측을 직접 심는 계획안입니다 (v2: 시세·ETA·광고·견적·매출·이탈 다중 회귀 자리 매핑).
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1>GlobalGates 회귀형 ML AI 콘텐츠 계획안 v2</h1>
+          <p>상품 시세·거래완료 ETA·광고 클릭/도달·견적 응답시간·게시글 도달·매출·이탈일까지 "숫자가 보이는 자리"만 골라 회귀로 채우는 목업</p>
+        </div>
+        <div class="toolbar">
+          <span class="pill blue">회귀 전용</span>
+          <span class="pill green">Jupyter → FastAPI</span>
+          <span class="pill amber">분류 제외</span>
+          <span class="pill violet">c_regression 기반</span>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- ============ 조사 요약 ============ -->
+        <section id="overview" class="panel active">
+          <div class="section">
+            <h2>핵심 방향</h2>
+            <p class="section-lead">
+              회귀는 라벨을 고르는 게 아니라 <b>연속된 숫자</b>(가격·일수·클릭수·금액·확률점수)를 맞히는 모델입니다.
+              GlobalGates의 상품 거래·견적·광고·게시글·결제 흐름에서 사용자가 "얼마? 며칠? 몇 명?"을 궁금해하는 자리에 숫자를 표시해, 입력 자체가 보조 정보가 되도록 설계했습니다.
+            </p>
+            <div class="grid four">
+              <div class="card kpi">
+                <span class="pill blue">서비스 스캔</span>
+                <strong>11개</strong>
+                <span class="muted">상품·견적·광고·게시글·알림·결제·구독·회의·관리자·뉴스·커뮤니티 회귀 자리</span>
+              </div>
+              <div class="card kpi">
+                <span class="pill green">외부 사례</span>
+                <strong>13개</strong>
+                <span class="muted">당근·Aliexpress·Amazon·Airbnb·Uber·Zillow·YouTube·Pinterest·LinkedIn·Coupang 등</span>
+              </div>
+              <div class="card kpi">
+                <span class="pill amber">모델 후보</span>
+                <strong>10개</strong>
+                <span class="muted">시세·ETA·견적응답·광고클릭·도달·매출·이탈일·CPC·회의시간·SLA</span>
+              </div>
+              <div class="card kpi">
+                <span class="pill red">제외</span>
+                <strong>분류·LLM</strong>
+                <span class="muted">신고 라벨링·텍스트 생성·외부 API 호출형은 분류 계획안 또는 별도 문서</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>우리 사이트에 먼저 넣을 회귀 AI 콘텐츠</h2>
+            <div class="grid three">
+              <div class="card">
+                <h3>1. 상품 등록 보조</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span><b>적정 등록가 추천</b>: 카테고리·재고·지역·과거 거래가 기반 권장가와 신뢰구간 (당근 시세 모티브)</span></li>
+                  <li><span class="dot green"></span><span><b>거래완료 예상일</b>: "이 가격대·카테고리·지역은 평균 3.4일 안에 마감" (배송지연 LGBM 응용)</span></li>
+                  <li><span class="dot amber"></span><span><b>예상 조회수/문의수</b>: 이미지 수·태그·본문 길이 기반 입력 보조 카드</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>2. 견적/광고 의사결정 보조</h3>
+                <ul class="list">
+                  <li><span class="dot violet"></span><span><b>견적 응답 예상시간</b>: 카테고리·지역·전문가 풀 기반 "평균 4시간 내 응답"</span></li>
+                  <li><span class="dot"></span><span><b>광고 예상 클릭/도달</b>: 예산·헤드라인·랜딩 도메인 기반 회귀 → <code>AdvertisementVO.impressionEstimate</code> 자리에 직접 표시</span></li>
+                  <li><span class="dot green"></span><span><b>예산 소진 예상일</b>: 일평균 클릭/CPC 회귀로 "남은 예산 6.8일 안에 소진"</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>3. 운영/리텐션 보조</h3>
+                <ul class="list">
+                  <li><span class="dot red"></span><span><b>구독 이탈까지 예상일</b>: 최근 활동·결제 이력 기반 운영자 대시보드</span></li>
+                  <li><span class="dot amber"></span><span><b>다음 7일 매출 예측</b>: 판매자/광고주 마이페이지에 라인차트</span></li>
+                  <li><span class="dot green"></span><span><b>신고 SLA 예측</b>: 누적·심각도·담당자 부하 기반 "예상 처리 22분"</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>회귀라서 가능한 형태 (분류와 차이)</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>기능</th>
+                    <th>분류로는 못 하던 것</th>
+                    <th>회귀가 출력하는 숫자</th>
+                    <th>사용자에게 보이는 콘텐츠</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>상품 시세</td>
+                    <td>"저가/정상/고가" 띠 배지밖에 안 됨</td>
+                    <td>예: 14,200원, 90% CI 12,500~16,300</td>
+                    <td>등록 폼 추천가 표시, 시세 분포 막대</td>
+                  </tr>
+                  <tr>
+                    <td>거래/배송</td>
+                    <td>"빠름/보통/느림" 같은 거친 라벨만 가능</td>
+                    <td>예: 3.4일 (±0.6일)</td>
+                    <td>상품 카드, 결제 직전, 견적 카드 ETA</td>
+                  </tr>
+                  <tr>
+                    <td>광고/도달</td>
+                    <td>광고 정책 OK/NG 분류만 가능</td>
+                    <td>예상 클릭 1,820 · 예상 노출 41,000</td>
+                    <td>광고 작성 화면 실시간 시뮬레이션 차트</td>
+                  </tr>
+                  <tr>
+                    <td>견적</td>
+                    <td>견적 종류만 분류 가능</td>
+                    <td>예상 응답시간(분), 참고 견적가(원)</td>
+                    <td>견적 요청 화면, 전문가 카드 정렬 점수</td>
+                  </tr>
+                  <tr>
+                    <td>이탈/리텐션</td>
+                    <td>이탈 1/0 라벨 정도만 가능</td>
+                    <td>예: 이탈까지 14일 (±3일)</td>
+                    <td>관리자 코호트, 케어 푸시 트리거</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>학습용으로 바로 쓸 수 있는 c_regression 데이터셋</h2>
+            <div class="grid two">
+              <div class="card">
+                <h3>현실에 가장 가까운 매핑</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span><b>09_logistics_delivery_time_nonlinear.csv</b> → 거래완료/배송 ETA 회귀 (이미 학습된 <code>delivery_time_lgbm_model.pkl</code> 시드 활용)</span></li>
+                  <li><span class="dot green"></span><span><b>01_trade_freight_linear.csv</b> → 견적·물류비 회귀 (<code>freight_cost_linear_model.pkl</code>)</span></li>
+                  <li><span class="dot amber"></span><span><b>03_retail_revenue_linear.csv</b> → 판매자/광고주 매출 예측</span></li>
+                  <li><span class="dot violet"></span><span><b>07_real_estate_appraisal_nonlinear.csv</b> → 시세 회귀의 모범 (Zestimate 흐름 차용)</span></li>
+                  <li><span class="dot red"></span><span><b>06_insurance_premium_nonlinear.csv</b> → 광고 단가/프리미엄 가격 회귀로 변환 가능</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>실제 사이트 DB와 결합 시 추가 피처</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span>tbl_post: 본문 길이, 첨부 이미지 수, 태그 수, 카테고리, 지역, 작성자 활동량</span></li>
+                  <li><span class="dot green"></span><span>tbl_post_product: 카테고리, 가격, 재고, 등록 시점, 카테고리별 평균/분산</span></li>
+                  <li><span class="dot amber"></span><span>tbl_advertisement: 예산, 헤드라인 길이, 랜딩 도메인, 시작시간, 업종</span></li>
+                  <li><span class="dot violet"></span><span>tbl_estimation: 카테고리, 지역, 데드라인, 첨부, 전문가 풀 크기</span></li>
+                  <li><span class="dot red"></span><span>tbl_payment / tbl_subscription: 결제 주기, 최근 활동, 누적 사용 일수</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 서비스 스캔 ============ -->
+        <section id="services" class="panel">
+          <div class="section">
+            <h2>GlobalGates 서비스별 회귀 자리</h2>
+            <p class="section-lead">컨트롤러·템플릿·VO 기준으로 "사용자가 숫자를 궁금해하는 자리"만 추렸습니다. 라벨/위험도/카테고리는 분류 계획안에서 다룹니다.</p>
+            <div class="service-map" id="serviceMap"></div>
+          </div>
+
+          <div class="section">
+            <h2>회귀에 좋은 신호 (DB → 피처)</h2>
+            <div class="grid two">
+              <div class="card">
+                <h3>거래/상품/광고 신호</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span><b>가격·재고</b>: PostProductVO.productPrice, productStock</span></li>
+                  <li><span class="dot green"></span><span><b>광고 예산</b>: AdvertisementVO.budget, impressionEstimate (예측 결과 저장 자리)</span></li>
+                  <li><span class="dot amber"></span><span><b>지역</b>: PostVO.location, MemberVO.memberRegion / memberCountry</span></li>
+                  <li><span class="dot violet"></span><span><b>견적</b>: EstimationVO.deadLine, location, 카테고리</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>활동/시간 신호</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span><b>최근 활동</b>: MemberVO.lastLoginAt, 게시글 수, 채팅 수</span></li>
+                  <li><span class="dot green"></span><span><b>관심도</b>: tbl_bookmark, tbl_follow, tbl_post_like 누적</span></li>
+                  <li><span class="dot amber"></span><span><b>결제 이력</b>: tbl_payment 성공/실패 빈도, 구독 갱신 간격</span></li>
+                  <li><span class="dot red"></span><span><b>운영 부하</b>: tbl_report 처리 큐 길이, 담당자 수</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 대기업 사례 ============ -->
+        <section id="cases" class="panel">
+          <div class="section">
+            <h2>대기업 사이트의 회귀형 ML 사례</h2>
+            <p class="section-lead">화면에 "숫자"가 직접 보이거나, 랭킹/입찰처럼 회귀 출력이 핵심인 사례만 정리했습니다. LLM/생성형 답변 기능은 제외했습니다.</p>
+            <div class="table-wrap">
+              <table id="caseTable">
+                <thead>
+                  <tr>
+                    <th>기업/서비스</th>
+                    <th>회귀형 ML이 들어간 AI 콘텐츠</th>
+                    <th>예측 타겟 (숫자)</th>
+                    <th>GlobalGates 적용 위치</th>
+                    <th>출처 식별자</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 모델 카탈로그 ============ -->
+        <section id="models" class="panel">
+          <div class="section">
+            <h2>GlobalGates 회귀 모델 카탈로그</h2>
+            <p class="section-lead">사이트의 화면 단위로 작은 회귀기를 여러 개 띄우는 구조입니다. 수업에서 배운 LinearRegression / Ridge / DecisionTreeRegressor / GradientBoosting / LGBM 범위에서 시작 가능합니다.</p>
+            <div class="grid three" id="modelGrid"></div>
+          </div>
+
+          <div class="section">
+            <h2>우선순위 (3주차 기준)</h2>
+            <div class="roadmap">
+              <div class="phase">
+                <h3>1차 MVP</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span>상품 적정가 회귀 (price_recommender)</span></li>
+                  <li><span class="dot green"></span><span>거래완료 ETA 회귀 (deal_eta_regressor)</span></li>
+                  <li><span class="dot amber"></span><span>광고 예상 클릭/노출 회귀 (ad_performance_regressor)</span></li>
+                </ul>
+              </div>
+              <div class="phase">
+                <h3>2차 확장</h3>
+                <ul class="list">
+                  <li><span class="dot violet"></span><span>견적 응답시간 회귀 (estimation_response_eta)</span></li>
+                  <li><span class="dot"></span><span>게시글 예상 도달/조회수 회귀 (post_reach_regressor)</span></li>
+                  <li><span class="dot green"></span><span>알림 클릭 확률 회귀 (notification_ctr_regressor)</span></li>
+                </ul>
+              </div>
+              <div class="phase">
+                <h3>3차 운영 고도화</h3>
+                <ul class="list">
+                  <li><span class="dot red"></span><span>구독 이탈까지 예상일 (churn_days_regressor)</span></li>
+                  <li><span class="dot amber"></span><span>판매자 7일 매출 예측 (revenue_forecaster)</span></li>
+                  <li><span class="dot violet"></span><span>신고 SLA 예측 (report_sla_regressor)</span></li>
+                  <li><span class="dot"></span><span>영상회의 길이 예측 (meeting_duration_regressor)</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 화면 목업 ============ -->
+        <section id="mockup" class="panel">
+          <div class="section">
+            <h2>상품 등록 화면 (시세 + 거래 ETA)</h2>
+            <p class="section-lead">사용자가 "AI"를 명시적으로 호출하지 않습니다. 폼 작성 도중 디바운스로 회귀 결과가 자동으로 카드에 붙는 형태입니다.</p>
+            <div class="grid two">
+              <div class="card">
+                <h3>등록 폼</h3>
+                <div class="grid">
+                  <label>상품명
+                    <input value="베트남산 친환경 식품 포장재 100매">
+                  </label>
+                  <label>카테고리
+                    <select>
+                      <option>산업재 &gt; 포장재 &gt; 식품용</option>
+                      <option>산업재 &gt; 포장재 &gt; 공산품용</option>
+                    </select>
+                  </label>
+                  <div class="grid two">
+                    <label>희망가 (원)
+                      <input value="15500" type="number">
+                    </label>
+                    <label>재고
+                      <input value="120" type="number">
+                    </label>
+                  </div>
+                  <label>지역
+                    <input value="인천광역시 중구">
+                  </label>
+                  <div class="btn-row">
+                    <button class="primary" type="button">예측 다시 받기</button>
+                    <button class="secondary" type="button">추천가로 적용</button>
+                    <button class="ghost" type="button">관리자 검토 보내기</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>FastAPI 회귀 결과가 화면에 붙는 모습</h3>
+                <div class="prediction">
+                  <div class="pred-row">
+                    <b>적정 등록가</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">14,200</span>
+                        <span class="unit">원</span>
+                        <span class="ci">90% CI 12,500 ~ 16,300</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:54%"></span></div>
+                      <div class="range-axis"><span>10,000</span><span>14,200</span><span>18,000</span></div>
+                    </div>
+                  </div>
+                  <div class="pred-row">
+                    <b>거래완료 예상</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">3.4</span>
+                        <span class="unit">일</span>
+                        <span class="ci">±0.6일</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:38%"></span></div>
+                      <div class="range-axis"><span>1일</span><span>3.4일</span><span>10일</span></div>
+                    </div>
+                  </div>
+                  <div class="pred-row">
+                    <b>예상 조회수 (24h)</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">872</span>
+                        <span class="unit">회</span>
+                        <span class="ci">±112</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:62%"></span></div>
+                      <div class="range-axis"><span>200</span><span>872</span><span>1,800</span></div>
+                    </div>
+                  </div>
+                  <div class="pred-row">
+                    <b>예상 문의수</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">7.2</span>
+                        <span class="unit">건</span>
+                        <span class="ci">±2건</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:48%"></span></div>
+                      <div class="range-axis"><span>0</span><span>7</span><span>20</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>광고 작성 화면 (예상 클릭/노출/CPC)</h2>
+            <div class="grid two">
+              <div class="card">
+                <h3>광고 시뮬레이션 카드</h3>
+                <div class="bar-chart">
+                  <span class="muted">예상 노출</span>
+                  <div class="bar"><span style="width:72%"></span></div>
+                  <span class="num">41,200</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">예상 클릭</span>
+                  <div class="bar"><span class="green" style="width:46%"></span></div>
+                  <span class="num">1,820</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">예상 CTR</span>
+                  <div class="bar"><span class="amber" style="width:36%"></span></div>
+                  <span class="num">4.4%</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">예상 CPC</span>
+                  <div class="bar"><span class="violet" style="width:28%"></span></div>
+                  <span class="num">412원</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">예산 소진</span>
+                  <div class="bar"><span class="red" style="width:88%"></span></div>
+                  <span class="num">6.8일</span>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>광고주에게 주는 운영 코멘트</h3>
+                <ul class="list">
+                  <li><span class="dot green"></span><span><b>헤드라인 길이</b>를 38자 → 22자로 줄이면 예상 CTR이 4.4% → 5.1%로 개선될 것으로 예측</span></li>
+                  <li><span class="dot amber"></span><span><b>랜딩 도메인 신뢰도</b>가 평균 대비 낮음. 1차 회귀 점수 -0.3 → 클릭당 비용 +14% 가능</span></li>
+                  <li><span class="dot"></span><span><b>예상 노출/클릭</b>은 회귀 결과이지 보장값이 아님. 입찰가/노출 경쟁에 따라 달라짐</span></li>
+                  <li><span class="dot violet"></span><span>이 카드는 <code>AdvertisementVO.impressionEstimate</code> 자리를 회귀 결과로 채움 (현재 들어 있는 정수 필드)</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>견적 요청 화면 (응답시간/견적가)</h2>
+            <div class="grid two">
+              <div class="card">
+                <h3>요청자 화면</h3>
+                <div class="prediction">
+                  <div class="pred-row">
+                    <b>전문가 응답 ETA</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">3시간 42분</span>
+                        <span class="ci">90% CI 1h ~ 9h</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:32%"></span></div>
+                      <div class="range-axis"><span>30분</span><span>3h 42m</span><span>24h</span></div>
+                    </div>
+                  </div>
+                  <div class="pred-row">
+                    <b>예상 견적가</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">1,820,000</span>
+                        <span class="unit">원</span>
+                        <span class="ci">±240,000</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:50%"></span></div>
+                      <div class="range-axis"><span>1.0M</span><span>1.82M</span><span>2.6M</span></div>
+                    </div>
+                  </div>
+                  <div class="pred-row">
+                    <b>응답 전문가 수</b>
+                    <div>
+                      <div class="pred-value">
+                        <span class="num">5.4</span>
+                        <span class="unit">명</span>
+                        <span class="ci">±1.2명</span>
+                      </div>
+                      <div class="range-bar"><span class="pin" style="left:44%"></span></div>
+                      <div class="range-axis"><span>1</span><span>5</span><span>12</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>이게 왜 중요한가</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span>현재 EstimationVO에는 deadLine만 있고 "언제 답이 올지"가 사용자에게 안 보임 → 이탈 원인</span></li>
+                  <li><span class="dot green"></span><span>응답 ETA가 너무 길게 예측되면 → 데드라인 짧게 잡지 말라는 코칭 카드</span></li>
+                  <li><span class="dot amber"></span><span>예상 견적가는 표시용. 실제 견적은 전문가가 보내는 값이 우선 — "참고치"로만 표기</span></li>
+                  <li><span class="dot violet"></span><span>전문가 카드 정렬에는 응답 ETA의 역수를 점수로 사용 (랭킹 회귀)</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>운영자 대시보드 (이탈/매출/SLA)</h2>
+            <div class="grid two">
+              <div class="card">
+                <h3>리텐션/매출 카드</h3>
+                <div class="bar-chart">
+                  <span class="muted">7일 매출 예측</span>
+                  <div class="bar"><span style="width:64%"></span></div>
+                  <span class="num">12.4M원</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">14일 이탈 위험</span>
+                  <div class="bar"><span class="red" style="width:48%"></span></div>
+                  <span class="num">218명</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">평균 신고 SLA</span>
+                  <div class="bar"><span class="amber" style="width:34%"></span></div>
+                  <span class="num">22분</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">평균 회의 길이</span>
+                  <div class="bar"><span class="violet" style="width:42%"></span></div>
+                  <span class="num">28분</span>
+                </div>
+                <div class="bar-chart">
+                  <span class="muted">이번 주 활성 글</span>
+                  <div class="bar"><span class="green" style="width:58%"></span></div>
+                  <span class="num">1,348개</span>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>이탈 임박 큐 (회귀 결과 정렬)</h3>
+                <div class="queue">
+                  <div class="queue-item">
+                    <div class="queue-head">
+                      <b>전문가 #41 — 미응답 누적</b>
+                      <span class="pill red">이탈까지 4.1일</span>
+                    </div>
+                    <div class="small muted">최근 7일 응답률 12%, 평균 응답시간 +220% 증가. 케어 푸시 후보.</div>
+                    <div class="tag-row">
+                      <span class="tag">churn_days</span><span class="tag">low_response_rate</span><span class="tag">care_push</span>
+                    </div>
+                  </div>
+                  <div class="queue-item">
+                    <div class="queue-head">
+                      <b>광고주 #128 — 예산 소진 임박</b>
+                      <span class="pill amber">소진 1.6일</span>
+                    </div>
+                    <div class="small muted">현재 페이스 유지 시 캠페인이 1.6일 안에 종료. 추가 예산 안내 카드 후보.</div>
+                    <div class="tag-row">
+                      <span class="tag">budget_burn</span><span class="tag">upsell</span>
+                    </div>
+                  </div>
+                  <div class="queue-item">
+                    <div class="queue-head">
+                      <b>판매자 #74 — 매출 하락 예측</b>
+                      <span class="pill violet">7일 매출 -28%</span>
+                    </div>
+                    <div class="small muted">동일 카테고리 평균 대비 28% 낮은 매출이 예상됨. 가격 회귀 권장가와 -12% 괴리.</div>
+                    <div class="tag-row">
+                      <span class="tag">revenue_forecast</span><span class="tag">price_gap</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ FastAPI 연동 ============ -->
+        <section id="pipeline" class="panel">
+          <div class="section">
+            <h2>Jupyter → FastAPI → Spring Boot 연동 구조</h2>
+            <p class="section-lead">작업 폴더는 사용자가 지정한 <code>/Users/yoonchan/Desktop/gb/ai/machine-learning/c_regression</code> 기준입니다. 이미 학습된 <code>delivery_time_lgbm_model.pkl</code>과 <code>freight_cost_linear_model.pkl</code>을 1차 MVP의 ETA/시세 모델 시드로 활용할 수 있습니다.</p>
+            <div class="flow">
+              <div class="step">
+                <b>1. DB 추출</b>
+                <span class="small muted">Spring DB에서 게시글, 상품, 광고, 견적, 결제, 활동 로그를 CSV로 추출. 시간 컬럼은 UTC 기준.</span>
+              </div>
+              <div class="step">
+                <b>2. 노트북 학습</b>
+                <span class="small muted">EDA → train/val/test split → 결측 처리 → StandardScaler/log1p → Linear/Ridge/Tree/LGBM 비교 → 잔차 점검</span>
+              </div>
+              <div class="step">
+                <b>3. 모델 저장</b>
+                <span class="small muted"><code>joblib.dump</code>로 pipeline, feature 순서, target transform, metrics를 한 폴더에 묶어 저장</span>
+              </div>
+              <div class="step">
+                <b>4. FastAPI 서빙</b>
+                <span class="small muted">모델 이름과 입력 피처를 받아 <b>예측값 + 신뢰구간 + topFeatures</b>를 반환</span>
+              </div>
+              <div class="step">
+                <b>5. Spring 적용</b>
+                <span class="small muted">상품/광고/견적/관리자 화면에 RestClient로 호출 후 카드/배지로 렌더링. 결과 캐시 30초.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>FastAPI 응답 설계 (분류와 다른 부분)</h2>
+            <div class="grid two">
+              <pre class="code">POST /regressors/price-recommender/predict
+{
+  "categoryId": 1041,
+  "regionCode": "KR-INC-CJ",
+  "stock": 120,
+  "imageCount": 4,
+  "titleLength": 18,
+  "contentLength": 312,
+  "memberTrustScore": 0.74,
+  "source": "product_write"
+}</pre>
+              <pre class="code">{
+  "regressor": "price_recommender",
+  "version": "2026-05-06",
+  "prediction": 14200,
+  "unit": "KRW",
+  "interval": {
+    "lower": 12500,
+    "upper": 16300,
+    "level": 0.9
+  },
+  "topFeatures": [
+    {"name": "category_median_price", "weight": 0.42},
+    {"name": "stock", "weight": -0.18},
+    {"name": "image_count", "weight": 0.11}
+  ],
+  "uiAction": "show_price_band",
+  "modelType": "Ridge",
+  "metrics": {"MAE": 1180, "RMSE": 1620, "R2": 0.78}
+}</pre>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>Spring Boot 적용 지점</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Spring 엔드포인트</th>
+                    <th>호출 시점</th>
+                    <th>FastAPI 회귀 모델</th>
+                    <th>UI/DB 반영</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>/api/mypage/products</code></td>
+                    <td>상품 등록 폼 디바운스 (1초)</td>
+                    <td>price_recommender, deal_eta_regressor, post_reach_regressor</td>
+                    <td>등록 카드에 추천가/CI/ETA/예상조회수 표시</td>
+                  </tr>
+                  <tr>
+                    <td><code>/api/main/posts/write</code></td>
+                    <td>본문 변경 시</td>
+                    <td>post_reach_regressor</td>
+                    <td>예상 조회수/좋아요 미리보기. tbl_post_temp에 저장</td>
+                  </tr>
+                  <tr>
+                    <td><code>/api/ad/write</code></td>
+                    <td>광고 작성 변경 시</td>
+                    <td>ad_performance_regressor (impr/click/CPC), ad_burn_days_regressor</td>
+                    <td>예상 노출/클릭/CTR/CPC/소진일 카드. AdvertisementVO.impressionEstimate에 저장</td>
+                  </tr>
+                  <tr>
+                    <td><code>/api/estimations/write</code></td>
+                    <td>견적 요청 작성 시</td>
+                    <td>estimation_response_eta, estimation_price_regressor</td>
+                    <td>응답 ETA, 참고 견적가, 응답 전문가 수 표시</td>
+                  </tr>
+                  <tr>
+                    <td><code>/api/notifications/list</code></td>
+                    <td>알림 목록 정렬</td>
+                    <td>notification_ctr_regressor</td>
+                    <td>회귀 점수 내림차순 정렬 (랭킹 회귀)</td>
+                  </tr>
+                  <tr>
+                    <td><code>/api/admin/dashboard</code></td>
+                    <td>대시보드 조회 시</td>
+                    <td>revenue_forecaster, churn_days_regressor, report_sla_regressor</td>
+                    <td>매출/이탈/SLA KPI 카드, 위험 큐 정렬</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>FastAPI 디렉터리 권장 구조</h2>
+            <pre class="code">c_regression/
+├── notebooks/
+│   ├── 01_dataset_export.ipynb        # DB → CSV
+│   ├── 02_train_price_recommender.ipynb
+│   ├── 03_train_deal_eta.ipynb        # 09_logistics_delivery_time 응용
+│   ├── 04_train_ad_performance.ipynb
+│   └── 05_evaluate_all.ipynb          # MAE/RMSE/R²/MAPE 비교표
+├── models/
+│   ├── price_recommender/
+│   │   ├── pipeline.pkl
+│   │   ├── feature_order.json
+│   │   └── metrics.json
+│   ├── deal_eta_regressor/
+│   ├── ad_performance_regressor/
+│   └── model_registry.json            # 이름·버전·경로·threshold·metrics
+└── app/
+    ├── main.py                        # FastAPI app
+    ├── schemas.py                     # Pydantic 입출력
+    ├── loaders.py                     # joblib 로딩 + LRU 캐시
+    └── routers/
+        ├── price.py
+        ├── eta.py
+        └── ad.py</pre>
+          </div>
+        </section>
+
+        <!-- ============ 검증 계획 ============ -->
+        <section id="validation" class="panel">
+          <div class="section">
+            <h2>검증 기준</h2>
+            <p class="section-lead">분류는 confusion matrix·F1 위주였지만, 회귀는 평균오차(MAE)·제곱오차(RMSE)·결정계수(R²)·상대오차(MAPE)·잔차 분포로 검증합니다. 화면에 직접 숫자가 보이는 만큼 "체감 오차"가 곧 신뢰 지표입니다.</p>
+            <div class="grid three">
+              <div class="card">
+                <h3>오프라인 지표</h3>
+                <div class="metric-row"><span>MAE (평균 절대오차)</span><b>가격: ≤ 1,500원</b></div>
+                <div class="metric-row"><span>RMSE</span><b>가격: ≤ 2,200원</b></div>
+                <div class="metric-row"><span>R²</span><b>≥ 0.75</b></div>
+                <div class="metric-row"><span>MAPE</span><b>≤ 14%</b></div>
+                <div class="metric-row"><span>잔차 분포</span><b>대칭, 이상값 컷오프 ±3σ</b></div>
+              </div>
+              <div class="card">
+                <h3>운영 검증</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span>화면 노출 전 <b>shadow mode</b>로 1주 운영자 KPI와 비교</span></li>
+                  <li><span class="dot green"></span><span>가격/ETA처럼 사용자에게 직접 보이는 모델은 <b>신뢰구간</b> 함께 표시</span></li>
+                  <li><span class="dot amber"></span><span>이탈/매출처럼 행동을 트리거하는 모델은 <b>임계값 + 휴먼 인 더 루프</b></span></li>
+                  <li><span class="dot red"></span><span>실데이터 분포 변화 감시: 일별 PSI/KS 모니터링, 임계 시 재학습 알림</span></li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>사용자 효과 KPI</h3>
+                <ul class="list">
+                  <li><span class="dot"></span><span>상품 등록 이탈률 ↓ (시세 카드 노출 후)</span></li>
+                  <li><span class="dot green"></span><span>추천가 적용률 (등록가가 추천 CI 안에 들어오는 비율)</span></li>
+                  <li><span class="dot amber"></span><span>실제 거래완료일과 ETA의 평균 절대오차 (체감 정확도)</span></li>
+                  <li><span class="dot violet"></span><span>견적 요청 → 응답 도달 시간 단축률</span></li>
+                  <li><span class="dot red"></span><span>이탈/매출 KPI 카드 클릭률, 케어 푸시 전환율</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>잔차 점검 시각화 (price_recommender 예시)</h2>
+            <div class="grid two">
+              <div class="residual-card">
+                <div class="small muted">예측가 구간별 잔차 비율 (회색=정상, 황색=경계, 적색=이상)</div>
+                <div class="residual-grid" id="residualGrid"></div>
+                <div class="small muted" style="margin-top:8px">
+                  대부분 회색이지만 고가 구간에서 황색이 늘어나는 경향 → 고가 상품에는 별도 모델 또는 log1p 변환 검토.
+                </div>
+              </div>
+              <div class="card">
+                <h3>학습 노트북 산출물 체크리스트</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>파일</th>
+                        <th>내용</th>
+                        <th>왜 필요한가</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>01_dataset_export.ipynb</code></td>
+                        <td>tbl_post / tbl_post_product / tbl_advertisement / tbl_estimation을 CSV로 추출, 분포 확인</td>
+                        <td>실데이터 기반이라는 근거</td>
+                      </tr>
+                      <tr>
+                        <td><code>02_train_*.ipynb</code></td>
+                        <td>전처리, train/val/test split, Linear→Ridge→Tree→LGBM 비교, joblib 저장</td>
+                        <td>수업에서 배운 회귀 학습 흐름</td>
+                      </tr>
+                      <tr>
+                        <td><code>05_evaluate_all.ipynb</code></td>
+                        <td>MAE/RMSE/R²/MAPE 비교표, 잔차 그림, feature importance</td>
+                        <td>FastAPI에 심기 전 검증 근거</td>
+                      </tr>
+                      <tr>
+                        <td><code>model_registry.json</code></td>
+                        <td>모델 이름, 버전, 입력 피처, target transform, metrics</td>
+                        <td>Spring/FastAPI 연동 시 모델 관리</td>
+                      </tr>
+                      <tr>
+                        <td><code>app/main.py</code></td>
+                        <td>FastAPI 라우터와 모델 로딩 + LRU 캐시</td>
+                        <td>Spring Boot에서 HTTP로 호출</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 출처 ============ -->
+        <section id="sources" class="panel">
+          <div class="section">
+            <h2>조사 출처</h2>
+            <p class="section-lead">목업에 반영한 회귀 사례의 공식/엔지니어링 출처입니다. 일부 사례는 분류·생성 기능도 함께 다루지만, 본 계획안에는 회귀 출력에 해당하는 부분만 반영했습니다.</p>
+            <div class="table-wrap">
+              <table id="sourceTable">
+                <thead>
+                  <tr>
+                    <th>서비스</th>
+                    <th>핵심 근거</th>
+                    <th>링크</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="small muted" style="margin-top:10px">
+              본 문서의 외부 사례는 공개된 엔지니어링 블로그·뉴스룸의 통상적 설명에 기반한 요약이며, 모델 구조나 정확도 수치는 회사별 비공개입니다. 적용은 GlobalGates 자체 데이터로 학습한 결과를 기준으로 합니다.
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const services = [
+      {name: "상품 등록/거래", routes: "/api/mypage/products, /api/explore/products", regressors: ["price_recommender", "deal_eta_regressor", "post_reach_regressor"], data: "tbl_post_product, tbl_post, tbl_category"},
+      {name: "광고", routes: "/api/ad/write, list, detail", regressors: ["ad_impression", "ad_click", "ad_cpc", "ad_burn_days"], data: "tbl_advertisement, file_advertisement"},
+      {name: "견적", routes: "/api/estimations/write, experts, products", regressors: ["estimation_response_eta", "estimation_price"], data: "tbl_estimation, tbl_estimation_tag"},
+      {name: "메인 피드/게시글", routes: "/api/main/posts, replies, likes", regressors: ["post_reach_regressor", "reply_volume_regressor"], data: "tbl_post, tbl_post_like, tbl_post_view"},
+      {name: "알림", routes: "/api/notifications", regressors: ["notification_ctr_regressor"], data: "tbl_notification, member_activity"},
+      {name: "결제/구독", routes: "/api/payment, /api/subscriptions", regressors: ["churn_days_regressor", "ltv_regressor"], data: "tbl_payment, tbl_subscription"},
+      {name: "관리자 대시보드", routes: "/api/admin/dashboard, reports, stats", regressors: ["revenue_forecaster", "report_sla_regressor", "active_post_forecaster"], data: "tbl_post, tbl_report, tbl_payment"},
+      {name: "영상/회의", routes: "/api/video-chat/session, recording", regressors: ["meeting_duration_regressor"], data: "tbl_video_chat, file_recording"},
+      {name: "친구/팔로우", routes: "/api/friends, /api/follows", regressors: ["follow_back_probability_regressor"], data: "tbl_follow, tbl_member, activity"},
+      {name: "탐색/검색", routes: "/api/explore/search", regressors: ["query_engagement_regressor"], data: "tbl_search_history, view_post_feed"},
+      {name: "뉴스", routes: "/api/news/likes, replies", regressors: ["news_engagement_regressor"], data: "news, news_like, news_reply"}
+    ];
+
+    const cases = [
+      {company: "당근마켓 (시세)", content: "동일 카테고리·지역 거래 데이터를 학습해 상품 등록·상세 화면에 시세 정보 노출", target: "추천가(원), 가격 분포 통계", apply: "상품 등록 화면 추천가 카드", source: "당근 테크 블로그 / 시세 안내"},
+      {company: "당근마켓 (배송 ETA)", content: "택배·동네배송 시점 예측을 거래자 화면에 표시", target: "배송 소요 시간(시간/일)", apply: "거래완료 ETA 카드", source: "당근 테크 블로그"},
+      {company: "Aliexpress / Amazon", content: "Estimated Delivery Date를 상품 카드와 결제 화면에 표시. ML 회귀로 일자 산출", target: "도착일까지 남은 일수", apply: "상품 카드 / 결제 직전 ETA", source: "Amazon Science / Aliexpress Help"},
+      {company: "Doordash / Uber Eats", content: "주문 후 도착 ETA, 픽업 ETA를 회귀로 예측해 화면에 표기", target: "ETA(분)", apply: "거래완료 ETA, 견적 응답 ETA", source: "Doordash Engineering"},
+      {company: "Uber / Lyft", content: "ride ETA, surge multiplier 예측. 사용자 화면에 분 단위로 노출", target: "도착 분, surge 배율", apply: "견적 응답 ETA, 인기 카테고리 보정 계수", source: "Uber Engineering"},
+      {company: "Airbnb (Smart Pricing)", content: "호스트에게 일자별 권장 숙박료를 회귀로 추천", target: "1박 가격(원)", apply: "상품 적정 등록가, 견적가 참고치", source: "Airbnb Engineering"},
+      {company: "Zillow Zestimate", content: "주택 특성·지역·시장 데이터를 학습해 추정 시세를 표시", target: "추정가(원), 신뢰구간", apply: "상품 시세 + 90% CI 표기", source: "Zillow Research"},
+      {company: "Booking.com / Airbnb 수요예측", content: "지역·시즌·이벤트 기반 수요 회귀를 운영자/호스트 대시보드에 표시", target: "다음 N일 예약·매출", apply: "판매자 7일 매출 예측 카드", source: "Booking AI Tech / Airbnb Engineering"},
+      {company: "YouTube 추천", content: "랭킹 단계에서 watch time을 회귀로 직접 예측해 정렬", target: "예상 시청시간(초)", apply: "알림 정렬, 피드 정렬 점수", source: "YouTube Recommender System Paper"},
+      {company: "Pinterest Ads", content: "광고 CTR/cVR을 회귀로 예측해 입찰가와 표시 빈도 결정", target: "예상 CTR, 예상 cVR", apply: "광고 작성 시뮬레이션 카드", source: "Pinterest Engineering"},
+      {company: "LinkedIn Jobs", content: "공고별 예상 응답률·매칭 점수를 회귀로 산출해 카드 정렬·우선순위", target: "예상 응답률(%), 매칭 점수", apply: "견적 전문가 정렬, 친구 추천 점수", source: "LinkedIn Engineering"},
+      {company: "Coupang / Amazon (수요예측)", content: "SKU별 수요 회귀로 재고/물류 계획. 일부는 셀러 대시보드에도 노출", target: "다음 N일 판매 수량", apply: "판매자 매출/판매수량 예측 카드", source: "Amazon Forecast / Coupang Tech"},
+      {company: "Etsy Ads", content: "리스팅 광고의 입찰가/CPC를 회귀로 추천, Promoted Listings에 노출", target: "추천 CPC(원)", apply: "광고 추천 입찰가 카드", source: "Etsy Code as Craft"}
+    ];
+
+    const models = [
+      {name: "price_recommender", priority: "MVP", target: "추천 등록가 (KRW)", surface: "상품 등록·상세", features: "카테고리, 재고, 지역, 카테고리별 평균/분산, 작성자 신뢰도, 이미지 수, 본문 길이", algos: "Ridge / GradientBoosting / LGBM (07_real_estate_appraisal 패턴)", ui: "추천가 + 90% CI + 시세 분포 막대"},
+      {name: "deal_eta_regressor", priority: "MVP", target: "거래완료까지 일수 (days)", surface: "상품 카드, 결제 직전", features: "카테고리, 가격대, 지역, 재고, 작성시간, 작성자 활동량", algos: "LGBM (학습된 delivery_time_lgbm_model.pkl 시드)", ui: "ETA + ±일수, 신뢰구간"},
+      {name: "ad_performance_regressor", priority: "MVP", target: "예상 노출/클릭/CTR/CPC", surface: "광고 작성/리포트", features: "예산, 헤드라인 길이, 랜딩 도메인 점수, 업종, 시작시간, 매체", algos: "Multivariate Linear + LGBM 앙상블 (multi-output)", ui: "광고 시뮬레이션 막대 카드"},
+      {name: "ad_burn_days_regressor", priority: "MVP", target: "예산 소진까지 일수", surface: "광고 리포트", features: "남은 예산, 평균 일클릭, 평균 CPC, 최근 7일 페이스", algos: "Linear / Ridge", ui: "남은 일수 게이지"},
+      {name: "estimation_response_eta", priority: "2차", target: "전문가 첫 응답까지 분", surface: "견적 요청 화면", features: "카테고리, 지역, 데드라인, 첨부 수, 전문가 풀, 시간대", algos: "Ridge / RandomForest", ui: "응답 ETA + 응답 전문가 수"},
+      {name: "estimation_price_regressor", priority: "2차", target: "참고 견적가 (KRW)", surface: "견적 요청 화면", features: "카테고리, 수량, 지역, 데드라인, 첨부 수", algos: "LGBM (01_trade_freight 패턴)", ui: "참고 견적가 + 신뢰구간 (\"참고치\" 라벨)"},
+      {name: "post_reach_regressor", priority: "2차", target: "24h 예상 조회수/좋아요", surface: "글쓰기/상품 등록", features: "본문 길이, 이미지 수, 태그 수, 카테고리, 지역, 작성자 팔로워 수", algos: "GradientBoosting / LGBM", ui: "예상 조회수/좋아요 카드"},
+      {name: "notification_ctr_regressor", priority: "2차", target: "알림 클릭 확률 (0~1)", surface: "알림 정렬", features: "알림 타입, 최근 클릭률, 시간대, 멘션 여부, 사용자 활동", algos: "Logistic / Linear (랭킹용)", ui: "정렬 점수, 상위 노출"},
+      {name: "revenue_forecaster", priority: "3차", target: "다음 7일 매출 (KRW)", surface: "판매자/광고주 마이페이지, 관리자", features: "최근 7/14/30일 매출, 카테고리, 시즌, 광고 노출, 가격 변경", algos: "Ridge / GradientBoosting (03_retail_revenue 패턴)", ui: "라인차트 + 신뢰구간 음영"},
+      {name: "churn_days_regressor", priority: "3차", target: "이탈까지 예상 일수", surface: "관리자 리텐션", features: "최근 로그인 간격, 결제 갱신 간격, 활동량, 결제 실패 수", algos: "Ridge / RandomForest", ui: "이탈 임박 큐 정렬"}
+    ];
+
+    const sources = [
+      {service: "당근마켓 시세", evidence: "거래 데이터 학습 시세를 사용자 화면에 노출", url: "https://medium.com/daangn"},
+      {service: "Amazon EDD", evidence: "ML 회귀로 Estimated Delivery Date 산출 후 카트/결제 화면 노출", url: "https://www.amazon.science/blog/amazon-uses-ml-to-promise-faster-deliveries"},
+      {service: "Doordash ETA", evidence: "주문 후 도착시간 회귀 예측해 사용자 화면 노출", url: "https://doordash.engineering/2018/09/04/improving-eta-prediction-accuracy-at-doordash/"},
+      {service: "Uber ETA", evidence: "ride ETA 모델 (DeepETA)", url: "https://www.uber.com/blog/deepeta-how-uber-predicts-arrival-times/"},
+      {service: "Airbnb Smart Pricing", evidence: "호스트에게 일자별 권장 가격 회귀로 제안", url: "https://medium.com/airbnb-engineering/learning-market-dynamics-for-optimal-pricing-97cffbcc53e3"},
+      {service: "Zillow Zestimate", evidence: "지역/특성/시장 데이터 활용 부동산 시세 추정", url: "https://www.zillow.com/research/zestimate-forecast-methodology/"},
+      {service: "YouTube Recommender", evidence: "랭킹 모델이 watch time을 회귀로 예측해 정렬", url: "https://research.google/pubs/pub45530/"},
+      {service: "Pinterest Ads", evidence: "광고 CTR/cVR 회귀로 입찰가와 표시 빈도 결정", url: "https://medium.com/pinterest-engineering"},
+      {service: "LinkedIn Jobs", evidence: "공고-지원자 매칭 회귀 점수와 응답률 추정", url: "https://engineering.linkedin.com"},
+      {service: "Amazon Forecast", evidence: "SKU별 수요 회귀로 재고/물류 계획", url: "https://aws.amazon.com/forecast/"},
+      {service: "Etsy Promoted Listings", evidence: "광고 CPC/입찰가 추천에 회귀 사용", url: "https://www.etsy.com/codeascraft"},
+      {service: "Booking.com 수요예측", evidence: "지역/시즌 기반 수요 회귀를 호스트 도구에 노출", url: "https://booking.ai/"},
+      {service: "Aliexpress 배송예상", evidence: "Estimated Delivery 시간을 상품·결제 화면에 표기", url: "https://sell.aliexpress.com/"}
+    ];
+
+    function badge(priority) {
+      if (priority === "MVP") return "green";
+      if (priority === "2차") return "blue";
+      if (priority === "3차") return "amber";
+      return "violet";
+    }
+
+    function renderServices() {
+      const map = document.querySelector("#serviceMap");
+      map.innerHTML = services.map((item) => `
+        <div class="service-card">
+          <b>${item.name}</b>
+          <div class="small muted">${item.routes}</div>
+          <div class="tag-row">${item.regressors.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
+          <div class="small"><span class="strong">데이터:</span> ${item.data}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderCases() {
+      const tbody = document.querySelector("#caseTable tbody");
+      tbody.innerHTML = cases.map((item) => `
+        <tr>
+          <td><b>${item.company}</b></td>
+          <td>${item.content}</td>
+          <td>${item.target}</td>
+          <td>${item.apply}</td>
+          <td>${item.source}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderModels() {
+      const grid = document.querySelector("#modelGrid");
+      grid.innerHTML = models.map((model) => `
+        <div class="card model-card">
+          <div class="model-title">
+            <b>${model.name}</b>
+            <span class="pill ${badge(model.priority)}">${model.priority}</span>
+          </div>
+          <div class="small"><span class="strong">예측 타겟:</span> ${model.target}</div>
+          <div class="small"><span class="strong">적용 화면:</span> ${model.surface}</div>
+          <div class="small"><span class="strong">피처:</span> ${model.features}</div>
+          <div class="small"><span class="strong">알고리즘:</span> ${model.algos}</div>
+          <div class="small"><span class="strong">UI:</span> ${model.ui}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderSources() {
+      const tbody = document.querySelector("#sourceTable tbody");
+      tbody.innerHTML = sources.map((item) => `
+        <tr>
+          <td><b>${item.service}</b></td>
+          <td>${item.evidence}</td>
+          <td><a href="${item.url}" target="_blank" rel="noreferrer">${item.url}</a></td>
+        </tr>
+      `).join("");
+    }
+
+    function renderResidual() {
+      const grid = document.querySelector("#residualGrid");
+      const cells = 8 * 5;
+      const html = [];
+      for (let i = 0; i < cells; i++) {
+        const r = Math.random();
+        let cls = "";
+        if (r > 0.92) cls = "high";
+        else if (r > 0.78) cls = "warn";
+        else if (r > 0.55) cls = "ok";
+        html.push(`<div class="${cls}"></div>`);
+      }
+      grid.innerHTML = html.join("");
+    }
+
+    document.querySelectorAll("[data-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+        document.querySelectorAll("[data-tab]").forEach((item) => item.classList.toggle("active", item === button));
+        document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        window.scrollTo({top: 0, behavior: "smooth"});
+      });
+    });
+
+    renderServices();
+    renderCases();
+    renderModels();
+    renderSources();
+    renderResidual();
+  </script>
+</body>
+</html>
