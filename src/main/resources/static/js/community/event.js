@@ -71,6 +71,12 @@ window.onload = () => {
         if (communityNameInput) communityNameInput.value = "";
         if (communityNameCount) communityNameCount.textContent = "0";
         if (communitySubmitBtn) communitySubmitBtn.disabled = true;
+        const tagsResetEl = createCommunityModal.querySelector("[data-community-tags]");
+        if (tagsResetEl) tagsResetEl.value = "";
+        const descResetEl = createCommunityModal.querySelector("[data-community-description]");
+        if (descResetEl) descResetEl.value = "";
+        const categoryResetEl = createCommunityModal.querySelector("[data-community-category]");
+        if (categoryResetEl) categoryResetEl.value = "";
         createCommunityModal.querySelector("input[name='communityType']")?.click();
     }
 
@@ -290,9 +296,15 @@ window.onload = () => {
         const categoryInput = document.querySelector("[data-community-category]");
         const coverInput = document.querySelector("[data-cover-file]");
 
+        const tagsInput = document.querySelector("[data-community-tags]");
+
         formData.append("communityName", nameInput?.value ?? "");
         formData.append("description", descInput?.value ?? "");
         if (categoryInput?.value) formData.append("categoryId", categoryInput.value);
+        // 공백만 입력된 케이스 ("   ") 는 의미 없는 데이터이므로 전송 자체를 생략.
+        // 서버 DTO setter 도 같은 정규화를 하지만 네트워크 비용도 절약.
+        const tagsValue = tagsInput?.value?.trim();
+        if (tagsValue) formData.append("tags", tagsValue);
         if (coverInput?.files[0]) formData.append("coverImage", coverInput.files[0]);
 
         try {

@@ -20,8 +20,6 @@ window.oauthJoinData = {
     profileUrl: params.get("profileUrl") || ""
 };
 
-const show = id => document.getElementById(id).style.display = 'flex';
-const hide = id => document.getElementById(id).style.display = 'none';
 const codeInput = document.querySelector('#modal-code input[name="code"]');
 const MODALS = [
     'modal-create', 'overlay-phone', 'overlay-email',
@@ -29,6 +27,24 @@ const MODALS = [
     'modal-profile', 'modal-username', 'modal-notification',
     'modal-language', 'modal-category', 'modal-submit'
 ];
+// 모바일에서 슬라이드업된 .join-panel은 모달 뒤에 가려도 입력을 방해하므로,
+// 가입 플로우 모달이 하나라도 열려 있는 동안 body.flow-modal-open 으로 표시해
+// CSS에서 패널을 임시로 내려둔다. 모든 모달이 닫히면 자동으로 패널이 복귀한다.
+const syncFlowModalOpen = () => {
+    const anyOpen = MODALS.some(mid => {
+        const el = document.getElementById(mid);
+        return el && el.style.display && el.style.display !== 'none';
+    });
+    document.body.classList.toggle('flow-modal-open', anyOpen);
+};
+const show = id => {
+    document.getElementById(id).style.display = 'flex';
+    syncFlowModalOpen();
+};
+const hide = id => {
+    document.getElementById(id).style.display = 'none';
+    syncFlowModalOpen();
+};
 const hideAll = () => MODALS.forEach(hide);
 const resetSmsState = () => {
     // 모달을 닫거나 처음부터 다시 시작할 때 인증 상태도 함께 비운다.

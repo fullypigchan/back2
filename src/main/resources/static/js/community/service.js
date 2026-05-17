@@ -70,6 +70,15 @@ const CommunityService = (() => {
         return await response.json();
     };
 
+    // AI 추천 — 가입 직후 호출되어 유사 커뮤니티 Top-N 을 받아온다.
+    // 서버가 다운/타임아웃이면 빈 items 로 graceful degrade (BE controller 가 fallback 처리).
+    const getRecommendations = async (communityId, topN = 5, method = "tfidf") => {
+        const url = `/api/communities/${communityId}/recommendations?topN=${topN}&method=${method}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("추천 조회 실패");
+        return await response.json();
+    };
+
     const getMembers = async (communityId, page) => {
         const response = await fetch(`/api/communities/${communityId}/members/${page}`);
         if (!response.ok) throw new Error("멤버 목록 조회 실패");
@@ -159,7 +168,7 @@ const CommunityService = (() => {
         create, update, remove, getDetail,
         getList, getMyList, getByCategory, search,
         getHomeFeed, getExploreFeed,
-        join, leave, getMembers, kickMember, changeRole,
+        join, leave, getMembers, kickMember, changeRole, getRecommendations,
         writeReply, writePost, updatePost, getPost,
         getMyProducts, getPostTemps, savePostTemp, loadPostTemp, deletePostTemps,
         searchMentionMembers

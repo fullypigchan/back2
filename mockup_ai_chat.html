@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 챗봇 진입점 — UX 시안 비교 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --c-brand: #1d9bf0;
+  --c-text: #0f1419;
+  --c-muted: #536471;
+  --c-line: #cfd9de;
+  --c-line-soft: #eff3f4;
+  --c-bg: #ffffff;
+  --c-surface: #f7f9f9;
+
+  /* AI gradient — 3-stop */
+  --ai-g: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  --ai-g-h: linear-gradient(135deg, #7b8ff5 0%, #8a5cb4 50%, #f5a8fc 100%);
+  --ai-c1: #667eea;
+  --ai-c2: #764ba2;
+  --ai-c3: #f093fb;
+
+  --r: 16px;
+  --shadow: 0 4px 28px rgba(0,0,0,.11), 0 1px 5px rgba(0,0,0,.07);
+
+  font-feature-settings: "tnum" 1, "ss01" 1;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: 'Instrument Sans', -apple-system, 'Apple SD Gothic Neo', Pretendard, sans-serif;
+  background: #eef1f6;
+  color: var(--c-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 52px 36px 32px;
+}
+.eyebrow {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--c-brand); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.eyebrow::before {
+  content: ''; width: 18px; height: 2px;
+  background: var(--c-brand); border-radius: 1px;
+}
+.page-title {
+  font-size: 28px; font-weight: 700;
+  letter-spacing: -.025em; line-height: 1.2;
+  color: var(--c-text); margin-bottom: 8px;
+}
+.page-desc {
+  font-size: 14px; color: var(--c-muted);
+  max-width: 560px; line-height: 1.8;
+}
+
+/* ===== 2x2 GRID ===== */
+.grid {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 36px 72px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* ===== VARIANT CARD ===== */
+.card {
+  background: #fff;
+  border: 1px solid #e2e7ed;
+  border-radius: 22px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: box-shadow .22s, transform .22s;
+}
+.card:hover {
+  box-shadow: 0 8px 40px rgba(0,0,0,.13);
+  transform: translateY(-2px);
+}
+
+/* card header */
+.card-hdr {
+  padding: 18px 20px 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.card-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--c-muted);
+}
+.card-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--c-text); letter-spacing: -.015em;
+}
+.card-ref {
+  font-size: 11px; color: var(--c-muted);
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  margin-top: 2px;
+}
+.card-ref a {
+  color: var(--c-brand); text-decoration: none; font-weight: 500;
+}
+.card-ref a:hover { text-decoration: underline; }
+
+/* ===== STAGE (mockup viewport) ===== */
+.stage {
+  position: relative;
+  height: 530px;
+  background: linear-gradient(160deg, #edf1f6 0%, #e3eaf2 100%);
+  margin: 14px 20px 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #dde3ea;
+}
+
+/* fake blurred page bg */
+.fbg {
+  position: absolute; inset: 0;
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 12px;
+  opacity: .3; pointer-events: none; user-select: none;
+}
+.fr { display: flex; align-items: center; gap: 10px; }
+.fav { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#bdd4ea,#a8c5e2); flex-shrink: 0; }
+.fb { height: 10px; border-radius: 5px; background: rgba(83,100,113,.22); }
+.fl { height: 8px; border-radius: 4px; background: rgba(83,100,113,.13); }
+.fd { height: 1px; background: rgba(83,100,113,.11); margin: 2px 0; }
+.fs { display: flex; flex-direction: column; gap: 7px; }
+
+/* shared FAB */
+.wfab {
+  position: absolute; bottom: 18px; right: 18px;
+  width: 52px; height: 52px; border-radius: 15px;
+  border: 1px solid var(--c-line); background: var(--c-bg);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 10;
+  box-shadow: 0 2px 10px rgba(0,0,0,.1);
+  transition: box-shadow .15s, transform .15s;
+}
+.wfab:hover { box-shadow: 0 4px 18px rgba(0,0,0,.16); transform: translateY(-1px); }
+
+/* shared dropdown container */
+.wdrop {
+  position: absolute; bottom: 82px; right: 18px;
+  width: 336px;
+  background: var(--c-bg); border: 1px solid var(--c-line);
+  border-radius: var(--r); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: hidden; z-index: 9;
+}
+.wdrop-hdr {
+  display: flex; align-items: center;
+  padding: 11px 13px 11px 14px; gap: 9px;
+  border-bottom: 1px solid var(--c-line-soft);
+}
+.wdrop-title {
+  flex: 1; font-size: 13.5px; font-weight: 700; color: var(--c-text);
+  letter-spacing: -.01em;
+}
+.wibtn {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-muted); cursor: pointer; border: none; background: none;
+  transition: background .13s;
+}
+.wibtn:hover { background: rgba(15,20,25,.07); }
+.wmeet {
+  display: flex; align-items: center;
+  padding: 10px 14px 10px 22px; gap: 9px;
+  cursor: pointer; border-top: 1px solid var(--c-line-soft);
+  transition: background .13s;
+}
+.wmeet:hover { background: rgba(15,20,25,.03); }
+.wmeet-info { flex: 1; min-width: 0; }
+.wmeet-name {
+  font-size: 13px; color: var(--c-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wmeet-meta { font-size: 11.5px; color: var(--c-muted); margin-top: 1px; }
+.wmeet-handle { color: var(--c-brand); font-weight: 500; }
+
+/* ===== CARD BOTTOM META ===== */
+.card-meta {
+  padding: 14px 20px 18px;
+  display: flex; gap: 14px;
+}
+.meta-col { flex: 1; }
+.meta-lbl {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--c-muted); margin-bottom: 5px;
+}
+.mi {
+  font-size: 12.5px; color: var(--c-text); line-height: 1.55;
+  display: flex; align-items: baseline; gap: 5px;
+}
+.mi::before { content: '·'; flex-shrink: 0; color: var(--c-muted); }
+.mi.p::before { color: #10b981; }
+.mi.c::before { color: #f87171; }
+
+/* =====================================================
+   VARIANT A — Intercom Fin AI: gradient sparkle pill
+   ===================================================== */
+
+/* the Intercom-style pill: full-width, sits above meeting list, has its own zone */
+#va .intercom-pill-zone {
+  padding: 10px 12px 8px;
+  background: linear-gradient(90deg, rgba(102,126,234,.07) 0%, rgba(240,147,251,.05) 60%, rgba(102,126,234,.04) 100%);
+  border-bottom: 1px solid rgba(102,126,234,.12);
+}
+#va .ic-pill {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 14px;
+  background: var(--c-bg);
+  border: 1.5px solid rgba(102,126,234,.28);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: border-color .16s, box-shadow .16s, transform .14s;
+  position: relative; overflow: hidden;
+}
+#va .ic-pill::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--ai-g);
+  opacity: 0;
+  transition: opacity .18s;
+  border-radius: 9999px;
+}
+#va .ic-pill:hover {
+  border-color: rgba(102,126,234,.56);
+  box-shadow: 0 2px 16px rgba(102,126,234,.22);
+  transform: translateY(-1px);
+}
+#va .ic-pill:hover::before { opacity: .05; }
+
+/* sparkle icon inside pill */
+#va .ic-spark {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--ai-g);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 8px rgba(102,126,234,.38);
+  position: relative; z-index: 1;
+}
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: .82; transform: scale(.88) rotate(12deg); }
+}
+#va .ic-spark svg { animation: sparkle-pulse 2.8s ease-in-out infinite; }
+
+#va .ic-pill-text {
+  flex: 1; font-size: 13.5px; font-weight: 600;
+  color: var(--c-text); letter-spacing: -.01em;
+  position: relative; z-index: 1;
+}
+/* gradient text on the "✦" char only */
+#va .ic-spark-char {
+  background: var(--ai-g); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  font-size: 14px; font-weight: 700;
+}
+
+#va .ic-arrow {
+  color: var(--ai-c1); flex-shrink: 0; position: relative; z-index: 1;
+  transition: transform .14s;
+}
+#va .ic-pill:hover .ic-arrow { transform: translateX(3px); }
+
+/* hint line under pill */
+#va .ic-hint {
+  font-size: 11px; color: var(--c-muted);
+  padding: 6px 14px 0;
+  letter-spacing: -.005em;
+}
+
+/* meeting list section label */
+#va .sect-lbl {
+  padding: 10px 14px 6px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--c-muted);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+
+
+/* =====================================================
+   VARIANT B — Notion AI: persistent star button in header
+   ===================================================== */
+
+#vb .notion-star-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: none; background: none;
+  position: relative;
+  transition: background .14s;
+}
+#vb .notion-star-btn:hover { background: rgba(102,126,234,.1); }
+
+/* the 4-point sparkle star */
+#vb .nstar {
+  width: 20px; height: 20px;
+}
+/* gradient fill via inline SVG */
+@keyframes star-spin-once {
+  from { transform: rotate(-15deg) scale(.85); opacity: .6; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+#vb .notion-star-btn .nstar { animation: star-spin-once .35s ease-out forwards; }
+#vb .notion-star-btn:hover .nstar {
+  animation: none;
+  filter: drop-shadow(0 0 5px rgba(118,75,162,.55));
+}
+
+/* tooltip */
+#vb .notion-star-btn::after {
+  content: 'AI에게 질문';
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: rgba(15,20,25,.88); color: #fff;
+  font-size: 11.5px; font-weight: 600; font-family: inherit;
+  padding: 4px 9px; border-radius: 7px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .13s;
+  z-index: 20;
+}
+#vb .notion-star-btn:hover::after { opacity: 1; }
+
+/* modal-style meeting picker that would appear on click */
+#vb .notion-ai-modal {
+  position: absolute; bottom: 82px; right: 18px;
+  width: 320px;
+  background: var(--c-bg); border: 1px solid var(--c-line);
+  border-radius: var(--r); box-shadow: var(--shadow);
+  overflow: hidden; z-index: 20;
+}
+#vb .nam-hdr {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--c-line-soft);
+  background: linear-gradient(135deg, rgba(102,126,234,.06) 0%, rgba(118,75,162,.04) 100%);
+}
+#vb .nam-title {
+  font-size: 13.5px; font-weight: 700; color: var(--c-text);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 2px;
+}
+#vb .nam-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 6px;
+  background: var(--ai-g);
+}
+#vb .nam-sub { font-size: 12px; color: var(--c-muted); }
+
+#vb .nam-chips {
+  padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+  border-bottom: 1px solid var(--c-line-soft);
+}
+#vb .nam-chip-lbl {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--c-muted); margin-bottom: 1px;
+}
+#vb .nchip {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 11px;
+  border: 1.5px solid var(--c-line);
+  border-radius: 10px; cursor: pointer;
+  transition: border-color .14s, background .14s;
+}
+#vb .nchip:hover { border-color: rgba(102,126,234,.44); background: rgba(102,126,234,.04); }
+#vb .nchip.active {
+  border-color: rgba(102,126,234,.55);
+  background: linear-gradient(90deg, rgba(102,126,234,.08), rgba(118,75,162,.05));
+}
+#vb .nchip-ico {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--c-line-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+#vb .nchip.active .nchip-ico { background: linear-gradient(135deg, rgba(102,126,234,.15), rgba(118,75,162,.1)); }
+#vb .nchip-text { flex: 1; min-width: 0; }
+#vb .nchip-name { font-size: 12.5px; font-weight: 500; color: var(--c-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#vb .nchip-time { font-size: 11px; color: var(--c-muted); }
+#vb .nchip-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--ai-g); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+#vb .nam-input-row {
+  padding: 10px 14px;
+  display: flex; gap: 8px; align-items: center;
+}
+#vb .nam-fake-input {
+  flex: 1; font-size: 13px; color: var(--c-muted);
+  border: 1.5px solid var(--c-line); border-radius: 9999px;
+  padding: 7px 13px; background: var(--c-surface);
+  pointer-events: none;
+}
+#vb .nam-go {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ai-g); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 7px rgba(102,126,234,.38);
+}
+
+
+/* =====================================================
+   VARIANT C — ChatGPT / Vercel v0: composer-first
+   ===================================================== */
+
+#vc .cf-panel {
+  position: absolute; bottom: 82px; right: 18px;
+  width: 346px;
+  background: var(--c-bg); border: 1px solid var(--c-line);
+  border-radius: var(--r); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: hidden; z-index: 9;
+}
+
+/* chip rail at top — recent meetings */
+#vc .cf-chip-rail {
+  padding: 11px 12px 0;
+  display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none;
+  padding-bottom: 0;
+}
+#vc .cf-chip-rail::-webkit-scrollbar { display: none; }
+#vc .cf-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px 5px 8px;
+  background: var(--c-line-soft); border: 1px solid var(--c-line);
+  border-radius: 9999px; cursor: pointer; flex-shrink: 0;
+  font-size: 12px; color: var(--c-muted); font-weight: 500;
+  transition: border-color .14s, background .14s;
+  white-space: nowrap;
+}
+#vc .cf-chip:hover { border-color: rgba(102,126,234,.45); color: var(--c-text); background: rgba(102,126,234,.06); }
+#vc .cf-chip.active {
+  background: linear-gradient(90deg, rgba(102,126,234,.12), rgba(118,75,162,.08));
+  border-color: rgba(102,126,234,.5); color: #4c1d95; font-weight: 600;
+}
+#vc .cf-chip-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--c-line); flex-shrink: 0;
+}
+#vc .cf-chip.active .cf-chip-dot { background: var(--ai-g); }
+
+/* selected context bar */
+#vc .cf-context-bar {
+  margin: 8px 12px 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 11px;
+  background: linear-gradient(90deg, rgba(102,126,234,.07) 0%, rgba(118,75,162,.04) 100%);
+  border: 1px solid rgba(102,126,234,.18); border-radius: 9px;
+}
+#vc .cf-ctx-ico {
+  font-size: 14px; flex-shrink: 0;
+}
+#vc .cf-ctx-text { flex: 1; font-size: 12px; font-weight: 600; color: var(--c-text); letter-spacing: -.008em; }
+#vc .cf-ctx-tag {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: rgba(102,126,234,.9);
+  background: rgba(102,126,234,.1); padding: 2px 7px; border-radius: 9999px;
+}
+
+/* main composer area — center of the widget */
+#vc .cf-composer {
+  padding: 10px 12px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+#vc .cf-composer-box {
+  border: 1.5px solid var(--c-line); border-radius: 14px;
+  overflow: hidden;
+  transition: border-color .15s, box-shadow .15s;
+}
+#vc .cf-composer-box:focus-within {
+  border-color: rgba(102,126,234,.5);
+  box-shadow: 0 0 0 3px rgba(102,126,234,.09);
+}
+#vc .cf-ta {
+  width: 100%; padding: 11px 14px 7px;
+  font-size: 13.5px; color: var(--c-text); font-family: inherit;
+  border: none; outline: none; background: none; resize: none;
+  line-height: 1.55; letter-spacing: -.01em; pointer-events: none;
+}
+#vc .cf-ta-placeholder { color: var(--c-muted); }
+#vc .cf-actions-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px 8px;
+}
+#vc .cf-actions-left { display: flex; align-items: center; gap: 4px; }
+#vc .cf-small-btn {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--c-muted); font-weight: 500;
+  padding: 4px 9px; border-radius: 9999px;
+  background: none; border: 1px solid var(--c-line);
+  cursor: pointer; transition: background .13s, color .13s;
+}
+#vc .cf-small-btn:hover { background: var(--c-line-soft); color: var(--c-text); }
+#vc .cf-send {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ai-g); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 1px 8px rgba(102,126,234,.38);
+  transition: transform .13s, box-shadow .13s;
+}
+#vc .cf-send:hover { transform: scale(1.07); box-shadow: 0 2px 14px rgba(102,126,234,.52); }
+
+/* secondary: meeting list toggle (demoted) */
+#vc .cf-list-toggle {
+  margin: 0 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 11px;
+  border: 1px solid var(--c-line-soft); border-radius: 10px;
+  cursor: pointer; margin-bottom: 10px;
+  transition: background .13s;
+}
+#vc .cf-list-toggle:hover { background: var(--c-line-soft); }
+#vc .cf-toggle-text { font-size: 12.5px; color: var(--c-muted); font-weight: 500; }
+#vc .cf-toggle-count {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--c-brand); background: rgba(29,155,240,.1);
+  padding: 2px 8px; border-radius: 9999px;
+}
+
+/* mini list (secondary) */
+#vc .cf-mini-list {
+  margin: 0 12px 10px;
+  border: 1px solid var(--c-line-soft); border-radius: 10px;
+  overflow: hidden;
+}
+#vc .cf-mini-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 11px; cursor: pointer;
+  transition: background .12s;
+  border-top: 1px solid var(--c-line-soft);
+}
+#vc .cf-mini-row:first-child { border-top: none; }
+#vc .cf-mini-row:hover { background: rgba(15,20,25,.03); }
+#vc .cf-mini-ico { font-size: 13px; flex-shrink: 0; }
+#vc .cf-mini-name { flex: 1; font-size: 12.5px; color: var(--c-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#vc .cf-mini-time { font-size: 11px; color: var(--c-muted); }
+
+
+/* =====================================================
+   VARIANT D — Linear Cmd+K: search → dynamic AI row
+   ===================================================== */
+
+#vd .lk-panel {
+  position: absolute; bottom: 82px; right: 18px;
+  width: 346px;
+  background: var(--c-bg); border: 1px solid var(--c-line);
+  border-radius: var(--r); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: hidden; z-index: 9;
+}
+
+#vd .lk-search-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--c-line-soft);
+}
+#vd .lk-search-ico { color: var(--c-muted); flex-shrink: 0; }
+
+/* fake input — typing state shown */
+#vd .lk-input-fake {
+  flex: 1; font-size: 13.5px; color: var(--c-text);
+  letter-spacing: -.01em; font-family: inherit;
+  display: flex; align-items: center; gap: 0;
+}
+#vd .lk-typed { color: var(--c-text); font-weight: 500; }
+#vd .lk-cursor {
+  display: inline-block; width: 1.5px; height: 15px;
+  background: var(--c-brand); margin-left: 1px;
+  animation: cursor-blink .85s step-start infinite;
+  vertical-align: middle;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; } 50% { opacity: 0; }
+}
+
+#vd .lk-kbd {
+  font-size: 10.5px; font-weight: 600; color: var(--c-muted);
+  background: var(--c-line-soft); border: 1px solid var(--c-line);
+  border-radius: 5px; padding: 2px 6px; flex-shrink: 0;
+}
+
+/* Dynamic AI row — appears when typing */
+#vd .lk-ai-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 13px;
+  cursor: pointer;
+  /* gradient tint bg — the key Linear detail */
+  background: linear-gradient(90deg, rgba(102,126,234,.09) 0%, rgba(240,147,251,.05) 100%);
+  border-bottom: 1px solid rgba(102,126,234,.1);
+  transition: background .15s;
+  position: relative; overflow: hidden;
+}
+#vd .lk-ai-row::after {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 2.5px;
+  background: var(--ai-g); border-radius: 0 2px 2px 0;
+}
+#vd .lk-ai-row:hover {
+  background: linear-gradient(90deg, rgba(102,126,234,.15) 0%, rgba(240,147,251,.09) 100%);
+}
+
+/* fade-in animation for the AI row */
+@keyframes ai-row-fadein {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#vd .lk-ai-row { animation: ai-row-fadein .22s ease-out; }
+
+#vd .lk-ai-ico {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--ai-g);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; box-shadow: 0 1px 7px rgba(102,126,234,.35);
+}
+#vd .lk-ai-label { flex: 1; display: flex; flex-direction: column; gap: 0; }
+#vd .lk-ai-prefix {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase;
+  background: var(--ai-g); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+#vd .lk-ai-query {
+  font-size: 13.5px; font-weight: 600; color: var(--c-text);
+  letter-spacing: -.01em; line-height: 1.3;
+}
+#vd .lk-ai-enter {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: rgba(102,126,234,.7); font-weight: 600;
+  flex-shrink: 0;
+}
+#vd .lk-enter-key {
+  font-size: 10px; background: rgba(102,126,234,.12);
+  border: 1px solid rgba(102,126,234,.22); border-radius: 4px;
+  padding: 1px 6px; color: rgba(102,126,234,.9);
+}
+
+/* section label */
+#vd .lk-sect {
+  padding: 8px 13px 5px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+/* result rows */
+#vd .lk-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 13px; cursor: pointer;
+  transition: background .12s;
+}
+#vd .lk-row:hover { background: rgba(15,20,25,.04); }
+#vd .lk-row-ico {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--c-line-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+#vd .lk-row-info { flex: 1; min-width: 0; }
+#vd .lk-row-name {
+  font-size: 13px; font-weight: 500; color: var(--c-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -.01em;
+}
+/* highlight matched text */
+#vd .lk-match {
+  color: var(--ai-c1); font-weight: 700;
+}
+#vd .lk-row-meta { font-size: 11.5px; color: var(--c-muted); }
+#vd .lk-row-handle { color: var(--c-brand); font-weight: 500; }
+
+/* ===== SCROLLBAR ===== */
+* { scrollbar-width: thin; scrollbar-color: var(--c-line) transparent; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .grid { padding: 0 16px 48px; }
+  .page-header { padding: 32px 16px 24px; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="eyebrow">UX 디자인 시안 비교 v3</div>
+  <h1 class="page-title">AI 진입점 재설계 — 실제 대기업 패턴 4가지</h1>
+  <p class="page-desc">
+    각 시안은 실제 서비스 UI에서 1:1로 추출한 진입 패턴입니다. 회의 row 안에 묻혀있던 "AI에게 질문"을 독립된 첫-시민 진입점으로 재설계했습니다.
+  </p>
+</header>
+
+<main class="grid">
+
+  <!-- =====================================================
+       VARIANT A — Intercom Fin AI Pattern
+       ===================================================== -->
+  <article class="card" id="va">
+    <div class="card-hdr">
+      <div class="card-label">시안 A · Intercom Fin AI 패턴</div>
+      <div class="card-title">Gradient Sparkle Pill — 드롭다운 최상단 독립 진입점</div>
+      <div class="card-ref">
+        ref: <a href="https://www.intercom.com/fin" target="_blank" rel="noopener">intercom.com/fin</a> · AI composer entry / gradient pill above message list
+      </div>
+    </div>
+
+    <div class="stage">
+      <!-- fake page bg -->
+      <div class="fbg">
+        <div class="fr"><div class="fav"></div><div class="fb" style="width:44%"></div></div>
+        <div class="fs"><div class="fl" style="width:82%"></div><div class="fl" style="width:65%"></div><div class="fl" style="width:73%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:30%"></div><div class="fl" style="width:90%"></div><div class="fl" style="width:71%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:50%"></div><div class="fl" style="width:78%"></div><div class="fl" style="width:60%"></div></div>
+      </div>
+
+      <!-- DROPDOWN -->
+      <div class="wdrop" style="width:330px;">
+
+        <!-- Intercom Fin: sparkle pill zone — visually distinct from meeting list -->
+        <div class="intercom-pill-zone">
+          <div class="ic-pill">
+            <div class="ic-spark">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1l1.1 3.4 3.4 1.1-3.4 1.1L7 10l-1.1-3.4L2.5 5.5l3.4-1.1L7 1z" fill="white" opacity=".95"/>
+                <circle cx="11.5" cy="2.5" r=".9" fill="white" opacity=".7"/>
+                <circle cx="2.5" cy="11.5" r=".7" fill="white" opacity=".55"/>
+              </svg>
+            </div>
+            <span class="ic-pill-text">
+              <span class="ic-spark-char">✦</span> AI에게 회의 질문하기
+            </span>
+            <svg class="ic-arrow" width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path d="M5.5 4l4.5 4-4.5 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="ic-hint">회의 녹화 내용을 기반으로 무엇이든 질문</div>
+        </div>
+
+        <!-- meeting list — clearly secondary to the pill above -->
+        <div class="sect-lbl">회의 목록</div>
+
+        <div class="wmeet">
+          <div class="wmeet-info">
+            <div class="wmeet-name">Q1 분기 실적 리뷰</div>
+            <div class="wmeet-meta"><span class="wmeet-handle">@sales</span> · 오늘 14:00 · 62분</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="color:#536471;flex-shrink:0">
+            <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="wmeet">
+          <div class="wmeet-info">
+            <div class="wmeet-name">제품 로드맵 스프린트 플래닝</div>
+            <div class="wmeet-meta"><span class="wmeet-handle">@product</span> · 오늘 11:30 · 45분</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="color:#536471;flex-shrink:0">
+            <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="wmeet">
+          <div class="wmeet-info">
+            <div class="wmeet-name">디자인 시스템 리뷰</div>
+            <div class="wmeet-meta"><span class="wmeet-handle">@design</span> · 어제 16:00 · 38분</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="color:#536471;flex-shrink:0">
+            <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <div class="wfab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="14" rx="3" stroke="#0f1419" stroke-width="1.7" fill="none"/>
+          <path d="M8 21h8M12 17v4" stroke="#0f1419" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card-meta">
+      <div class="meta-col">
+        <div class="meta-lbl">장점</div>
+        <div class="mi p">Pill이 회의 목록과 시각적으로 완전 분리</div>
+        <div class="mi p">그라데이션 zone으로 AI가 1차시민임을 즉시 전달</div>
+        <div class="mi p">회의 선택 없이도 AI 진입 가능 (글로벌 컨텍스트)</div>
+      </div>
+      <div class="meta-col">
+        <div class="meta-lbl">단점</div>
+        <div class="mi c">드롭다운 열어야 pill 보임</div>
+        <div class="mi c">pill 클릭 → 회의 선택 추가 단계 필요</div>
+      </div>
+    </div>
+  </article>
+
+
+  <!-- =====================================================
+       VARIANT B — Notion AI Pattern
+       ===================================================== -->
+  <article class="card" id="vb">
+    <div class="card-hdr">
+      <div class="card-label">시안 B · Notion AI 패턴</div>
+      <div class="card-title">헤더 고정 Star 버튼 + 회의 선택 모달</div>
+      <div class="card-ref">
+        ref: <a href="https://www.notion.so/product/ai" target="_blank" rel="noopener">notion.so</a> · top-right persistent AI star button (every page, always same position)
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="fbg">
+        <div class="fr"><div class="fav"></div><div class="fb" style="width:52%"></div></div>
+        <div class="fs"><div class="fl" style="width:76%"></div><div class="fl" style="width:60%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:38%"></div><div class="fl" style="width:88%"></div><div class="fl" style="width:68%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:55%"></div><div class="fl" style="width:80%"></div><div class="fl" style="width:50%"></div></div>
+      </div>
+
+      <!-- Notion AI modal (shown, simulating post-click) -->
+      <div class="notion-ai-modal">
+        <div class="nam-hdr">
+          <div class="nam-title">
+            <div class="nam-badge">
+              <!-- 4-point Notion star -->
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1l1 3.5 3.5 1L8 6.5l-.5 4L6 6.5 2.5 5.5l3.5-1L7 1z" fill="white"/>
+              </svg>
+            </div>
+            어떤 회의에 대해 물어볼까요?
+          </div>
+          <div class="nam-sub">최근 회의를 선택하거나 직접 질문하세요</div>
+        </div>
+
+        <div class="nam-chips">
+          <div class="nam-chip-lbl">최근 회의</div>
+          <!-- chip: active/selected state -->
+          <div class="nchip active">
+            <div class="nchip-ico">📋</div>
+            <div class="nchip-text">
+              <div class="nchip-name">Q1 분기 실적 리뷰</div>
+              <div class="nchip-time">오늘 14:00 · 62분</div>
+            </div>
+            <div class="nchip-check">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6l2.5 2.5 5-5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="nchip">
+            <div class="nchip-ico">🚀</div>
+            <div class="nchip-text">
+              <div class="nchip-name">제품 로드맵 스프린트</div>
+              <div class="nchip-time">오늘 11:30 · 45분</div>
+            </div>
+          </div>
+          <div class="nchip">
+            <div class="nchip-ico">🎨</div>
+            <div class="nchip-text">
+              <div class="nchip-name">디자인 시스템 리뷰</div>
+              <div class="nchip-time">어제 16:00 · 38분</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nam-input-row">
+          <div class="nam-fake-input">Q1 리뷰에서 결정된 사항은?</div>
+          <div class="nam-go">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 8L2 2.5l2 5.5-2 5.5L13.5 8z" fill="white"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- DROPDOWN (meeting list, background) -->
+      <div class="wdrop" style="bottom:82px; opacity:.45; pointer-events:none; width:300px;">
+        <div class="wdrop-hdr">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style="color:#536471">
+            <rect x="1" y="2" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/>
+            <path d="M3.5 6h7M3.5 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <span class="wdrop-title">회의 목록</span>
+          <!-- Notion-style AI star button — ALWAYS VISIBLE, right side of header -->
+          <button class="notion-star-btn" title="AI에게 질문" aria-label="AI에게 질문">
+            <svg class="nstar" viewBox="0 0 20 20" fill="none">
+              <defs>
+                <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#667eea"/>
+                  <stop offset="50%" stop-color="#764ba2"/>
+                  <stop offset="100%" stop-color="#f093fb"/>
+                </linearGradient>
+              </defs>
+              <!-- 4-point sparkle — Notion AI star shape -->
+              <path d="M10 2 L11.8 8.2 L18 10 L11.8 11.8 L10 18 L8.2 11.8 L2 10 L8.2 8.2 Z" fill="url(#ng)"/>
+              <circle cx="16" cy="4" r="1.2" fill="#f093fb" opacity=".65"/>
+              <circle cx="4" cy="16" r=".9" fill="#667eea" opacity=".5"/>
+            </svg>
+          </button>
+          <button class="wibtn" aria-label="닫기">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="#536471" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="wmeet"><div class="wmeet-info"><div class="wmeet-name">Q1 분기 실적 리뷰</div><div class="wmeet-meta"><span class="wmeet-handle">@sales</span> · 오늘 14:00</div></div></div>
+        <div class="wmeet"><div class="wmeet-info"><div class="wmeet-name">제품 로드맵 스프린트 플래닝</div><div class="wmeet-meta"><span class="wmeet-handle">@product</span> · 오늘 11:30</div></div></div>
+      </div>
+
+      <!-- FAB -->
+      <div class="wfab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="14" rx="3" stroke="#0f1419" stroke-width="1.7" fill="none"/>
+          <path d="M8 21h8M12 17v4" stroke="#0f1419" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card-meta">
+      <div class="meta-col">
+        <div class="meta-lbl">장점</div>
+        <div class="mi p">헤더 star 버튼 — 드롭다운 어느 상태에서도 항상 동일 위치</div>
+        <div class="mi p">회의 칩 선택 → 컨텍스트 잠금 → 질문 플로우가 명확</div>
+        <div class="mi p">회의 목록 UI를 전혀 건드리지 않음</div>
+      </div>
+      <div class="meta-col">
+        <div class="meta-lbl">단점</div>
+        <div class="mi c">별 아이콘의 의미 사전 학습 필요</div>
+        <div class="mi c">모달 레이어가 추가되어 클릭 뎁스 증가</div>
+      </div>
+    </div>
+  </article>
+
+
+  <!-- =====================================================
+       VARIANT C — ChatGPT / Vercel v0 Pattern
+       ===================================================== -->
+  <article class="card" id="vc">
+    <div class="card-hdr">
+      <div class="card-label">시안 C · ChatGPT / Vercel v0 패턴</div>
+      <div class="card-title">Composer First — 입력창이 1차시민, 회의는 chip rail</div>
+      <div class="card-ref">
+        ref: <a href="https://chat.openai.com" target="_blank" rel="noopener">chat.openai.com</a>, <a href="https://v0.dev" target="_blank" rel="noopener">v0.dev</a> · composer always visible, recent chips above
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="fbg">
+        <div class="fr"><div class="fav"></div><div class="fb" style="width:48%"></div></div>
+        <div class="fs"><div class="fl" style="width:74%"></div><div class="fl" style="width:57%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:36%"></div><div class="fl" style="width:88%"></div><div class="fl" style="width:70%"></div><div class="fl" style="width:52%"></div></div>
+      </div>
+
+      <!-- Composer-first panel -->
+      <div class="cf-panel">
+
+        <!-- chip rail: meetings compressed to chips (secondary) -->
+        <div class="cf-chip-rail">
+          <div class="cf-chip active">
+            <div class="cf-chip-dot" style="background:linear-gradient(135deg,#667eea,#764ba2);"></div>
+            Q1 실적 리뷰
+          </div>
+          <div class="cf-chip">
+            <div class="cf-chip-dot"></div>
+            스프린트 플래닝
+          </div>
+          <div class="cf-chip">
+            <div class="cf-chip-dot"></div>
+            디자인 리뷰
+          </div>
+          <div class="cf-chip">
+            <div class="cf-chip-dot"></div>
+            채용 인터뷰
+          </div>
+        </div>
+
+        <!-- selected meeting context bar -->
+        <div class="cf-context-bar">
+          <div class="cf-ctx-ico">📋</div>
+          <div class="cf-ctx-text">Q1 분기 실적 리뷰 · 오늘 14:00 · 62분</div>
+          <div class="cf-ctx-tag">선택됨</div>
+        </div>
+
+        <!-- MAIN: composer — the primary element -->
+        <div class="cf-composer">
+          <div class="cf-composer-box">
+            <div class="cf-ta cf-ta-placeholder">Ask anything about your meetings…</div>
+            <div class="cf-actions-row">
+              <div class="cf-actions-left">
+                <button class="cf-small-btn">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/>
+                    <path d="M3 5h6M3 8h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                  요약 보기
+                </button>
+                <button class="cf-small-btn">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l2.5 3 5.5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  액션 아이템
+                </button>
+              </div>
+              <button class="cf-send" aria-label="전송">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.5 8L2 2.5l2 5.5-2 5.5L13.5 8z" fill="white"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- secondary: meeting list toggle (demoted) -->
+        <div class="cf-list-toggle">
+          <span class="cf-toggle-text">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="display:inline;vertical-align:middle;margin-right:5px;">
+              <rect x="1" y="2" width="12" height="10" rx="2" stroke="#536471" stroke-width="1.4" fill="none"/>
+              <path d="M3.5 6h7M3.5 9h5" stroke="#536471" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            모든 회의 목록 보기
+          </span>
+          <span class="cf-toggle-count">12개</span>
+        </div>
+
+      </div>
+
+      <!-- FAB -->
+      <div class="wfab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="14" rx="3" stroke="#0f1419" stroke-width="1.7" fill="none"/>
+          <path d="M8 21h8M12 17v4" stroke="#0f1419" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card-meta">
+      <div class="meta-col">
+        <div class="meta-lbl">장점</div>
+        <div class="mi p">열자마자 입력할 수 있음 — 마찰 0</div>
+        <div class="mi p">Chip으로 회의 컨텍스트 즉시 잠금</div>
+        <div class="mi p">AI가 진입점이고 목록이 보조임을 레이아웃으로 강제</div>
+      </div>
+      <div class="meta-col">
+        <div class="meta-lbl">단점</div>
+        <div class="mi c">기존 위젯과 패러다임 전환 — 개발 공수 최고</div>
+        <div class="mi c">회의 목록 탐색이 chip rail로 제한될 수 있음</div>
+      </div>
+    </div>
+  </article>
+
+
+  <!-- =====================================================
+       VARIANT D — Linear Cmd+K Pattern
+       ===================================================== -->
+  <article class="card" id="vd">
+    <div class="card-hdr">
+      <div class="card-label">시안 D · Linear Cmd+K 패턴</div>
+      <div class="card-title">검색바 + 입력 시 동적으로 등장하는 AI 행</div>
+      <div class="card-ref">
+        ref: <a href="https://linear.app" target="_blank" rel="noopener">linear.app</a> · Cmd+K command bar — "Ask Linear AI: &lt;query&gt;" row auto-generated at top of results on keypress
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="fbg">
+        <div class="fr"><div class="fav"></div><div class="fb" style="width:46%"></div></div>
+        <div class="fs"><div class="fl" style="width:70%"></div><div class="fl" style="width:54%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:32%"></div><div class="fl" style="width:84%"></div></div>
+        <div class="fd"></div>
+        <div class="fs"><div class="fb" style="width:42%"></div><div class="fl" style="width:78%"></div><div class="fl" style="width:62%"></div></div>
+      </div>
+
+      <!-- Linear Cmd+K panel — search state: user has typed "예산" -->
+      <div class="lk-panel">
+
+        <!-- search bar — typing state -->
+        <div class="lk-search-row">
+          <svg class="lk-search-ico" width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <circle cx="6.5" cy="6.5" r="4.5" stroke="#536471" stroke-width="1.5"/>
+            <path d="M10 10l3.5 3.5" stroke="#536471" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div class="lk-input-fake">
+            <span class="lk-typed">예산 승인</span><span class="lk-cursor"></span>
+          </div>
+          <span class="lk-kbd">ESC</span>
+        </div>
+
+        <!-- THE CORE LINEAR PATTERN: AI row dynamically generated from typed query -->
+        <!-- This row does NOT exist when input is empty — it appears as user types -->
+        <div class="lk-ai-row">
+          <div class="lk-ai-ico">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1l1.1 3.4 3.4 1.1-3.4 1.1L7 10l-1.1-3.4L2.5 5.5l3.4-1.1L7 1z" fill="white" opacity=".95"/>
+              <circle cx="11.5" cy="2.5" r=".9" fill="white" opacity=".7"/>
+            </svg>
+          </div>
+          <div class="lk-ai-label">
+            <div class="lk-ai-prefix">✦ AI에게 묻기</div>
+            <div class="lk-ai-query">"예산 승인"</div>
+          </div>
+          <div class="lk-ai-enter">
+            <span class="lk-enter-key">↵</span>
+            Enter
+          </div>
+        </div>
+
+        <!-- section: search results below AI row -->
+        <div class="lk-sect">회의 결과 · 2건</div>
+
+        <div class="lk-row">
+          <div class="lk-row-ico">📋</div>
+          <div class="lk-row-info">
+            <div class="lk-row-name">Q1 분기 실적 리뷰 — <span class="lk-match">예산</span> 검토</div>
+            <div class="lk-row-meta"><span class="lk-row-handle">@sales</span> · 오늘 14:00 · 62분</div>
+          </div>
+        </div>
+
+        <div class="lk-row">
+          <div class="lk-row-ico">💰</div>
+          <div class="lk-row-info">
+            <div class="lk-row-name">마케팅 <span class="lk-match">예산 승인</span> 회의</div>
+            <div class="lk-row-meta"><span class="lk-row-handle">@marketing</span> · 어제 · 29분</div>
+          </div>
+        </div>
+
+        <!-- empty state prompt when input is empty -->
+        <div class="lk-sect" style="color:#cfd9de; border-top:1px solid #eff3f4; padding-top:9px; padding-bottom:8px; font-size:11px; letter-spacing:.03em;">
+          입력 시 AI 행이 자동으로 나타납니다
+        </div>
+
+      </div>
+
+      <!-- FAB -->
+      <div class="wfab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="14" rx="3" stroke="#0f1419" stroke-width="1.7" fill="none"/>
+          <path d="M8 21h8M12 17v4" stroke="#0f1419" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card-meta">
+      <div class="meta-col">
+        <div class="meta-lbl">장점</div>
+        <div class="mi p">입력 전엔 AI 행 없음 → 인터페이스 과부하 없음</div>
+        <div class="mi p">검색 중에 자연스럽게 AI로 전환 가능 — 패턴 학습 불필요</div>
+        <div class="mi p">회의 목록 그대로 유지, 검색 기능만 추가</div>
+      </div>
+      <div class="meta-col">
+        <div class="meta-lbl">단점</div>
+        <div class="mi c">AI 진입점이 수동적 — 능동적으로 어필하지 않음</div>
+        <div class="mi c">검색을 해야만 AI 선택지 보임 (discoverability 낮음)</div>
+      </div>
+    </div>
+  </article>
+
+</main>
+</body>
+</html>

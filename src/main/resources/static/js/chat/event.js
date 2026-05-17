@@ -30,6 +30,12 @@ window.onload = () => {
     const deleteChatModal = document.querySelector(".Small-Modal.DeleteChat");
     const leaveModal = document.querySelector(".Small-Modal.Leave");
     const banUserModal = document.querySelector(".Small-Modal.Ban-User");
+    const profanityModal = document.querySelector(".Small-Modal.Profanity");
+    const profanityModalTitle = document.getElementById("profanityModalTitle");
+    const profanityModalMessage = document.getElementById("profanityModalMessage");
+    const profanitySendAnywayBtn = document.getElementById("profanitySendAnyway");
+    const profanityEditBtn = document.getElementById("profanityEdit");
+    const profanityCloseBtn = document.getElementById("profanityClose");
 
     // 1-3.반응형 관련 DOM (모바일 nav 더보기/로그아웃은 /js/common/mobile-nav.js가 처리)
     const userListWrapper = document.querySelector(".Chat-UserList-Wrapper");
@@ -71,6 +77,9 @@ window.onload = () => {
         SOCKET_RETRY_DELAY: 3000,
         MAX_MESSAGE_LENGTH: 4000,
     };
+
+    // 비속어 체크 결과로 대기 중인 전송 페이로드. 모달에서 "그래도 보내기" 선택시 사용.
+    let pendingSendPayload = null;
 
     let expertSearchTimer = null;
     let roomRefreshTimer = null;
@@ -1449,17 +1458,22 @@ window.onload = () => {
         setTimeout(() => toast.classList.remove("on"), CONFIG.TOAST_DURATION);
     }
 
-    // 11-5.메시지 전송 이벤트
-    chatForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        if (isSending) return;
-        isSending = true;
-        const content = chatInput.value.trim();
-        const file = chatAttach?.files[0] || null;
-        if (!content && !file) {
-            isSending = false;
-            return;
+    // 11-5-0-1.비속어 모달 열기. allowOverride=true면 "그래도 보내기" 버튼 노출.
+    function openProfanityModal({ allowOverride }) {
+        if (allowOverride) {
+            profanityModalTitle.textContent = "비속어가 감지되었습니다";
+            profanityModalMessage.textContent = "메시지에 비속어로 보이는 표현이 포함되어 있습니다. 그래도 보내시겠습니까?";
+            profanitySendAnywayBtn.classList.remove("off");
+        } else {
+            profanityModalTitle.textContent = "전송할 수 없습니다";
+            profanityModalMessage.textContent = "심한 비속어가 감지되어 메시지를 보낼 수 없습니다. 수정 후 다시 시도해주세요.";
+            profanitySendAnywayBtn.classList.add("off");
         }
+        openModal(profanityModal);
+    }
+
+    // 11-5-0-2.실제 전송 수행. 비속어 체크 통과 후 호출.
+    async function performSend(content, file) {
         try {
             if (file) {
                 await ChatService.sendMessageWithFile(currentRoomId, content, file);
@@ -1479,10 +1493,70 @@ window.onload = () => {
                 if (inputImageEl) inputImageEl.src = "";
                 if (inputImageContainer) inputImageContainer.classList.add("off");
             }
-        } finally {
-            isSending = false;
         }
+    }
+
+    // 11-5.메시지 전송 이벤트
+    chatForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (isSending) return;
+        isSending = true;
+        const content = chatInput.value.trim();
+        const file = chatAttach?.files[0] || null;
+        if (!content && !file) {
+            isSending = false;
+            return;
+        }
+
+        if (content) {
+            const verdict = await ChatService.checkProfanity(content);
+            if (verdict.action === "soften_required") {
+                pendingSendPayload = null;
+                openProfanityModal({ allowOverride: false });
+                isSending = false;
+                return;
+            }
+            if (verdict.action === "show_modal") {
+                pendingSendPayload = { content, file };
+                openProfanityModal({ allowOverride: true });
+                isSending = false;
+                return;
+            }
+        }
+
+        await performSend(content, file);
+        isSending = false;
     });
+
+    // 11-5-1.비속어 모달 - "그래도 보내기" 클릭시 대기 페이로드 전송
+    profanitySendAnywayBtn.addEventListener("click", async () => {
+        const payload = pendingSendPayload;
+        pendingSendPayload = null;
+        closeModal(profanityModal);
+        if (!payload || isSending) return;
+        isSending = true;
+        await performSend(payload.content, payload.file);
+        isSending = false;
+    });
+
+    // 11-5-2.비속어 모달 - "수정하기" / 닫기 클릭시 전송 취소, 입력창 포커스
+    function cancelProfanitySend() {
+        pendingSendPayload = null;
+        closeModal(profanityModal);
+        chatInput.focus();
+    }
+    profanityEditBtn.addEventListener("click", cancelProfanitySend);
+    profanityCloseBtn.addEventListener("click", cancelProfanitySend);
+
+    // 11-5-3.비속어 모달 키보드 단축키 - ESC/Enter 모두 "수정하기"로 동작.
+    // capture 단계에서 잡아 chatInput의 Enter→submit이 다시 트리거되지 않게 한다.
+    document.addEventListener("keydown", (e) => {
+        if (profanityModal.classList.contains("off")) return;
+        if (e.key !== "Escape" && e.key !== "Enter") return;
+        e.preventDefault();
+        e.stopPropagation();
+        cancelProfanitySend();
+    }, true);
 
     // 11-6.한글 입력 조합 처리
     let isComposing = false;

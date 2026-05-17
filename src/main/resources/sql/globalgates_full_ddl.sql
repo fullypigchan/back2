@@ -48,23 +48,26 @@ CREATE TABLE tbl_file (
 
 -- tbl_member
 CREATE TABLE tbl_member (
-    id               bigint        GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    member_name      varchar(255),
-    member_email     varchar(255)  NOT NULL UNIQUE,
-    member_password  varchar(255),
-    member_nickname  varchar(255),
-    member_handle    varchar(255)  UNIQUE NOT NULL,
-    member_phone     varchar(255),
-    member_bio       text,
-    member_region    varchar(255),
-    member_status    member_status NOT NULL DEFAULT 'active',
-    member_role      member_role   NOT NULL DEFAULT 'business',
-    push_enabled     boolean       NOT NULL DEFAULT true,
-    website_url      varchar(255),
-    birth_date       varchar(255),
-    created_datetime timestamp     NOT NULL DEFAULT now(),
-    updated_datetime timestamp     NOT NULL DEFAULT now(),
-    last_login_at    timestamp
+    id                    bigint        GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    member_name           varchar(255),
+    member_email          varchar(255)  NOT NULL UNIQUE,
+    member_password       varchar(255),
+    member_nickname       varchar(255),
+    member_handle         varchar(255)  UNIQUE NOT NULL,
+    member_phone          varchar(255),
+    member_bio            text,
+    member_region         varchar(255),
+    member_status         member_status NOT NULL DEFAULT 'active',
+    member_role           member_role   NOT NULL DEFAULT 'business',
+    push_enabled          boolean       NOT NULL DEFAULT true,
+    website_url           varchar(255),
+    birth_date            varchar(255),
+    created_datetime      timestamp     NOT NULL DEFAULT now(),
+    updated_datetime      timestamp     NOT NULL DEFAULT now(),
+    last_login_at         timestamp,
+    member_language       varchar(255),
+    member_country        varchar(255),
+    member_login_verified boolean       DEFAULT true
 );
 
 -- tbl_category
@@ -604,6 +607,18 @@ CREATE TABLE tbl_video_session (
     CONSTRAINT fk_video_session_conversation FOREIGN KEY (conversation_id) REFERENCES tbl_conversation(id),
     CONSTRAINT fk_video_session_caller FOREIGN KEY (caller_id) REFERENCES tbl_member(id),
     CONSTRAINT fk_video_session_receiver FOREIGN KEY (receiver_id) REFERENCES tbl_member(id)
+);
+
+CREATE INDEX idx_video_session_caller_id ON tbl_video_session(caller_id);
+CREATE INDEX idx_video_session_receiver_id ON tbl_video_session(receiver_id);
+
+-- tbl_ai_video_summary (화상 채팅 AI 요약본)
+CREATE TABLE tbl_ai_video_summary (
+    id               bigint    GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    video_session_id bigint    NOT NULL UNIQUE,
+    summary          text      NOT NULL,
+    created_datetime timestamp NOT NULL DEFAULT now(),
+    CONSTRAINT fk_ai_video_summary_session FOREIGN KEY (video_session_id) REFERENCES tbl_video_session(id)
 );
 
 -- tbl_video_recoding (녹음 파일)

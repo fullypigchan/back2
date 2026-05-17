@@ -33,8 +33,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         "http://localhost:*",
                         "https://127.0.0.1:*",
                         "http://127.0.0.1:*",
-                        "https://*.globalgates.com",
-                        "https://globalgates.com"
+                        "https://globalgates.ai.kr",
+                        "https://*.globalgates.ai.kr"
                 )
                 .addInterceptors(handshakeInterceptor)
                 .withSockJS();

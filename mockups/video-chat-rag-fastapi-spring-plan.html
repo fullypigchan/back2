@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GlobalGates Video Chat RAG · FastAPI Spring 연결 계획</title>
+<style>
+  :root {
+    --bg: #0f1217;
+    --panel: #171b22;
+    --panel2: #1d232d;
+    --line: #303846;
+    --text: #edf2f7;
+    --muted: #9aa6b6;
+    --soft: #c9d2df;
+    --java: #f49b35;
+    --py: #3b82f6;
+    --db: #22c55e;
+    --redis: #ef4444;
+    --warn: #f59e0b;
+    --bad: #fb7185;
+    --ok: #34d399;
+    --ink: #05070a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.65 -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+  }
+  a { color: #7dd3fc; text-decoration: none; }
+  code, pre { font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace; }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 38px 24px 96px; }
+  .top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: end;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 26px;
+  }
+  h1 { margin: 10px 0 8px; font-size: 30px; line-height: 1.22; letter-spacing: 0; }
+  h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
+  h3 { margin: 0 0 10px; font-size: 15px; }
+  p { margin: 0 0 12px; color: var(--soft); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    margin-right: 5px;
+  }
+  .meta { color: var(--muted); font-size: 12px; text-align: right; }
+  .meta b { color: var(--text); }
+  .toc { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .toc a { border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; font-size: 12px; color: var(--soft); background: rgba(255,255,255,.02); }
+  .section { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, var(--panel), var(--panel2)); margin-bottom: 18px; overflow: hidden; }
+  .section .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.02); }
+  .section .head .left { display: flex; align-items: center; gap: 12px; }
+  .num { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: #7dd3fc; color: var(--ink); font-weight: 800; }
+  .section .body { padding: 18px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .card { border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.025); padding: 14px; }
+  .card h3 .tag { float: right; font-size: 11px; color: var(--muted); font-weight: 500; }
+  .mini { font-size: 12px; color: var(--muted); }
+  .pill { display: inline-flex; border-radius: 999px; padding: 2px 8px; border: 1px solid var(--line); font-size: 11px; color: var(--muted); margin: 2px 3px 2px 0; }
+  .pill.py { color: #bfdbfe; border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.1); }
+  .pill.java { color: #fed7aa; border-color: rgba(244,155,53,.5); background: rgba(244,155,53,.1); }
+  .pill.db { color: #bbf7d0; border-color: rgba(34,197,94,.5); background: rgba(34,197,94,.1); }
+  .pill.redis { color: #fecaca; border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.1); }
+  .pill.warn { color: #fde68a; border-color: rgba(245,158,11,.5); background: rgba(245,158,11,.1); }
+  ul, ol { margin: 8px 0 0 18px; padding: 0; color: var(--soft); }
+  li { margin: 5px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 10px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; background: rgba(255,255,255,.02); }
+  td code { color: #bae6fd; }
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .lane { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: rgba(255,255,255,.025); min-height: 190px; }
+  .lane h3 { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; text-align: center; }
+  .msg { border-left: 3px solid #7dd3fc; background: rgba(125,211,252,.06); border-radius: 0 8px 8px 0; padding: 8px 9px; margin: 8px 0; font-size: 12px; }
+  .msg.java { border-color: var(--java); background: rgba(244,155,53,.08); }
+  .msg.py { border-color: var(--py); background: rgba(59,130,246,.08); }
+  .msg.db { border-color: var(--db); background: rgba(34,197,94,.08); }
+  .msg.redis { border-color: var(--redis); background: rgba(239,68,68,.08); }
+  .codecard { border: 1px solid var(--line); border-radius: 10px; background: #080b10; overflow: hidden; margin: 12px 0; }
+  .codecard .bar { padding: 8px 12px; color: var(--muted); font-size: 12px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.025); display: flex; justify-content: space-between; gap: 10px; }
+  .codecard .bar b { color: #7dd3fc; }
+  pre { margin: 0; padding: 13px 15px; overflow-x: auto; color: #e8eef7; font-size: 12.3px; line-height: 1.58; }
+  .callout { border: 1px solid rgba(245,158,11,.45); background: rgba(245,158,11,.08); border-radius: 10px; padding: 13px; color: #fde68a; }
+  .danger { border-color: rgba(251,113,133,.5); background: rgba(251,113,133,.08); color: #fecdd3; }
+  .ok { border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.08); color: #bbf7d0; }
+  .tree { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tree code { color: #dbeafe; }
+  .sources li { word-break: break-all; }
+  @media (max-width: 1100px) {
+    .top, .grid2, .grid3, .tree { grid-template-columns: 1fr; }
+    .grid4, .flow { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 700px) {
+    .grid4, .flow { grid-template-columns: 1fr; }
+    .meta { text-align: left; }
+    .wrap { padding: 24px 14px 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <span class="badge">Plan v3</span>
+      <span class="badge">FastAPI AI</span>
+      <span class="badge">Spring Boot BFF</span>
+      <span class="badge">SSE Stream</span>
+      <span class="badge">Auth First</span>
+      <h1>Video Chat RAG 챗봇의 FastAPI · Spring Boot 연결 계획</h1>
+      <p>현재 <code>f_video_chat_rag.ipynb</code>의 구조를 기준으로, AI 실행부는 FastAPI에 심고 화면과 인증 경계는 Spring Boot에 남기는 계획안이다. 핵심 CRUD는 전체 CRUD가 아니라 <b>member 범위 요약 SELECT</b>, <b>요약 INSERT</b>, <b>질의 로그 INSERT</b>, <b>Redis 캐시 저장</b>에 한정한다.</p>
+    </div>
+    <div class="meta">
+      <div>수정일: <b>2026-05-11</b></div>
+      <div>분석 경로: <b>~/Desktop/gb/fastapi</b></div>
+      <div>대상 UI: <b>video_ai 위젯</b></div>
+    </div>
+  </div>
+
+  <div class="toc">
+    <a href="#now">1. 현재 구조 판정</a>
+    <a href="#crud">2. 필요한 CRUD</a>
+    <a href="#arch">3. 연결 구조</a>
+    <a href="#fastapi">4. FastAPI 모듈 코드</a>
+    <a href="#spring">5. Spring 모듈 코드</a>
+    <a href="#frontend">6. 화면 스트림</a>
+    <a href="#lightrag">7. aquery/hybrid 판단</a>
+    <a href="#steps">8. 적용 순서</a>
+    <a href="#sources">9. 출처</a>
+  </div>
+
+  <div class="section" id="now">
+    <div class="head"><div class="left"><div class="num">1</div><h2>현재 구조 판정</h2></div><span class="mini">로컬 파일 기준</span></div>
+    <div class="body">
+      <div class="grid3">
+        <div class="card">
+          <h3>FastAPI 예제 <span class="tag">~/Desktop/gb/fastapi</span></h3>
+          <p><code>workspace/basic</code>은 이미 <code>router → service → repository/domain</code> 분리 형태다. 이 패턴은 유지한다.</p>
+          <p><code>workspace/stream</code>은 <code>StreamingResponse</code>와 Redis semantic cache 흐름이 있지만, 현재는 단일 메시지 기반이고 member/video scope가 없다.</p>
+        </div>
+        <div class="card">
+          <h3>Spring 현황 <span class="tag">globalgates</span></h3>
+          <p><code>VideoChatAPIController</code>가 세션 생성, 녹음 업로드, S3 저장을 담당한다. UI 위젯 <code>video_ai/event.js</code>는 아직 샘플 회의 데이터와 “분석 중” 더미 응답만 있다.</p>
+          <p><code>tbl_video_session</code>에는 <code>caller_id</code>, <code>receiver_id</code>가 있어 RAG 범위를 로그인 회원 기준으로 제한할 수 있다.</p>
+        </div>
+        <div class="card">
+          <h3>노트북 기준 <span class="tag">f_video_chat_rag.ipynb</span></h3>
+          <p>DB에서 <code>tbl_ai_video_summary</code>와 <code>tbl_video_session</code>을 조인해 문서를 만들고, FAISS 검색과 Redis answer cache를 사용한다.</p>
+          <p>캐시 scope는 <code>member_id</code>와 선택적 <code>video_session_id</code>로 만들어야 한다. Spring에서 인증된 memberId를 넣고, 브라우저 입력값으로 받지 않는다.</p>
+          <p>실제 DB에는 <code>tbl_ai_video_summary.video_session_id</code>의 FK와 UNIQUE가 있으므로, repo DDL에도 같은 구조를 반영한다.</p>
+        </div>
+      </div>
+      <div class="callout danger" style="margin-top:14px">
+        결론: 브라우저가 FastAPI를 직접 호출하면 <code>member_id</code>를 조작할 수 있다. Spring이 인증된 사용자에서 <code>memberId</code>를 꺼내 FastAPI로 내부 호출하고, FastAPI는 cache lookup보다 먼저 <code>member_id + video_session_id</code> 접근 권한을 검증한다.
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="crud">
+    <div class="head"><div class="left"><div class="num">2</div><h2>챗봇 서비스에서 실제 필요한 CRUD</h2></div><span class="mini">전체 CRUD 금지, 서비스 유스케이스 기준</span></div>
+    <div class="body">
+      <table>
+        <thead>
+          <tr><th>구분</th><th>필요 여부</th><th>대상</th><th>이유</th><th>담당</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill db">SELECT</span></td>
+            <td>필수</td>
+            <td><code>tbl_ai_video_summary join tbl_video_session</code></td>
+            <td>질문에 답할 수 있는 문서는 로그인 회원이 caller 또는 receiver였던 화상채팅 요약뿐이다.</td>
+            <td>FastAPI repository</td>
+          </tr>
+          <tr>
+            <td><span class="pill db">SELECT</span></td>
+            <td>필수</td>
+            <td><code>tbl_video_session</code></td>
+            <td>선택적 <code>video_session_id</code>가 들어오면 해당 회의가 현재 회원의 회의인지 검증해야 한다.</td>
+            <td>FastAPI 또는 Spring</td>
+          </tr>
+          <tr>
+            <td><span class="pill db">INSERT</span></td>
+            <td>필수</td>
+            <td><code>tbl_ai_video_summary</code></td>
+            <td>녹음 STT/요약 결과를 RAG 코퍼스로 만들려면 회의별 요약을 저장해야 한다. 현 노트북도 이 테이블을 전제로 한다.</td>
+            <td>FastAPI AI summary service</td>
+          </tr>
+          <tr>
+            <td><span class="pill redis">INSERT</span></td>
+            <td>필수</td>
+            <td>Redis answer cache</td>
+            <td>질문 답변 캐시는 DB CRUD가 아니라 Redis vector index에 저장한다. scope는 <code>member_{id}__video_session_{id|all}</code>.</td>
+            <td>FastAPI semantic_cache</td>
+          </tr>
+          <tr>
+            <td><span class="pill db">INSERT</span></td>
+            <td>권장</td>
+            <td><code>tbl_ai_video_chat_query_log</code></td>
+            <td>장애 분석, cache hit율, 출처 추적, 비용 측정에 필요하다. 서비스 동작 자체에는 없어도 된다.</td>
+            <td>FastAPI repository</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">UPDATE</span></td>
+            <td>조건부</td>
+            <td><code>tbl_ai_video_summary</code></td>
+            <td>같은 회의를 재요약하거나 STT 오류를 보정할 때만 필요하다. 일반 질문 답변에서는 사용하지 않는다.</td>
+            <td>FastAPI summary service</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">DELETE</span></td>
+            <td>조건부</td>
+            <td>summary/index/cache</td>
+            <td>회의 삭제, 개인정보 삭제 요청, 보관기간 만료가 있을 때만 필요하다. 챗봇 Q&amp;A의 기본 경로에는 없다.</td>
+            <td>Spring 정책 + FastAPI index cleanup</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section" id="arch">
+    <div class="head"><div class="left"><div class="num">3</div><h2>FastAPI와 Spring Boot 연결 구조</h2></div><span class="mini">브라우저 → Spring → FastAPI</span></div>
+    <div class="body">
+      <div class="flow">
+        <div class="lane">
+          <h3>Browser</h3>
+          <div class="msg">우측 하단 챗봇에서 질문 입력</div>
+          <div class="msg">POST <code>/api/video-chat/ai/stream</code></div>
+          <div class="msg">응답 body stream을 읽어 말풍선에 누적</div>
+        </div>
+        <div class="lane">
+          <h3>Spring BFF</h3>
+          <div class="msg java"><code>@AuthenticationPrincipal</code>에서 memberId 추출</div>
+          <div class="msg java">질문 길이, optional videoSessionId 검증</div>
+          <div class="msg java">FastAPI 내부 API로 SSE relay</div>
+        </div>
+        <div class="lane">
+          <h3>FastAPI</h3>
+          <div class="msg py">internal token 검증</div>
+          <div class="msg py">member/video_session 권한 검증</div>
+          <div class="msg py">semantic cache lookup</div>
+          <div class="msg py">miss면 RAG chain streaming</div>
+        </div>
+        <div class="lane">
+          <h3>DB</h3>
+          <div class="msg db">video_session 권한 SELECT</div>
+          <div class="msg db">member 범위 summary SELECT</div>
+          <div class="msg db">질의 로그 INSERT</div>
+          <div class="msg db">요약 생성 시 summary INSERT</div>
+        </div>
+        <div class="lane">
+          <h3>Redis/FAISS</h3>
+          <div class="msg redis">Redis answer cache hit/miss</div>
+          <div class="msg redis">FAISS metadata filter</div>
+          <div class="msg redis">답변 완료 후 cache store</div>
+        </div>
+      </div>
+      <div class="callout ok" style="margin-top:14px">
+        API contract: 브라우저 요청에는 <code>question</code>과 선택적 <code>videoSessionId</code>만 둔다. <code>memberId</code>는 Spring이 인증 객체에서 넣어 FastAPI로 전달한다. FastAPI는 <code>StreamingResponse</code>를 만들기 전에 객체 권한을 먼저 검증한다.
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="fastapi">
+    <div class="head"><div class="left"><div class="num">4</div><h2>FastAPI에 심을 AI 모듈 코드</h2></div><span class="mini">현재 notebook → app 모듈화</span></div>
+    <div class="body">
+      <div class="tree">
+        <div class="card">
+          <h3>권장 패키지 구조</h3>
+          <pre>app/
+  main.py
+  core/config.py
+  db/database.py
+  domain/video_chat_rag.py
+  repository/video_summary_repository.py
+  service/semantic_cache.py
+  service/video_rag_service.py
+  router/video_chat_rag.py</pre>
+        </div>
+        <div class="card">
+          <h3>노트북 코드의 이동 위치</h3>
+          <ul>
+            <li><code>load_dotenv</code>, env 상수 → <code>core/config.py</code></li>
+            <li>DB SELECT → <code>repository/video_summary_repository.py</code></li>
+            <li>Document 생성, FAISS, retriever → <code>service/video_rag_service.py</code></li>
+            <li>Redis semantic cache → <code>service/semantic_cache.py</code></li>
+            <li><code>ask_video_chat_rag</code> → <code>stream_answer</code> async generator</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>app/domain/video_chat_rag.py</b><span>입출력 DTO</span></div>
+<pre>from pydantic import BaseModel, Field
+
+class VideoChatRagRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=1000)
+    member_id: int
+    video_session_id: int | None = None
+
+class VideoSummaryRow(BaseModel):
+    summary_id: int
+    video_session_id: int
+    conversation_id: int
+    caller_id: int
+    receiver_id: int
+    created_datetime: str | None = None
+    summary: str</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>app/db/database.py</b><span>기존 basic/database.py 패턴 유지</span></div>
+<pre>import asyncpg
+from contextlib import asynccontextmanager
+from app.core.config import settings
+
+class Database:
+    def __init__(self):
+        self._pool = None
+
+    async def connect(self):
+        if self._pool is None:
+            self._pool = await asyncpg.create_pool(settings.database_url)
+
+    async def disconnect(self):
+        if self._pool is not None:
+            await self._pool.close()
+
+    @asynccontextmanager
+    async def get_connection(self):
+        async with self._pool.acquire() as conn:
+            yield conn
+
+db = Database()</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>app/repository/video_summary_repository.py</b><span>SELECT와 INSERT만 우선</span></div>
+<pre>from app.db.database import db
+
+class VideoSummaryRepository:
+    async def member_can_access_video_session(self, member_id: int, video_session_id: int) -> bool:
+        query = """
+            select exists (
+                select 1
+                from tbl_video_session
+                where id = $2
+                  and (caller_id = $1 or receiver_id = $1)
+            )
+        """
+        async with db.get_connection() as conn:
+            return await conn.fetchval(query, member_id, video_session_id)
+
+    async def find_summaries_for_member(self, member_id: int, video_session_id: int | None = None):
+        query = """
+            select
+                s.id as summary_id,
+                s.video_session_id,
+                vs.conversation_id,
+                vs.caller_id,
+                vs.receiver_id,
+                s.created_datetime,
+                s.summary
+            from tbl_ai_video_summary s
+            join tbl_video_session vs on vs.id = s.video_session_id
+            where (vs.caller_id = $1 or vs.receiver_id = $1)
+              and ($2::bigint is null or s.video_session_id = $2)
+            order by s.video_session_id
+        """
+        async with db.get_connection() as conn:
+            rows = await conn.fetch(query, member_id, video_session_id)
+            return [dict(row) for row in rows]
+
+    async def insert_summary(self, video_session_id: int, summary: str) -> int:
+        query = """
+            insert into tbl_ai_video_summary (video_session_id, summary)
+            values ($1, $2)
+            on conflict (video_session_id)
+            do update set summary = excluded.summary
+            returning id
+        """
+        async with db.get_connection() as conn:
+            return await conn.fetchval(query, video_session_id, summary)
+
+    async def insert_query_log(self, member_id: int, question: str, answer: str, cache_hit: bool):
+        query = """
+            insert into tbl_ai_video_chat_query_log
+                (member_id, question, answer, cache_hit)
+            values ($1, $2, $3, $4)
+        """
+        async with db.get_connection() as conn:
+            await conn.execute(query, member_id, question, answer, cache_hit)</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>app/service/semantic_cache.py</b><span>노트북의 Redis cache scope 유지</span></div>
+<pre>import json
+from langchain.globals import set_llm_cache
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Redis
+from langchain_community.vectorstores.redis import RedisTag
+from app.core.config import settings
+
+set_llm_cache(None)
+
+cache_embeddings = HuggingFaceEmbeddings(
+    model_name="jhgan/ko-sbert-nli",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": True},
+)
+
+ANSWER_CACHE_SCHEMA = {
+    "text": [{"name": "question"}],
+    "tag": [{"name": "answer"}, {"name": "scope"}],
+}
+
+def build_cache_scope(member_id: int, video_session_id: int | None = None) -> str:
+    if member_id is None:
+        raise ValueError("member_id is required")
+    session_scope = "all" if video_session_id is None else str(video_session_id)
+    return f"member_{member_id}__video_session_{session_scope}"
+
+def build_cache_query(question: str, member_id: int, video_session_id: int | None = None) -> str:
+    return f"{build_cache_scope(member_id, video_session_id)}\n질문: {question}"
+
+class SemanticAnswerCache:
+    def _store(self):
+        return Redis.from_existing_index(
+            cache_embeddings,
+            index_name=settings.answer_cache_index,
+            redis_url=settings.redis_url,
+            schema=ANSWER_CACHE_SCHEMA,
+        )
+
+    def lookup(self, question: str, member_id: int, video_session_id: int | None = None):
+        scope = build_cache_scope(member_id, video_session_id)
+        try:
+            results = self._store().similarity_search_with_score(
+                build_cache_query(question, member_id, video_session_id),
+                k=1,
+                filter=RedisTag("scope") == scope,
+            )
+        except Exception:
+            return None
+
+        if not results:
+            return None
+        doc, score = results[0]
+        if score &lt;= settings.answer_cache_score_threshold and doc.metadata.get("scope") == scope:
+            return {"answer": doc.metadata["answer"], "score": score, "scope": scope}
+        return None
+
+    def store(self, question: str, answer: str, member_id: int, video_session_id: int | None = None):
+        scope = build_cache_scope(member_id, video_session_id)
+        Redis.from_texts(
+            texts=[build_cache_query(question, member_id, video_session_id)],
+            embedding=cache_embeddings,
+            metadatas=[{"question": question, "answer": answer, "scope": scope}],
+            index_name=settings.answer_cache_index,
+            redis_url=settings.redis_url,
+            index_schema=ANSWER_CACHE_SCHEMA,
+        )
+
+def sse_json(payload: dict) -> str:
+    return "data: " + json.dumps(payload, ensure_ascii=False) + "\n\n"</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>app/service/video_rag_service.py</b><span>RAG miss일 때만 LLM 호출</span></div>
+<pre>import asyncio
+from langchain_core.documents import Document
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from app.repository.video_summary_repository import VideoSummaryRepository
+from app.service.semantic_cache import SemanticAnswerCache, sse_json
+
+class VideoRagService:
+    def __init__(self):
+        self.repo = VideoSummaryRepository()
+        self.cache = SemanticAnswerCache()
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name="jhgan/ko-sbert-nli",
+            model_kwargs={"device": "cpu"},
+            encode_kwargs={"normalize_embeddings": True},
+        )
+        self.llm = ChatOpenAI(model_name="gpt-5.4-mini", temperature=0, cache=False)
+        self.prompt = ChatPromptTemplate.from_template(
+            "너는 사용자의 화상채팅 요약 기록만 근거로 답한다.\n"
+            "근거가 없으면 모른다고 답한다.\n\n"
+            "[화상채팅 요약]\n{context}\n\n[질문]\n{question}"
+        )
+        self.chain = self.prompt | self.llm | StrOutputParser()
+
+    async def assert_authorized(self, member_id: int, video_session_id: int | None):
+        if member_id is None:
+            raise PermissionError("member_id is required")
+        if video_session_id is None:
+            return
+        allowed = await self.repo.member_can_access_video_session(member_id, video_session_id)
+        if not allowed:
+            raise PermissionError("video_session_id is not accessible for member_id")
+
+    async def _build_member_vectorstore(self, member_id: int, video_session_id: int | None):
+        rows = await self.repo.find_summaries_for_member(member_id, video_session_id)
+        docs = [
+            Document(
+                page_content=row["summary"],
+                metadata={
+                    "summary_id": row["summary_id"],
+                    "video_session_id": row["video_session_id"],
+                    "conversation_id": row["conversation_id"],
+                    "caller_id": row["caller_id"],
+                    "receiver_id": row["receiver_id"],
+                },
+            )
+            for row in rows
+        ]
+        if not docs:
+            return None
+        return FAISS.from_documents(docs, self.embeddings)
+
+    async def _retrieve_context(self, question: str, member_id: int, video_session_id: int | None):
+        vectorstore = await self._build_member_vectorstore(member_id, video_session_id)
+        if vectorstore is None:
+            return ""
+        docs = vectorstore.similarity_search(question, k=4)
+        return "\n\n".join(
+            f"[video_session_id={d.metadata['video_session_id']}]\n{d.page_content}"
+            for d in docs
+        )
+
+    async def stream_answer(self, question: str, member_id: int, video_session_id: int | None = None):
+        # router에서 assert_authorized를 먼저 호출한 뒤 StreamingResponse를 생성한다.
+        hit = self.cache.lookup(question, member_id, video_session_id)
+        if hit:
+            yield sse_json({"type": "meta", "cacheHit": True, "score": hit["score"]})
+            for char in hit["answer"]:
+                yield sse_json({"type": "token", "text": char})
+                await asyncio.sleep(0.005)
+            yield sse_json({"type": "done"})
+            return
+
+        context = await self._retrieve_context(question, member_id, video_session_id)
+        if not context:
+            msg = "확인 가능한 화상채팅 요약 기록이 없습니다."
+            yield sse_json({"type": "meta", "cacheHit": False})
+            yield sse_json({"type": "token", "text": msg})
+            yield sse_json({"type": "done"})
+            return
+
+        answer = ""
+        yield sse_json({"type": "meta", "cacheHit": False})
+        async for token in self.chain.astream({"context": context, "question": question}):
+            answer += token
+            yield sse_json({"type": "token", "text": token})
+
+        self.cache.store(question, answer, member_id, video_session_id)
+        await self.repo.insert_query_log(member_id, question, answer, cache_hit=False)
+        yield sse_json({"type": "done"})</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>app/router/video_chat_rag.py</b><span>StreamingResponse endpoint</span></div>
+<pre>from fastapi import APIRouter, Header, HTTPException, status
+from fastapi.responses import StreamingResponse
+from app.core.config import settings
+from app.domain.video_chat_rag import VideoChatRagRequest
+from app.service.video_rag_service import VideoRagService
+
+router = APIRouter(prefix="/internal/ai/video-chat", tags=["VideoChatRAG"])
+rag_service = VideoRagService()
+
+def verify_internal_token(x_ai_internal_token: str | None):
+    if x_ai_internal_token != settings.ai_internal_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid internal token")
+
+@router.post("/rag/stream")
+async def stream_video_chat_rag(req: VideoChatRagRequest, x_ai_internal_token: str | None = Header(None)):
+    verify_internal_token(x_ai_internal_token)
+    try:
+        await rag_service.assert_authorized(req.member_id, req.video_session_id)
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+    return StreamingResponse(
+        rag_service.stream_answer(req.question, req.member_id, req.video_session_id),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache"},
+    )</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="spring">
+    <div class="head"><div class="left"><div class="num">5</div><h2>Spring Boot 모듈 코드</h2></div><span class="mini">화면과 인증 경계</span></div>
+    <div class="body">
+      <div class="callout">
+        현재 <code>build.gradle</code>에는 <code>spring-boot-starter-webflux</code>가 없다. Spring MVC 서버는 유지하되 FastAPI SSE를 소비하려면 WebClient 사용을 위해 WebFlux starter를 추가하는 편이 가장 단순하다.
+      </div>
+      <div class="codecard">
+        <div class="bar"><b>build.gradle</b><span>WebClient dependency</span></div>
+<pre>dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/java/com/app/globalgates/dto/video_chat_ai/VideoChatAiRequest.java</b><span>브라우저 요청 DTO</span></div>
+<pre>package com.app.globalgates.dto.video_chat_ai;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record VideoChatAiRequest(
+        @NotBlank @Size(max = 1000) String question,
+        Long videoSessionId
+) {}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/java/com/app/globalgates/dto/video_chat_ai/VideoChatAiInternalRequest.java</b><span>FastAPI 내부 요청 DTO</span></div>
+<pre>package com.app.globalgates.dto.video_chat_ai;
+
+public record VideoChatAiInternalRequest(
+        String question,
+        Long memberId,
+        Long videoSessionId
+) {}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/java/com/app/globalgates/config/FastAiConfig.java</b><span>WebClient bean</span></div>
+<pre>package com.app.globalgates.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Configuration
+public class FastAiConfig {
+    @Bean
+    public WebClient fastAiWebClient(
+            WebClient.Builder builder,
+            @Value("${fast-ai.base-url}") String baseUrl
+    ) {
+        return builder.baseUrl(baseUrl).build();
+    }
+}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/java/com/app/globalgates/service/video_chat_ai/VideoChatAiClient.java</b><span>FastAPI SSE 소비</span></div>
+<pre>package com.app.globalgates.service.video_chat_ai;
+
+import com.app.globalgates.dto.video_chat_ai.VideoChatAiInternalRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+
+@Component
+@RequiredArgsConstructor
+public class VideoChatAiClient {
+    private final WebClient fastAiWebClient;
+
+    @Value("${fast-ai.internal-token}")
+    private String internalToken;
+
+    public Flux&lt;String&gt; stream(VideoChatAiInternalRequest request) {
+        return fastAiWebClient.post()
+                .uri("/internal/ai/video-chat/rag/stream")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .header("X-AI-Internal-Token", internalToken)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference&lt;ServerSentEvent&lt;String&gt;&gt;() {})
+                .map(ServerSentEvent::data);
+    }
+}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/java/com/app/globalgates/service/video_chat_ai/VideoChatAiService.java</b><span>SseEmitter relay</span></div>
+<pre>package com.app.globalgates.service.video_chat_ai;
+
+import com.app.globalgates.dto.video_chat_ai.VideoChatAiInternalRequest;
+import com.app.globalgates.dto.video_chat_ai.VideoChatAiRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+@Service
+@RequiredArgsConstructor
+public class VideoChatAiService {
+    private final VideoChatAiClient client;
+
+    public SseEmitter stream(Long memberId, VideoChatAiRequest request) {
+        SseEmitter emitter = new SseEmitter(0L);
+        VideoChatAiInternalRequest internalRequest = new VideoChatAiInternalRequest(
+                request.question(),
+                memberId,
+                request.videoSessionId()
+        );
+
+        client.stream(internalRequest)
+                .subscribe(
+                        data -&gt; send(emitter, data),
+                        emitter::completeWithError,
+                        emitter::complete
+                );
+
+        return emitter;
+    }
+
+    private void send(SseEmitter emitter, String data) {
+        try {
+            emitter.send(SseEmitter.event().data(data));
+        } catch (Exception e) {
+            emitter.completeWithError(e);
+        }
+    }
+}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/java/com/app/globalgates/controller/video_chat_ai/VideoChatAiAPIController.java</b><span>인증된 memberId 주입</span></div>
+<pre>package com.app.globalgates.controller.video_chat_ai;
+
+import com.app.globalgates.auth.CustomUserDetails;
+import com.app.globalgates.dto.video_chat_ai.VideoChatAiRequest;
+import com.app.globalgates.service.video_chat_ai.VideoChatAiService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/video-chat/ai")
+public class VideoChatAiAPIController {
+    private final VideoChatAiService videoChatAiService;
+
+    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody VideoChatAiRequest request
+    ) {
+        return videoChatAiService.stream(userDetails.getId(), request);
+    }
+}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="bar"><b>src/main/resources/application.yml</b><span>운영 설정</span></div>
+<pre>fast-ai:
+  base-url: ${FAST_AI_BASE_URL:http://localhost:8000}
+  internal-token: ${FAST_AI_INTERNAL_TOKEN}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="frontend">
+    <div class="head"><div class="left"><div class="num">6</div><h2>Spring 화면 위젯의 스트리밍 연결</h2></div><span class="mini">event.js의 더미 응답 교체</span></div>
+    <div class="body">
+      <p>현재 <code>src/main/resources/static/js/video_ai/event.js</code>의 <code>sendMessage()</code>는 더미 메시지만 추가한다. 이 부분을 POST + response stream 처리로 바꾼다. EventSource는 GET 중심이므로, 질문 본문을 보내야 하는 현재 구조에서는 <code>fetch()</code>의 <code>ReadableStream</code>을 읽는 편이 맞다.</p>
+      <div class="codecard">
+        <div class="bar"><b>static/js/video_ai/event.js</b><span>sendMessage 교체 방향</span></div>
+<pre>async function sendMessage() {
+    const text = chatTextarea.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    chatTextarea.value = '';
+    chatTextarea.style.height = 'auto';
+
+    const aiBubble = addMessage('', 'ai');
+
+    const response = await fetch('/api/video-chat/ai/stream', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            question: text,
+            videoSessionId: currentMeeting?.videoSessionId ?? null
+        })
+    });
+
+    if (!response.ok || !response.body) {
+        aiBubble.textContent = '답변을 가져오지 못했습니다.';
+        return;
+    }
+
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buffer = '';
+
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += value;
+
+        const events = buffer.split('\n\n');
+        buffer = events.pop() ?? '';
+
+        for (const event of events) {
+            const line = event.split('\n').find((part) =&gt; part.startsWith('data:'));
+            if (!line) continue;
+
+            const payload = JSON.parse(line.slice(5).trim());
+            if (payload.type === 'token') {
+                aiBubble.textContent += payload.text;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+    }
+}</pre>
+      </div>
+      <div class="callout">
+        실제 적용 때는 <code>addMessage()</code>가 만든 DOM 노드를 반환하도록 바꿔야 한다. 지금 함수는 append만 하고 반환값이 없으므로, streaming 누적 렌더링을 하려면 그 부분도 같이 수정해야 한다.
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="lightrag">
+    <div class="head"><div class="left"><div class="num">7</div><h2><code>rag.aquery(..., mode="hybrid")</code> 사용 판단</h2></div><span class="mini">현재 노트북과 LightRAG 가능성 분리</span></div>
+    <div class="body">
+      <div class="grid2">
+        <div class="card">
+          <h3>현재 노트북 기준</h3>
+          <p><code>f_video_chat_rag.ipynb</code>는 LangChain FAISS + Redis answer cache + LCEL chain 구조다. 이 상태를 FastAPI로 옮기면 <code>chain.astream(...)</code> 또는 <code>llm.astream(...)</code> 흐름이 자연스럽다.</p>
+          <p>따라서 위 FastAPI 코드는 현재 노트북 상태에 맞춰 <code>self.chain.astream</code>으로 작성했다.</p>
+        </div>
+        <div class="card">
+          <h3>LightRAG를 별도로 채택한다면</h3>
+          <p>사용자가 제시한 <code>rag.aquery(question, mode="hybrid")</code>는 LightRAG 계열 API로 보인다. 최신 공식 소스의 <code>QueryParam</code>에는 <code>mode</code>와 <code>stream</code> 필드가 있다.</p>
+          <p>그 경우에는 아래처럼 FastAPI service 내부만 갈아끼우면 되고, Spring/Frontend 계약은 그대로 유지한다.</p>
+        </div>
+      </div>
+      <div class="codecard">
+        <div class="bar"><b>LightRAG 채택 시 FastAPI service 내부 대체 예시</b><span>Spring 계약 유지</span></div>
+<pre>from lightrag.base import QueryParam
+from app.service.semantic_cache import sse_json
+
+async def stream_answer_with_lightrag(question: str, member_id: int, video_session_id: int | None = None):
+    hit = cache.lookup(question, member_id, video_session_id)
+    if hit:
+        for char in hit["answer"]:
+            yield sse_json({"type": "token", "text": char})
+        yield sse_json({"type": "done"})
+        return
+
+    # 구현체에 따라 aquery 반환이 문자열 또는 async iterator일 수 있으므로 실제 설치 버전에서 확인 필요
+    result = await rag.aquery(
+        question,
+        param=QueryParam(mode="hybrid", stream=True),
+    )
+
+    answer = ""
+    async for chunk in result:
+        answer += chunk
+        yield sse_json({"type": "token", "text": chunk})
+
+    cache.store(question, answer, member_id, video_session_id)
+    yield sse_json({"type": "done"})</pre>
+      </div>
+      <div class="callout danger">
+        단, 현재 노트북에는 LightRAG 객체 초기화, storage 초기화, member별 데이터 격리 방식이 없다. 지금 단계에서 LightRAG로 갈아타면 “노트북 상태에 맞춘 이식”이 아니라 엔진 교체가 된다. 먼저 LangChain 버전으로 FastAPI를 붙이고, LightRAG는 별도 리팩터링 티켓으로 분리하는 편이 안전하다.
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="steps">
+    <div class="head"><div class="left"><div class="num">8</div><h2>적용 순서</h2></div><span class="mini">실패 지점을 작게 나누기</span></div>
+    <div class="body">
+      <div class="grid4">
+        <div class="card">
+          <h3>1단계</h3>
+          <p>FastAPI에 <code>member_id</code> 필수화와 <code>video_session_id</code> 객체 권한 검증을 먼저 추가한다. cache lookup과 RAG 호출은 이 검증 뒤에만 실행한다.</p>
+        </div>
+        <div class="card">
+          <h3>2단계</h3>
+          <p>FastAPI에 <code>/internal/ai/video-chat/rag/stream</code> 추가. member 범위 DB SELECT와 Redis cache를 붙이고 Spring 없이 curl/http 파일로 검증한다.</p>
+        </div>
+        <div class="card">
+          <h3>3단계</h3>
+          <p>Spring에 WebClient client/service/controller 추가. 브라우저는 아직 건드리지 말고 Spring endpoint가 FastAPI stream을 relay하는지만 확인한다.</p>
+        </div>
+        <div class="card">
+          <h3>4단계</h3>
+          <p><code>video_ai/event.js</code>의 더미 응답을 fetch stream으로 교체한다. 이때 memberId는 절대 JS에서 보내지 않는다.</p>
+        </div>
+        <div class="card">
+          <h3>5단계</h3>
+          <p>녹음 업로드 이후 STT/요약 INSERT와 reindex 트리거를 붙인다. 챗봇 Q&amp;A가 안정화된 뒤 넣는다.</p>
+        </div>
+      </div>
+      <div class="callout ok" style="margin-top:14px">
+        우선순위: <b>member scope 보안</b> → <b>질문 스트림 연결</b> → <b>캐시 hit/miss 관측</b> → <b>요약 생성 INSERT 자동화</b>.
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sources">
+    <div class="head"><div class="left"><div class="num">9</div><h2>확인한 공식 출처</h2></div><span class="mini">2026-05-10 확인</span></div>
+    <div class="body">
+      <ul class="sources">
+        <li>FastAPI <code>StreamingResponse</code>: async generator 또는 iterator를 받아 response body를 stream할 수 있음. <a href="https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse">https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse</a></li>
+        <li>Spring Framework <code>WebClient</code>: non-blocking, streaming 지원 HTTP client. <a href="https://docs.spring.io/spring-framework/reference/web/webflux-webclient.html">https://docs.spring.io/spring-framework/reference/web/webflux-webclient.html</a></li>
+        <li>Spring WebClient <code>bodyToFlux</code> + <code>TEXT_EVENT_STREAM</code> 예시. <a href="https://docs.spring.io/spring-framework/reference/web/webflux-webclient/client-retrieve.html">https://docs.spring.io/spring-framework/reference/web/webflux-webclient/client-retrieve.html</a></li>
+        <li>Spring MVC <code>SseEmitter</code>와 reactive return value 처리. <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-async.html#mvc-ann-async-sse">https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-async.html#mvc-ann-async-sse</a></li>
+        <li>MDN Fetch API: POST body와 response stream 처리. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch">https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch</a></li>
+        <li>MDN ReadableStream: fetch response body가 ReadableStream으로 제공됨. <a href="https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream">https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream</a></li>
+        <li>LangChain RAG: indexing과 retrieval/generation을 분리하는 구조. <a href="https://docs.langchain.com/oss/python/langchain/rag">https://docs.langchain.com/oss/python/langchain/rag</a></li>
+        <li>LangChain FAISS: metadata filter와 <code>$or</code> 등 일부 MongoDB 스타일 operator 지원. <a href="https://docs.langchain.com/oss/python/integrations/vectorstores/faiss">https://docs.langchain.com/oss/python/integrations/vectorstores/faiss</a></li>
+        <li>OWASP API1: BOLA. 객체 ID를 클라이언트가 조작하는 API는 object-level authorization이 필요함. <a href="https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/">https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/</a></li>
+        <li>LightRAG 공식 GitHub source: <code>QueryParam</code>의 <code>mode</code>, <code>stream</code> 필드 확인. <a href="https://raw.githubusercontent.com/HKUDS/LightRAG/main/lightrag/base.py">https://raw.githubusercontent.com/HKUDS/LightRAG/main/lightrag/base.py</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

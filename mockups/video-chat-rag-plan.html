@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GlobalGates × video_chat_ai · RAG(8단계) 챗봇 코드 분배 기획안</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#12161e; --panel2:#171c26; --line:#232b39;
+    --text:#e6ecf2; --muted:#8b96a8; --soft:#cbd2dc;
+    --accent:#7c5cff; --accent2:#22d3ee; --pink:#ff4d6d;
+    --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --gold:#facc15;
+    --java:#f89820; --py:#3776ab; --js:#f7df1e; --redis:#dc382d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
+  code,pre{font-family:"JetBrains Mono","SF Mono","Menlo",monospace}
+  .wrap{max-width:1340px;margin:0 auto;padding:44px 26px 120px}
+  a{color:var(--accent2);text-decoration:none}
+
+  /* ====== HEADER ====== */
+  header.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:30px;border-bottom:1px solid var(--line);padding-bottom:22px;flex-wrap:wrap}
+  header.hero h1{font-size:30px;margin:0 0 6px;letter-spacing:-0.02em;font-weight:700}
+  header.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  header.hero p{color:var(--muted);margin:0;max-width:840px;font-size:13.5px}
+  .meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-size:12px;color:var(--muted)}
+  .meta b{color:var(--text)}
+  .badge{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-right:6px}
+  .badge.hot{border-color:rgba(255,77,109,.45);color:#ff8aa0;background:rgba(255,77,109,.08)}
+
+  /* ====== TOC ====== */
+  .toc{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:34px}
+  .toc a{font-size:12px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:#cbd2dc;background:rgba(255,255,255,.01)}
+  .toc a:hover{border-color:var(--accent);color:#fff}
+
+  /* ====== SECTION ====== */
+  section{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;margin-bottom:24px;overflow:hidden;scroll-margin-top:24px}
+  section > .head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.01);flex-wrap:wrap;gap:10px}
+  section > .head .left{display:flex;gap:14px;align-items:center}
+  section > .head .num{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700;color:#0b0d12;font-size:14px}
+  section > .head h2{margin:0;font-size:18px;letter-spacing:-0.01em;font-weight:600}
+  section > .head .tag{font-size:11px;color:var(--muted)}
+  section > .body{padding:22px 24px}
+
+  /* ====== ARCHITECTURE DIAGRAM ====== */
+  .arch{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:14px;margin-top:6px}
+  .stack{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(255,255,255,.015)}
+  .stack h4{margin:0 0 10px;font-size:12px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;display:flex;gap:6px;align-items:center}
+  .stack h4 .swatch{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+  .stack.fe h4 .swatch{background:var(--js)}
+  .stack.bff h4 .swatch{background:var(--java)}
+  .stack.rag h4 .swatch{background:var(--py)}
+  .stack.store h4 .swatch{background:var(--redis)}
+  .node{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:rgba(255,255,255,.025);font-size:13px}
+  .node.muted{opacity:.65}
+  .node .role{font-size:10.5px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;display:block}
+  .node .path{font-size:11.5px;color:var(--accent2);font-family:"JetBrains Mono",monospace;display:block;margin-top:3px;word-break:break-all}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:22px;font-weight:700;height:32px}
+
+  /* ====== 8-STEP RAG VISUAL ====== */
+  .pipeline{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:10px}
+  .step{position:relative;border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center;background:rgba(255,255,255,.015);min-height:110px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+  .step .n{position:absolute;top:8px;left:10px;font-size:10.5px;color:var(--muted);font-weight:700}
+  .step .ico{font-size:22px;line-height:1}
+  .step .name{font-size:13px;font-weight:600}
+  .step .sub{font-size:10.5px;color:var(--muted);line-height:1.4}
+  .step.batch{border-color:rgba(124,92,255,.4);background:rgba(124,92,255,.06)}
+  .step.req{border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.06)}
+  .legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;font-size:12px;color:var(--soft)}
+  .legend .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+  .legend .chip .dot{width:8px;height:8px;border-radius:999px}
+  .legend .chip.batch .dot{background:var(--accent)}
+  .legend .chip.req .dot{background:var(--accent2)}
+
+  /* ====== CODE TREE ====== */
+  .tree{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:6px}
+  .tree .col{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(255,255,255,.015)}
+  .tree .col h4{margin:0 0 8px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .tree .col h4 .lang{font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:0.06em;text-transform:uppercase}
+  .tree ul{margin:0;padding:0;list-style:none;font-size:12.5px;font-family:"JetBrains Mono",monospace}
+  .tree li{padding:5px 0;color:var(--soft);border-bottom:1px dashed rgba(255,255,255,.04)}
+  .tree li:last-child{border-bottom:none}
+  .tree li .why{display:block;color:var(--muted);font-family:-apple-system,sans-serif;font-size:11px;line-height:1.5;margin-top:2px}
+  .tree li .new{color:var(--ok);font-weight:600;margin-right:6px}
+  .tree li .mod{color:var(--warn);font-weight:600;margin-right:6px}
+  .tree li .ext{color:var(--muted);font-weight:600;margin-right:6px}
+
+  /* ====== SEQUENCE / FLOW ====== */
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
+  .lane{border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.015)}
+  .lane h5{margin:0 0 8px;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;text-align:center}
+  .msg{border-left:2px solid var(--accent);padding:7px 10px;margin-bottom:8px;background:rgba(124,92,255,.06);border-radius:0 8px 8px 0;font-size:12px}
+  .msg.api{border-color:var(--accent2);background:rgba(34,211,238,.06)}
+  .msg.cache{border-color:var(--ok);background:rgba(52,211,153,.06)}
+  .msg.miss{border-color:var(--warn);background:rgba(251,191,36,.06)}
+  .msg b{display:block;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+
+  /* ====== ASYNC TABLE ====== */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:rgba(255,255,255,.015)}
+  td code{font-size:12px;color:var(--accent2);background:rgba(34,211,238,.07);padding:1px 6px;border-radius:4px}
+  td .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.04em}
+  .pill.async{background:rgba(34,211,238,.14);color:#67e8f9;border:1px solid rgba(34,211,238,.4)}
+  .pill.batch{background:rgba(124,92,255,.14);color:#a892ff;border:1px solid rgba(124,92,255,.4)}
+  .pill.cache{background:rgba(52,211,153,.14);color:#6ee7b7;border:1px solid rgba(52,211,153,.4)}
+  .pill.sync{background:rgba(251,191,36,.14);color:#fcd34d;border:1px solid rgba(251,191,36,.4)}
+
+  /* ====== CODE BLOCKS ====== */
+  .codecard{border:1px solid var(--line);border-radius:12px;background:#0a0c11;padding:0;margin:10px 0 0;overflow:hidden}
+  .codecard .ch{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02);font-size:11.5px;color:var(--muted)}
+  .codecard .ch .file{color:var(--accent2);font-family:"JetBrains Mono",monospace}
+  .codecard pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:12.5px;line-height:1.6;color:#dde4ec}
+  .codecard pre .kw{color:#c792ea}
+  .codecard pre .str{color:#c3e88d}
+  .codecard pre .com{color:#5c6773;font-style:italic}
+  .codecard pre .fn{color:#82aaff}
+  .codecard pre .num{color:#f78c6c}
+
+  /* ====== CACHE FLOW ====== */
+  .cache-flow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .cache-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(255,255,255,.015)}
+  .cache-card.hit{border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.04)}
+  .cache-card.miss{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.04)}
+  .cache-card h4{margin:0 0 8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+  .cache-card h4 .stat{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+  .cache-card.hit h4 .stat{background:rgba(52,211,153,.15);color:#6ee7b7}
+  .cache-card.miss h4 .stat{background:rgba(251,191,36,.15);color:#fcd34d}
+  .cache-card ol{margin:6px 0 0 18px;padding:0;font-size:12.5px;color:var(--soft)}
+  .cache-card ol li{margin-bottom:4px}
+
+  /* ====== MILESTONES ====== */
+  .ms{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
+  .ms .mile{border:1px solid var(--line);border-radius:12px;padding:12px;background:rgba(255,255,255,.015)}
+  .ms .mile .n{font-size:10.5px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}
+  .ms .mile h5{margin:0 0 8px;font-size:13.5px;font-weight:600}
+  .ms .mile ul{margin:0;padding:0 0 0 16px;font-size:11.5px;color:var(--soft);line-height:1.6}
+  .ms .mile ul li{margin-bottom:3px}
+
+  /* ====== KPI / RISK ====== */
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+  .kbox{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(255,255,255,.015)}
+  .kbox .label{font-size:10.5px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+  .kbox .val{font-size:22px;font-weight:700;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .kbox .sub{font-size:11.5px;color:var(--muted);margin-top:4px}
+
+  .risks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .risk{border:1px solid var(--line);border-radius:12px;padding:13px;background:rgba(255,255,255,.015)}
+  .risk h5{margin:0 0 5px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+  .risk h5 .lvl{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.04em}
+  .risk h5 .lvl.h{background:rgba(248,113,113,.15);color:#fca5a5;border:1px solid rgba(248,113,113,.4)}
+  .risk h5 .lvl.m{background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.4)}
+  .risk h5 .lvl.l{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.4)}
+  .risk p{margin:4px 0 0;font-size:12px;color:var(--soft)}
+  .risk p.fix{color:var(--muted);font-size:11.5px;margin-top:6px}
+  .risk p.fix b{color:var(--ok)}
+
+  /* ====== UI MOCK ====== */
+  .ui-mock{display:grid;grid-template-columns:1fr 1.4fr;gap:18px;align-items:center;margin-top:6px}
+  .browser{border:1px solid var(--line);border-radius:14px;background:#0a0c11;overflow:hidden}
+  .browser .bar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+  .browser .bar .dot{width:10px;height:10px;border-radius:999px;background:#3a4150}
+  .browser .bar .url{flex:1;background:rgba(255,255,255,.04);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace;margin-left:6px}
+  .browser .stage{position:relative;height:340px;background:#0e1118;background-image:radial-gradient(circle at 30% 20%,rgba(124,92,255,.07),transparent 40%),radial-gradient(circle at 80% 80%,rgba(34,211,238,.05),transparent 40%)}
+  .fab{position:absolute;right:18px;bottom:18px;width:54px;height:54px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#0b0d12;font-weight:700;font-size:22px;box-shadow:0 6px 24px rgba(124,92,255,.35)}
+  .chatpanel{position:absolute;right:84px;bottom:18px;width:300px;background:#161a23;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .chatpanel .ph{padding:8px 12px;font-size:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .chatpanel .ph .badge2{font-size:10px;background:rgba(124,92,255,.15);color:#a892ff;padding:2px 7px;border-radius:999px}
+  .chatpanel .body2{padding:10px;display:flex;flex-direction:column;gap:7px;max-height:200px;overflow:hidden}
+  .bubble{padding:7px 11px;border-radius:14px;font-size:11.5px;line-height:1.45;max-width:85%}
+  .bubble.u{background:#22273a;align-self:flex-end;color:#e6ecf2}
+  .bubble.a{background:rgba(124,92,255,.15);color:#dde4ec;border:1px solid rgba(124,92,255,.3)}
+  .bubble .src{display:block;font-size:10px;color:var(--muted);margin-top:3px;border-top:1px dashed rgba(255,255,255,.08);padding-top:3px}
+  .typing{display:inline-block;font-size:14px;color:var(--accent2);letter-spacing:2px}
+  .ui-explain h3{margin:0 0 10px;font-size:16px}
+  .ui-explain ul{margin:0;padding:0 0 0 18px;color:var(--soft);font-size:13px;line-height:1.7}
+
+  /* ====== UTIL ====== */
+  .gridtwo{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .gridtwo > div{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(255,255,255,.015)}
+  .gridtwo h4{margin:0 0 8px;font-size:13px}
+  .gridtwo ul{margin:0;padding:0 0 0 18px;font-size:12.5px;color:var(--soft);line-height:1.7}
+  hr.sep{border:none;border-top:1px dashed var(--line);margin:18px 0}
+  .note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .note b{color:var(--soft)}
+
+  @media (max-width: 1100px){
+    .arch{grid-template-columns:1fr}
+    .pipeline{grid-template-columns:repeat(4,1fr)}
+    .tree,.cache-flow,.ui-mock,.risks,.gridtwo{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr 1fr}
+    .ms,.kpi{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- =========== HEADER =========== -->
+  <header class="hero">
+    <div>
+      <span class="badge hot">Plan v1</span>
+      <span class="badge">RAG · 8단계</span>
+      <span class="badge">Async-First</span>
+      <span class="badge">FastAPI ↔ Spring Boot</span>
+      <h1 style="margin-top:14px">video_chat_ai · <span class="grad">RAG 챗봇</span> 코드 분배 기획안</h1>
+      <p>화상통화 <b>요약본</b>을 코퍼스로, 우측 하단 챗봇이 "언제 어떤 회의를 했는지" "그 때 무슨 얘기를 나눴는지"를 답한다. <b>llm.md</b>의 8단계 RAG · 시멘틱 캐싱 · LCEL 비동기 패턴을 그대로 가져오되, <b>인덱싱(배치)</b>과 <b>응답(요청)</b>을 갈라 놓고 Spring Boot ↔ FastAPI ↔ Frontend로 책임을 나눈다.</p>
+    </div>
+    <div class="meta">
+      <div>작성: <b>2026-05-10</b></div>
+      <div>대상 파일군: <b>video_chat_ai · video_chat</b></div>
+      <div>참조: <b>/Users/yoonchan/Desktop/llm.md</b></div>
+    </div>
+  </header>
+
+  <!-- =========== TOC =========== -->
+  <div class="toc">
+    <a href="#arch">1. 시스템 아키텍처</a>
+    <a href="#pipeline">2. RAG 8단계 분리</a>
+    <a href="#tree">3. 코드 분배 트리</a>
+    <a href="#flow">4. 요청 시퀀스</a>
+    <a href="#cache">5. 시멘틱 캐싱</a>
+    <a href="#async">6. 비동기 매핑표</a>
+    <a href="#snippets">7. 핵심 코드 스니펫</a>
+    <a href="#ui">8. 챗봇 UI 연동</a>
+    <a href="#kpi">9. KPI · 리스크</a>
+    <a href="#milestones">10. 마일스톤</a>
+  </div>
+
+  <!-- =========== 1. ARCHITECTURE =========== -->
+  <section id="arch">
+    <div class="head">
+      <div class="left"><div class="num">1</div><h2>시스템 아키텍처 — 폴리글랏 분담</h2></div>
+      <div class="tag">Frontend(JS) → Spring Boot(BFF) → FastAPI(RAG) → Redis · FAISS</div>
+    </div>
+    <div class="body">
+      <p style="margin:0 0 16px;color:var(--soft);font-size:13px">
+        Spring Boot는 <b>인증·권한·세션·요약본 저장</b>을 담당하는 <b>BFF</b>로만 둔다. RAG 두뇌는 LangChain 생태계가 풍부한 <b>FastAPI</b>로 따로 띄우고, 둘 사이는 <b>WebClient(SSE)</b>로 토큰 스트리밍 그대로 패스스루.
+      </p>
+      <div class="arch">
+        <!-- FE -->
+        <div class="stack fe">
+          <h4><span class="swatch"></span>Frontend (Thymeleaf + JS)</h4>
+          <div class="node">
+            <span class="role">FAB · 챗 패널</span>
+            video_ai.html
+            <span class="path">templates/video_ai/video_ai.html</span>
+          </div>
+          <div class="node">
+            <span class="role">SSE 토큰 렌더링</span>
+            event.js
+            <span class="path">static/js/video_ai/event.js</span>
+          </div>
+          <div class="node">
+            <span class="role">메시지 버블 · 타이핑</span>
+            video_ai.css
+            <span class="path">static/css/video_ai/video_ai.css</span>
+          </div>
+        </div>
+
+        <!-- BFF + RAG -->
+        <div>
+          <div class="stack bff">
+            <h4><span class="swatch"></span>Spring Boot (BFF) — globalgates</h4>
+            <div class="node">
+              <span class="role">REST · SSE 패스스루</span>
+              VideoChatAiController
+              <span class="path">controller/video_chat_ai/VideoChatAiController.java</span>
+            </div>
+            <div class="node">
+              <span class="role">FastAPI 호출 + 인증 주입</span>
+              VideoChatAiService · RagClient
+              <span class="path">service/video_chat_ai/{VideoChatAiService,RagClient}.java</span>
+            </div>
+            <div class="node muted">
+              <span class="role">기존 (재사용)</span>
+              VideoChatService · MeetingService · S3Service
+            </div>
+          </div>
+          <div class="arrow">↓ HTTP / SSE (WebClient reactive)</div>
+          <div class="stack rag">
+            <h4><span class="swatch"></span>FastAPI (RAG 두뇌) — globalgates-rag</h4>
+            <div class="node">
+              <span class="role">엔트리 · lifespan 부트</span>
+              app/main.py
+              <span class="path">set_llm_cache · ChatOpenAI · FAISS 1회 로드</span>
+            </div>
+            <div class="node">
+              <span class="role">8단계 체인 · LCEL</span>
+              app/services/rag_chain.py
+              <span class="path">retriever → prompt → llm → parser</span>
+            </div>
+            <div class="node">
+              <span class="role">스트리밍 + 시멘틱 캐시</span>
+              app/services/semantic_stream.py
+              <span class="path">llm.md §1-10 패턴 그대로</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STORE -->
+        <div class="stack store">
+          <h4><span class="swatch"></span>Storage</h4>
+          <div class="node">
+            <span class="role">시멘틱 캐시</span>
+            Redis Stack (6380)
+            <span class="path">RedisSemanticCache · index_schema</span>
+          </div>
+          <div class="node">
+            <span class="role">벡터 인덱스 (요약본)</span>
+            FAISS (디스크 영속)
+            <span class="path">/var/rag/faiss/&lt;meeting_id&gt;/</span>
+          </div>
+          <div class="node">
+            <span class="role">요약본 원본</span>
+            MySQL · meeting_summary
+            <span class="path">기존 meeting + summary 컬럼</span>
+          </div>
+          <div class="node muted">
+            <span class="role">녹음 원본</span>
+            S3 · file_recoding
+          </div>
+        </div>
+      </div>
+      <p class="note">
+        <b>왜 두 서버로 가르는가?</b> ① LangChain·FAISS·HuggingFaceEmbeddings는 파이썬 생태계에서만 1급 시민. ② Spring Boot에 부하 집중 회피(임베딩은 CPU 점유율 큼). ③ 운영 시 RAG만 따로 스케일/롤백 가능. <b>대안:</b> 단일 서버 유지가 강제라면 FastAPI 자리에 OpenAI Embeddings + ChromaDB를 Spring AI 1.0으로 짜는 방향도 가능 — 다만 llm.md 코드 재사용성이 크게 떨어진다.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========== 2. RAG 8-STEP =========== -->
+  <section id="pipeline">
+    <div class="head">
+      <div class="left"><div class="num">2</div><h2>RAG 8단계 — 배치(인덱싱) vs 요청(응답) 분리</h2></div>
+      <div class="tag">llm.md §5-0 · 운영 권장 분리 방식</div>
+    </div>
+    <div class="body">
+      <p style="margin:0 0 14px;color:var(--soft);font-size:13px">
+        1~4단계(<b>로드→분할→임베딩→벡터DB 저장</b>)는 <b>요약본이 새로 생성된 시점에 1회만</b> 돌면 충분. FastAPI <code>BackgroundTasks</code>로 빼서 응답 핸들러를 가볍게. 5~8단계만 챗봇 요청에서 실행.
+      </p>
+      <div class="pipeline">
+        <div class="step batch"><span class="n">STEP 1</span><div class="ico">📄</div><div class="name">Load</div><div class="sub">요약본 텍스트 로드<br><code style="font-size:10px">TextLoader / DB read</code></div></div>
+        <div class="step batch"><span class="n">STEP 2</span><div class="ico">✂️</div><div class="name">Split</div><div class="sub">RecursiveCharacter<br>chunk 500 / overlap 50</div></div>
+        <div class="step batch"><span class="n">STEP 3</span><div class="ico">🧬</div><div class="name">Embed</div><div class="sub">jhgan/ko-sbert-nli<br>768-dim · CPU OK</div></div>
+        <div class="step batch"><span class="n">STEP 4</span><div class="ico">🗄️</div><div class="name">Store</div><div class="sub">FAISS.from_documents<br>save_local 영속</div></div>
+        <div class="step req"><span class="n">STEP 5</span><div class="ico">🔍</div><div class="name">Retrieve</div><div class="sub">k=4 · MMR<br>meeting_id 필터</div></div>
+        <div class="step req"><span class="n">STEP 6</span><div class="ico">📝</div><div class="name">Prompt</div><div class="sub">"문맥 내 정보만 사용"<br>환각 차단 지시</div></div>
+        <div class="step req"><span class="n">STEP 7</span><div class="ico">🤖</div><div class="name">LLM</div><div class="sub">ChatOpenAI · stream<br>temp=0 (사실 QA)</div></div>
+        <div class="step req"><span class="n">STEP 8</span><div class="ico">⛓️</div><div class="name">Chain</div><div class="sub">LCEL astream<br>SSE → 클라이언트</div></div>
+      </div>
+      <div class="legend">
+        <span class="chip batch"><span class="dot"></span>배치(요약 생성 시 1회) — <b>POST /index/summary</b></span>
+        <span class="chip req"><span class="dot"></span>요청(질문 시 매번) — <b>POST /chat/stream</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== 3. CODE TREE =========== -->
+  <section id="tree">
+    <div class="head">
+      <div class="left"><div class="num">3</div><h2>코드 분배 — 어느 파일을 새로 만들고, 어느 파일에 끼우는가</h2></div>
+      <div class="tag"><span style="color:var(--ok)">●</span>신규 · <span style="color:var(--warn)">●</span>수정 · <span style="color:var(--muted)">●</span>기존 재사용</div>
+    </div>
+    <div class="body">
+      <div class="tree">
+        <!-- FastAPI -->
+        <div class="col">
+          <h4>🐍 FastAPI (신규 서비스)<span class="lang">Python · LangChain</span></h4>
+          <ul>
+            <li><span class="new">●</span>app/main.py
+              <span class="why">lifespan에서 <code>load_dotenv</code> · <code>set_llm_cache(RedisSemanticCache(threshold=0.1))</code> · <code>llm = ChatOpenAI()</code> · FAISS 디렉터리 스캔 → 메모리 적재</span>
+            </li>
+            <li><span class="new">●</span>app/core/config.py
+              <span class="why">REDIS_URL=redis://localhost:6380, OPENAI_API_KEY, FAISS_DIR, EMBED_MODEL=jhgan/ko-sbert-nli</span>
+            </li>
+            <li><span class="new">●</span>app/core/llm.py
+              <span class="why">ChatOpenAI 전역 인스턴스(temperature=0, model=gpt-5.4-mini). FastAPI Depends로 핸들러 주입.</span>
+            </li>
+            <li><span class="new">●</span>app/core/cache.py
+              <span class="why">RedisSemanticCache 등록(스코어 0.1) + Stream용 <code>Redis.from_existing_index</code> 헬퍼.</span>
+            </li>
+            <li><span class="new">●</span>app/core/embeddings.py
+              <span class="why">HuggingFaceEmbeddings 캐시 임베딩(검색용)과 동일 모델 재사용. <code>normalize_embeddings=True</code>.</span>
+            </li>
+            <li><span class="new">●</span>app/services/indexing.py
+              <span class="why">요약본 텍스트 → <code>RecursiveCharacterTextSplitter(500/50)</code> → FAISS.from_documents → <code>save_local</code>. <b>BackgroundTasks</b>로 호출.</span>
+            </li>
+            <li><span class="new">●</span>app/services/retriever.py
+              <span class="why">meeting_id별 인덱스 lazy load. k=4, search_type="mmr" 옵션.</span>
+            </li>
+            <li><span class="new">●</span>app/services/rag_chain.py
+              <span class="why">LCEL: <code>{"context": retriever, "question": Passthrough()} | prompt | llm | StrOutputParser()</code>. ainvoke / astream 둘 다.</span>
+            </li>
+            <li><span class="new">●</span>app/services/semantic_stream.py
+              <span class="why">llm.md §1-10. similarity_search → threshold 통과 시 캐시 답변을 char 단위 yield, 아니면 LLM stream + Redis.from_texts 저장.</span>
+            </li>
+            <li><span class="new">●</span>app/api/routes/chat.py
+              <span class="why">POST /chat (ainvoke), POST /chat/stream (EventSourceResponse, async generator).</span>
+            </li>
+            <li><span class="new">●</span>app/api/routes/index.py
+              <span class="why">POST /index/summary (BackgroundTasks 큐잉), DELETE /index/{meeting_id}.</span>
+            </li>
+            <li><span class="new">●</span>app/schemas/chat.py
+              <span class="why">Pydantic: ChatRequest(meeting_id, question, member_id), ChatChunk(token, done).</span>
+            </li>
+            <li><span class="new">●</span>requirements.txt
+              <span class="why">langchain, langchain-openai, langchain-community, langchain-huggingface, faiss-cpu, redis, sse-starlette, fastapi, uvicorn[standard]</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Spring Boot -->
+        <div class="col">
+          <h4>☕ Spring Boot (BFF 추가)<span class="lang">Java · WebClient</span></h4>
+          <ul>
+            <li><span class="new">●</span>controller/video_chat_ai/VideoChatAiController.java
+              <span class="why">POST /api/video-ai/chat/stream — <code>ServerSentEvent&lt;String&gt;</code> 반환. 인증 후 FastAPI에 패스스루.</span>
+            </li>
+            <li><span class="new">●</span>service/video_chat_ai/VideoChatAiService.java
+              <span class="why">권한 검사(이 회의 참가자였는가) → RagClient.streamChat 위임 → 로깅·관측.</span>
+            </li>
+            <li><span class="new">●</span>service/video_chat_ai/RagClient.java
+              <span class="why">WebClient(reactive). <code>retrieve().bodyToFlux(String.class)</code>로 SSE 토큰 그대로 전달.</span>
+            </li>
+            <li><span class="new">●</span>service/video_chat_ai/SummaryHook.java
+              <span class="why">요약본 저장 직후 → POST /index/summary 호출(@TransactionalEventListener AFTER_COMMIT). 실패해도 본 요청 영향 없음.</span>
+            </li>
+            <li><span class="new">●</span>dto/video_chat_ai/{ChatAskDTO,ChatTokenDTO}.java
+              <span class="why">{meetingId, question} / {token, done, error}</span>
+            </li>
+            <li><span class="mod">●</span>config/WebClientConfig.java
+              <span class="why">신규 또는 기존 빈에 fastapi.base-url 추가. 30s 응답 타임아웃, 5분 read 타임아웃(스트리밍).</span>
+            </li>
+            <li><span class="mod">●</span>application.yml
+              <span class="why">rag.fastapi.base-url=http://localhost:8001 · rag.timeout 등.</span>
+            </li>
+            <li><span class="ext">●</span>service/video_chat/VideoChatService.java
+              <span class="why">기존 — 회의/녹음 메타데이터 조회만. 변경 없음.</span>
+            </li>
+            <li><span class="ext">●</span>service/MeetingService.java
+              <span class="why">기존 — 요약 컬럼 보유 가정. 없으면 add summary VARCHAR(8000) 마이그레이션 1건만 추가.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Frontend -->
+        <div class="col">
+          <h4>🎨 Frontend (기존 video_ai 보강)<span class="lang">JS · Thymeleaf</span></h4>
+          <ul>
+            <li><span class="ext">●</span>templates/video_ai/video_ai.html
+              <span class="why">기존 패널 그대로(이미 챗 입력·메시지 영역 존재). 마크업 변경 없음.</span>
+            </li>
+            <li><span class="mod">●</span>static/js/video_ai/event.js
+              <span class="why">신규 함수 <code>askWithRag(meetingId, q)</code>: <code>fetch</code> + <code>ReadableStream.getReader()</code>로 SSE chunk 토큰 단위 append. 마지막 청크에 <code>done:true</code>.</span>
+            </li>
+            <li><span class="mod">●</span>static/css/video_ai/video_ai.css
+              <span class="why">user/assistant 버블 색상 분리, "타이핑" 인디케이터 (3-dot blink) 추가.</span>
+            </li>
+            <li><span class="new">●</span>static/js/video_ai/rag-client.js (선택)
+              <span class="why">SSE 파서를 분리하고 싶으면. 작은 규모면 event.js에 두 줄로 처리해도 OK.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="note"><b>지침:</b> Spring Boot 쪽에는 <b>RAG 비즈니스 로직 0줄</b> 원칙. 권한·세션·로그만 추가하고 모델·임베딩·체인 코드는 100% FastAPI에. 추후 RAG 엔진 교체 시 BFF 손대지 않기 위함.</p>
+    </div>
+  </section>
+
+  <!-- =========== 4. SEQUENCE FLOW =========== -->
+  <section id="flow">
+    <div class="head">
+      <div class="left"><div class="num">4</div><h2>요청 시퀀스 — 사용자 질문이 답변이 되어 돌아오기까지</h2></div>
+      <div class="tag">시멘틱 캐시 히트 시 ~50ms · 미스 시 첫 토큰 ~600ms</div>
+    </div>
+    <div class="body">
+      <div class="flow">
+        <div class="lane">
+          <h5>① 브라우저</h5>
+          <div class="msg"><b>USER 입력</b>"지난주 월요일 회의에서 결정된 단가는?"</div>
+          <div class="msg"><b>FETCH</b>POST /api/video-ai/chat/stream<br>Body: { meetingId, question }</div>
+          <div class="msg"><b>RENDER</b>SSE chunk → bubble append (token-by-token)</div>
+        </div>
+        <div class="lane">
+          <h5>② Spring BFF</h5>
+          <div class="msg api"><b>AUTH</b>SecurityContext 인증 ✓<br>참가자 권한 확인</div>
+          <div class="msg api"><b>FORWARD</b>WebClient.post()<br>→ FastAPI /chat/stream<br>SSE Flux 그대로 패스</div>
+          <div class="msg api"><b>LOG</b>request_id, latency, token_count</div>
+        </div>
+        <div class="lane">
+          <h5>③ FastAPI 캐시 게이트</h5>
+          <div class="msg cache"><b>SEMANTIC HIT?</b>RedisSemanticCache(0.1)<br>유사 질문 즉답 가능?</div>
+          <div class="msg cache"><b>HIT</b>cached_text → for char yield<br>(asyncio.sleep(0.01))</div>
+          <div class="msg miss"><b>MISS</b>다음 단계로 진행</div>
+        </div>
+        <div class="lane">
+          <h5>④ RAG 체인</h5>
+          <div class="msg api"><b>RETRIEVE</b>FAISS.similarity_search(k=4)<br>meeting_id 인덱스만</div>
+          <div class="msg api"><b>PROMPT</b>"문맥 내 정보만으로 답변" + Context 주입</div>
+          <div class="msg api"><b>LLM astream</b>ChatOpenAI(temp=0)<br>토큰 단위 스트림</div>
+        </div>
+        <div class="lane">
+          <h5>⑤ 캐시 저장 + 응답</h5>
+          <div class="msg cache"><b>WRITE</b>Redis.from_texts<br>question + answer 메타</div>
+          <div class="msg api"><b>EVENT</b>각 chunk를 EventSourceResponse로 push</div>
+          <div class="msg"><b>DONE</b>{token:"", done:true}</div>
+        </div>
+      </div>
+      <p class="note"><b>중간 끊김 대비:</b> 토큰 누적 텍스트는 메모리 변수에 모아 두고, 정상 완료 시점에만 캐시에 commit. 클라가 중도 abort하면 캐시 미저장 → 다음 동일 질문에 다시 풀체인.</p>
+    </div>
+  </section>
+
+  <!-- =========== 5. CACHE FLOW =========== -->
+  <section id="cache">
+    <div class="head">
+      <div class="left"><div class="num">5</div><h2>시멘틱 캐싱 — RAG는 score_threshold = 0.1 (보수적)</h2></div>
+      <div class="tag">llm.md §1-9, §1-10, §5-6</div>
+    </div>
+    <div class="body">
+      <p style="margin:0 0 12px;color:var(--soft);font-size:13px">
+        일반 챗봇은 0.35~0.4지만 <b>RAG는 사실성</b>이 중요 → 0.1로 낮춰 잘못된 캐시 매칭을 차단. 그래도 의미가 거의 같은 질문은 즉답으로 가른다.
+      </p>
+      <div class="cache-flow">
+        <div class="cache-card hit">
+          <h4>HIT 케이스 <span class="stat">~50ms</span></h4>
+          <ol>
+            <li>"단가 얼마로 정해졌어?" → 임베딩</li>
+            <li>FAISS-on-Redis similarity_search(k=1)</li>
+            <li>score 0.05 ≤ 0.1 → <b>매칭</b></li>
+            <li>저장된 answer를 char 단위로 yield (시각적 타이핑)</li>
+            <li>OpenAI 호출 0건, 토큰 비용 0</li>
+          </ol>
+        </div>
+        <div class="cache-card miss">
+          <h4>MISS 케이스 <span class="stat">~600ms TTFT</span></h4>
+          <ol>
+            <li>"이번 회의 결론 요약해줘" → 임베딩</li>
+            <li>유사도 부족 → 풀 체인 진입</li>
+            <li>Retriever(k=4) → Prompt → LLM astream</li>
+            <li>토큰 누적하며 클라이언트로 yield</li>
+            <li>완료 시점에 Redis.from_texts(question, answer) 저장</li>
+            <li>두 번째 같은 질문은 HIT 케이스로 강등</li>
+          </ol>
+        </div>
+      </div>
+      <p class="note">
+        <b>운영 가드레일:</b> ① 회의 ID/사용자 ID를 인덱스 prefix(<code>cache:meeting:{id}</code>)로 분리 → 다른 회의 답변이 새어나오는 사고 방지. ② <b>개인정보 포함 답변 캐싱 금지 플래그</b> — 시스템 프롬프트가 "참가자 외 노출 금지"인 답변은 <code>no_cache=True</code>로 우회. ③ 요약본이 갱신되면 해당 prefix invalidate.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========== 6. ASYNC TABLE =========== -->
+  <section id="async">
+    <div class="head">
+      <div class="left"><div class="num">6</div><h2>비동기 매핑표 — llm.md 코드 → 우리 환경</h2></div>
+      <div class="tag">FastAPI ASGI · ainvoke / astream / abatch</div>
+    </div>
+    <div class="body">
+      <table>
+        <thead>
+          <tr>
+            <th>llm.md 출처</th>
+            <th>패턴</th>
+            <th>우리 위치</th>
+            <th>실행 모드</th>
+            <th>핵심 포인트</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>§1-9 RedisSemanticCache</td>
+            <td><code>set_llm_cache(...)</code></td>
+            <td>app/main.py · lifespan</td>
+            <td><span class="pill cache">global</span></td>
+            <td>부팅 시 1회. score=0.1 (RAG)</td>
+          </tr>
+          <tr>
+            <td>§1-10 Stream + Semantic</td>
+            <td><code>similarity_search → astream</code></td>
+            <td>services/semantic_stream.py</td>
+            <td><span class="pill async">async</span></td>
+            <td>스트리밍은 직접 캐싱 (set_llm_cache 미지원)</td>
+          </tr>
+          <tr>
+            <td>§3-2 LCEL ChatPromptTemplate</td>
+            <td><code>prompt | llm | parser</code></td>
+            <td>services/rag_chain.py</td>
+            <td><span class="pill async">ainvoke / astream</span></td>
+            <td>FastAPI 라우트는 무조건 await</td>
+          </tr>
+          <tr>
+            <td>§3-7 RunnablePassthrough.assign</td>
+            <td><code>{"context": retriever, "question": Passthrough()}</code></td>
+            <td>services/rag_chain.py</td>
+            <td><span class="pill async">async</span></td>
+            <td>retriever 결과를 question과 함께 prompt로</td>
+          </tr>
+          <tr>
+            <td>§5-1 PyMuPDFLoader (대체)</td>
+            <td><code>TextLoader / DB read</code></td>
+            <td>services/indexing.py</td>
+            <td><span class="pill batch">background</span></td>
+            <td>PDF 아님 — 요약본 텍스트 직접 로드</td>
+          </tr>
+          <tr>
+            <td>§5-2 RecursiveCharacterTextSplitter</td>
+            <td>chunk=500 / overlap=50</td>
+            <td>services/indexing.py</td>
+            <td><span class="pill batch">background</span></td>
+            <td>요약본은 보통 작아 단일 청크 가능. 길면 그대로 분할</td>
+          </tr>
+          <tr>
+            <td>§5-3 FAISS.from_documents</td>
+            <td><code>save_local / load_local</code></td>
+            <td>services/indexing.py · retriever.py</td>
+            <td><span class="pill batch">background</span></td>
+            <td>meeting_id별 디렉터리. lazy load + LRU 캐시</td>
+          </tr>
+          <tr>
+            <td>§5-4 Retriever k 튜닝</td>
+            <td><code>as_retriever(search_kwargs={"k":4})</code></td>
+            <td>services/retriever.py</td>
+            <td><span class="pill async">async (call)</span></td>
+            <td>요약본은 짧으니 k=4면 충분. 정밀 필요 시 MMR.</td>
+          </tr>
+          <tr>
+            <td>§5-5 RAG 프롬프트 (환각 차단)</td>
+            <td>"문맥 내 정보만 사용"</td>
+            <td>services/rag_chain.py</td>
+            <td><span class="pill sync">template</span></td>
+            <td>"확인 불가 시 명시" 필수 문구 추가</td>
+          </tr>
+          <tr>
+            <td>§5-6 RAG + Semantic 풀세트</td>
+            <td>운영 표준 템플릿</td>
+            <td>app/main.py + rag_chain.py</td>
+            <td><span class="pill async">ainvoke</span></td>
+            <td>이번 작업의 마스터 레퍼런스</td>
+          </tr>
+          <tr>
+            <td>§3-6 abatch</td>
+            <td><code>chain.abatch([...], max_concurrency=3)</code></td>
+            <td>services/indexing.py (배치 인덱싱)</td>
+            <td><span class="pill batch">background</span></td>
+            <td>회의 여러 개 한 번에 인덱싱할 때</td>
+          </tr>
+          <tr>
+            <td>§1-3 Streaming (SSE)</td>
+            <td><code>EventSourceResponse(astream(...))</code></td>
+            <td>api/routes/chat.py</td>
+            <td><span class="pill async">SSE</span></td>
+            <td>TTFT 단축 = 체감 속도. JSON 한 방 응답 금지.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========== 7. CODE SNIPPETS =========== -->
+  <section id="snippets">
+    <div class="head">
+      <div class="left"><div class="num">7</div><h2>핵심 코드 스니펫 — llm.md를 우리 환경으로 옮긴 결과</h2></div>
+      <div class="tag">5 파일 · 그대로 복붙 가능 수준의 골격</div>
+    </div>
+    <div class="body">
+
+      <div class="codecard">
+        <div class="ch"><span>① 부팅 시 1회 — 시멘틱 캐시 글로벌 등록</span><span class="file">fastapi/app/main.py</span></div>
+        <pre><span class="kw">from</span> contextlib <span class="kw">import</span> asynccontextmanager
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">from</span> langchain.globals <span class="kw">import</span> set_llm_cache
+<span class="kw">from</span> langchain_community.cache <span class="kw">import</span> RedisSemanticCache
+<span class="kw">from</span> langchain_huggingface <span class="kw">import</span> HuggingFaceEmbeddings
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+
+<span class="kw">from</span> app.core.config <span class="kw">import</span> settings
+<span class="kw">from</span> app.api.routes <span class="kw">import</span> chat, index
+
+<span class="kw">@asynccontextmanager</span>
+<span class="kw">async def</span> <span class="fn">lifespan</span>(app: FastAPI):
+    load_dotenv()
+    <span class="com"># RAG 정확도 우선 → score_threshold = 0.1 (llm.md §5-6)</span>
+    embeddings = HuggingFaceEmbeddings(
+        model_name=<span class="str">"jhgan/ko-sbert-nli"</span>,
+        model_kwargs={<span class="str">"device"</span>: <span class="str">"cpu"</span>},
+        encode_kwargs={<span class="str">"normalize_embeddings"</span>: <span class="kw">True</span>},
+    )
+    set_llm_cache(RedisSemanticCache(
+        redis_url=settings.REDIS_URL,
+        embedding=embeddings,
+        score_threshold=<span class="num">0.1</span>,
+    ))
+    app.state.llm = ChatOpenAI(model_name=<span class="str">"gpt-5.4-mini"</span>, temperature=<span class="num">0</span>)
+    app.state.embeddings = embeddings
+    <span class="kw">yield</span>
+    <span class="com"># shutdown</span>
+
+app = FastAPI(lifespan=lifespan)
+app.include_router(chat.router, prefix=<span class="str">"/chat"</span>)
+app.include_router(index.router, prefix=<span class="str">"/index"</span>)</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="ch"><span>② 8단계 RAG LCEL — astream</span><span class="file">fastapi/app/services/rag_chain.py</span></div>
+        <pre><span class="kw">from</span> langchain_community.vectorstores <span class="kw">import</span> FAISS
+<span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> PromptTemplate
+<span class="kw">from</span> langchain_core.output_parsers <span class="kw">import</span> StrOutputParser
+<span class="kw">from</span> langchain_core.runnables <span class="kw">import</span> RunnablePassthrough
+
+PROMPT = PromptTemplate.from_template(<span class="str">"""
+귀하는 화상회의 요약본을 바탕으로 질문에 답변하는 분석 전문가입니다.
+반드시 아래 #Context 안의 정보만 활용하십시오. 자료로 답변이 어렵다면 추측 없이
+'제공된 정보로는 확인이 불가능하다'고 명시하십시오. 모든 응답은 한국어로 작성합니다.
+
+#Context:
+{context}
+
+#Question:
+{question}
+
+#Answer:"""</span>)
+
+<span class="kw">def</span> <span class="fn">build_chain</span>(faiss_dir: str, embeddings, llm):
+    vs = FAISS.load_local(faiss_dir, embeddings, allow_dangerous_deserialization=<span class="kw">True</span>)
+    retriever = vs.as_retriever(search_kwargs={<span class="str">"k"</span>: <span class="num">4</span>})
+    <span class="kw">return</span> (
+        {<span class="str">"context"</span>: retriever, <span class="str">"question"</span>: RunnablePassthrough()}
+        | PROMPT
+        | llm
+        | StrOutputParser()
+    )
+
+<span class="kw">async def</span> <span class="fn">stream_answer</span>(chain, question: str):
+    <span class="kw">async for</span> token <span class="kw">in</span> chain.astream(question):
+        <span class="kw">yield</span> token</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="ch"><span>③ Stream + Semantic Cache (직접 구현 — llm.md §1-10)</span><span class="file">fastapi/app/services/semantic_stream.py</span></div>
+        <pre><span class="kw">from</span> langchain_community.vectorstores <span class="kw">import</span> Redis
+<span class="kw">import</span> asyncio
+
+INDEX_NAME = <span class="str">"vca_semantic_cache"</span>
+SCHEMA = {<span class="str">"text"</span>: [{<span class="str">"name"</span>: <span class="str">"question"</span>}], <span class="str">"tag"</span>: [{<span class="str">"name"</span>: <span class="str">"answer"</span>}]}
+
+<span class="kw">async def</span> <span class="fn">stream_with_cache</span>(message, embeddings, redis_url, chain, threshold=<span class="num">0.1</span>):
+    <span class="kw">try</span>:
+        vdb = Redis.from_existing_index(embeddings, index_name=INDEX_NAME,
+                                        redis_url=redis_url, schema=SCHEMA)
+        results = vdb.similarity_search_with_score(message, k=<span class="num">1</span>)
+    <span class="kw">except</span> Exception:
+        results = []
+
+    <span class="kw">if</span> results <span class="kw">and</span> results[<span class="num">0</span>][<span class="num">1</span>] &lt;= threshold:
+        cached = results[<span class="num">0</span>][<span class="num">0</span>].metadata[<span class="str">"answer"</span>]
+        <span class="kw">for</span> ch <span class="kw">in</span> cached:
+            <span class="kw">await</span> asyncio.sleep(<span class="num">0.01</span>)
+            <span class="kw">yield</span> ch
+        <span class="kw">return</span>
+
+    full = <span class="str">""</span>
+    <span class="kw">async for</span> token <span class="kw">in</span> chain.astream(message):
+        full += token
+        <span class="kw">yield</span> token
+
+    <span class="kw">if</span> full:
+        Redis.from_texts(texts=[message], embedding=embeddings,
+                         metadatas=[{<span class="str">"question"</span>: message, <span class="str">"answer"</span>: full}],
+                         index_name=INDEX_NAME, redis_url=redis_url)</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="ch"><span>④ FastAPI SSE 라우트</span><span class="file">fastapi/app/api/routes/chat.py</span></div>
+        <pre><span class="kw">from</span> fastapi <span class="kw">import</span> APIRouter, Request
+<span class="kw">from</span> sse_starlette.sse <span class="kw">import</span> EventSourceResponse
+
+<span class="kw">from</span> app.schemas.chat <span class="kw">import</span> ChatRequest
+<span class="kw">from</span> app.services.rag_chain <span class="kw">import</span> build_chain
+<span class="kw">from</span> app.services.semantic_stream <span class="kw">import</span> stream_with_cache
+
+router = APIRouter()
+
+<span class="kw">@router.post</span>(<span class="str">"/stream"</span>)
+<span class="kw">async def</span> <span class="fn">chat_stream</span>(req: ChatRequest, request: Request):
+    llm = request.app.state.llm
+    embeddings = request.app.state.embeddings
+    chain = build_chain(faiss_dir=<span class="str">f"./faiss/{req.meeting_id}"</span>,
+                        embeddings=embeddings, llm=llm)
+
+    <span class="kw">async def</span> <span class="fn">event_gen</span>():
+        <span class="kw">async for</span> token <span class="kw">in</span> stream_with_cache(req.question, embeddings,
+                                              <span class="str">"redis://localhost:6380"</span>, chain):
+            <span class="kw">yield</span> {<span class="str">"event"</span>: <span class="str">"token"</span>, <span class="str">"data"</span>: token}
+        <span class="kw">yield</span> {<span class="str">"event"</span>: <span class="str">"done"</span>, <span class="str">"data"</span>: <span class="str">""</span>}
+
+    <span class="kw">return</span> EventSourceResponse(event_gen())</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="ch"><span>⑤ Spring Boot — SSE 패스스루</span><span class="file">spring/.../VideoChatAiController.java</span></div>
+        <pre><span class="kw">@RestController</span>
+<span class="kw">@RequiredArgsConstructor</span>
+<span class="kw">@RequestMapping</span>(<span class="str">"/api/video-ai"</span>)
+<span class="kw">public class</span> <span class="fn">VideoChatAiController</span> {
+    <span class="kw">private final</span> RagClient ragClient;
+    <span class="kw">private final</span> VideoChatAiService videoChatAiService;
+
+    <span class="kw">@PostMapping</span>(value = <span class="str">"/chat/stream"</span>, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    <span class="kw">public</span> Flux&lt;ServerSentEvent&lt;String&gt;&gt; <span class="fn">streamChat</span>(
+            <span class="kw">@AuthenticationPrincipal</span> CustomUserDetails user,
+            <span class="kw">@RequestBody</span> ChatAskDTO body) {
+
+        videoChatAiService.assertParticipant(user.getId(), body.getMeetingId());
+        <span class="kw">return</span> ragClient.streamChat(body)
+                .map(token -&gt; ServerSentEvent.builder(token).event(<span class="str">"token"</span>).build())
+                .concatWithValues(ServerSentEvent.builder(<span class="str">""</span>).event(<span class="str">"done"</span>).build());
+    }
+}</pre>
+      </div>
+
+      <div class="codecard">
+        <div class="ch"><span>⑥ Frontend — SSE 토큰 단위 렌더링</span><span class="file">static/js/video_ai/event.js (추가)</span></div>
+        <pre><span class="kw">async function</span> <span class="fn">askWithRag</span>(meetingId, question, bubbleEl) {
+  <span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">"/api/video-ai/chat/stream"</span>, {
+    method: <span class="str">"POST"</span>,
+    headers: { <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },
+    body: JSON.stringify({ meetingId, question }),
+  });
+  <span class="kw">const</span> reader = res.body.getReader();
+  <span class="kw">const</span> dec = <span class="kw">new</span> TextDecoder();
+  <span class="kw">let</span> buffer = <span class="str">""</span>;
+  <span class="kw">while</span> (<span class="kw">true</span>) {
+    <span class="kw">const</span> { value, done } = <span class="kw">await</span> reader.read();
+    <span class="kw">if</span> (done) <span class="kw">break</span>;
+    buffer += dec.decode(value, { stream: <span class="kw">true</span> });
+    <span class="kw">for</span> (<span class="kw">const</span> line <span class="kw">of</span> buffer.split(<span class="str">"\n"</span>)) {
+      <span class="kw">if</span> (line.startsWith(<span class="str">"data:"</span>)) {
+        <span class="kw">const</span> token = line.slice(<span class="num">5</span>).trim();
+        bubbleEl.textContent += token;
+      }
+    }
+    buffer = <span class="str">""</span>;
+  }
+}</pre>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========== 8. UI MOCK =========== -->
+  <section id="ui">
+    <div class="head">
+      <div class="left"><div class="num">8</div><h2>챗봇 UI — 우측 하단 FAB · 스트리밍 버블</h2></div>
+      <div class="tag">기존 video_ai.html 마크업 그대로 활용</div>
+    </div>
+    <div class="body">
+      <div class="ui-mock">
+        <div class="ui-explain">
+          <h3>UI 변경 최소화</h3>
+          <ul>
+            <li>FAB → 드롭다운 → <b>회의 선택</b> → AI 질문 패널 (현재 패널 그대로)</li>
+            <li>회의 선택 후 입력창에 질문 → <code>askWithRag(meetingId, q)</code> 호출</li>
+            <li>응답은 빈 assistant 버블을 즉시 만들고, SSE 토큰을 <code>textContent</code>로 누적</li>
+            <li>마지막에 <b>출처 표시</b> — "회의 #123 · 2026-05-08" (요약본 메타)</li>
+            <li>캐시 히트도 시각적으로 동일(타이핑 효과). 사용자에게는 균일 UX</li>
+          </ul>
+        </div>
+        <div class="browser">
+          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">globalgates.local/video</span></div>
+          <div class="stage">
+            <div class="chatpanel">
+              <div class="ph">AI에게 질문 <span class="badge2">RAG · 회의 #128</span></div>
+              <div class="body2">
+                <div class="bubble u">지난 회의에서 결정된 단가는?</div>
+                <div class="bubble a">제공된 요약본에 따르면 단가는 <b>개당 4,200원</b>으로 합의되었습니다. <span class="typing">●●●</span><span class="src">📄 회의 #128 · 2026-05-08</span></div>
+                <div class="bubble u">납기일은?</div>
+                <div class="bubble a">제공된 정보로는 확인이 불가능합니다.<span class="src">📄 회의 #128 · context k=4</span></div>
+              </div>
+            </div>
+            <div class="fab">AI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== 9. KPI / RISK =========== -->
+  <section id="kpi">
+    <div class="head">
+      <div class="left"><div class="num">9</div><h2>KPI · 리스크 · 가드레일</h2></div>
+      <div class="tag">캐시 히트율 / TTFT / 환각률 3종</div>
+    </div>
+    <div class="body">
+      <div class="kpi">
+        <div class="kbox"><div class="label">캐시 히트율 목표</div><div class="val">≥ 35%</div><div class="sub">동일 회의 반복 질문 비율 기반</div></div>
+        <div class="kbox"><div class="label">TTFT (첫 토큰 지연)</div><div class="val">≤ 800ms</div><div class="sub">캐시 미스 기준</div></div>
+        <div class="kbox"><div class="label">평균 응답 토큰</div><div class="val">120 ± 60</div><div class="sub">한국어 요약 답변</div></div>
+        <div class="kbox"><div class="label">환각률</div><div class="val">≤ 5%</div><div class="sub">"확인 불가" 미발화 오답 비율</div></div>
+      </div>
+      <hr class="sep">
+      <div class="risks">
+        <div class="risk">
+          <h5>요약본 부재 회의 <span class="lvl h">HIGH</span></h5>
+          <p>요약본이 아직 생성 안 된 회의에 질문 → 빈 컨텍스트 → 환각 가능.</p>
+          <p class="fix"><b>FIX:</b> retriever 결과가 0건이면 LLM 호출 전 단축 응답: "이 회의는 아직 요약이 준비되지 않았습니다."</p>
+        </div>
+        <div class="risk">
+          <h5>다른 회의 답변 누출 <span class="lvl h">HIGH</span></h5>
+          <p>인덱스 prefix 분리를 안 하면 다른 회의 청크가 검색될 위험.</p>
+          <p class="fix"><b>FIX:</b> meeting_id별 FAISS 디렉터리 + 캐시 키 prefix(<code>meeting:{id}</code>) 강제. 권한 검사를 BFF에서 1차.</p>
+        </div>
+        <div class="risk">
+          <h5>OpenAI 비용 폭주 <span class="lvl m">MED</span></h5>
+          <p>스트리밍 시멘틱 캐시 미적용 시 동일 질문에 매번 호출.</p>
+          <p class="fix"><b>FIX:</b> §1-10 직접 구현 패턴으로 수동 캐싱 + LangSmith로 토큰 모니터링.</p>
+        </div>
+        <div class="risk">
+          <h5>임베딩 모델 cold start <span class="lvl m">MED</span></h5>
+          <p>HuggingFaceEmbeddings 첫 호출 시 모델 다운로드 → 첫 요청 5~10s.</p>
+          <p class="fix"><b>FIX:</b> lifespan에서 dummy 텍스트 1회 임베딩하여 모델 워밍업.</p>
+        </div>
+        <div class="risk">
+          <h5>SSE 프록시 차단 <span class="lvl l">LOW</span></h5>
+          <p>중간 nginx/ALB가 chunked 응답을 버퍼링하면 토큰이 묶여서 도착.</p>
+          <p class="fix"><b>FIX:</b> nginx <code>proxy_buffering off;</code> + <code>X-Accel-Buffering: no</code> 헤더.</p>
+        </div>
+        <div class="risk">
+          <h5>요약본 PII 노출 <span class="lvl m">MED</span></h5>
+          <p>요약 안에 전화번호·계좌·민감정보가 들어있으면 RAG 응답에 그대로 노출.</p>
+          <p class="fix"><b>FIX:</b> 요약 생성 단계에서 PII 마스킹(이름·번호 정규식). 캐시에는 마스킹된 답변만.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== 10. MILESTONES =========== -->
+  <section id="milestones">
+    <div class="head">
+      <div class="left"><div class="num">10</div><h2>마일스톤 — 5단계 점진 도입</h2></div>
+      <div class="tag">M1~M3은 벙커형, M4~M5는 운영 준비</div>
+    </div>
+    <div class="body">
+      <div class="ms">
+        <div class="mile">
+          <div class="n">M1 · 인프라</div>
+          <h5>Redis Stack + FastAPI 스켈레톤</h5>
+          <ul>
+            <li>docker-compose: redis-stack, fastapi-rag</li>
+            <li>app/main.py lifespan + /health</li>
+            <li>set_llm_cache 로딩 검증</li>
+            <li>jhgan/ko-sbert-nli 모델 워밍업</li>
+          </ul>
+        </div>
+        <div class="mile">
+          <div class="n">M2 · 인덱싱</div>
+          <h5>요약본 → FAISS 파이프라인</h5>
+          <ul>
+            <li>POST /index/summary (BackgroundTasks)</li>
+            <li>meeting_id별 디렉터리 영속</li>
+            <li>Spring Boot SummaryHook (AfterCommit)</li>
+            <li>재인덱스 / 삭제 라우트</li>
+          </ul>
+        </div>
+        <div class="mile">
+          <div class="n">M3 · 응답 체인</div>
+          <h5>RAG astream + SSE</h5>
+          <ul>
+            <li>rag_chain.build_chain</li>
+            <li>POST /chat/stream (EventSourceResponse)</li>
+            <li>Spring 패스스루 컨트롤러</li>
+            <li>FE event.js 토큰 렌더</li>
+          </ul>
+        </div>
+        <div class="mile">
+          <div class="n">M4 · 캐시 + 가드</div>
+          <h5>시멘틱 캐시 + 권한 분리</h5>
+          <ul>
+            <li>semantic_stream.py 적용</li>
+            <li>인덱스 prefix 분리</li>
+            <li>참가자 권한 검사 (BFF)</li>
+            <li>요약 부재 단축 응답</li>
+          </ul>
+        </div>
+        <div class="mile">
+          <div class="n">M5 · 관측 · 최적화</div>
+          <h5>KPI 대시보드 · 튜닝</h5>
+          <ul>
+            <li>LangSmith 또는 자체 메트릭</li>
+            <li>캐시 히트율 · TTFT · 토큰 추적</li>
+            <li>k 튜닝 + MMR 실험</li>
+            <li>PII 마스킹 룰 보강</li>
+          </ul>
+        </div>
+      </div>
+      <hr class="sep">
+      <div class="gridtwo">
+        <div>
+          <h4>도입 순서 결정 근거</h4>
+          <ul>
+            <li>인프라(M1)부터 → 캐시·임베딩 글로벌 등록은 모든 단계의 전제</li>
+            <li>인덱싱(M2)을 응답(M3) 전에 → 데이터 없이는 응답 검증 불가</li>
+            <li>캐시(M4)를 가장 늦게 → "잘못된 캐시 적중"이 가장 디버깅 어려움</li>
+            <li>관측(M5)은 출시 전 마지막 — 메트릭 없이 튜닝 무의미</li>
+          </ul>
+        </div>
+        <div>
+          <h4>다음 액션 (사용자 결정 대기)</h4>
+          <ul>
+            <li>요약본 컬럼/테이블 위치 확인 (meeting.summary? 별도 테이블?)</li>
+            <li>FastAPI 서비스 신설 vs Spring AI 단일화 — 본 안은 신설 권장</li>
+            <li>Redis Stack 추가 컨테이너 OK 여부</li>
+            <li>OpenAI API 키 운영 환경 주입 방식 (Secrets Manager?)</li>
+            <li>승인되면 M1부터 PR 단위로 분할 진행</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p style="text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px">
+    GlobalGates · video_chat_ai RAG 챗봇 코드 분배 기획안 · 작성 2026-05-10 · 출처 <code>/Users/yoonchan/Desktop/llm.md</code>
+  </p>
+</div>
+</body>
+</html>

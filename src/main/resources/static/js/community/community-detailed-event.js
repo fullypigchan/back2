@@ -329,7 +329,15 @@ window.onload = () => {
           joinBtn.disabled = true;
           try {
               await CommunityService.join(communityId);
+              // 가입 성공 시 상세 새로고침 + AI 유사 커뮤니티 추천 모달 노출.
+              // 추천 호출은 모달 내부에서 비동기로 수행되므로 메인 흐름을 막지 않는다.
               loadDetail();
+              const baseName = detailState.community?.communityName
+                  || document.getElementById("headerTitle")?.textContent
+                  || "커뮤니티";
+              if (typeof CommunityRecommend !== "undefined") {
+                  CommunityRecommend.showAfterJoin(communityId, baseName);
+              }
           } catch (err) { console.error(err); }
           finally { joinBtn.disabled = false; }
       }

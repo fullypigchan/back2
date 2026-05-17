@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GlobalGates × n8n 자동화 기획안</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#12161e; --panel2:#171c26; --line:#232b39;
+    --text:#e6ecf2; --muted:#8b96a8; --accent:#7c5cff; --accent2:#22d3ee;
+    --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+    --gg:#ff4d6d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent2);text-decoration:none}
+  .wrap{max-width:1240px;margin:0 auto;padding:48px 28px 96px}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:36px;border-bottom:1px solid var(--line);padding-bottom:24px}
+  header h1{font-size:32px;margin:0 0 6px;letter-spacing:-0.02em}
+  header h1 .accent{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  header p{color:var(--muted);margin:0;max-width:680px}
+  .badge{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
+  .meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .meta b{color:var(--text)}
+
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px}
+  .summary .cell{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .summary .cell h4{margin:0 0 6px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0.04em;text-transform:uppercase}
+  .summary .cell p{margin:0;font-size:13.5px;color:#cbd2dc}
+  .summary .cell.ok{border-color:rgba(52,211,153,.35)}
+  .summary .cell.bad{border-color:rgba(248,113,113,.35)}
+
+  section.case{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:0;margin-bottom:24px;overflow:hidden}
+  section.case .head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.01)}
+  section.case .head .left{display:flex;gap:14px;align-items:center}
+  section.case .num{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700;color:#0b0d12}
+  section.case h2{margin:0;font-size:18px;letter-spacing:-0.01em}
+  section.case .tag{font-size:11px;color:var(--muted)}
+  .pri{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.04em}
+  .pri.p1{background:rgba(255,77,109,.12);color:#ff6b85;border:1px solid rgba(255,77,109,.4)}
+  .pri.p2{background:rgba(124,92,255,.12);color:#a892ff;border:1px solid rgba(124,92,255,.4)}
+  .pri.p3{background:rgba(34,211,238,.10);color:#67e8f9;border:1px solid rgba(34,211,238,.35)}
+
+  .body{display:grid;grid-template-columns:1.05fr 1fr;gap:0}
+  .col{padding:20px 22px}
+  .col + .col{border-left:1px solid var(--line)}
+  .col h3{margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;display:flex;gap:8px;align-items:center}
+  .col h3 .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+  .col.us h3 .dot{background:var(--gg)}
+  .shot{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+  .shot img{display:block;width:100%;height:auto;filter:saturate(.95)}
+  .shot .src{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);padding:4px 9px;border-radius:8px;font-size:11px;color:#dfe6f0}
+
+  .applies{margin-top:14px;font-size:13px;color:#cbd2dc}
+  .applies code{background:#0a0d13;border:1px solid var(--line);padding:1px 6px;border-radius:6px;color:#c9d1dc;font-size:12px}
+  .applies b{color:#fff}
+
+  /* Mock screen card (our site) */
+  .mock{background:#fff;color:#1c2330;border-radius:12px;border:1px solid var(--line);overflow:hidden;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo",sans-serif}
+  .mock .topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #eef0f4}
+  .mock .topbar .logo{font-weight:800;color:var(--gg);letter-spacing:-.02em}
+  .mock .topbar .url{flex:1;background:#f3f5f8;border-radius:8px;padding:5px 10px;color:#6b7384;font-size:12px}
+  .mock .body-area{padding:14px 16px;background:#f7f8fb}
+  .mock .body-area h5{margin:0 0 10px;font-size:14px;color:#212a3a}
+  .mock .row{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #e6e9ee;border-radius:10px;background:#fff;margin-bottom:8px}
+  .mock .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ff4d6d,#7c5cff);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
+  .mock .row .meta-r{flex:1}
+  .mock .row .meta-r .t{font-size:13px;color:#212a3a;font-weight:600}
+  .mock .row .meta-r .s{font-size:12px;color:#6b7384}
+  .mock .pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#fff0f3;color:#e11d48;border:1px solid #ffd0d8;font-weight:600}
+  .mock .pill.blue{background:#eef2ff;color:#4f46e5;border-color:#dbe2ff}
+  .mock .pill.green{background:#e8f8ee;color:#117a3a;border-color:#cdebd5}
+  .mock .pill.gray{background:#eef0f4;color:#475066;border-color:#dfe3eb}
+  .mock .pill.amber{background:#fff5e0;color:#a36505;border-color:#f1d9a3}
+  .mock .toast{position:relative;background:#fff;border:1px solid #e6e9ee;border-radius:14px;padding:12px 14px;box-shadow:0 12px 28px rgba(20,24,40,.12)}
+  .mock .toast::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:14px 0 0 14px;background:var(--gg)}
+  .mock .btn{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e6e9ee;background:#fff;color:#212a3a;cursor:pointer}
+  .mock .btn.primary{background:linear-gradient(135deg,#ff4d6d,#ff7a8b);border-color:transparent;color:#fff}
+  .mock .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .mock .stat{padding:10px;border:1px solid #e6e9ee;border-radius:10px;background:#fff}
+  .mock .stat .v{font-size:18px;font-weight:800;color:#212a3a}
+  .mock .stat .k{font-size:11px;color:#6b7384}
+
+  /* n8n flow */
+  .flow{margin-top:12px;background:#0a0d13;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#cbd2dc}
+  .flow .node{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(124,92,255,.08)}
+  .flow .node.ext{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.4)}
+  .flow .node.act{background:rgba(255,77,109,.08);border-color:rgba(255,77,109,.4)}
+  .flow .arr{color:var(--muted)}
+
+  /* exclude block */
+  .excluded{margin-top:32px;background:#10131a;border:1px dashed rgba(248,113,113,.35);border-radius:14px;padding:18px 20px}
+  .excluded h3{margin:0 0 10px;font-size:14px;color:#f87171;letter-spacing:.04em;text-transform:uppercase}
+  .excluded ul{margin:0;padding-left:18px;color:#cbd2dc}
+  .excluded li{margin-bottom:6px}
+
+  footer{margin-top:40px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:18px}
+
+  @media (max-width:980px){
+    .summary{grid-template-columns:repeat(2,1fr)}
+    .body{grid-template-columns:1fr}
+    .col + .col{border-left:0;border-top:1px solid var(--line)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <span class="badge">GLOBALGATES · 자동화 기획안</span>
+    <h1><span class="accent">n8n</span> 자동화 적용 후보 — 커뮤니티/비즈니스 매칭 사이트</h1>
+    <p>대기업·커뮤니티 사이트 자동화 사례를 직접 캡처해 우리 도메인에 매핑했습니다. 각 카드는 <b>레퍼런스 화면 → 우리 사이트 적용 지점 → n8n 워크플로우</b> 순서로 구성됩니다.</p>
+  </div>
+  <div class="meta">
+    <span>버전 <b>v1</b></span>
+    <span>대상 모듈 <b>Member · Estimation · Subscribe · Advertisement · Inquiry · Notification · Admin</b></span>
+    <span>작성 <b>2026-05-08</b></span>
+  </div>
+</header>
+
+<!-- summary -->
+<div class="summary">
+  <div class="cell ok">
+    <h4>n8n에 맞는 영역</h4>
+    <p>이벤트 기반 fan-out, 다채널 알림, 배치 집계, 외부 SaaS 연동, AI 1차분류</p>
+  </div>
+  <div class="cell ok">
+    <h4>우리 도메인 핵심 동선</h4>
+    <p>견적 매칭 · 구독 결제 · 광고주 리포트 · 신규 회원 활성화</p>
+  </div>
+  <div class="cell bad">
+    <h4>n8n에 안 맞는 영역</h4>
+    <p>실시간 채팅/화상, 피드 랭킹, 결제 캡처 트랜잭션, 자동 제재 집행</p>
+  </div>
+  <div class="cell">
+    <h4>구현 우선순위</h4>
+    <p>P1: ②견적 매칭 · ③결제·구독 / P2: ①온보딩 · ④모더레이션 / P3: ⑤~⑧</p>
+  </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- CASE 1 — Onboarding -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">1</div><h2>신규 가입 온보딩 시퀀스</h2><span class="tag">· Discord / Discourse / Slack Community</span></div>
+    <span class="pri p2">P2</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — Discord Safety / 신규 멤버 가이드</h3>
+      <div class="shot">
+        <img src="refs/01-discord-welcome.png" alt="Discord welcome guide">
+        <span class="src">discord.com/safety</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 가입 직후 환영 → 프로필 완성 유도 → 추천 채널/사람 → 비활성시 리텐션. 단계별 메시지가 시간에 따라 자동으로 발송됨.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>member/join.html</code> · <code>mypage.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/welcome</div></div>
+        <div class="body-area">
+          <h5>환영합니다, 윤찬님 👋 · D+0 자동 발송</h5>
+          <div class="row"><div class="av">1</div><div class="meta-r"><div class="t">프로필 사진과 카테고리 선택</div><div class="s">관심 카테고리를 선택하면 견적 추천이 시작됩니다</div></div><span class="pill">필수</span></div>
+          <div class="row"><div class="av">2</div><div class="meta-r"><div class="t">D+1 — 첫 게시물/팔로우 추천</div><div class="s">관심 분야 인기 비즈니스 회원 5명을 자동으로 추천</div></div><span class="pill blue">메일</span></div>
+          <div class="row"><div class="av">3</div><div class="meta-r"><div class="t">D+7 — 미활동 회원에게 리텐션 메일</div><div class="s">"이번 주 내 카테고리 인기 견적 3건"</div></div><span class="pill amber">조건부</span></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">MemberService 가입 webhook</span><span class="arr">→</span>
+        <span class="node">n8n Wait (24h)</span><span class="arr">→</span>
+        <span class="node">SQL: 프로필 완성 여부</span><span class="arr">→</span>
+        <span class="node act">SES/SMS 발송</span>
+      </div>
+      <div class="applies">트리거: <code>MemberService.join()</code> 후 이벤트 publish · 채널: 메일/푸시/SMS · 분기 기준: 프로필 완성도 · 마지막 로그인</div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 2 — Estimation matching -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">2</div><h2>견적(Estimation) 매칭 · 마감 알림</h2><span class="tag">· 숨고 / Thumbtack</span></div>
+    <span class="pri p1">P1 · 수익 핵심</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — 숨고 메인</h3>
+      <div class="shot">
+        <img src="refs/03-soomgo-match.png" alt="Soomgo home">
+        <span class="src">soomgo.com</span>
+      </div>
+      <div class="shot" style="margin-top:10px">
+        <img src="refs/08-thumbtack-pro.png" alt="Thumbtack pros">
+        <span class="src">thumbtack.com/pros</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 요청 한 건이 카테고리·지역으로 매칭된 N명에게 동시에 fan-out. 일정 시간 무응답시 다음 후보로 자동 재발송. 첫 N명 응답까지만 노출.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>estimation/estimation-regist.html</code> · <code>estimation-list.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/estimation/new</div></div>
+        <div class="body-area">
+          <h5>새 견적 요청 — IT/개발 · 서울</h5>
+          <div class="row">
+            <div class="av">B</div>
+            <div class="meta-r"><div class="t">매칭된 비즈니스 회원 12명에게 발송됨</div><div class="s">SMS · 카카오 알림톡 · 앱 푸시 (즉시) → D+1 답변 0명시 다음 8명 자동 발송</div></div>
+            <span class="pill green">자동</span>
+          </div>
+          <div class="row">
+            <div class="av">⏱</div>
+            <div class="meta-r"><div class="t">마감 D-3 / D-1 리마인드</div><div class="s">요청자에게도 "응답 X건 도착" 푸시 자동 발송</div></div>
+            <span class="pill blue">n8n</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">EstimationService.create</span><span class="arr">→</span>
+        <span class="node">SELECT BusinessMember by Category+Region</span><span class="arr">→</span>
+        <span class="node act">SMS / 알림톡 / Push fan-out</span><span class="arr">→</span>
+        <span class="node">Wait 24h · 응답수 체크</span><span class="arr">→</span>
+        <span class="node act">다음 후보 재발송</span>
+      </div>
+      <div class="applies">트리거: <code>EstimationVO insert</code> · 모듈 매칭: <code>BusinessMemberVO + CategoryVO</code> · 채널: <b>알림톡 우선</b>, 미수신시 SMS fallback</div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 3 — Subscribe / Payment lifecycle -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">3</div><h2>결제·구독 라이프사이클 자동화</h2><span class="tag">· Substack / Patreon</span></div>
+    <span class="pri p1">P1</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — Substack 메인</h3>
+      <div class="shot">
+        <img src="refs/04-substack-subscribe.png" alt="Substack home">
+        <span class="src">substack.com</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 결제 실패시 dunning 시퀀스, 만료 D-7/D-3/D-day 단계 메일, 영수증/세금계산서 자동 발송. 광고 캠페인 종료 D-3에 연장 제안.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>Subscribe/Subscribe.html</code> · <code>Advertisement/Advertisement.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/subscribe</div></div>
+        <div class="body-area">
+          <h5>구독 라이프사이클 (Bootpay 연동)</h5>
+          <div class="row"><div class="av">!</div><div class="meta-r"><div class="t">결제 실패 — 24h 후 1차 / 72h 후 2차 재시도 메일</div><div class="s">3회 실패시 운영자에게 Slack 알림</div></div><span class="pill">DUNNING</span></div>
+          <div class="row"><div class="av">⏰</div><div class="meta-r"><div class="t">만료 D-7 · D-3 · D-day 자동 메일</div><div class="s">갱신 버튼 + 혜택 강조 카피 자동 삽입</div></div><span class="pill blue">예약</span></div>
+          <div class="row"><div class="av">📄</div><div class="meta-r"><div class="t">영수증/세금계산서 자동 발급 + 메일</div><div class="s">광고주에게는 캠페인 종료 D-3 연장 제안</div></div><span class="pill green">자동</span></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">Bootpay webhook (success/fail)</span><span class="arr">→</span>
+        <span class="node">n8n 분기 (status)</span><span class="arr">→</span>
+        <span class="node act">메일 + Slack 운영방</span>
+      </div>
+      <div class="applies">트리거: <code>BootpayBillingService</code> 콜백 · 모듈: <code>SubscriptionService · PaymentAdvertisementService</code> · ⚠ 결제 캡처 자체는 Spring 처리, n8n은 후속 통보만</div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 4 — Moderation alert -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">4</div><h2>운영(모더레이션) 알림 큐</h2><span class="tag">· Reddit AutoMod / Discord Trust Levels</span></div>
+    <span class="pri p2">P2</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — Discourse Trust Levels</h3>
+      <div class="shot">
+        <img src="refs/02-discourse-trust.png" alt="Discourse trust levels">
+        <span class="src">blog.discourse.org</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 신고 누적/이상 행위 시그널을 자동으로 모아 운영자 큐에 카드로 노출. <b>자동 제재 집행이 아닌 사람 결재 큐</b>가 핵심.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>admin/admin.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/admin/moderation</div></div>
+        <div class="body-area">
+          <h5>운영자 큐 — Slack #ops-mod 동기화</h5>
+          <div class="row"><div class="av">⚠</div><div class="meta-r"><div class="t">게시물 #4821 — 신고 3건 누적</div><div class="s">자동 임시 노출 차단 + 운영자에게 Slack 멘션</div></div><span class="pill">3 reports</span></div>
+          <div class="row"><div class="av">🤖</div><div class="meta-r"><div class="t">AI 1차 분류 — 스팸 의심 88%</div><div class="s">의심 케이스만 사람에게 라우팅, 정상은 자동 통과</div></div><span class="pill amber">AI</span></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">ReportVO insert</span><span class="arr">→</span>
+        <span class="node">n8n COUNT 체크</span><span class="arr">→</span>
+        <span class="node">OpenAI 1차 분류</span><span class="arr">→</span>
+        <span class="node act">Slack/Discord 카드</span>
+      </div>
+      <div class="applies">트리거: <code>ReportService</code> · 임계: 3건 또는 신뢰점수 하락 · ⚠ <b>자동 차단까지는 가지 않는다</b> — 임시 hide만, 영구 제재는 사람 결재</div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 5 — Advertiser report -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">5</div><h2>광고주/비즈니스 위클리 리포트</h2><span class="tag">· Meta Ads · 네이버 비즈센터</span></div>
+    <span class="pri p3">P3</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — 네이버 비즈센터</h3>
+      <div class="shot">
+        <img src="refs/07-naver-bizcenter.png" alt="Naver biz center">
+        <span class="src">business.naver.com</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 매주 광고 노출/클릭/전환 자동 집계 → PDF/메일로 발송. 클릭 한 번에 다음 캠페인 세팅까지 유도.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>Advertisement/Advertisement.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/ad/report</div></div>
+        <div class="body-area">
+          <h5>이번 주 캠페인 리포트 (월요일 09:00 자동)</h5>
+          <div class="grid2">
+            <div class="stat"><div class="v">128,402</div><div class="k">노출</div></div>
+            <div class="stat"><div class="v">3,201</div><div class="k">클릭</div></div>
+            <div class="stat"><div class="v">2.49%</div><div class="k">CTR</div></div>
+            <div class="stat"><div class="v">₩412,000</div><div class="k">전환 매출</div></div>
+          </div>
+          <div style="margin-top:10px"><span class="btn primary">캠페인 연장</span> <span class="btn">PDF 다운로드</span></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">매주 월 09:00 cron</span><span class="arr">→</span>
+        <span class="node">AdminStatsService 집계 API</span><span class="arr">→</span>
+        <span class="node">PDF 생성</span><span class="arr">→</span>
+        <span class="node act">메일 발송</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 6 — Reactivation -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">6</div><h2>휴면·이탈 회원 재활성화</h2><span class="tag">· LinkedIn · Reddit "you've been missed"</span></div>
+    <span class="pri p3">P3</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — Reddit Popular</h3>
+      <div class="shot">
+        <img src="refs/05-reddit-digest.png" alt="Reddit popular feed">
+        <span class="src">reddit.com/r/popular</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — "최근 N일 동안 본인 게시물에 달린 좋아요/댓글/팔로우" 디지털 영수증을 모아 한 통의 메일로. 돌아갈 이유를 만들어줌.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>mypage.html</code> · <code>Notification.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/mypage</div></div>
+        <div class="body-area">
+          <h5>오랜만이에요, 윤찬님 — 그동안 GG에 일어난 일</h5>
+          <div class="row"><div class="av">♥</div><div class="meta-r"><div class="t">내 게시물 좋아요 +24</div><div class="s">최근 7일</div></div></div>
+          <div class="row"><div class="av">💬</div><div class="meta-r"><div class="t">새 댓글 8건 · 팔로우 +3</div><div class="s">"확인하러 가기"</div></div><span class="pill blue">CTA</span></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">매일 03:00 cron</span><span class="arr">→</span>
+        <span class="node">last_login &gt; 14d 회원 SELECT</span><span class="arr">→</span>
+        <span class="node">개인화 데이터 collect</span><span class="arr">→</span>
+        <span class="node act">SES 메일</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 7 — CS routing -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">7</div><h2>CS 문의 자동 라우팅 · SLA</h2><span class="tag">· Channel Talk · Intercom</span></div>
+    <span class="pri p3">P3</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — Channel Talk</h3>
+      <div class="shot">
+        <img src="refs/06-channeltalk-cs.png" alt="Channel Talk">
+        <span class="src">channel.io/ko</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 키워드/카테고리 자동 분류 → 담당자 멘션 → SLA 카운트다운 → 미응답시 매니저로 에스컬레이션.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>Inquiry/inquiry_active_list.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">globalgates.io/inquiry</div></div>
+        <div class="body-area">
+          <h5>새 문의 — 결제 카테고리</h5>
+          <div class="row"><div class="av">CS</div><div class="meta-r"><div class="t">"환불 가능한가요?" → 결제팀 자동 라우팅</div><div class="s">SLA 4시간 카운트다운 시작</div></div><span class="pill amber">3h 22m</span></div>
+          <div class="row"><div class="av">🚨</div><div class="meta-r"><div class="t">SLA 초과 — 매니저로 에스컬레이션</div><div class="s">Slack 멘션 + 문의자에게 안내 메일</div></div><span class="pill">ESC</span></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">InquiryActivityService 신규</span><span class="arr">→</span>
+        <span class="node">OpenAI 카테고리 분류</span><span class="arr">→</span>
+        <span class="node">담당자 Slack 멘션</span><span class="arr">→</span>
+        <span class="node act">SLA Wait + 에스컬레이션</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE 8 — Weekly digest -->
+<section class="case">
+  <div class="head">
+    <div class="left"><div class="num">8</div><h2>위클리 다이제스트 (회원별 큐레이션 메일)</h2><span class="tag">· Reddit Weekly · Hashnode · Medium Daily Digest</span></div>
+    <span class="pri p3">P3</span>
+  </div>
+  <div class="body">
+    <div class="col ref">
+      <h3><span class="dot"></span>레퍼런스 — Reddit /r/popular</h3>
+      <div class="shot">
+        <img src="refs/05-reddit-digest.png" alt="Reddit feed">
+        <span class="src">reddit.com/r/popular</span>
+      </div>
+      <div class="applies"><b>핵심 패턴</b> — 회원의 팔로잉/관심 카테고리 기반으로 한 주의 인기글·새 견적·뉴스 톱 5를 자동으로 한 통의 메일로 묶어 발송.</div>
+    </div>
+    <div class="col us">
+      <h3><span class="dot"></span>우리 사이트 적용 — <code>news/*.html</code> · <code>community/*.html</code></h3>
+      <div class="mock">
+        <div class="topbar"><div class="logo">GG</div><div class="url">메일 미리보기</div></div>
+        <div class="body-area">
+          <h5>이번 주 GG 다이제스트 · 윤찬님 맞춤</h5>
+          <div class="row"><div class="av">📰</div><div class="meta-r"><div class="t">이번 주 인기 뉴스 5</div><div class="s">팔로잉 카테고리 기반</div></div></div>
+          <div class="row"><div class="av">💼</div><div class="meta-r"><div class="t">내 카테고리 신규 견적 3</div><div class="s">매칭 알고리즘 결과를 그대로 사용</div></div></div>
+          <div class="row"><div class="av">🔥</div><div class="meta-r"><div class="t">팔로우한 비즈니스 회원의 새 게시물</div><div class="s">최근 7일</div></div></div>
+        </div>
+      </div>
+      <div class="flow">
+        <span class="node ext">매주 일 19:00 cron</span><span class="arr">→</span>
+        <span class="node">회원 batch (chunk 500)</span><span class="arr">→</span>
+        <span class="node">개인별 큐레이션 SQL</span><span class="arr">→</span>
+        <span class="node act">SES 메일</span>
+      </div>
+      <div class="applies">⚠ 추천 알고리즘은 변경하지 않음. 이미 있는 인기/매칭 결과를 메일 채널로 fan-out만 하는 형태.</div>
+    </div>
+  </div>
+</section>
+
+<!-- exclude -->
+<div class="excluded">
+  <h3>제외된 후보 — 우리 사이트 성격과 맞지 않음</h3>
+  <ul>
+    <li><b>실시간 채팅·화상채팅 모더레이션</b> — <code>chat/</code>, <code>video_chat/</code>는 WebSocket/시그널링 기반 저지연 영역. n8n 배치성과 어긋남.</li>
+    <li><b>피드/타임라인 추천 랭킹 자동화</b> — <code>PostService</code> 즉시 응답 피드. ML 파이프라인 영역, n8n 부적합.</li>
+    <li><b>결제 캡처 자체</b> — Bootpay 콜백은 Spring 트랜잭션에서 처리. n8n은 <i>후속</i> 통보만.</li>
+    <li><b>자동 제재 집행</b> — 차단/계정 정지는 사람 결재 단계 필요. n8n은 큐 도착·임시 hide까지만.</li>
+    <li><b>대량 콜드 메일·DM (LinkedIn 외부 영업 자동화)</b> — 우리 사이트는 가입자 기반 인앱 알림이 본질. 외부 영업은 도메인 밖.</li>
+  </ul>
+</div>
+
+<footer>
+  <span>GlobalGates × n8n 자동화 기획안 v1 · 2026-05-08</span>
+  <span>레퍼런스 스크린샷 출처는 각 카드의 우측 하단 라벨 참조</span>
+</footer>
+
+</div>
+</body>
+</html>

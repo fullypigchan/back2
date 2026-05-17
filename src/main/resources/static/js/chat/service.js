@@ -260,6 +260,23 @@ const ChatService = (() => {
         } catch (e) { /* 캡처 차단 자체 흐름이 망가지면 안 되므로 silent */ }
     };
 
+    // 29.비속어 검사 (Spring 프록시 → FastAPI). 네트워크/서버 오류 시 fail-open(allow).
+    const checkProfanity = async (message) => {
+        try {
+            const response = await fetch("/api/v1/chat/profanity-check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message }),
+            });
+            if (!response.ok) {
+                return { action: "allow", label: "clean", isAbusive: false, pAbusive: 0, pClean: 1 };
+            }
+            return await response.json();
+        } catch (e) {
+            return { action: "allow", label: "clean", isAbusive: false, pAbusive: 0, pClean: 1 };
+        }
+    };
+
     return {
         getRooms,
         createRoom,
@@ -288,5 +305,6 @@ const ChatService = (() => {
         updateDisappearMessage,
         getDisappearMessage,
         reportScreenshotAttempt,
+        checkProfanity,
     };
 })();

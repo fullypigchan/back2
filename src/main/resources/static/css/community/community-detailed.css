@@ -17,11 +17,6 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .hidden { display: none !important; }
 
 /* ===== 레이아웃 ===== */
-.app-container {
-  display: flex;
-  justify-content: center;
-}
-
 .main-content {
   width: 100%;
   max-width: 600px;

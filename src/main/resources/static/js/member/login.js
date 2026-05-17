@@ -55,14 +55,24 @@ document.addEventListener("DOMContentLoaded", () => {
         moveChildren(loginGoogleButton, originalGoogleButton);
     };
 
+    // 모바일에서 슬라이드업된 .join-panel을 모달이 열려 있는 동안 내려두기 위해
+    // body.flow-modal-open 클래스를 토글한다. 모든 로그인 모달이 닫히면 해제한다.
+    const syncFlowModalOpen = () => {
+        const anyOpen = loginModal.style.display === "grid"
+                     || passwordModal.style.display === "grid";
+        document.body.classList.toggle("flow-modal-open", anyOpen);
+    };
+
     const showModal = (modal) => {
         modal.style.display = "grid";
         modal.setAttribute("aria-hidden", "false");
+        syncFlowModalOpen();
     };
 
     const hideModal = (modal) => {
         modal.style.display = "none";
         modal.setAttribute("aria-hidden", "true");
+        syncFlowModalOpen();
     };
 
     const closeAllModals = () => {

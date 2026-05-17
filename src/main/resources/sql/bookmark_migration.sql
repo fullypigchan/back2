@@ -25,3 +25,14 @@ UPDATE tbl_member
 SET member_role = 'admin', updated_datetime = now()
 WHERE member_email = 'tedwin1@kakao.com';
 
+SELECT
+    (SELECT COUNT(*) FROM tbl_member WHERE member_status='active')
+                                                                                     AS a_active,
+    (SELECT COUNT(*) FROM tbl_member WHERE member_status='active' AND
+        push_enabled)    AS b_push,
+    (SELECT COUNT(*) FROM tbl_member WHERE member_status='active' AND
+        push_enabled
+                                       AND member_email IS NOT NULL AND member_email <> '')
+                                                                                     AS c_email,
+    (SELECT COUNT(*) FROM tbl_post_like WHERE created_datetime >= NOW() -
+                                                                  INTERVAL '7 days') AS d_recent_likes;
